@@ -8,6 +8,7 @@ class ApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// No implementation required here to test that context loads.
 	}
 
 }
