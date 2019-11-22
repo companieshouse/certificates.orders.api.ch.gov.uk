@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.items.orders.api.ch.gov.uk;
+package uk.gov.companieshouse.items.orders.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
