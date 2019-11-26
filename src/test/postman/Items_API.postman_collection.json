@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "c7a5dd93-c8c2-494c-87e1-b4fda3adca73",
+		"name": "Items API",
+		"description": "Sanity testing for the CHS Ordering Items API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create item",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "http://chs-dev:10020/orderable/certificates",
+					"protocol": "http",
+					"host": [
+						"chs-dev"
+					],
+					"port": "10020",
+					"path": [
+						"orderable",
+						"certificates"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

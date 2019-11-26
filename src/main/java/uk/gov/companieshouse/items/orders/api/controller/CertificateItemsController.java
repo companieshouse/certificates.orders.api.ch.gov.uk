@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -13,6 +15,7 @@ public class CertificateItemsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public Object createCertificateItem() {
 
         LOGGER.info("createCertificateItem called.");
