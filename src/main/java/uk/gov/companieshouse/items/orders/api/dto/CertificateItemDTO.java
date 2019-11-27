@@ -20,6 +20,7 @@ public class CertificateItemDTO {
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
 
+    @JsonProperty("kind")
     private String kind;
 
     public String getCompanyNumber() {
