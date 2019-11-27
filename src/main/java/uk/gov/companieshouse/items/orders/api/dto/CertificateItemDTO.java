@@ -1,9 +1,14 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import java.util.Map;
 
+/**
+ * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
+ */
 public class CertificateItemDTO {
 
     private String id;
@@ -20,8 +25,20 @@ public class CertificateItemDTO {
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
 
+    @JsonProperty("item_costs")
+    private ItemCosts itemCosts;
+
+    @JsonProperty("item_options")
+    private CertificateItemOptions itemOptions;
+
     @JsonProperty("kind")
     private String kind;
+
+    @JsonProperty("postal_delivery")
+    private boolean isPostalDelivery;
+
+    @JsonProperty("quantity")
+    private int quantity;
 
     public String getCompanyNumber() {
         return companyNumber;
@@ -55,12 +72,44 @@ public class CertificateItemDTO {
         this.descriptionValues = descriptionValues;
     }
 
+    public ItemCosts getItemCosts() {
+        return itemCosts;
+    }
+
+    public void setItemCosts(ItemCosts itemCosts) {
+        this.itemCosts = itemCosts;
+    }
+
+    public CertificateItemOptions getItemOptions() {
+        return itemOptions;
+    }
+
+    public void setItemOptions(CertificateItemOptions itemOptions) {
+        this.itemOptions = itemOptions;
+    }
+
     public String getKind() {
         return kind;
     }
 
     public void setKind(String kind) {
         this.kind = kind;
+    }
+
+    public boolean isPostalDelivery() {
+        return isPostalDelivery;
+    }
+
+    public void setPostalDelivery(boolean postalDelivery) {
+        isPostalDelivery = postalDelivery;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     @Override
@@ -71,7 +120,11 @@ public class CertificateItemDTO {
                 ", description='" + description + '\'' +
                 ", descriptionIdentifier='" + descriptionIdentifier + '\'' +
                 ", descriptionValues=" + descriptionValues +
+                ", itemCosts=" + itemCosts +
+                ", itemOptions=" + itemOptions +
                 ", kind='" + kind + '\'' +
+                ", isPostalDelivery=" + isPostalDelivery +
+                ", quantity=" + quantity +
                 '}';
     }
 }
