@@ -26,10 +26,20 @@ public enum ItemType {
     }
 
     /**
+     * Populates the read only fields of the item DTO provided.
+     * @param certificateItemDTO the DTO with read only fields
+     */
+    public void populateReadOnlyFields(final CertificateItemDTO certificateItemDTO) {
+        populateDescriptionFields(certificateItemDTO);
+        populateItemCosts(certificateItemDTO);
+        populatePostalDelivery(certificateItemDTO);
+    }
+
+    /**
      * Populates the description fields to facilitate UI text rendering.
      * @param certificateItemDTO the DTO bearing text for UI rendering
      */
-    public void populateDescriptionFields(final CertificateItemDTO certificateItemDTO) {
+    void populateDescriptionFields(final CertificateItemDTO certificateItemDTO) {
         certificateItemDTO.setDescriptionIdentifier(itemType);
         certificateItemDTO.setKind(kind);
         // TODO Populate description and description values when we know what these are.
@@ -39,7 +49,7 @@ public enum ItemType {
      * Populates the item costs fields.
      * @param certificateItemDTO the DTO bearing the item costs
      */
-    public void populateItemCosts(final CertificateItemDTO certificateItemDTO) {
+    void populateItemCosts(final CertificateItemDTO certificateItemDTO) {
         final ItemCosts costs = new ItemCosts();
 
         // TODO Retrieve the actual costs as appropriate.
@@ -51,7 +61,11 @@ public enum ItemType {
         certificateItemDTO.setItemCosts(costs);
     }
 
-    public void populatePostalDelivery(final CertificateItemDTO certificateItemDTO) {
+    /**
+     * Populates the postal delivery field as appropriate for this type.
+     * @param certificateItemDTO the DTO
+     */
+    void populatePostalDelivery(final CertificateItemDTO certificateItemDTO) {
         certificateItemDTO.setPostalDelivery(true);
     }
 }

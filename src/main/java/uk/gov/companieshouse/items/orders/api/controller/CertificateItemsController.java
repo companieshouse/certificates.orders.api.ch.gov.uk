@@ -23,9 +23,7 @@ public class CertificateItemsController {
 
         LOGGER.info("ENTERING createCertificateItem(" + certificateItemDTO + ")");
 
-        CERTIFICATE.populateDescriptionFields(certificateItemDTO);
-        CERTIFICATE.populateItemCosts(certificateItemDTO);
-        CERTIFICATE.populatePostalDelivery(certificateItemDTO);
+        CERTIFICATE.populateReadOnlyFields(certificateItemDTO);
 
         LOGGER.info("EXITING createCertificateItem() with " + certificateItemDTO);
         return certificateItemDTO;
