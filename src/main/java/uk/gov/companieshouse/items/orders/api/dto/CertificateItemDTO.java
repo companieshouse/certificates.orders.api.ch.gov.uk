@@ -34,7 +34,6 @@ public class CertificateItemDTO {
     @JsonProperty("kind")
     private String kind;
 
-    @JsonProperty("postal_delivery")
     private boolean isPostalDelivery;
 
     @JsonProperty("quantity")
@@ -96,6 +95,7 @@ public class CertificateItemDTO {
         this.kind = kind;
     }
 
+    @JsonProperty("postal_delivery")
     public boolean isPostalDelivery() {
         return isPostalDelivery;
     }

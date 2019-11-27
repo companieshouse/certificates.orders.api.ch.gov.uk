@@ -11,67 +11,46 @@ public class CertificateItemOptions {
     private String additionalInformation;
 
     // TODO Give these options human readable names
-    @JsonProperty("cert_acc")
     private boolean isCertAcc;
 
-    @JsonProperty("cert_arts")
     private boolean isCertArts;
 
-    @JsonProperty("cert_cobj")
     private boolean isCertCobj;
 
-    @JsonProperty("cert_dir")
     private boolean isCertDir;
 
-    @JsonProperty("cert_dissliq")
     private boolean isCertDissLiq;
 
-    @JsonProperty("cert_domicil")
     private boolean isCertDomicil;
 
-    @JsonProperty("cert_extra_i")
     private boolean isCertExtraI;
 
-    @JsonProperty("cert_inc")
     private boolean isCertInc;
 
-    @JsonProperty("cert_inc_con")
     private boolean isCertIncCon;
 
-    @JsonProperty("cert_inc_con_last")
     private boolean isCertIncConLast;
 
-    @JsonProperty("cert_isscap")
     private boolean isCertIssCap;
 
-    @JsonProperty("cert_mem")
-    private boolean isCertmem;
+    private boolean isCertMem;
 
-    @JsonProperty("cert_mortdoc")
     private boolean isCertMortDoc;
 
-    @JsonProperty("cert_nomc")
     private boolean isCertNomc;
 
-    @JsonProperty("cert_nonexis")
     private boolean isCertNonExis;
 
-    @JsonProperty("cert_only")
     private boolean isCertOnly;
 
-    @JsonProperty("cert_other_c")
     private boolean isCertOtherC;
 
-    @JsonProperty("cert_ret")
     private boolean isCertRet;
 
-    @JsonProperty("cert_roc")
     private boolean isCertRoc;
 
-    @JsonProperty("cert_sec")
-    private boolean isCertsec;
+    private boolean isCertSec;
 
-    @JsonProperty("cert_shar")
     private boolean isCertShar;
 
     public String getAdditionalInformation() {
@@ -82,10 +61,12 @@ public class CertificateItemOptions {
         this.additionalInformation = additionalInformation;
     }
 
+    @JsonProperty("cert_acc")
     public boolean isCertAcc() {
         return isCertAcc;
     }
 
+    @JsonProperty("cert_arts")
     public void setCertAcc(boolean certAcc) {
         isCertAcc = certAcc;
     }
@@ -98,6 +79,7 @@ public class CertificateItemOptions {
         isCertArts = certArts;
     }
 
+    @JsonProperty("cert_cobj")
     public boolean isCertCobj() {
         return isCertCobj;
     }
@@ -106,6 +88,7 @@ public class CertificateItemOptions {
         isCertCobj = certCobj;
     }
 
+    @JsonProperty("cert_dir")
     public boolean isCertDir() {
         return isCertDir;
     }
@@ -114,6 +97,7 @@ public class CertificateItemOptions {
         isCertDir = certDir;
     }
 
+    @JsonProperty("cert_dissliq")
     public boolean isCertDissLiq() {
         return isCertDissLiq;
     }
@@ -122,6 +106,7 @@ public class CertificateItemOptions {
         isCertDissLiq = certDissLiq;
     }
 
+    @JsonProperty("cert_domicil")
     public boolean isCertDomicil() {
         return isCertDomicil;
     }
@@ -130,6 +115,7 @@ public class CertificateItemOptions {
         isCertDomicil = certDomicil;
     }
 
+    @JsonProperty("cert_extra_i")
     public boolean isCertExtraI() {
         return isCertExtraI;
     }
@@ -138,6 +124,7 @@ public class CertificateItemOptions {
         isCertExtraI = certExtraI;
     }
 
+    @JsonProperty("cert_inc")
     public boolean isCertInc() {
         return isCertInc;
     }
@@ -146,6 +133,7 @@ public class CertificateItemOptions {
         isCertInc = certInc;
     }
 
+    @JsonProperty("cert_inc_con")
     public boolean isCertIncCon() {
         return isCertIncCon;
     }
@@ -154,6 +142,7 @@ public class CertificateItemOptions {
         isCertIncCon = certIncCon;
     }
 
+    @JsonProperty("cert_inc_con_last")
     public boolean isCertIncConLast() {
         return isCertIncConLast;
     }
@@ -162,6 +151,7 @@ public class CertificateItemOptions {
         isCertIncConLast = certIncConLast;
     }
 
+    @JsonProperty("cert_isscap")
     public boolean isCertIssCap() {
         return isCertIssCap;
     }
@@ -170,14 +160,16 @@ public class CertificateItemOptions {
         isCertIssCap = certIssCap;
     }
 
-    public boolean isCertmem() {
-        return isCertmem;
+    @JsonProperty("cert_mem")
+    public boolean isCertMem() {
+        return isCertMem;
     }
 
-    public void setCertmem(boolean certmem) {
-        isCertmem = certmem;
+    public void setCertMem(boolean certMem) {
+        isCertMem = certMem;
     }
 
+    @JsonProperty("cert_mortdoc")
     public boolean isCertMortDoc() {
         return isCertMortDoc;
     }
@@ -186,6 +178,7 @@ public class CertificateItemOptions {
         isCertMortDoc = certMortDoc;
     }
 
+    @JsonProperty("cert_nomc")
     public boolean isCertNomc() {
         return isCertNomc;
     }
@@ -194,6 +187,7 @@ public class CertificateItemOptions {
         isCertNomc = certNomc;
     }
 
+    @JsonProperty("cert_nonexis")
     public boolean isCertNonExis() {
         return isCertNonExis;
     }
@@ -202,6 +196,7 @@ public class CertificateItemOptions {
         isCertNonExis = certNonExis;
     }
 
+    @JsonProperty("cert_only")
     public boolean isCertOnly() {
         return isCertOnly;
     }
@@ -210,6 +205,7 @@ public class CertificateItemOptions {
         isCertOnly = certOnly;
     }
 
+    @JsonProperty("cert_other_c")
     public boolean isCertOtherC() {
         return isCertOtherC;
     }
@@ -218,6 +214,7 @@ public class CertificateItemOptions {
         isCertOtherC = certOtherC;
     }
 
+    @JsonProperty("cert_ret")
     public boolean isCertRet() {
         return isCertRet;
     }
@@ -226,6 +223,7 @@ public class CertificateItemOptions {
         isCertRet = certRet;
     }
 
+    @JsonProperty("cert_roc")
     public boolean isCertRoc() {
         return isCertRoc;
     }
@@ -234,14 +232,16 @@ public class CertificateItemOptions {
         isCertRoc = certRoc;
     }
 
-    public boolean isCertsec() {
-        return isCertsec;
+    @JsonProperty("cert_sec")
+    public boolean isCertSec() {
+        return isCertSec;
     }
 
-    public void setCertsec(boolean certsec) {
-        isCertsec = certsec;
+    public void setCertSec(boolean certSec) {
+        isCertSec = certSec;
     }
 
+    @JsonProperty("cert_shar")
     public boolean isCertShar() {
         return isCertShar;
     }
@@ -265,7 +265,7 @@ public class CertificateItemOptions {
                 ", isCertIncCon=" + isCertIncCon +
                 ", isCertIncConLast=" + isCertIncConLast +
                 ", isCertIssCap=" + isCertIssCap +
-                ", isCertmem=" + isCertmem +
+                ", isCertMem=" + isCertMem +
                 ", isCertMortDoc=" + isCertMortDoc +
                 ", isCertNomc=" + isCertNomc +
                 ", isCertNonExis=" + isCertNonExis +
@@ -273,7 +273,7 @@ public class CertificateItemOptions {
                 ", isCertOtherC=" + isCertOtherC +
                 ", isCertRet=" + isCertRet +
                 ", isCertRoc=" + isCertRoc +
-                ", isCertsec=" + isCertsec +
+                ", isCertSec=" + isCertSec +
                 ", isCertShar=" + isCertShar +
                 '}';
     }
