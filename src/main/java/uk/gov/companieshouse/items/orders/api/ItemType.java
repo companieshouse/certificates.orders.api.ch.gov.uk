@@ -10,7 +10,12 @@ public enum ItemType {
 
     CERTIFICATE("certificate", "certificate"),
     CERTIFIED_COPY("certified-copy", "certified-copy"),
-    SCAN_ON_DEMAND("scan-on-demand", "scan-on-demand");
+    SCAN_ON_DEMAND("scan-on-demand", "scan-on-demand") {
+        @Override
+        public void populatePostalDelivery(CertificateItemDTO certificateItemDTO) {
+            certificateItemDTO.setPostalDelivery(false);
+        }
+    };
 
     private String itemType;
     private String kind;
@@ -44,5 +49,9 @@ public enum ItemType {
         costs.setTotalCost("4");
 
         certificateItemDTO.setItemCosts(costs);
+    }
+
+    public void populatePostalDelivery(final CertificateItemDTO certificateItemDTO) {
+        certificateItemDTO.setPostalDelivery(true);
     }
 }

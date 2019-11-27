@@ -54,6 +54,7 @@ class CertificateItemsControllerUnitTest {
         createdCertificateItemDTO.setDescriptionIdentifier("certificate");
         createdCertificateItemDTO.setItemCosts(costs);
         createdCertificateItemDTO.setItemOptions(options);
+        createdCertificateItemDTO.setPostalDelivery(true);
 
         // When and Then
         mockMvc.perform(post("/certificates")
@@ -63,7 +64,8 @@ class CertificateItemsControllerUnitTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(createdCertificateItemDTO)))
                 .andExpect(jsonPath("$.item_options.cert_inc", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_shar", is(true)))
-                .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)));
+                .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)))
+                .andExpect(jsonPath("$.postal_delivery", is(true)));
 
         // Then
         // TODO: Verify can retrieve equivalent entity

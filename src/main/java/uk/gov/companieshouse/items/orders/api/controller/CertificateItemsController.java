@@ -25,6 +25,7 @@ public class CertificateItemsController {
 
         CERTIFICATE.populateDescriptionFields(certificateItemDTO);
         CERTIFICATE.populateItemCosts(certificateItemDTO);
+        CERTIFICATE.populatePostalDelivery(certificateItemDTO);
 
         LOGGER.info("EXITING createCertificateItem() with " + certificateItemDTO);
         return certificateItemDTO;
