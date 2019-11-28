@@ -2,82 +2,14 @@ package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
-
-import java.util.Map;
 
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
  */
-public class CertificateItemDTO {
-
-    private String id;
-
-    @JsonProperty("company_number")
-    private String companyNumber;
-
-    @JsonProperty("description")
-    private String description;
-
-    @JsonProperty("description_identifier")
-    private String descriptionIdentifier;
-
-    @JsonProperty("description_values")
-    private Map<String, String> descriptionValues;
-
-    @JsonProperty("item_costs")
-    private ItemCosts itemCosts;
+public class CertificateItemDTO extends ItemDTO {
 
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
-
-    @JsonProperty("kind")
-    private String kind;
-
-    private boolean isPostalDelivery;
-
-    @JsonProperty("quantity")
-    private int quantity;
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDescriptionIdentifier() {
-        return descriptionIdentifier;
-    }
-
-    public void setDescriptionIdentifier(String descriptionIdentifier) {
-        this.descriptionIdentifier = descriptionIdentifier;
-    }
-
-    public Map<String, String> getDescriptionValues() {
-        return descriptionValues;
-    }
-
-    public void setDescriptionValues(Map<String, String> descriptionValues) {
-        this.descriptionValues = descriptionValues;
-    }
-
-    public ItemCosts getItemCosts() {
-        return itemCosts;
-    }
-
-    public void setItemCosts(ItemCosts itemCosts) {
-        this.itemCosts = itemCosts;
-    }
 
     public CertificateItemOptions getItemOptions() {
         return itemOptions;
@@ -87,44 +19,10 @@ public class CertificateItemDTO {
         this.itemOptions = itemOptions;
     }
 
-    public String getKind() {
-        return kind;
-    }
-
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-
-    @JsonProperty("postal_delivery")
-    public boolean isPostalDelivery() {
-        return isPostalDelivery;
-    }
-
-    public void setPostalDelivery(boolean postalDelivery) {
-        isPostalDelivery = postalDelivery;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     @Override
     public String toString() {
         return "CertificateItemDTO{" +
-                "id='" + id + '\'' +
-                ", companyNumber='" + companyNumber + '\'' +
-                ", description='" + description + '\'' +
-                ", descriptionIdentifier='" + descriptionIdentifier + '\'' +
-                ", descriptionValues=" + descriptionValues +
-                ", itemCosts=" + itemCosts +
-                ", itemOptions=" + itemOptions +
-                ", kind='" + kind + '\'' +
-                ", isPostalDelivery=" + isPostalDelivery +
-                ", quantity=" + quantity +
-                '}';
+                "itemOptions=" + itemOptions +
+                "} [" + super.toString() + "]";
     }
 }
