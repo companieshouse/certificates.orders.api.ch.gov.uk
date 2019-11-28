@@ -42,7 +42,7 @@ public enum ItemType {
     void populateDescriptionFields(final ItemDTO itemDTO) {
         itemDTO.setDescriptionIdentifier(itemType);
         itemDTO.setKind(kind);
-        // TODO Populate description and description values when we know what these are.
+        // TODO PCI-505 Populate description and description values when we know what these are.
     }
 
     /**
@@ -52,7 +52,7 @@ public enum ItemType {
     void populateItemCosts(final ItemDTO itemDTO) {
         final ItemCosts costs = new ItemCosts();
 
-        // TODO Retrieve the actual costs as appropriate.
+        // TODO PCI-506 Retrieve the actual costs as appropriate.
         costs.setDiscountApplied("1");
         costs.setIndividualItemCost("2");
         costs.setPostageCost("3");

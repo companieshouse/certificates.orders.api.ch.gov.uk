@@ -13,7 +13,7 @@ public class CertificateItemOptions {
     @JsonProperty("additional_information")
     private String additionalInformation;
 
-    // TODO Give these options human readable names
+    // TODO PCI-504 Give these options human readable names.
     private boolean isCertAcc;
 
     private boolean isCertArts;
