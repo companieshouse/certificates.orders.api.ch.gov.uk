@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
  */
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemDTO extends ItemDTO {
 
+    @NotNull
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 

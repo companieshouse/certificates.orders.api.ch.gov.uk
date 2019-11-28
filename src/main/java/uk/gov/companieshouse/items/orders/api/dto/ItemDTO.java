@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -25,6 +27,7 @@ public class ItemDTO {
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
 
+    @NotNull
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
 
@@ -33,6 +36,7 @@ public class ItemDTO {
 
     private boolean isPostalDelivery;
 
+    @Min(1)
     @JsonProperty("quantity")
     private int quantity;
 

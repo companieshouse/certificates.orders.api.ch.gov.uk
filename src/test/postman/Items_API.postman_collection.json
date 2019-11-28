@@ -20,7 +20,115 @@
 				],
 				"body": {
 					"mode": "raw",
+					"raw": "{\n\t\"company_number\": \"000064000\",\n\t\"item_costs\": {},\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://chs-dev:10020/orderable/certificates",
+					"protocol": "http",
+					"host": [
+						"chs-dev"
+					],
+					"port": "10020",
+					"path": [
+						"orderable",
+						"certificates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create item missing quantity",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"company_number\": \"000064000\",\n\t\"item_costs\": {},\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://chs-dev:10020/orderable/certificates",
+					"protocol": "http",
+					"host": [
+						"chs-dev"
+					],
+					"port": "10020",
+					"path": [
+						"orderable",
+						"certificates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create item missing item costs",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
 					"raw": "{\n\t\"company_number\": \"000064000\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://chs-dev:10020/orderable/certificates",
+					"protocol": "http",
+					"host": [
+						"chs-dev"
+					],
+					"port": "10020",
+					"path": [
+						"orderable",
+						"certificates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create item missing item options",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"company_number\": \"000064000\",\n\t\"item_costs\": {},\n\t\"quantity\": 3\n}",
 					"options": {
 						"raw": {
 							"language": "json"

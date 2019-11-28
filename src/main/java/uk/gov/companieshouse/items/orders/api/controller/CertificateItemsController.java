@@ -9,6 +9,8 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import javax.validation.Valid;
+
 import static uk.gov.companieshouse.items.orders.api.ItemType.CERTIFICATE;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
@@ -19,7 +21,7 @@ public class CertificateItemsController {
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
     @ResponseStatus(HttpStatus.CREATED)
-    public CertificateItemDTO createCertificateItem(final @RequestBody CertificateItemDTO certificateItemDTO) {
+    public CertificateItemDTO createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO) {
 
         LOGGER.info("ENTERING createCertificateItem(" + certificateItemDTO + ")");
 
