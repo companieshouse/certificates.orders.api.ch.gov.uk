@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import java.util.Map;
@@ -109,17 +110,5 @@ public class ItemDTO {
     }
 
     @Override
-    public String toString() {
-        return "ItemDTO{" +
-                "id='" + id + '\'' +
-                ", companyNumber='" + companyNumber + '\'' +
-                ", description='" + description + '\'' +
-                ", descriptionIdentifier='" + descriptionIdentifier + '\'' +
-                ", descriptionValues=" + descriptionValues +
-                ", itemCosts=" + itemCosts +
-                ", kind='" + kind + '\'' +
-                ", isPostalDelivery=" + isPostalDelivery +
-                ", quantity=" + quantity +
-                '}';
-    }
+    public String toString() { return new Gson().toJson(this); }
 }

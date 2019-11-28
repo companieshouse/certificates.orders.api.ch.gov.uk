@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.gson.Gson;
 
 /**
  * An instance of this represents the item options for a certificate item.
@@ -253,30 +254,5 @@ public class CertificateItemOptions {
     }
 
     @Override
-    public String toString() {
-        return "CertificateItemOptions{" +
-                "additionalInformation='" + additionalInformation + '\'' +
-                ", isCertAcc=" + isCertAcc +
-                ", isCertArts=" + isCertArts +
-                ", isCertCobj=" + isCertCobj +
-                ", isCertDir=" + isCertDir +
-                ", isCertDissLiq=" + isCertDissLiq +
-                ", isCertDomicil=" + isCertDomicil +
-                ", isCertExtraI=" + isCertExtraI +
-                ", isCertInc=" + isCertInc +
-                ", isCertIncCon=" + isCertIncCon +
-                ", isCertIncConLast=" + isCertIncConLast +
-                ", isCertIssCap=" + isCertIssCap +
-                ", isCertMem=" + isCertMem +
-                ", isCertMortDoc=" + isCertMortDoc +
-                ", isCertNomc=" + isCertNomc +
-                ", isCertNonExis=" + isCertNonExis +
-                ", isCertOnly=" + isCertOnly +
-                ", isCertOtherC=" + isCertOtherC +
-                ", isCertRet=" + isCertRet +
-                ", isCertRoc=" + isCertRoc +
-                ", isCertSec=" + isCertSec +
-                ", isCertShar=" + isCertShar +
-                '}';
-    }
+    public String toString() { return new Gson().toJson(this); }
 }

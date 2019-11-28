@@ -69,7 +69,7 @@ class CertificateItemsControllerUnitTest {
                 .andExpect(jsonPath("$.postal_delivery", is(true)));
 
         // Then
-        // TODO: Verify can retrieve equivalent entity
+        // TODO PCI-324 Verify can retrieve equivalent entity
 
     }
 

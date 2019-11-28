@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
 /**
@@ -22,9 +23,5 @@ public class CertificateItemDTO extends ItemDTO {
     }
 
     @Override
-    public String toString() {
-        return "CertificateItemDTO{" +
-                "itemOptions=" + itemOptions +
-                "} [" + super.toString() + "]";
-    }
+    public String toString() { return new Gson().toJson(this); }
 }

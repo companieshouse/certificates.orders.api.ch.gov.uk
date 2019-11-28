@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
 
 /**
  * An instance of this represents the item's costs.
@@ -52,12 +53,5 @@ public class ItemCosts {
     }
 
     @Override
-    public String toString() {
-        return "ItemCosts{" +
-                "discountApplied='" + discountApplied + '\'' +
-                ", individualItemCost='" + individualItemCost + '\'' +
-                ", postageCost='" + postageCost + '\'' +
-                ", totalCost='" + totalCost + '\'' +
-                '}';
-    }
+    public String toString() { return new Gson().toJson(this); }
 }
