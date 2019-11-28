@@ -66,11 +66,11 @@ public class CertificateItemOptions {
         return isCertAcc;
     }
 
-    @JsonProperty("cert_arts")
     public void setCertAcc(boolean certAcc) {
         isCertAcc = certAcc;
     }
 
+    @JsonProperty("cert_arts")
     public boolean isCertArts() {
         return isCertArts;
     }
