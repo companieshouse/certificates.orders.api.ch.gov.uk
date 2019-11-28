@@ -16,6 +16,9 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<structured-logging.version>1.2.0-rc1</structured-logging.version>
+		<hamcrest-library-version>2.1</hamcrest-library-version>
+		<gson.version>2.8.0</gson.version>
 	</properties>
 
 	<dependencies>
@@ -35,6 +38,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>structured-logging</artifactId>
+			<version>${structured-logging.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -46,6 +60,12 @@
 					<artifactId>junit-vintage-engine</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>${hamcrest-library-version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
