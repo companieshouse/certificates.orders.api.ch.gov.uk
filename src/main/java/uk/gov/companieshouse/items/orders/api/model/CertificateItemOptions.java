@@ -1,10 +1,12 @@
 package uk.gov.companieshouse.items.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * An instance of this represents the item options for a certificate item.
  */
+@JsonPropertyOrder(alphabetic = true)
 public class CertificateItemOptions {
 
     @JsonProperty("additional_information")
