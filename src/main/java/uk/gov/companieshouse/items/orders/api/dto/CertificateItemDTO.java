@@ -1,11 +1,13 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
  */
+@JsonPropertyOrder(alphabetic = true)
 public class CertificateItemDTO extends ItemDTO {
 
     @JsonProperty("item_options")
