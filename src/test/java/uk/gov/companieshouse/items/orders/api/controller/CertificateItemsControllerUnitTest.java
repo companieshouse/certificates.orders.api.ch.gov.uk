@@ -49,6 +49,7 @@ class CertificateItemsControllerUnitTest {
         newCertificateItemDTO.setItemOptions(options);
 
         final CertificateItemDTO createdCertificateItemDTO = new CertificateItemDTO();
+        createdCertificateItemDTO.setId("CHS1");
         createdCertificateItemDTO.setCompanyNumber(newCertificateItemDTO.getCompanyNumber());
         createdCertificateItemDTO.setKind("certificate");
         createdCertificateItemDTO.setDescriptionIdentifier("certificate");

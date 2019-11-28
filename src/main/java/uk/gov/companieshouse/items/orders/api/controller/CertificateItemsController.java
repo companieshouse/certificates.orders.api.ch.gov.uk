@@ -25,6 +25,10 @@ public class CertificateItemsController {
 
         CERTIFICATE.populateReadOnlyFields(certificateItemDTO);
 
+        // TODO ID will be generated as per
+        //  https://companieshouse.atlassian.net/wiki/spaces/DEV/pages/1258094916/Certificates+API+High+Level+Development+Design#CertificatesAPIHighLevelDevelopmentDesign-Traceability
+        certificateItemDTO.setId("CHS1");
+
         LOGGER.info("EXITING createCertificateItem() with " + certificateItemDTO);
         return certificateItemDTO;
     }
