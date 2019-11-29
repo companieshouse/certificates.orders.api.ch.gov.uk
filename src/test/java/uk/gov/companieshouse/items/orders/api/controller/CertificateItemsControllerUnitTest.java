@@ -31,7 +31,7 @@ class CertificateItemsControllerUnitTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("Creates certificate item creation")
+    @DisplayName("Create creates certificate item")
     void createCertificateItemCreatesCertificateItem() throws Exception {
 
         // Given
@@ -72,75 +72,6 @@ class CertificateItemsControllerUnitTest {
 
         // Then
         // TODO PCI-324 Verify can retrieve equivalent entity
-
-    }
-
-    @Test
-    @DisplayName("Create rejects missing item costs")
-    void createCertificateItemRejectsMissingItemCosts() throws Exception {
-
-        // Given
-        final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-        newCertificateItemDTO.setCompanyNumber("1234");
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(true);
-        options.setCertShar(true);
-        newCertificateItemDTO.setItemOptions(options);
-        newCertificateItemDTO.setQuantity(5);
-
-        // When and Then
-        mockMvc.perform(post("/certificates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newCertificateItemDTO)))
-                .andExpect(status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    @DisplayName("Create rejects missing item options")
-    void createCertificateItemRejectsMissingItemOptions() throws Exception {
-
-        // Given
-        final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-        newCertificateItemDTO.setCompanyNumber("1234");
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
-        newCertificateItemDTO.setItemCosts(costs);
-        newCertificateItemDTO.setQuantity(5);
-
-        // When and Then
-        mockMvc.perform(post("/certificates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newCertificateItemDTO)))
-                .andExpect(status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-
-    }
-
-    @Test
-    @DisplayName("Create rejects missing quantity")
-    void createCertificateItemRejectsMissingQuantity() throws Exception {
-
-        // Given
-        final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-        newCertificateItemDTO.setCompanyNumber("1234");
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
-        newCertificateItemDTO.setItemCosts(costs);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(true);
-        options.setCertShar(true);
-        newCertificateItemDTO.setItemOptions(options);
-
-        // When and Then
-        mockMvc.perform(post("/certificates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newCertificateItemDTO)))
-                .andExpect(status().isBadRequest()).andDo(MockMvcResultHandlers.print());
 
     }
 
