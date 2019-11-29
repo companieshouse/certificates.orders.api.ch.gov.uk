@@ -28,6 +28,36 @@ class ItemsApiApplicationTests {
 		// No implementation required here to test that context loads.
 	}
 
+    @Test
+    @DisplayName("Create rejects missing company number")
+    void createCertificateItemRejectsMissingCompanyNumber() {
+
+        // Given
+        final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+        final ItemCosts costs = new ItemCosts();
+        costs.setDiscountApplied("1");
+        costs.setIndividualItemCost("2");
+        costs.setPostageCost("3");
+        costs.setTotalCost("4");
+        newCertificateItemDTO.setItemCosts(costs);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(true);
+        options.setCertShar(true);
+        newCertificateItemDTO.setItemOptions(options);
+        newCertificateItemDTO.setQuantity(5);
+
+        // When and Then
+        webTestClient.post().uri("/orderable/certificates")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromValue(newCertificateItemDTO))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Bad Request")
+                .jsonPath("$.errors[0].field").isEqualTo("companyNumber");
+
+    }
+
 	@Test
 	@DisplayName("Create does not reject missing item costs")
 	void createCertificateItemDoesNotRejectsMissingItemCosts() {

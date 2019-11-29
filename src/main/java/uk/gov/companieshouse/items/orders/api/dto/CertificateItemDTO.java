@@ -17,12 +17,24 @@ public class CertificateItemDTO extends ItemDTO {
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
+    @NotNull
+    @JsonProperty("company_number")
+    private String companyNumber;
+
     public CertificateItemOptions getItemOptions() {
         return itemOptions;
     }
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         this.itemOptions = itemOptions;
+    }
+
+    public String getCompanyNumber() {
+        return companyNumber;
+    }
+
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
     }
 
     @Override

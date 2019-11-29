@@ -14,9 +14,6 @@ public class ItemDTO {
 
     private String id;
 
-    @JsonProperty("company_number")
-    private String companyNumber;
-
     @JsonProperty("description")
     private String description;
 
@@ -44,14 +41,6 @@ public class ItemDTO {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
     }
 
     public String getDescription() {
