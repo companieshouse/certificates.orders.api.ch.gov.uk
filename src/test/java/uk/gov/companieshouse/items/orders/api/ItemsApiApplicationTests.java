@@ -11,6 +11,8 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import java.util.HashMap;
+
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,12 +36,6 @@ class ItemsApiApplicationTests {
 
         // Given
         final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
-        newCertificateItemDTO.setItemCosts(costs);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(true);
         options.setCertShar(true);
@@ -60,7 +56,7 @@ class ItemsApiApplicationTests {
 
 	@Test
 	@DisplayName("Create does not reject missing item costs")
-	void createCertificateItemDoesNotRejectsMissingItemCosts() {
+	void createCertificateItemDoesNotRejectMissingItemCosts() {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
@@ -77,6 +73,7 @@ class ItemsApiApplicationTests {
 				.body(fromValue(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isCreated();
+
 	}
 
 	@Test
@@ -86,12 +83,6 @@ class ItemsApiApplicationTests {
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
 		newCertificateItemDTO.setCompanyNumber("1234");
-		final ItemCosts costs = new ItemCosts();
-		costs.setDiscountApplied("1");
-		costs.setIndividualItemCost("2");
-		costs.setPostageCost("3");
-		costs.setTotalCost("4");
-		newCertificateItemDTO.setItemCosts(costs);
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
@@ -113,12 +104,6 @@ class ItemsApiApplicationTests {
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
 		newCertificateItemDTO.setCompanyNumber("1234");
-		final ItemCosts costs = new ItemCosts();
-		costs.setDiscountApplied("1");
-		costs.setIndividualItemCost("2");
-		costs.setPostageCost("3");
-		costs.setTotalCost("4");
-		newCertificateItemDTO.setItemCosts(costs);
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setCertInc(true);
 		options.setCertShar(true);
@@ -133,6 +118,116 @@ class ItemsApiApplicationTests {
 				.expectBody()
 				.jsonPath("$.error").isEqualTo("Bad Request")
 				.jsonPath("$.errors[0].field").isEqualTo("quantity");
+
+	}
+
+	@Test
+	@DisplayName("Create rejects read only item costs")
+	void createCertificateItemRejectsReadOnlyItemCosts() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		final ItemCosts costs = new ItemCosts();
+		costs.setDiscountApplied("1");
+		costs.setIndividualItemCost("2");
+		costs.setPostageCost("3");
+		costs.setTotalCost("4");
+		newCertificateItemDTO.setItemCosts(costs);
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		webTestClient.post().uri("/orderable/certificates")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(fromValue(newCertificateItemDTO))
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.error").isEqualTo("Bad Request")
+				.jsonPath("$.errors[0].field").isEqualTo("itemCosts");
+
+	}
+
+	@Test
+	@DisplayName("Create rejects read only description")
+	void createCertificateItemRejectsReadOnlyDescription() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		newCertificateItemDTO.setDescription("description text");
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		webTestClient.post().uri("/orderable/certificates")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(fromValue(newCertificateItemDTO))
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.error").isEqualTo("Bad Request")
+				.jsonPath("$.errors[0].field").isEqualTo("description");
+
+	}
+
+
+	@Test
+	@DisplayName("Create rejects read only description identifier")
+	void createCertificateItemRejectsReadOnlyDescriptionIdentifier() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		newCertificateItemDTO.setDescriptionIdentifier("description identifier text");
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		webTestClient.post().uri("/orderable/certificates")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(fromValue(newCertificateItemDTO))
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.error").isEqualTo("Bad Request")
+				.jsonPath("$.errors[0].field").isEqualTo("descriptionIdentifier");
+
+	}
+
+	@Test
+	@DisplayName("Create rejects read only description values")
+	void createCertificateItemRejectsReadOnlyDescriptionValues() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		newCertificateItemDTO.setDescriptionValues(new HashMap<>());
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		webTestClient.post().uri("/orderable/certificates")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(fromValue(newCertificateItemDTO))
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.error").isEqualTo("Bad Request")
+				.jsonPath("$.errors[0].field").isEqualTo("descriptionValues");
 
 	}
 

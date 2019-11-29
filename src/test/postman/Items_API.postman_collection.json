@@ -7,184 +7,357 @@
 	},
 	"item": [
 		{
-			"name": "Create item",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "Certificates API",
+			"item": [
+				{
+					"name": "Create certificate item",
+					"item": [
+						{
+							"name": "Missing attributes",
+							"item": [
+								{
+									"name": "Create certificate item missing company number",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item missing quantity",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item missing item costs",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"000064000\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item missing item options",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"description": "Test what happens when attributes are missing from request payloads.",
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Read only attributes",
+							"item": [
+								{
+									"name": "Create certificate item read only item costs",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"item_costs\": {},\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item read only description",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description\": \"description text\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item read only description identifier",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description_identifier\": \"description identifier text\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item read only description values",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description_values\": {},\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://chs-dev:10020/orderable/certificates",
+											"protocol": "http",
+											"host": [
+												"chs-dev"
+											],
+											"port": "10020",
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"description": "Test what happen when requests are made containing values for read only attributes.",
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Create certificate item",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://chs-dev:10020/orderable/certificates",
+									"protocol": "http",
+									"host": [
+										"chs-dev"
+									],
+									"port": "10020",
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
 						}
-					}
-				},
-				"url": {
-					"raw": "http://chs-dev:10020/orderable/certificates",
-					"protocol": "http",
-					"host": [
-						"chs-dev"
 					],
-					"port": "10020",
-					"path": [
-						"orderable",
-						"certificates"
-					]
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create item missing company number",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://chs-dev:10020/orderable/certificates",
-					"protocol": "http",
-					"host": [
-						"chs-dev"
-					],
-					"port": "10020",
-					"path": [
-						"orderable",
-						"certificates"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create item missing quantity",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://chs-dev:10020/orderable/certificates",
-					"protocol": "http",
-					"host": [
-						"chs-dev"
-					],
-					"port": "10020",
-					"path": [
-						"orderable",
-						"certificates"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create item missing item costs",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"company_number\": \"000064000\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://chs-dev:10020/orderable/certificates",
-					"protocol": "http",
-					"host": [
-						"chs-dev"
-					],
-					"port": "10020",
-					"path": [
-						"orderable",
-						"certificates"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create item missing item options",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"quantity\": 3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://chs-dev:10020/orderable/certificates",
-					"protocol": "http",
-					"host": [
-						"chs-dev"
-					],
-					"port": "10020",
-					"path": [
-						"orderable",
-						"certificates"
-					]
-				}
-			},
-			"response": []
+			],
+			"protocolProfileBehavior": {}
 		}
 	]
 }

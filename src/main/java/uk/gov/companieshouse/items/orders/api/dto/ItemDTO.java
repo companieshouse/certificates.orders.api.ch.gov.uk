@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Null;
 import java.util.Map;
 
 /**
@@ -14,15 +15,19 @@ public class ItemDTO {
 
     private String id;
 
+    @Null
     @JsonProperty("description")
     private String description;
 
+    @Null
     @JsonProperty("description_identifier")
     private String descriptionIdentifier;
 
+    @Null
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
 
+    @Null
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
 

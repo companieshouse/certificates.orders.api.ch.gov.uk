@@ -37,12 +37,6 @@ class CertificateItemsControllerUnitTest {
         // Given
         final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
         newCertificateItemDTO.setCompanyNumber("1234");
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
-        newCertificateItemDTO.setItemCosts(costs);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(true);
         options.setCertShar(true);
@@ -54,6 +48,11 @@ class CertificateItemsControllerUnitTest {
         createdCertificateItemDTO.setCompanyNumber(newCertificateItemDTO.getCompanyNumber());
         createdCertificateItemDTO.setKind("certificate");
         createdCertificateItemDTO.setDescriptionIdentifier("certificate");
+        final ItemCosts costs = new ItemCosts();
+        costs.setDiscountApplied("1");
+        costs.setIndividualItemCost("2");
+        costs.setPostageCost("3");
+        costs.setTotalCost("4");
         createdCertificateItemDTO.setItemCosts(costs);
         createdCertificateItemDTO.setItemOptions(options);
         createdCertificateItemDTO.setPostalDelivery(true);
