@@ -29,8 +29,8 @@ class ItemsApiApplicationTests {
 	}
 
 	@Test
-	@DisplayName("Create rejects missing item costs")
-	void createCertificateItemRejectsMissingItemCosts() {
+	@DisplayName("Create does not reject missing item costs")
+	void createCertificateItemDoesNotRejectsMissingItemCosts() {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
@@ -46,10 +46,7 @@ class ItemsApiApplicationTests {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromValue(newCertificateItemDTO))
 				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("itemCosts");
+				.expectStatus().isCreated();
 	}
 
 	@Test
