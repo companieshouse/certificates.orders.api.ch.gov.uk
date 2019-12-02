@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
@@ -105,6 +104,4 @@ public class ItemDTO {
         this.quantity = quantity;
     }
 
-    @Override
-    public String toString() { return new Gson().toJson(this); }
 }

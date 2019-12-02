@@ -42,16 +42,8 @@ class ItemsApiApplicationTests {
         newCertificateItemDTO.setItemOptions(options);
         newCertificateItemDTO.setQuantity(5);
 
-        // When and Then
-        webTestClient.post().uri("/orderable/certificates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(fromValue(newCertificateItemDTO))
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.error").isEqualTo("Bad Request")
-                .jsonPath("$.errors[0].field").isEqualTo("companyNumber");
-
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "company_number: must not be null");
     }
 
 	@Test
@@ -86,15 +78,7 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
-				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("itemOptions");
-
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "item_options: must not be null");
 	}
 
 	@Test
@@ -110,15 +94,7 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setItemOptions(options);
 
 		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
-				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("quantity");
-
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "quantity: must be greater than or equal to 1");
 	}
 
 	@Test
@@ -141,15 +117,7 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
-				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("itemCosts");
-
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "item_costs: must be null");
 	}
 
 	@Test
@@ -167,15 +135,7 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
-				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("description");
-
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description: must be null");
 	}
 
 
@@ -194,15 +154,7 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
-				.exchange()
-				.expectStatus().isBadRequest()
-				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("descriptionIdentifier");
-
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description_identifier: must be null");
 	}
 
 	@Test
@@ -220,15 +172,24 @@ class ItemsApiApplicationTests {
 		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description_values: must be null");
+	}
+
+	/**
+	 * Utility method that posts the create certificate item request, asserts a bad request status response and an
+	 * expected validation error message.
+	 * @param itemToCreate the DTO representing the certificate item to be requested
+	 * @param expectedError expected validation error message
+	 */
+	private void postBadCreateRequestAndExpectError(final CertificateItemDTO itemToCreate, final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
+				.body(fromValue(itemToCreate))
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody()
-				.jsonPath("$.error").isEqualTo("Bad Request")
-				.jsonPath("$.errors[0].field").isEqualTo("descriptionValues");
-
+				.jsonPath("$.status").isEqualTo("BAD_REQUEST")
+				.jsonPath("$.errors[0]").isEqualTo(expectedError);
 	}
 
 }
