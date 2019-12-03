@@ -2,12 +2,11 @@ package uk.gov.companieshouse.items.orders.api;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 
@@ -21,15 +20,15 @@ class ItemTypeUnitTest {
     void certificateItemPopulatedCorrectly() {
 
         // Given
-        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final Item item = new Item();
 
         // When
-        CERTIFICATE.populateReadOnlyFields(certificateItemDTO);
+        CERTIFICATE.populateReadOnlyFields(item);
 
         // Then
-        verifyDescriptionFields(certificateItemDTO, "certificate");
-        verifyCostsFields(certificateItemDTO);
-        verifyPostalDelivery(certificateItemDTO, CERTIFICATE);
+        verifyDescriptionFields(item, "certificate");
+        verifyCostsFields(item);
+        verifyPostalDelivery(item, CERTIFICATE);
     }
 
     @Test
@@ -37,15 +36,15 @@ class ItemTypeUnitTest {
     void certifiedCopyItemPopulatedCorrectly() {
 
         // Given
-        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final Item item = new Item();
 
         // When
-        CERTIFIED_COPY.populateReadOnlyFields(certificateItemDTO);
+        CERTIFIED_COPY.populateReadOnlyFields(item);
 
         // Then
-        verifyDescriptionFields(certificateItemDTO, "certified-copy");
-        verifyCostsFields(certificateItemDTO);
-        verifyPostalDelivery(certificateItemDTO, CERTIFIED_COPY);
+        verifyDescriptionFields(item, "certified-copy");
+        verifyCostsFields(item);
+        verifyPostalDelivery(item, CERTIFIED_COPY);
     }
 
     @Test
@@ -53,24 +52,24 @@ class ItemTypeUnitTest {
     void scanOnDemandItemPopulatedCorrectly() {
 
         // Given
-        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final Item item = new Item();
 
         // When
-        SCAN_ON_DEMAND.populateReadOnlyFields(certificateItemDTO);
+        SCAN_ON_DEMAND.populateReadOnlyFields(item);
 
         // Then
-        verifyDescriptionFields(certificateItemDTO, "scan-on-demand");
-        verifyCostsFields(certificateItemDTO);
-        verifyPostalDelivery(certificateItemDTO, SCAN_ON_DEMAND);
+        verifyDescriptionFields(item, "scan-on-demand");
+        verifyCostsFields(item);
+        verifyPostalDelivery(item, SCAN_ON_DEMAND);
     }
 
-    private void verifyDescriptionFields(final CertificateItemDTO certificateItemDTO, final String value) {
-        assertThat(certificateItemDTO.getDescriptionIdentifier(), is(value));
-        assertThat(certificateItemDTO.getKind(), is(value));
+    private void verifyDescriptionFields(final Item item, final String value) {
+        assertThat(item.getDescriptionIdentifier(), is(value));
+        assertThat(item.getKind(), is(value));
     }
 
-    private void verifyCostsFields(final CertificateItemDTO certificateItemDTO) {
-        final ItemCosts costs = certificateItemDTO.getItemCosts();
+    private void verifyCostsFields(final Item item) {
+        final ItemCosts costs = item.getItemCosts();
         assertThat(costs, is(notNullValue()));
         assertThat(costs.getDiscountApplied(), is("1"));
         assertThat(costs.getIndividualItemCost(), is("2"));
@@ -78,7 +77,7 @@ class ItemTypeUnitTest {
         assertThat(costs.getTotalCost(), is("4"));
     }
 
-    private void verifyPostalDelivery(final CertificateItemDTO certificateItemDTO, final ItemType type) {
-        assertThat(certificateItemDTO.isPostalDelivery(), is(type != SCAN_ON_DEMAND));
+    private void verifyPostalDelivery(final Item item, final ItemType type) {
+        assertThat(item.isPostalDelivery(), is(type != SCAN_ON_DEMAND));
     }
 }

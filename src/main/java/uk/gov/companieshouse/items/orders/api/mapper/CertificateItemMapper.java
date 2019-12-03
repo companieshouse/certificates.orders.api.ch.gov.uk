@@ -7,4 +7,5 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 @Mapper(componentModel = "spring")
 public interface CertificateItemMapper {
     CertificateItem certificateItemDTOtoCertificateItem(CertificateItemDTO certificateItemDTO);
+    CertificateItemDTO certificateItemToCertificateItemDTO(CertificateItem certificateItem);
 }
