@@ -175,6 +175,24 @@ class ItemsApiApplicationTests {
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description_values: must be null");
 	}
 
+	@Test
+	@DisplayName("Create rejects read only id")
+	void createCertificateItemRejectsReadOnlyId() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		newCertificateItemDTO.setId("TEST_ID");
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "id: must be null in a create item request");
+	}
+
 	/**
 	 * Utility method that posts the create certificate item request, asserts a bad request status response and an
 	 * expected validation error message.
