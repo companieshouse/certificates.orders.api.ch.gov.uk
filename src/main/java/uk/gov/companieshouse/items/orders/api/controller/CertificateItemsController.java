@@ -1,13 +1,17 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import javax.validation.Valid;
+import java.util.List;
 
 import static uk.gov.companieshouse.items.orders.api.ItemType.CERTIFICATE;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
@@ -17,11 +21,21 @@ public class CertificateItemsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
+    private final CreateItemRequestValidator validator;
+
+    public CertificateItemsController(CreateItemRequestValidator validator) {
+        this.validator = validator;
+    }
+
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CertificateItemDTO createCertificateItem(final @RequestBody CertificateItemDTO certificateItemDTO) {
+    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO) {
 
         LOGGER.info("ENTERING createCertificateItem(" + certificateItemDTO + ")");
+
+        final List<String> errors = validator.getValidationErrors(certificateItemDTO);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
+        }
 
         CERTIFICATE.populateReadOnlyFields(certificateItemDTO);
 
@@ -30,7 +44,7 @@ public class CertificateItemsController {
         certificateItemDTO.setId("CHS1");
 
         LOGGER.info("EXITING createCertificateItem() with " + certificateItemDTO);
-        return certificateItemDTO;
+        return ResponseEntity.status(HttpStatus.CREATED).body(certificateItemDTO);
     }
 
 }

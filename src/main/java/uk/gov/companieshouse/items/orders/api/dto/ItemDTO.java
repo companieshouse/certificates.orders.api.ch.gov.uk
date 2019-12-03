@@ -1,9 +1,10 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Null;
 import java.util.Map;
 
 /**
@@ -13,18 +14,19 @@ public class ItemDTO {
 
     private String id;
 
-    @JsonProperty("company_number")
-    private String companyNumber;
-
+    @Null
     @JsonProperty("description")
     private String description;
 
+    @Null
     @JsonProperty("description_identifier")
     private String descriptionIdentifier;
 
+    @Null
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
 
+    @Null
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
 
@@ -33,6 +35,7 @@ public class ItemDTO {
 
     private boolean isPostalDelivery;
 
+    @Min(1)
     @JsonProperty("quantity")
     private int quantity;
 
@@ -42,14 +45,6 @@ public class ItemDTO {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
     }
 
     public String getDescription() {
@@ -109,6 +104,4 @@ public class ItemDTO {
         this.quantity = quantity;
     }
 
-    @Override
-    public String toString() { return new Gson().toJson(this); }
 }
