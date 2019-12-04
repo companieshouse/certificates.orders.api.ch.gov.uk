@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
 
-import java.util.Objects;
-
 /**
  * An instance of this represents the item options for a certificate item.
  */
@@ -258,37 +256,4 @@ public class CertificateItemOptions {
     @Override
     public String toString() { return new Gson().toJson(this); }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CertificateItemOptions)) return false;
-        CertificateItemOptions that = (CertificateItemOptions) o;
-        return isCertAcc == that.isCertAcc &&
-                isCertArts == that.isCertArts &&
-                isCertCobj == that.isCertCobj &&
-                isCertDir == that.isCertDir &&
-                isCertDissLiq == that.isCertDissLiq &&
-                isCertDomicil == that.isCertDomicil &&
-                isCertExtraI == that.isCertExtraI &&
-                isCertInc == that.isCertInc &&
-                isCertIncCon == that.isCertIncCon &&
-                isCertIncConLast == that.isCertIncConLast &&
-                isCertIssCap == that.isCertIssCap &&
-                isCertMem == that.isCertMem &&
-                isCertMortDoc == that.isCertMortDoc &&
-                isCertNomc == that.isCertNomc &&
-                isCertNonExis == that.isCertNonExis &&
-                isCertOnly == that.isCertOnly &&
-                isCertOtherC == that.isCertOtherC &&
-                isCertRet == that.isCertRet &&
-                isCertRoc == that.isCertRoc &&
-                isCertSec == that.isCertSec &&
-                isCertShar == that.isCertShar &&
-                Objects.equals(additionalInformation, that.additionalInformation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(additionalInformation, isCertAcc, isCertArts, isCertCobj, isCertDir, isCertDissLiq, isCertDomicil, isCertExtraI, isCertInc, isCertIncCon, isCertIncConLast, isCertIssCap, isCertMem, isCertMortDoc, isCertNomc, isCertNonExis, isCertOnly, isCertOtherC, isCertRet, isCertRoc, isCertSec, isCertShar);
-    }
 }

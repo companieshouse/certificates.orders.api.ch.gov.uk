@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.model;
 
 import com.google.gson.Gson;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import java.util.Map;
 
@@ -9,6 +10,9 @@ import java.util.Map;
  * An instance of this represents an item of any type.
  */
 public class Item {
+
+    @Transient
+    public static final String SEQUENCE_NAME = "items_sequence";
 
     @Id
     private String id;

@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
@@ -18,14 +16,12 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -43,6 +39,8 @@ class CertificateItemsControllerUnitTest {
     @Autowired
     private CertificateItemRepository repository;
 
+    private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
+
     @Test
     @DisplayName("Create creates certificate item")
     void createCertificateItemCreatesCertificateItem() throws Exception {
@@ -57,6 +55,7 @@ class CertificateItemsControllerUnitTest {
         newItem.setQuantity(5);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setKind("certificate");
         expectedItem.setDescriptionIdentifier("certificate");
@@ -75,6 +74,7 @@ class CertificateItemsControllerUnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.item_options.cert_inc", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_shar", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)))
@@ -82,49 +82,18 @@ class CertificateItemsControllerUnitTest {
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
-        final CertificateItemDTO itemReturned = getItemReturned(outcome);
-        final String newCertificateItemId = assertThatItemReturnedIsAsExpected(itemReturned, expectedItem);
-        assertItemSavedCorrectly(newCertificateItemId);
+        assertItemSavedCorrectly(EXPECTED_ITEM_ID);
     }
 
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
-     * from the database.
-     * @param returnedItemId the ID of the newly created item as returned in the REST response
+     * from the database using its expected ID value.
+     * @param expectedItemId the expected ID of the newly created item
      */
-    private void assertItemSavedCorrectly(final String returnedItemId) {
-        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(returnedItemId);
+    private void assertItemSavedCorrectly(final String expectedItemId) {
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
-        assertThat(retrievedCertificateItem.get().getId(), is(returnedItemId));
-    }
-
-    /**
-     * Partially compares the content returned with that expected. Comparison excludes the ID as this will vary.
-     * As a side effect this returns the actual ID found in the REST response for legibility of test code.
-     * @param itemReturned the item returned in the REST response
-     * @param itemExpected the item we expect to be returned in the REST response (with no ID)
-     * @return the actual ID found in the rest response
-     */
-    private String assertThatItemReturnedIsAsExpected(final CertificateItemDTO itemReturned,
-                                                      final CertificateItemDTO itemExpected) {
-        final String newCertificateItemId = itemReturned.getId();
-        itemReturned.setId(null);
-        assertThat(itemReturned.equals(itemExpected), is(true));
-        return newCertificateItemId;
-    }
-
-    /**
-     * Extracts the item ({@link CertificateItemDTO}) from the JSON payload of the REST response.
-     * @param outcome outcome of sending the create item REST request
-     * @return the item ({@link CertificateItemDTO}) created from the REST response JSON payload
-     * @throws JsonProcessingException should something unexpected happen
-     * @throws UnsupportedEncodingException should something unexpected happen
-     */
-    private CertificateItemDTO getItemReturned(final ResultActions outcome)
-            throws JsonProcessingException, UnsupportedEncodingException {
-        final MvcResult result = outcome.andReturn();
-        final String body = result.getResponse().getContentAsString();
-        return objectMapper.readValue(body, CertificateItemDTO.class);
+        assertThat(retrievedCertificateItem.get().getId(), is(expectedItemId));
     }
 
 }
