@@ -23,10 +23,13 @@
 hs_err_pid*
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
+!.idea/runConfigurations
 *.iws
 *.iml
 *.ipr
+
+!.idea
 
 target/
 .classpath
