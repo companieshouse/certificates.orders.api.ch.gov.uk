@@ -27,6 +27,13 @@ public class CertificateItemsController {
     private final CertificateItemMapper mapper;
     private final CertificateItemService service;
 
+    /**
+     * Constructor.
+     * @param validator the validator this relies on for some 'input' validations
+     * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
+     *               {@link CertificateItem} instances
+     * @param service the service used by this to manage and store certificate items
+     */
     public CertificateItemsController(final CreateItemRequestValidator validator,
                                       final CertificateItemMapper mapper,
                                       final CertificateItemService service) {
