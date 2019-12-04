@@ -3,6 +3,8 @@ package uk.gov.companieshouse.items.orders.api.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 
+import java.util.Objects;
+
 /**
  * An instance of this represents the item's costs.
  */
@@ -54,4 +56,20 @@ public class ItemCosts {
 
     @Override
     public String toString() { return new Gson().toJson(this); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ItemCosts)) return false;
+        ItemCosts itemCosts = (ItemCosts) o;
+        return Objects.equals(discountApplied, itemCosts.discountApplied) &&
+                Objects.equals(individualItemCost, itemCosts.individualItemCost) &&
+                Objects.equals(postageCost, itemCosts.postageCost) &&
+                Objects.equals(totalCost, itemCosts.totalCost);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(discountApplied, individualItemCost, postageCost, totalCost);
+    }
 }

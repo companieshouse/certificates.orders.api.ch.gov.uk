@@ -6,6 +6,7 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Null;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An instance of this represents the JSON serializable item for use in REST requests and responses.
@@ -104,4 +105,23 @@ public class ItemDTO {
         this.quantity = quantity;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ItemDTO)) return false;
+        ItemDTO itemDTO = (ItemDTO) o;
+        return isPostalDelivery == itemDTO.isPostalDelivery &&
+                quantity == itemDTO.quantity &&
+                Objects.equals(id, itemDTO.id) &&
+                Objects.equals(description, itemDTO.description) &&
+                Objects.equals(descriptionIdentifier, itemDTO.descriptionIdentifier) &&
+                Objects.equals(descriptionValues, itemDTO.descriptionValues) &&
+                Objects.equals(itemCosts, itemDTO.itemCosts) &&
+                Objects.equals(kind, itemDTO.kind);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, description, descriptionIdentifier, descriptionValues, itemCosts, kind, isPostalDelivery, quantity);
+    }
 }

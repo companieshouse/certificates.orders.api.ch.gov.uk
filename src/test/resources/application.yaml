@@ -1,0 +1,11 @@
+server:
+  servlet:
+    context-path: /orderable
+
+uk:
+  gov:
+    companieshouse:
+      items:
+        orders:
+          api:
+            path: /certificates
