@@ -78,9 +78,11 @@ class CertificateItemServiceTest {
                                                                  final LocalDateTime intervalStart,
                                                                  final LocalDateTime intervalEnd) {
         assertThat(itemCreated.getCreatedAt().isAfter(intervalStart), is(true));
-        assertThat(itemCreated.getCreatedAt().isBefore(intervalEnd), is(true));
+        assertThat(itemCreated.getCreatedAt().isBefore(intervalEnd) ||
+                   itemCreated.getCreatedAt().isEqual(intervalEnd), is(true));
         assertThat(itemCreated.getUpdatedAt().isAfter(intervalStart), is(true));
-        assertThat(itemCreated.getUpdatedAt().isBefore(intervalEnd), is(true));
+        assertThat(itemCreated.getUpdatedAt().isBefore(intervalEnd) ||
+                   itemCreated.getUpdatedAt().isEqual(intervalEnd), is(true));
     }
 
 }
