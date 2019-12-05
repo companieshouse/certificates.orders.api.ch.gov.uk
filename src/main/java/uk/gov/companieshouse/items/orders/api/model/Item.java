@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -16,6 +17,10 @@ public class Item {
 
     @Id
     private String id;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private String companyNumber;
 
@@ -41,6 +46,22 @@ public class Item {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public String getCompanyNumber() {

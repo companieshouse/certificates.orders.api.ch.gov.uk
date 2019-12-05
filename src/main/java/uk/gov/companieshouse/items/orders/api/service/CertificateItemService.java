@@ -5,6 +5,8 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
+import java.time.LocalDateTime;
+
 import static uk.gov.companieshouse.items.orders.api.ItemType.CERTIFICATE;
 
 /**
@@ -30,7 +32,18 @@ public class CertificateItemService {
     public CertificateItem createCertificateItem(final CertificateItem item) {
         CERTIFICATE.populateReadOnlyFields(item);
         item.setId(getNextId());
+        setCreationDateTimes(item);
         return repository.save(item);
+    }
+
+    /**
+     * Sets the created at and updated at date time 'timestamps' to now.
+     * @param item the item to be 'timestamped'
+     */
+    void setCreationDateTimes(final Item item) {
+        final LocalDateTime now = LocalDateTime.now();
+        item.setCreatedAt(now);
+        item.setUpdatedAt(now);
     }
 
     /**
