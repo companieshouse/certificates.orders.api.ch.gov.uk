@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
@@ -14,7 +15,9 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
@@ -22,6 +25,9 @@ import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICA
 public class CertificateItemsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+
+    private static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
+    private static final String LOG_MESSAGE_DATA_KEY = "message";
 
     private final CreateItemRequestValidator validator;
     private final CertificateItemMapper mapper;
@@ -43,9 +49,12 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
-    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO)
+    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        LOGGER.info("ENTERING createCertificateItem(" + certificateItemDTO + ")");
+        final Map<String, Object> logData = new HashMap<>();
+        logData.put(LOG_MESSAGE_DATA_KEY, "ENTERING createCertificateItem(" + certificateItemDTO + ")");
+        LOGGER.infoContext(requestId, "X Request ID header", logData);
 
         final List<String> errors = validator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
@@ -56,7 +65,8 @@ public class CertificateItemsController {
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
-        LOGGER.info("EXITING createCertificateItem() with " + createdCertificateItemDTO);
+        logData.put(LOG_MESSAGE_DATA_KEY, "EXITING createCertificateItem() with " + createdCertificateItemDTO);
+        LOGGER.infoContext(requestId, "X Request ID header", logData);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
