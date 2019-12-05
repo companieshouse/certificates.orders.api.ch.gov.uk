@@ -27,5 +27,9 @@ else
     source "${APP_DIR}/app_env"
 fi
 
+# Unset HUMAN_LOG for JSON format structured logging.
+#export HUMAN_LOG=
+echo "HUMAN_LOG=${HUMAN_LOG}"
+
 exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/items.orders.api.ch.gov.uk.jar"
 

@@ -77,10 +77,12 @@ class CertificateItemServiceTest {
     private void verifyCreationTimestampsWithinExecutionInterval(final Item itemCreated,
                                                                  final LocalDateTime intervalStart,
                                                                  final LocalDateTime intervalEnd) {
-        assertThat(itemCreated.getCreatedAt().isAfter(intervalStart), is(true));
+        assertThat(itemCreated.getCreatedAt().isAfter(intervalStart) ||
+                   itemCreated.getCreatedAt().isEqual(intervalStart), is(true));
         assertThat(itemCreated.getCreatedAt().isBefore(intervalEnd) ||
                    itemCreated.getCreatedAt().isEqual(intervalEnd), is(true));
-        assertThat(itemCreated.getUpdatedAt().isAfter(intervalStart), is(true));
+        assertThat(itemCreated.getUpdatedAt().isAfter(intervalStart) ||
+                   itemCreated.getUpdatedAt().isEqual(intervalStart), is(true));
         assertThat(itemCreated.getUpdatedAt().isBefore(intervalEnd) ||
                    itemCreated.getUpdatedAt().isEqual(intervalEnd), is(true));
     }
