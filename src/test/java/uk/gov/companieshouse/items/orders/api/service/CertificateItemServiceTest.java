@@ -22,7 +22,13 @@ import static org.hamcrest.core.Is.is;
  * Unit tests the {@link CertificateItemService} class.
  */
 @ExtendWith(MockitoExtension.class)
-class CertificateItemServiceUnitTest {
+class CertificateItemServiceTest {
+
+    /** The value produced by the sequence that drives the item ID generation. */
+    private static final long NEXT_ID_SEQUENCE_VALUE = 1L;
+
+    /** The next ID value expected to result given that the next sequence value is {@link #NEXT_ID_SEQUENCE_VALUE}. */
+    private static final String EXPECTED_ID_VALUE = "CHS00000000000000001";
 
     @InjectMocks
     private CertificateItemService serviceUnderTest;
@@ -37,17 +43,17 @@ class CertificateItemServiceUnitTest {
     void getNextIdGetsNextId() {
 
         // Given
-        when(generator.generateSequence(anyString())).thenReturn(1L);
+        when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);
 
         // When and Then
-        assertThat(serviceUnderTest.getNextId(), is("CHS00000000000000001"));
+        assertThat(serviceUnderTest.getNextId(), is(EXPECTED_ID_VALUE));
     }
 
     @Test
     void createCertificateItemPopulatesAndSavesItem() {
 
         // Given
-        when(generator.generateSequence(anyString())).thenReturn(1L);
+        when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);
         final CertificateItem item = new CertificateItem();
         final LocalDateTime intervalStart = LocalDateTime.now();
 
@@ -56,7 +62,7 @@ class CertificateItemServiceUnitTest {
 
         // Then
         final LocalDateTime intervalEnd = LocalDateTime.now();
-        assertThat(item.getId(), is("CHS00000000000000001"));
+        assertThat(item.getId(), is(EXPECTED_ID_VALUE));
         verifyCreationTimestampsWithinExecutionInterval(item, intervalStart, intervalEnd);
         verify(repository).save(item);
     }

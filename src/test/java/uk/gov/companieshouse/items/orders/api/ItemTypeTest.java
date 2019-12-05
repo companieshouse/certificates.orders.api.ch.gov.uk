@@ -13,54 +13,43 @@ import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 /**
  * Unit tests the {@link ItemType} enum.
  */
-class ItemTypeUnitTest {
+class ItemTypeTest {
 
     @Test
     @DisplayName("Certificate item populated correctly")
     void certificateItemPopulatedCorrectly() {
-
-        // Given
-        final Item item = new Item();
-
-        // When
-        CERTIFICATE.populateReadOnlyFields(item);
-
-        // Then
-        verifyDescriptionFields(item, "certificate");
-        verifyCostsFields(item);
-        verifyPostalDelivery(item, CERTIFICATE);
+        itemPopulatedCorrrectly(CERTIFICATE, "certificate");
     }
 
     @Test
     @DisplayName("Certified copy item populated correctly")
     void certifiedCopyItemPopulatedCorrectly() {
-
-        // Given
-        final Item item = new Item();
-
-        // When
-        CERTIFIED_COPY.populateReadOnlyFields(item);
-
-        // Then
-        verifyDescriptionFields(item, "certified-copy");
-        verifyCostsFields(item);
-        verifyPostalDelivery(item, CERTIFIED_COPY);
+        itemPopulatedCorrrectly(CERTIFIED_COPY, "certified-copy");
     }
 
     @Test
     @DisplayName("Scan on demand item populated correctly")
     void scanOnDemandItemPopulatedCorrectly() {
+        itemPopulatedCorrrectly(SCAN_ON_DEMAND, "scan-on-demand");
+    }
 
+    /**
+     * Utility method that calls {@link ItemType#populateReadOnlyFields(Item)} and verifies
+     * the impact on the item is that expected.
+     * @param type the {@link ItemType}
+     * @param expectedDescriptionFieldsValue the expected description field values
+     */
+    private void itemPopulatedCorrrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
         // Given
         final Item item = new Item();
 
         // When
-        SCAN_ON_DEMAND.populateReadOnlyFields(item);
+        type.populateReadOnlyFields(item);
 
         // Then
-        verifyDescriptionFields(item, "scan-on-demand");
+        verifyDescriptionFields(item, expectedDescriptionFieldsValue);
         verifyCostsFields(item);
-        verifyPostalDelivery(item, SCAN_ON_DEMAND);
+        verifyPostalDelivery(item, type);
     }
 
     private void verifyDescriptionFields(final Item item, final String value) {

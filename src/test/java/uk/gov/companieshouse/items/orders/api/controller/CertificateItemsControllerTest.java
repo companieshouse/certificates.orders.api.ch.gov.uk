@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,14 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
+import java.util.Collections;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @AutoConfigureMockMvc
 @SpringBootTest
-class CertificateItemsControllerUnitTest {
+class CertificateItemsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,10 +45,16 @@ class CertificateItemsControllerUnitTest {
     private CertificateItemRepository repository;
 
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
+    private static final int QUANTITY = 5;
+
+    @AfterEach
+    void tearDown() {
+        repository.findById(EXPECTED_ITEM_ID).ifPresent(repository::delete);
+    }
 
     @Test
-    @DisplayName("Create creates certificate item")
-    void createCertificateItemCreatesCertificateItem() throws Exception {
+    @DisplayName("Successfully creates certificate item")
+    void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
@@ -52,7 +63,7 @@ class CertificateItemsControllerUnitTest {
         options.setCertInc(true);
         options.setCertShar(true);
         newItem.setItemOptions(options);
-        newItem.setQuantity(5);
+        newItem.setQuantity(QUANTITY);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
@@ -67,7 +78,7 @@ class CertificateItemsControllerUnitTest {
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
-        expectedItem.setQuantity(5);
+        expectedItem.setQuantity(QUANTITY);
 
         // When and Then
         final ResultActions outcome = mockMvc.perform(post("/certificates")
@@ -85,6 +96,33 @@ class CertificateItemsControllerUnitTest {
         assertItemSavedCorrectly(EXPECTED_ITEM_ID);
     }
 
+    @Test
+    @DisplayName("Fails to create certificate item that fails validation")
+    void createCertificateItemFailsToCreateCertificateItem() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(true);
+        options.setCertShar(true);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
+
+        // When and Then
+        final ResultActions outcome = mockMvc.perform(post("/certificates")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
      * from the database using its expected ID value.
@@ -94,6 +132,16 @@ class CertificateItemsControllerUnitTest {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(expectedItemId));
+    }
+
+    /**
+     * Verifies that the item that could have been created by the create item POST request cannot in fact be retrieved
+     * from the database.
+     * @param expectedItemId the expected ID of the newly created item
+     */
+    private void assertItemWasNotSaved(final String expectedItemId) {
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
+        assertThat(retrievedCertificateItem.isPresent(), is(false));
     }
 
 }
