@@ -37,12 +37,8 @@ class ItemsApiApplicationTest {
     void createCertificateItemRejectsMissingCompanyNumber() {
 
         // Given
-        final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(true);
-        options.setCertShar(true);
-        newCertificateItemDTO.setItemOptions(options);
-        newCertificateItemDTO.setQuantity(5);
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setCompanyNumber(null);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "company_number: must not be null");
@@ -53,13 +49,7 @@ class ItemsApiApplicationTest {
 	void createCertificateItemDoesNotRejectMissingItemCosts() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -76,9 +66,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsMissingItemOptions() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
-		newCertificateItemDTO.setQuantity(5);
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setItemOptions(null);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "item_options: must not be null");
@@ -89,12 +78,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsMissingQuantity() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setQuantity(0); // 0 is default value when value not specified
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "quantity: must be greater than or equal to 1");
@@ -105,19 +90,14 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyItemCosts() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		final ItemCosts costs = new ItemCosts();
 		costs.setDiscountApplied("1");
 		costs.setIndividualItemCost("2");
 		costs.setPostageCost("3");
 		costs.setTotalCost("4");
 		newCertificateItemDTO.setItemCosts(costs);
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
+
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "item_costs: must be null");
@@ -128,14 +108,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescription() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setDescription("description text");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description: must be null");
@@ -147,14 +121,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescriptionIdentifier() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setDescriptionIdentifier("description identifier text");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description_identifier: must be null");
@@ -165,14 +133,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescriptionValues() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setDescriptionValues(new HashMap<>());
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "description_values: must be null");
@@ -183,14 +145,8 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyId() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setId("TEST_ID");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "id: must be null in a create item request");
@@ -201,13 +157,7 @@ class ItemsApiApplicationTest {
 	void createCertificateItemRejectsMissingRequestId() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber("1234");
-		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -234,6 +184,21 @@ class ItemsApiApplicationTest {
 				.expectBody()
 				.jsonPath("$.status").isEqualTo("BAD_REQUEST")
 				.jsonPath("$.errors[0]").isEqualTo(expectedError);
+	}
+
+	/**
+	 * Factory method that produces a DTO for a valid create item request payload.
+	 * @return a valid item DTO
+	 */
+	private CertificateItemDTO createValidNewItem() {
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+		return newCertificateItemDTO;
 	}
 
 }
