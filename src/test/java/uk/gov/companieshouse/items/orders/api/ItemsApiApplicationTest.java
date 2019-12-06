@@ -14,6 +14,8 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import java.util.HashMap;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ItemsApiApplicationTest {
@@ -61,6 +63,7 @@ class ItemsApiApplicationTest {
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
+				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromValue(newCertificateItemDTO))
 				.exchange()
@@ -193,6 +196,28 @@ class ItemsApiApplicationTest {
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "id: must be null in a create item request");
 	}
 
+	@Test
+	@DisplayName("Create rejects missing X-Request-ID")
+	void createCertificateItemRejectsMissingRequestId() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyNumber("1234");
+		final CertificateItemOptions options = new CertificateItemOptions();
+		options.setCertInc(true);
+		options.setCertShar(true);
+		newCertificateItemDTO.setItemOptions(options);
+		newCertificateItemDTO.setQuantity(5);
+
+		// When and Then
+		webTestClient.post().uri("/orderable/certificates")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(fromValue(newCertificateItemDTO))
+				.exchange()
+				.expectStatus().isBadRequest();
+
+	}
+
 	/**
 	 * Utility method that posts the create certificate item request, asserts a bad request status response and an
 	 * expected validation error message.
@@ -201,6 +226,7 @@ class ItemsApiApplicationTest {
 	 */
 	private void postBadCreateRequestAndExpectError(final CertificateItemDTO itemToCreate, final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
+				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromValue(itemToCreate))
 				.exchange()
