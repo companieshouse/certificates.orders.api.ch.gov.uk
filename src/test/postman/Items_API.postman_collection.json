@@ -362,6 +362,11 @@
 										"name": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "X-Request-ID",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5",
+										"type": "text"
 									}
 								],
 								"body": {

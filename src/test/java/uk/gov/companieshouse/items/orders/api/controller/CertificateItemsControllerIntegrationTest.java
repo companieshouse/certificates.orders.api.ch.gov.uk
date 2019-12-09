@@ -17,16 +17,16 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
-import java.util.Collections;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -82,6 +82,7 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         final ResultActions outcome = mockMvc.perform(post("/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
@@ -113,6 +114,7 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         final ResultActions outcome = mockMvc.perform(post("/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
