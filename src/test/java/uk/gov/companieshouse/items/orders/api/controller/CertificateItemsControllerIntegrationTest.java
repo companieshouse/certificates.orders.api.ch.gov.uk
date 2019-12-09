@@ -33,7 +33,7 @@ import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_RE
  */
 @AutoConfigureMockMvc
 @SpringBootTest
-class CertificateItemsControllerTest {
+class CertificateItemsControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
