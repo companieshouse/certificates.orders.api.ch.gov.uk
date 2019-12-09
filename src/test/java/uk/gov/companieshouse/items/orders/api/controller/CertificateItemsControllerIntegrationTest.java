@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @AutoConfigureMockMvc
 @SpringBootTest
-class CertificateItemsControllerTest {
+class CertificateItemsControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
