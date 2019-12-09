@@ -39,4 +39,5 @@ public class CertificateItemDTO extends ItemDTO {
 
     @Override
     public String toString() { return new Gson().toJson(this); }
+
 }

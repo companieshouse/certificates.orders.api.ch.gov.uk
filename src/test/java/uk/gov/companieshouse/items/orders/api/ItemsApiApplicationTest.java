@@ -16,7 +16,7 @@ import java.util.HashMap;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ItemsApiApplicationTests {
+class ItemsApiApplicationTest {
 
 	@Autowired
 	private WebTestClient webTestClient;

@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -13,7 +16,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import javax.validation.Valid;
 import java.util.List;
 
-import static uk.gov.companieshouse.items.orders.api.ItemType.CERTIFICATE;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
 @RestController
@@ -22,14 +24,27 @@ public class CertificateItemsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final CreateItemRequestValidator validator;
+    private final CertificateItemMapper mapper;
+    private final CertificateItemService service;
 
-    public CertificateItemsController(CreateItemRequestValidator validator) {
+    /**
+     * Constructor.
+     * @param validator the validator this relies on for some 'input' validations
+     * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
+     *               {@link CertificateItem} instances
+     * @param service the service used by this to manage and store certificate items
+     */
+    public CertificateItemsController(final CreateItemRequestValidator validator,
+                                      final CertificateItemMapper mapper,
+                                      final CertificateItemService service) {
         this.validator = validator;
+        this.mapper = mapper;
+        this.service = service;
     }
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
-    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO) {
-
+    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO)
+    {
         LOGGER.info("ENTERING createCertificateItem(" + certificateItemDTO + ")");
 
         final List<String> errors = validator.getValidationErrors(certificateItemDTO);
@@ -37,14 +52,12 @@ public class CertificateItemsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
         }
 
-        CERTIFICATE.populateReadOnlyFields(certificateItemDTO);
+        CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
+        item = service.createCertificateItem(item);
+        final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
-        // TODO PCI-324 ID will be generated as per
-        //  https://companieshouse.atlassian.net/wiki/spaces/DEV/pages/1258094916/Certificates+API+High+Level+Development+Design#CertificatesAPIHighLevelDevelopmentDesign-Traceability
-        certificateItemDTO.setId("CHS1");
-
-        LOGGER.info("EXITING createCertificateItem() with " + certificateItemDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(certificateItemDTO);
+        LOGGER.info("EXITING createCertificateItem() with " + createdCertificateItemDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
 }

@@ -9,8 +9,3 @@ uk:
         orders:
           api:
             path: /certificates
-
-spring:
-  data:
-    mongodb:
-      uri: ${MONGODB_URL}
