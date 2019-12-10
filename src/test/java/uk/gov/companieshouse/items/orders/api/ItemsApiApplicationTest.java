@@ -13,7 +13,7 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import java.util.HashMap;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromValue;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
@@ -55,7 +55,7 @@ class ItemsApiApplicationTest {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
+				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isCreated();
 
@@ -162,7 +162,7 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
+				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isBadRequest();
 
@@ -178,7 +178,7 @@ class ItemsApiApplicationTest {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(itemToCreate))
+				.body(fromObject(itemToCreate))
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody()

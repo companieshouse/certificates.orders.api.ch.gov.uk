@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
  * Unit tests the {@link FieldNameConverter} class.
  */
 @SpringBootTest
-class FieldNameConverterUnitTest {
+class FieldNameConverterTest {
 
     @Autowired
     private FieldNameConverter converterUnderTest;
