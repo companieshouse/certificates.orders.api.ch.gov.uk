@@ -74,6 +74,8 @@ public class CertificateItemsController {
 
         trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
 
+        final CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
+        trace("item = " + item, requestId);
         // TODO heavyResourceRepository.save(partialUpdate, id);
         // return ResponseEntity.ok("resource address updated");
     }
