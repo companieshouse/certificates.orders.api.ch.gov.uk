@@ -36,9 +36,9 @@ public class Item {
 
     private String kind;
 
-    private boolean isPostalDelivery;
+    private Boolean isPostalDelivery;
 
-    private int quantity;
+    private Integer quantity;
 
     public String getId() {
         return id;
@@ -120,7 +120,7 @@ public class Item {
         this.kind = kind;
     }
 
-    public boolean isPostalDelivery() {
+    public Boolean isPostalDelivery() {
         return isPostalDelivery;
     }
 
@@ -128,11 +128,11 @@ public class Item {
         isPostalDelivery = postalDelivery;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
