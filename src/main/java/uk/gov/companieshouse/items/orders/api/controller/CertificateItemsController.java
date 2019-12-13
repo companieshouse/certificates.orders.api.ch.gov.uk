@@ -49,9 +49,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        final Map<String, Object> logData = new HashMap<>();
-        logData.put(LOG_MESSAGE_DATA_KEY, "ENTERING createCertificateItem(" + certificateItemDTO + ")");
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        logInfo("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = validator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
@@ -62,9 +60,9 @@ public class CertificateItemsController {
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
-        logData.put(LOG_MESSAGE_DATA_KEY, "EXITING createCertificateItem() with " + createdCertificateItemDTO);
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        logInfo("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
+
     }
 
     @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
@@ -74,13 +72,21 @@ public class CertificateItemsController {
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
-        final Map<String, Object> logData = new HashMap<>();
-        logData.put(LOG_MESSAGE_DATA_KEY,
-                "ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")");
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        logInfo("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
 
         // TODO heavyResourceRepository.save(partialUpdate, id);
         // return ResponseEntity.ok("resource address updated");
+    }
+
+    /**
+     * Utility method that logs each message with the request ID for log tracing/analysis.
+     * @param message the message to log
+     * @param requestId the request ID
+     */
+    private void logInfo(final String message, final String requestId) {
+        final Map<String, Object> logData = new HashMap<>();
+        logData.put(LOG_MESSAGE_DATA_KEY, message);
+        LOGGER.infoContext(requestId, "X Request ID header", logData);
     }
 
 }
