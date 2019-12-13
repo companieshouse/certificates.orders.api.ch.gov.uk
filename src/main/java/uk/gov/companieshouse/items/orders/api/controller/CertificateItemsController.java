@@ -49,7 +49,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        logInfo("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
+        trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = validator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
@@ -60,7 +60,7 @@ public class CertificateItemsController {
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
-        logInfo("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
+        trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
 
     }
@@ -72,7 +72,7 @@ public class CertificateItemsController {
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
-        logInfo("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
+        trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
 
         // TODO heavyResourceRepository.save(partialUpdate, id);
         // return ResponseEntity.ok("resource address updated");
@@ -83,10 +83,10 @@ public class CertificateItemsController {
      * @param message the message to log
      * @param requestId the request ID
      */
-    private void logInfo(final String message, final String requestId) {
+    private void trace(final String message, final String requestId) {
         final Map<String, Object> logData = new HashMap<>();
         logData.put(LOG_MESSAGE_DATA_KEY, message);
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        LOGGER.traceContext(requestId, "X Request ID header", logData);
     }
 
 }
