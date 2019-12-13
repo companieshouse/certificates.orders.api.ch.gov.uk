@@ -74,6 +74,11 @@ public class CertificateItemsController {
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
+        final Map<String, Object> logData = new HashMap<>();
+        logData.put(LOG_MESSAGE_DATA_KEY,
+                "ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")");
+        LOGGER.infoContext(requestId, "X Request ID header", logData);
+
         // TODO heavyResourceRepository.save(partialUpdate, id);
         // return ResponseEntity.ok("resource address updated");
     }
