@@ -12,6 +12,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,22 +63,22 @@ public class CertificateItemsController {
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
-
     }
 
     @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void updateCertificateItem(
+    public ResponseEntity updateCertificateItem(
             final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws InvocationTargetException, IllegalAccessException {
 
         trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
 
         final CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         trace("item = " + item, requestId);
-        // TODO heavyResourceRepository.save(partialUpdate, id);
-        // return ResponseEntity.ok("resource address updated");
+
+        final CertificateItem updatedItem = service.updateCertificateItem(item, id);
+
+        return ResponseEntity.status(updatedItem != null ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
     }
 
     /**
