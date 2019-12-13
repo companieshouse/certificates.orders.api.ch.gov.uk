@@ -551,7 +551,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006401\",\n\t\"quantity\": 4\n}",
+									"raw": "{\n\t\"company_number\": \"00006401\",\n\t\"item_options\": {},\n\t\"quantity\": 4\n}",
 									"options": {
 										"raw": {
 											"language": "json"

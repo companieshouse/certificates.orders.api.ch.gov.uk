@@ -2,10 +2,7 @@ package uk.gov.companieshouse.items.orders.api.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -68,6 +65,17 @@ public class CertificateItemsController {
         logData.put(LOG_MESSAGE_DATA_KEY, "EXITING createCertificateItem() with " + createdCertificateItemDTO);
         LOGGER.infoContext(requestId, "X Request ID header", logData);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
+    }
+
+    @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateCertificateItem(
+            final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+            final @PathVariable("id") String id,
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+
+        // TODO heavyResourceRepository.save(partialUpdate, id);
+        // return ResponseEntity.ok("resource address updated");
     }
 
 }
