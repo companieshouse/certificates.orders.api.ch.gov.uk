@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c7a5dd93-c8c2-494c-87e1-b4fda3adca73",
+		"_postman_id": "50ec2fe0-f5d2-43d5-83e9-04fdc2fd71d1",
 		"name": "Items API",
 		"description": "Sanity testing for the CHS Ordering Items API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -396,9 +396,28 @@
 					],
 					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Get certificate item",
+					"item": [
+						{
+							"name": "Get certificate item",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
