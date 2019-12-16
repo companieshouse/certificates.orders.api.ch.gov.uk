@@ -15,9 +15,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import javax.json.JsonMergePatch;
 import javax.json.JsonValue;
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
@@ -126,6 +124,21 @@ public class CertificateItemsController {
         final Map<String, Object> logData = new HashMap<>();
         logData.put(LOG_MESSAGE_DATA_KEY, message);
         LOGGER.traceContext(requestId, "X Request ID header", logData);
+    }
+
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
+    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
+    {
+        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+        if(item.isPresent()) {
+            final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
+            return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
+        } else {
+            final List<String> errors = new ArrayList<>();
+            errors.add("certificate resource not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
+        }
     }
 
 }

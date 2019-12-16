@@ -67,6 +67,15 @@ class CertificateItemServiceTest {
         verify(repository).save(item);
     }
 
+    @Test
+    void getCertificateItemRetrievesItem() {
+        // When
+        serviceUnderTest.getCertificateItemById(EXPECTED_ID_VALUE);
+
+        // Then
+        verify(repository).findById(EXPECTED_ID_VALUE);
+    }
+
     /**
      * Verifies that the item created at and updated at timestamps are within the expected interval
      * for item creation.

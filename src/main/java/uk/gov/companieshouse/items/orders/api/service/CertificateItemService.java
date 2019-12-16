@@ -8,6 +8,7 @@ import uk.gov.companieshouse.items.orders.api.util.NonNullPropertyCopier;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static uk.gov.companieshouse.items.orders.api.ItemType.CERTIFICATE;
 
@@ -75,6 +76,10 @@ public class CertificateItemService {
         final LocalDateTime now = LocalDateTime.now();
         item.setCreatedAt(now);
         item.setUpdatedAt(now);
+    }
+
+    public Optional<CertificateItem> getCertificateItemById(String id) {
+        return repository.findById(id);
     }
 
     /**
