@@ -47,6 +47,8 @@ public class CertificateItemService {
      * @return the latest certificate item state resulting from the save
      */
     public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
+        final LocalDateTime now = LocalDateTime.now();
+        updatedCertificateItem.setUpdatedAt(now);
         return repository.save(updatedCertificateItem);
     }
 
