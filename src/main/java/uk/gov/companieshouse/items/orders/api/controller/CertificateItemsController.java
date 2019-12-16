@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +12,9 @@ import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidat
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import javax.json.JsonMergePatch;
+import javax.json.JsonValue;
 import javax.validation.Valid;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ public class CertificateItemsController {
 
     private final CreateItemRequestValidator validator;
     private final CertificateItemMapper mapper;
+    private final ObjectMapper objectMapper;
     private final CertificateItemService service;
 
     /**
@@ -36,13 +39,17 @@ public class CertificateItemsController {
      * @param validator the validator this relies on for some 'input' validations
      * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
      *               {@link CertificateItem} instances
+     * @param objectMapper mapper used by this to convert between {@link JsonMergePatch} and
+     *                     {@link CertificateItem} instances
      * @param service the service used by this to manage and store certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator validator,
                                       final CertificateItemMapper mapper,
+                                      final ObjectMapper objectMapper,
                                       final CertificateItemService service) {
         this.validator = validator;
         this.mapper = mapper;
+        this.objectMapper = objectMapper;
         this.service = service;
     }
 
@@ -65,20 +72,49 @@ public class CertificateItemsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
-    @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
+//    @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
+//    public ResponseEntity updateCertificateItem(
+//            final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+//            final @PathVariable("id") String id,
+//            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws InvocationTargetException, IllegalAccessException {
+//
+//        trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
+//
+//        final CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
+//        trace("item = " + item, requestId);
+//
+//        final CertificateItem updatedItem = service.updateCertificateItem(item, id);
+//
+//        return ResponseEntity.status(updatedItem != null ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
+//    }
+
+    @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.path}/{id}",
+                  consumes = "application/merge-patch+json")
     public ResponseEntity updateCertificateItem(
-            final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+            /*final @Valid @RequestBody CertificateItemDTO certificateItemDTO*/
+            final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws InvocationTargetException, IllegalAccessException {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
-        trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
+        trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 
-        final CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
-        trace("item = " + item, requestId);
+// TODO
+//        final CertificateItem itemRetrieved = service.getCertificateItemById(id)
+//                .orElseThrow(ResourceNotFoundException::new);
 
-        final CertificateItem updatedItem = service.updateCertificateItem(item, id);
+        return ResponseEntity.noContent().build();
+    }
 
-        return ResponseEntity.status(updatedItem != null ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
+    <T> T mergePatch(final JsonMergePatch mergePatch, final T targetBean, final Class<T> beanClass) {
+
+        // Convert the Java bean to a JSON document
+        JsonValue target = objectMapper.convertValue(targetBean, JsonValue.class);
+
+        // Apply the JSON Merge Patch to the JSON document
+        JsonValue patched = mergePatch.apply(target);
+
+        // Convert the JSON document to a Java bean and return it
+        return objectMapper.convertValue(patched, beanClass);
     }
 
     /**
