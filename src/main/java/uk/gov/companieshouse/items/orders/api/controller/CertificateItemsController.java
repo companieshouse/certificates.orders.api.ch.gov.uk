@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,39 +71,52 @@ public class CertificateItemsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
-//    @PatchMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
-//    public ResponseEntity updateCertificateItem(
-//            final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
-//            final @PathVariable("id") String id,
-//            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws InvocationTargetException, IllegalAccessException {
-//
-//        trace("ENTERING updateCertificateItem(" + certificateItemDTO + ", " + id + ", " + requestId + ")", requestId);
-//
-//        final CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
-//        trace("item = " + item, requestId);
-//
-//        final CertificateItem updatedItem = service.updateCertificateItem(item, id);
-//
-//        return ResponseEntity.status(updatedItem != null ? HttpStatus.OK : HttpStatus.NOT_FOUND).build();
-//    }
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
+    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
+    {
+        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+        if(item.isPresent()) {
+            final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
+            return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
+        } else {
+            final List<String> errors = new ArrayList<>();
+            errors.add("certificate resource not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
+        }
+    }
 
     @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.path}/{id}",
                   consumes = "application/merge-patch+json")
-    public ResponseEntity updateCertificateItem(
-            /*final @Valid @RequestBody CertificateItemDTO certificateItemDTO*/
+    public ResponseEntity<Void> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 
-// TODO
-//        final CertificateItem itemRetrieved = service.getCertificateItemById(id)
-//                .orElseThrow(ResourceNotFoundException::new);
+        final CertificateItem itemRetrieved = service.getCertificateItemById(id)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        // Apply the patch
+        final CertificateItem patchedItem = mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
+
+        final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
+
+        trace("Certificate item updated to " + savedItem, requestId);
 
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Applies the changes captured in the merge patch to the target bean.
+     * See <a href="https://cassiomolin.com/2019/06/10/using-http-patch-in-spring/">Using HTTP PATCH in Spring</a>.
+     * @param mergePatch JSON merge patch
+     * @param targetBean the bean to be patched
+     * @param beanClass the class of the bean to be patched
+     * @param <T> the type of the bean
+     * @return the patched bean
+     */
     <T> T mergePatch(final JsonMergePatch mergePatch, final T targetBean, final Class<T> beanClass) {
 
         // Convert the Java bean to a JSON document
@@ -124,21 +138,6 @@ public class CertificateItemsController {
         final Map<String, Object> logData = new HashMap<>();
         logData.put(LOG_MESSAGE_DATA_KEY, message);
         LOGGER.traceContext(requestId, "X Request ID header", logData);
-    }
-
-    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
-    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
-                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
-    {
-        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
-        if(item.isPresent()) {
-            final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
-            return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
-        } else {
-            final List<String> errors = new ArrayList<>();
-            errors.add("certificate resource not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
-        }
     }
 
 }

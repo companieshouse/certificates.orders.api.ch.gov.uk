@@ -6,7 +6,6 @@ import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.NonNullPropertyCopier;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -43,29 +42,12 @@ public class CertificateItemService {
     }
 
     /**
-     * Updates the certificate item in the database identified by the ID.
-     * @param partialUpdate the partially populated item, the non-null fields of which
-     *                      will be copied to the corresponding item in the database
-     * @param id the ID of the certificate item to be updated
-     * @return the updated certificate item, or <code>null</code> if the item could not be found
-     * @throws InvocationTargetException should something unexpected happen
-     * @throws IllegalAccessException should something unexpected happen
+     * Saves the certificate item, assumed to have been updated, to the database.
+     * @param updatedCertificateItem the certificate item to save
+     * @return the latest certificate item state resulting from the save
      */
-    public CertificateItem updateCertificateItem(final CertificateItem partialUpdate, final String id) throws InvocationTargetException, IllegalAccessException {
-
-        if (repository.findById(id).isPresent()) {
-            final CertificateItem itemFound = repository.findById(id).get();
-            final LocalDateTime now = LocalDateTime.now();
-            itemFound.setUpdatedAt(now); //?
-            copier.copyProperties(itemFound, partialUpdate);
-
-            repository.save(itemFound);
-
-            return itemFound;
-        } else {
-            return null;
-        }
-
+    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
+        return repository.save(updatedCertificateItem);
     }
 
     /**
