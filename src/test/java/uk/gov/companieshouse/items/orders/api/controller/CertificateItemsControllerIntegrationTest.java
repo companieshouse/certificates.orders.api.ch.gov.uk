@@ -23,7 +23,9 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
@@ -123,6 +125,44 @@ class CertificateItemsControllerIntegrationTest {
 
         // Then
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Successfully gets a certificate item")
+    void getCertificateItemSuccessfully() throws Exception {
+        // Given
+        // Create certificate item in database
+        final CertificateItem newItem = new CertificateItem();
+        newItem.setId(EXPECTED_ITEM_ID);
+        newItem.setQuantity(QUANTITY);
+        repository.save(newItem);
+
+        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setQuantity(QUANTITY);
+        expectedItem.setId(EXPECTED_ITEM_ID);
+
+        // When and then
+        final ResultActions outcome = mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+            .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Return not found when a certificate item does not exist")
+    void getCertificateItemReturnsNotFound() throws Exception {
+        final ApiError expectedValidationError =
+                new ApiError(NOT_FOUND, singletonList("certificate resource not found"));
+
+        // When and then
+        final ResultActions outcome = mockMvc.perform(get("/certificates/CHS0")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
     }
 
     /**
