@@ -65,10 +65,11 @@ public class CertificateItemsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
-    @GetMapping("/certificates/{certificate_id}")
-    public ResponseEntity<Object> getCertificateItem(@PathVariable String certificate_id)
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
+    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        Optional<CertificateItem> item = service.getCertificateItemById(certificate_id);
+        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
             return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
