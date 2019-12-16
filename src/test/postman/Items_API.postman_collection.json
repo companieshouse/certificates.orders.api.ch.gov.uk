@@ -404,9 +404,25 @@
 							"name": "Get certificate item",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "X-Request-ID",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5",
+										"type": "text"
+									}
+								],
 								"url": {
-									"raw": ""
+									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000001",
+									"protocol": "http",
+									"host": [
+										"chs-dev"
+									],
+									"port": "10020",
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000001"
+									]
 								}
 							},
 							"response": []
