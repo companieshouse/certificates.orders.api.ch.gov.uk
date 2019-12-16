@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +8,12 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
-import javax.json.JsonValue;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -30,7 +29,7 @@ public class CertificateItemsController {
 
     private final CreateItemRequestValidator validator;
     private final CertificateItemMapper mapper;
-    private final ObjectMapper objectMapper;
+    private PatchMerger patcher;
     private final CertificateItemService service;
 
     /**
@@ -38,17 +37,17 @@ public class CertificateItemsController {
      * @param validator the validator this relies on for some 'input' validations
      * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
      *               {@link CertificateItem} instances
-     * @param objectMapper mapper used by this to convert between {@link JsonMergePatch} and
-     *                     {@link CertificateItem} instances
+     * @param patcher the component used by this to apply JSON merge patches to
+     *                {@link CertificateItem} instances
      * @param service the service used by this to manage and store certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator validator,
                                       final CertificateItemMapper mapper,
-                                      final ObjectMapper objectMapper,
+                                      final PatchMerger patcher,
                                       final CertificateItemService service) {
         this.validator = validator;
         this.mapper = mapper;
-        this.objectMapper = objectMapper;
+        this.patcher = patcher;
         this.service = service;
     }
 
@@ -99,34 +98,13 @@ public class CertificateItemsController {
                 .orElseThrow(ResourceNotFoundException::new);
 
         // Apply the patch
-        final CertificateItem patchedItem = mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
+        final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
 
         final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
 
         trace("Certificate item updated to " + savedItem, requestId);
 
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Applies the changes captured in the merge patch to the target bean.
-     * See <a href="https://cassiomolin.com/2019/06/10/using-http-patch-in-spring/">Using HTTP PATCH in Spring</a>.
-     * @param mergePatch JSON merge patch
-     * @param targetBean the bean to be patched
-     * @param beanClass the class of the bean to be patched
-     * @param <T> the type of the bean
-     * @return the patched bean
-     */
-    <T> T mergePatch(final JsonMergePatch mergePatch, final T targetBean, final Class<T> beanClass) {
-
-        // Convert the Java bean to a JSON document
-        JsonValue target = objectMapper.convertValue(targetBean, JsonValue.class);
-
-        // Apply the JSON Merge Patch to the JSON document
-        JsonValue patched = mergePatch.apply(target);
-
-        // Convert the JSON document to a Java bean and return it
-        return objectMapper.convertValue(patched, beanClass);
     }
 
     /**
