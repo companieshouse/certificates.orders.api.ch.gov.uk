@@ -2,10 +2,7 @@ package uk.gov.companieshouse.items.orders.api.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -15,9 +12,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
@@ -68,6 +63,21 @@ public class CertificateItemsController {
         logData.put(LOG_MESSAGE_DATA_KEY, "EXITING createCertificateItem() with " + createdCertificateItemDTO);
         LOGGER.infoContext(requestId, "X Request ID header", logData);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
+    }
+
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
+    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
+    {
+        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+        if(item.isPresent()) {
+            final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
+            return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
+        } else {
+            final List<String> errors = new ArrayList<>();
+            errors.add("certificate resource not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
+        }
     }
 
 }
