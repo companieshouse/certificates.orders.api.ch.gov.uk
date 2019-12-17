@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
 import javax.json.Json;
 import javax.json.JsonMergePatch;
@@ -136,6 +137,33 @@ class PatchMergerTest {
 
         // Then
         assertThat(patched.getCompanyNumber(), is(CORRECTED_COMPANY_NUMBER));
+    }
+
+    @Test
+    @DisplayName("Nested level properties propagated correctly")
+    void sourceNestedLevelPropertiesPropagated() throws IOException {
+        // Given
+        final CertificateItem original = new CertificateItem();
+        final CertificateItemOptions originalOptions = new CertificateItemOptions();
+        originalOptions.setAdditionalInformation(ORIGINAL_ADDITIONAL_INFO);
+        originalOptions.setCertAcc(ORIGINAL_CERT_ACC);
+        originalOptions.setCertArts(ORIGINAL_CERT_ARTS);
+        original.setItemOptions(originalOptions);
+
+        final CertificateItem delta = new CertificateItem();
+        final CertificateItemOptions deltaOptions = new CertificateItemOptions();
+        deltaOptions.setAdditionalInformation(CORRECTED_ADDITIONAL_INFO);
+        deltaOptions.setCertAcc(CORRECTED_CERT_ACC);
+        delta.setItemOptions(deltaOptions);
+
+        // When
+        final CertificateItem patched =
+                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+
+        // Then
+        assertThat(patched.getItemOptions().getAdditionalInformation(), is(CORRECTED_ADDITIONAL_INFO));
+        assertThat(patched.getItemOptions().isCertAcc(), is(CORRECTED_CERT_ACC));
+        assertThat(patched.getItemOptions().isCertArts(), is(ORIGINAL_CERT_ARTS));
     }
 
     /**
