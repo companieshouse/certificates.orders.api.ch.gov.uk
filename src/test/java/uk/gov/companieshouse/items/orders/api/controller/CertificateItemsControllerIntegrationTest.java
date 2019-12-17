@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -84,7 +83,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
 
         // When and Then
-        final ResultActions outcome = mockMvc.perform(post("/certificates")
+        mockMvc.perform(post("/certificates")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
@@ -116,7 +115,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
 
         // When and Then
-        final ResultActions outcome = mockMvc.perform(post("/certificates")
+        mockMvc.perform(post("/certificates")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
@@ -143,7 +142,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setId(EXPECTED_ITEM_ID);
 
         // When and then
-        final ResultActions outcome = mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
             .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -158,7 +157,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(NOT_FOUND, singletonList("certificate resource not found"));
 
         // When and then
-        final ResultActions outcome = mockMvc.perform(get("/certificates/CHS0")
+        mockMvc.perform(get("/certificates/CHS0")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
