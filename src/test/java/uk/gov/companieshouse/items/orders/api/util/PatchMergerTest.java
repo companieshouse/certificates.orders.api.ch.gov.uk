@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
+import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -99,7 +101,6 @@ class PatchMergerTest {
         final CertificateItem patched =
                 patchMerger.mergePatch(createMergePatchFromPojo(empty), original, CertificateItem.class);
 
-
         // Then
         assertThat(patched.isPostalDelivery(), is(ORIGINAL_POSTAL_DELIVERY));
     }
@@ -145,7 +146,7 @@ class PatchMergerTest {
      * @throws IOException should something unexpected happen
      */
     JsonMergePatch createMergePatchFromPojo(final Object pojo) throws IOException {
-        final Gson gson = new Gson();
+        final Gson gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES).create();
         final String json = gson.toJson(pojo);
         final InputStream stream = new ByteArrayInputStream(json.getBytes());
         final JsonReader reader = Json.createReader(stream);
