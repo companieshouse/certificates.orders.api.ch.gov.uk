@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.util;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
@@ -22,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -37,22 +34,12 @@ class PatchMergerTest {
     static class Config {
         @Bean
         public ObjectMapper objectMapper() {
-            return new ObjectMapper()
-                    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    .setPropertyNamingStrategy(SNAKE_CASE)
-                    .findAndRegisterModules();
+            return new ApplicationConfiguration().objectMapper();
         }
 
         @Bean
         PatchMerger patchMerger() {
             return new PatchMerger(objectMapper());
-        }
-
-        @Bean
-        JsonMergePatchHttpMessageConverter converter() {
-            return new JsonMergePatchHttpMessageConverter();
         }
     }
 
@@ -203,7 +190,7 @@ class PatchMergerTest {
     }
 
     /**
-     * Performs the equivalent conversion to that carried out by {@link JsonMergePatchHttpMessageConverter} to
+     * Performs an equivalent conversion to that carried out by {@link JsonMergePatchHttpMessageConverter} et al to
      * facilitate integration testing of the {@link PatchMerger} class.
      * @param pojo the POJO that represents a merge patch
      * @return the {@link JsonMergePatch} representation
