@@ -23,15 +23,6 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .setPropertyNamingStrategy(SNAKE_CASE)
-                .findAndRegisterModules();
-    }
-
-    @Bean
-    public ObjectMapper patchMapper() {
-        return new ObjectMapper()
                 .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

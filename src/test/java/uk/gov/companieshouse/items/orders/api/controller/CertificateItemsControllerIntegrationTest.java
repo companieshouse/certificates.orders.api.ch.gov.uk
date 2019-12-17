@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -25,8 +24,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
@@ -43,10 +42,6 @@ class CertificateItemsControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    @Qualifier("patchMapper")
-    private ObjectMapper patchMapper;
 
     @Autowired
     private CertificateItemRepository repository;
@@ -69,6 +64,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(true);
         options.setCertShar(true);
+        options.setCertDissLiq(false);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
@@ -93,7 +89,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
-                .andExpect(content().json(patchMapper.writeValueAsString(expectedItem)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.item_options.cert_inc", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_shar", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)))
