@@ -33,13 +33,13 @@ class PatchMergerTest {
     @Configuration
     static class Config {
         @Bean
-        public ObjectMapper objectMapper() {
-            return new ApplicationConfiguration().objectMapper();
+        public ObjectMapper patchMapper() {
+            return new ApplicationConfiguration().patchMapper();
         }
 
         @Bean
         PatchMerger patchMerger() {
-            return new PatchMerger(objectMapper());
+            return new PatchMerger(patchMapper());
         }
     }
 

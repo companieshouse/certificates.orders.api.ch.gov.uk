@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 
@@ -17,7 +18,7 @@ public class PatchMerger {
      * @param objectMapper mapper used by this to convert between {@link JsonMergePatch} and
      *                     {@link CertificateItem} instances
      */
-    public PatchMerger(ObjectMapper objectMapper) {
+    public PatchMerger(@Qualifier("patchMapper") final ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
