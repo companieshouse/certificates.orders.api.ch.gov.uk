@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +21,8 @@ import javax.json.JsonReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.regex.Pattern;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
-import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -76,6 +72,9 @@ class PatchMergerTest {
 
     @Autowired
     private PatchMerger patchMerger;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Test
     @DisplayName("Unpopulated source string property does not overwrite populated target field")
@@ -211,11 +210,7 @@ class PatchMergerTest {
      * @throws IOException should something unexpected happen
      */
     JsonMergePatch createMergePatchFromPojo(final Object pojo) throws IOException {
-        final Gson gson = new GsonBuilder()
-                .setFieldNamingStrategy(field -> LOWER_CASE_WITH_UNDERSCORES.translateName(field).replaceFirst(
-                        Pattern.quote("is_"), "")) // e.g., map isCertAcc to cert_acc, not is_cert_acc.
-                .create();
-        final String json = gson.toJson(pojo);
+        final String json = mapper.writeValueAsString(pojo);
         final InputStream stream = new ByteArrayInputStream(json.getBytes());
         final JsonReader reader = Json.createReader(stream);
         final JsonMergePatch patch = Json.createMergePatch(reader.readValue());
