@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
-import uk.gov.companieshouse.items.orders.api.util.NonNullPropertyCopier;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -19,14 +18,11 @@ public class CertificateItemService {
 
     private final CertificateItemRepository repository;
     private final SequenceGeneratorService generator;
-    private final NonNullPropertyCopier copier;
 
     public CertificateItemService(final CertificateItemRepository repository,
-                                  final SequenceGeneratorService generator,
-                                  final NonNullPropertyCopier copier) {
+                                  final SequenceGeneratorService generator) {
         this.repository = repository;
         this.generator = generator;
-        this.copier = copier;
     }
 
     /**
