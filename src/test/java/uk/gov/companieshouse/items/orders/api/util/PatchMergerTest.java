@@ -23,6 +23,7 @@ import javax.json.JsonReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Pattern;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
@@ -140,7 +141,7 @@ class PatchMergerTest {
     }
 
     @Test
-    @DisplayName("Nested level properties propagated correctly")
+    @DisplayName("Nested level properties are propagated correctly")
     void sourceNestedLevelPropertiesPropagated() throws IOException {
         // Given
         final CertificateItem original = new CertificateItem();
@@ -174,7 +175,10 @@ class PatchMergerTest {
      * @throws IOException should something unexpected happen
      */
     JsonMergePatch createMergePatchFromPojo(final Object pojo) throws IOException {
-        final Gson gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES).create();
+        final Gson gson = new GsonBuilder()
+                .setFieldNamingStrategy(field -> LOWER_CASE_WITH_UNDERSCORES.translateName(field).replaceFirst(
+                        Pattern.quote("is_"), "")) // e.g., map isCertAcc to cert_acc, not is_cert_acc.
+                .create();
         final String json = gson.toJson(pojo);
         final InputStream stream = new ByteArrayInputStream(json.getBytes());
         final JsonReader reader = Json.createReader(stream);
