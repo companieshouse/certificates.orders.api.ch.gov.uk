@@ -63,7 +63,9 @@ class PatchMergerTest {
     private static final String ORIGINAL_COMPANY_NUMBER = "1234";
     private static final String CORRECTED_COMPANY_NUMBER = "1235";
     private static final boolean ORIGINAL_POSTAL_DELIVERY = true;
+    private static final boolean CORRECTED_POSTAL_DELIVERY = false;
     private static final int ORIGINAL_QUANTITY = 20;
+    private static final int CORRECTED_QUANTITY = 2;
 
     private static final String ORIGINAL_ADDITIONAL_INFO = "We have our reasons.";
     private static final boolean ORIGINAL_CERT_ACC = true;
@@ -124,8 +126,8 @@ class PatchMergerTest {
     }
 
     @Test
-    @DisplayName("Root level property is propagated correctly")
-    void sourceRootLevelPropertyPropagated() throws IOException  {
+    @DisplayName("Root level string property is propagated correctly")
+    void sourceRootLevelStringPropertyPropagated() throws IOException  {
         // Given
         final CertificateItem original = new CertificateItem();
         original.setCompanyNumber(ORIGINAL_COMPANY_NUMBER);
@@ -138,6 +140,40 @@ class PatchMergerTest {
 
         // Then
         assertThat(patched.getCompanyNumber(), is(CORRECTED_COMPANY_NUMBER));
+    }
+
+    @Test
+    @DisplayName("Root level boolean property is propagated correctly")
+    void sourceRootLevelBooleanPropertyPropagated() throws IOException  {
+        // Given
+        final CertificateItem original = new CertificateItem();
+        original.setPostalDelivery(ORIGINAL_POSTAL_DELIVERY);
+        final CertificateItem delta = new CertificateItem();
+        delta.setPostalDelivery(CORRECTED_POSTAL_DELIVERY);
+
+        // When
+        final CertificateItem patched =
+                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+
+        // Then
+        assertThat(patched.isPostalDelivery(), is(CORRECTED_POSTAL_DELIVERY));
+    }
+
+    @Test
+    @DisplayName("Root level integer property is propagated correctly")
+    void sourceRootLevelIntegerPropertyPropagated() throws IOException  {
+        // Given
+        final CertificateItem original = new CertificateItem();
+        original.setQuantity(ORIGINAL_QUANTITY);
+        final CertificateItem delta = new CertificateItem();
+        delta.setQuantity(CORRECTED_QUANTITY);
+
+        // When
+        final CertificateItem patched =
+                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+
+        // Then
+        assertThat(patched.getQuantity(), is(CORRECTED_QUANTITY));
     }
 
     @Test
