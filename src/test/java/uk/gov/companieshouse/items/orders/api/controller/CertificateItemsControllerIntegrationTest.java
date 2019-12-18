@@ -202,6 +202,26 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
     }
 
+    @Test
+    @DisplayName("Reports failure to find certificate item")
+    void updateCertificateItemReportsFailureToFindItem() throws Exception {
+
+        // Given
+        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        itemUpdate.setQuantity(UPDATED_QUANTITY);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(UPDATED_CERT_INC);
+        itemUpdate.setItemOptions(options);
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
      * from the database using its expected ID value.
