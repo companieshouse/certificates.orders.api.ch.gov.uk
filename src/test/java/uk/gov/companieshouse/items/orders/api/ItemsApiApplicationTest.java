@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.items.orders.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,6 @@ class ItemsApiApplicationTest {
 
 	@Autowired
 	private WebTestClient webTestClient;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Test
 	@DisplayName("Application context loads successfully")
