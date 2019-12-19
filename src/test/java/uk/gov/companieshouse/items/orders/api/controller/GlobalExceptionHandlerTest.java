@@ -51,7 +51,6 @@ public class GlobalExceptionHandlerTest {
         when(converter.toSnakeCase(FIELD1)).thenReturn(FIELD1);
 
         final ApiError error = handlerUnderTest.buildBadRequestApiError(ex);
-        assertThat(error.getErrors().size(), is(2));
         assertThat(error.getStatus(), is(HttpStatus.BAD_REQUEST));
         assertThat(error.getErrors().stream()
                 .anyMatch(o -> o.equals(FIELD1 + ": " + MESSAGE1)), is(true));
