@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
@@ -46,6 +47,7 @@ class CertificateItemsControllerIntegrationTest {
     private CertificateItemRepository repository;
 
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
+    private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final boolean ORIGINAL_CERT_INC = true;
@@ -219,6 +221,27 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Rejects update request containing read only attribute value")
+    void updateCertificateItemRejectsPatchWithReadOnlyAttributeValue() throws Exception {
+
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setId(UPDATED_ITEM_ID);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList("id: must be null"));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
     }
 

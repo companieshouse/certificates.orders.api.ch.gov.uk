@@ -15,6 +15,7 @@ import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 
 import javax.json.JsonMergePatch;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,12 +51,12 @@ public class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() {
+    void updateUpdatesSuccessfully() throws IOException {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         // When
-        final ResponseEntity<Void> response =
+        final ResponseEntity<Object> response =
                 controllerUnderTest.updateCertificateItem(patch, ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         // Then

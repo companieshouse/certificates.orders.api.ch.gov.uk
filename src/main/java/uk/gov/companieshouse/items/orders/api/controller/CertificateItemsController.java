@@ -15,6 +15,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.*;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
@@ -87,12 +88,17 @@ public class CertificateItemsController {
 
     @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.path}/{id}",
                   consumes = "application/merge-patch+json")
-    public ResponseEntity<Void> updateCertificateItem(
+    public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws IOException {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
+
+        final List<String> errors = validator.getValidationErrors(mergePatchDocument);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
+        }
 
         final CertificateItem itemRetrieved = service.getCertificateItemById(id)
                 .orElseThrow(ResourceNotFoundException::new);
