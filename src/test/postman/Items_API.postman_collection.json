@@ -541,7 +541,49 @@
 										"key": "Content-Type",
 										"name": "Content-Type",
 										"type": "text",
-										"value": "application/json"
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006444\",\n\t\"item_options\": {},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000037",
+									"protocol": "http",
+									"host": [
+										"chs-dev"
+									],
+									"port": "10020",
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000037"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item not found",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
 									},
 									{
 										"key": "X-Request-ID",
@@ -559,7 +601,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000001",
+									"raw": "http://chs-dev:10020/orderable/certificates/UNKNOWN",
 									"protocol": "http",
 									"host": [
 										"chs-dev"
@@ -568,7 +610,7 @@
 									"path": [
 										"orderable",
 										"certificates",
-										"CHS00000000000000001"
+										"UNKNOWN"
 									]
 								}
 							},
