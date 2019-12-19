@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,10 +8,12 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import javax.json.JsonMergePatch;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -26,6 +29,7 @@ public class CertificateItemsController {
 
     private final CreateItemRequestValidator validator;
     private final CertificateItemMapper mapper;
+    private PatchMerger patcher;
     private final CertificateItemService service;
 
     /**
@@ -33,13 +37,17 @@ public class CertificateItemsController {
      * @param validator the validator this relies on for some 'input' validations
      * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
      *               {@link CertificateItem} instances
+     * @param patcher the component used by this to apply JSON merge patches to
+     *                {@link CertificateItem} instances
      * @param service the service used by this to manage and store certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator validator,
                                       final CertificateItemMapper mapper,
+                                      final PatchMerger patcher,
                                       final CertificateItemService service) {
         this.validator = validator;
         this.mapper = mapper;
+        this.patcher = patcher;
         this.service = service;
     }
 
@@ -47,9 +55,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        final Map<String, Object> logData = new HashMap<>();
-        logData.put(LOG_MESSAGE_DATA_KEY, "ENTERING createCertificateItem(" + certificateItemDTO + ")");
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = validator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
@@ -60,8 +66,7 @@ public class CertificateItemsController {
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
-        logData.put(LOG_MESSAGE_DATA_KEY, "EXITING createCertificateItem() with " + createdCertificateItemDTO);
-        LOGGER.infoContext(requestId, "X Request ID header", logData);
+        trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
@@ -78,6 +83,39 @@ public class CertificateItemsController {
             errors.add("certificate resource not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
         }
+    }
+
+    @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.path}/{id}",
+                  consumes = "application/merge-patch+json")
+    public ResponseEntity<Void> updateCertificateItem(
+            final @RequestBody JsonMergePatch mergePatchDocument,
+            final @PathVariable("id") String id,
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+
+        trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
+
+        final CertificateItem itemRetrieved = service.getCertificateItemById(id)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        // Apply the patch
+        final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
+
+        final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
+
+        trace("Certificate item updated to " + savedItem, requestId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Utility method that logs each message with the request ID for log tracing/analysis.
+     * @param message the message to log
+     * @param requestId the request ID
+     */
+    private void trace(final String message, final String requestId) {
+        final Map<String, Object> logData = new HashMap<>();
+        logData.put(LOG_MESSAGE_DATA_KEY, message);
+        LOGGER.traceContext(requestId, "X Request ID header", logData);
     }
 
 }

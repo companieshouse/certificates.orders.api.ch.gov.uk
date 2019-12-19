@@ -9,13 +9,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
+import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
 import java.util.Optional;
 
@@ -24,8 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
@@ -48,6 +47,9 @@ class CertificateItemsControllerIntegrationTest {
 
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
     private static final int QUANTITY = 5;
+    private static final int UPDATED_QUANTITY = 10;
+    private static final boolean ORIGINAL_CERT_INC = true;
+    private static final boolean UPDATED_CERT_INC = false;
 
     @AfterEach
     void tearDown() {
@@ -64,6 +66,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(true);
         options.setCertShar(true);
+        options.setCertDissLiq(false);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
@@ -83,7 +86,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
 
         // When and Then
-        final ResultActions outcome = mockMvc.perform(post("/certificates")
+        mockMvc.perform(post("/certificates")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
@@ -115,7 +118,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
 
         // When and Then
-        final ResultActions outcome = mockMvc.perform(post("/certificates")
+        mockMvc.perform(post("/certificates")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
@@ -142,7 +145,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setId(EXPECTED_ITEM_ID);
 
         // When and then
-        final ResultActions outcome = mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
             .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -157,11 +160,65 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(NOT_FOUND, singletonList("certificate resource not found"));
 
         // When and then
-        final ResultActions outcome = mockMvc.perform(get("/certificates/CHS0")
+        mockMvc.perform(get("/certificates/CHS0")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Successfully updates certificate item")
+    void updateCertificateItemSuccessfullyUpdatesCertificateItem() throws Exception {
+
+        // Given
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(ORIGINAL_CERT_INC);
+        savedItem.setItemOptions(options);
+        repository.save(savedItem);
+
+        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        itemUpdate.setQuantity(UPDATED_QUANTITY);
+        options.setCertInc(UPDATED_CERT_INC);
+        itemUpdate.setItemOptions(options);
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isNoContent())
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
+        assertThat(retrievedCertificateItem.isPresent(), is(true));
+        assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
+        assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
+        assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
+    }
+
+    @Test
+    @DisplayName("Reports failure to find certificate item")
+    void updateCertificateItemReportsFailureToFindItem() throws Exception {
+
+        // Given
+        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        itemUpdate.setQuantity(UPDATED_QUANTITY);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(UPDATED_CERT_INC);
+        itemUpdate.setItemOptions(options);
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());
     }
 

@@ -29,6 +29,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             final HttpHeaders headers,
             final HttpStatus status,
             final WebRequest request) {
+        final ApiError apiError = buildBadRequestApiError(ex);
+        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+    }
+
+    /**
+     * Uility to build ApiError from MethodArgumentNotValidException.
+     * @param ex the MethodArgumentNotValidException handled
+     * @return the resulting ApiError
+     */
+    ApiError buildBadRequestApiError(final MethodArgumentNotValidException ex) {
         final List<String> errors = new ArrayList<>();
         for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.add(converter.toSnakeCase(error.getField()) + ": " + error.getDefaultMessage());
@@ -37,9 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
         }
 
-        final ApiError apiError =
-                new ApiError(HttpStatus.BAD_REQUEST, errors);
-        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+        return new ApiError(HttpStatus.BAD_REQUEST, errors);
     }
 
 }

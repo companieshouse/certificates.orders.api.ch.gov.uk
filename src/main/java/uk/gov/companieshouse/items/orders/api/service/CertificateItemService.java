@@ -26,7 +26,7 @@ public class CertificateItemService {
     }
 
     /**
-     * Creates the item in the database.
+     * Creates the certificate item in the database.
      * @param item the item to be created
      * @return the created item
      */
@@ -35,6 +35,17 @@ public class CertificateItemService {
         item.setId(getNextId());
         setCreationDateTimes(item);
         return repository.save(item);
+    }
+
+    /**
+     * Saves the certificate item, assumed to have been updated, to the database.
+     * @param updatedCertificateItem the certificate item to save
+     * @return the latest certificate item state resulting from the save
+     */
+    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
+        final LocalDateTime now = LocalDateTime.now();
+        updatedCertificateItem.setUpdatedAt(now);
+        return repository.save(updatedCertificateItem);
     }
 
     /**

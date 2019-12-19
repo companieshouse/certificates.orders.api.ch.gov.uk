@@ -17,12 +17,14 @@
 		<java.version>1.8</java.version>
 		<structured-logging.version>1.9.0</structured-logging.version>
 		<commons.lang.version>2.6</commons.lang.version>
+		<commons.beanutils.version>1.9.4</commons.beanutils.version>
 		<gson.version>2.8.0</gson.version>
 		<org.mapstruct.version>1.3.0.Final</org.mapstruct.version>
 		<jacoco-maven-plugin.version>0.7.7.201606060606</jacoco-maven-plugin.version>
 		<junit-jupiter-engine-version>5.2.0</junit-jupiter-engine-version>
 		<mockito-junit-jupiter-version>2.18.0</mockito-junit-jupiter-version>
 		<hamcrest-all-version>1.3</hamcrest-all-version>
+		<javax.json-api.version>1.1.4</javax.json-api.version>
 	</properties>
 
 	<dependencies>
@@ -53,6 +55,11 @@
 			<artifactId>commons-lang</artifactId>
 			<version>${commons.lang.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>${commons.beanutils.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -63,6 +70,21 @@
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${org.mapstruct.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
+			<version>${javax.json-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.johnzon</groupId>
+			<artifactId>johnzon-core</artifactId>
+			<version>${johnzon.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr353</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>

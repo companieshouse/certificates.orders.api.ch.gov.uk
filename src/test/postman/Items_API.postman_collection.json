@@ -392,6 +392,229 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Create certificate item - sundance",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
+									"protocol": "https",
+									"host": [
+										"api",
+										"sundance",
+										"aws",
+										"chdev",
+										"org"
+									],
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create certificate item - apollo1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
+									"protocol": "https",
+									"host": [
+										"api",
+										"sundance",
+										"aws",
+										"chdev",
+										"org"
+									],
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create certificate item - apollo2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
+									"protocol": "https",
+									"host": [
+										"api",
+										"sundance",
+										"aws",
+										"chdev",
+										"org"
+									],
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Update certificate item",
+					"item": [
+						{
+							"name": "Update certificate item",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006444\",\n\t\"item_options\": {},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000037",
+									"protocol": "http",
+									"host": [
+										"chs-dev"
+									],
+									"port": "10020",
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000037"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item not found",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006401\",\n\t\"item_options\": {},\n\t\"quantity\": 4\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://chs-dev:10020/orderable/certificates/UNKNOWN",
+									"protocol": "http",
+									"host": [
+										"chs-dev"
+									],
+									"port": "10020",
+									"path": [
+										"orderable",
+										"certificates",
+										"UNKNOWN"
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
