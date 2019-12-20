@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
@@ -146,6 +144,23 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
+    @DisplayName("Multiple read only fields rejected")
+    void getValidationErrorsRejectsMultipleReadOnlyFields() throws IOException {
+        // Given
+        itemUpdate.setDescriptionValues(TOKEN_VALUES);
+        itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
+        itemUpdate.setKind(TOKEN_STRING);
+        final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+
+        // Then
+        assertThat(errors,
+                containsInAnyOrder("descriptionValues: must be null", "itemCosts: must be null", "kind: must be null"));
+    }
+
+    @Test
     @DisplayName("Quantity must be greater than 0")
     void getValidationErrorsRejectsZeroQuantity() throws IOException {
         // Given
@@ -159,7 +174,19 @@ class PatchItemRequestValidatorTest {
         assertThat(errors, contains("quantity: must be greater than or equal to 1"));
     }
 
-    // TODO PCI-435 Test multiple read only fields, also what happens with invalid input leading to IOException?
+    @Test
+    @DisplayName("Unknown field is ignored")
+    void getValidationErrorsIgnoresUnknownField() throws IOException {
+        // Given
+        final String jsonWithUnknownField = "{ \"idx\": \"CHS1\" }";
+        final JsonMergePatch patch = patchFactory.patchFromJson(jsonWithUnknownField);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
 
     /**
      * Utility method that asserts that the validator produces a "<field name>: must be null"

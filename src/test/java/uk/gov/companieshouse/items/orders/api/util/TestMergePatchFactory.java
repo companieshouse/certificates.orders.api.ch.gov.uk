@@ -39,4 +39,19 @@ public class TestMergePatchFactory {
         return patch;
     }
 
+    /**
+     * Performs an equivalent conversion to that carried out by {@link JsonMergePatchHttpMessageConverter} et al to
+     * facilitate integration testing.
+     * @param json the JSON that represents a merge patch
+     * @return the {@link JsonMergePatch} representation
+     * @throws IOException should something unexpected happen
+     */
+    public JsonMergePatch patchFromJson(final String json) throws IOException {
+        final InputStream stream = new ByteArrayInputStream(json.getBytes());
+        final JsonReader reader = Json.createReader(stream);
+        final JsonMergePatch patch = Json.createMergePatch(reader.readValue());
+        stream.close();
+        return patch;
+    }
+
 }

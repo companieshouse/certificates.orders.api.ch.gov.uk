@@ -35,15 +35,19 @@ public class PatchItemRequestValidator {
      * Validates the patch provided, returning any errors found.
      * @param patch the item to be validated
      * @return the errors found, which will be empty if the item is found to be valid
-     * @throws IOException TODO should this actually be an error with the input => Bad Request?
      */
-    public List<String> getValidationErrors(final JsonMergePatch patch) throws IOException {
-        final PatchValidationCertificateItemDTO dto =
-                objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
-        final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
-        return violations.stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .collect(Collectors.toList());
+    public List<String> getValidationErrors(final JsonMergePatch patch) {
+        try {
+            final PatchValidationCertificateItemDTO dto =
+                    objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
+            final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
+            return violations.stream()
+                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                    .collect(Collectors.toList());
+        } catch (IOException ex) {
+            // This exception will not occur because there are no low-level IO operations here.
+            return null;
+        }
     }
 
 }
