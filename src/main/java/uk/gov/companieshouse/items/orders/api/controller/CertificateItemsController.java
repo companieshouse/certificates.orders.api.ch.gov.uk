@@ -10,6 +10,7 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
+import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -28,25 +29,29 @@ public class CertificateItemsController {
     private static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
     private static final String LOG_MESSAGE_DATA_KEY = "message";
 
-    private final CreateItemRequestValidator validator;
+    private final CreateItemRequestValidator createItemRequestValidator;
+    private final PatchItemRequestValidator patchItemRequestValidator;
     private final CertificateItemMapper mapper;
     private PatchMerger patcher;
     private final CertificateItemService service;
 
     /**
      * Constructor.
-     * @param validator the validator this relies on for some 'input' validations
+     * @param createItemRequestValidator the validator this relies on for some create request 'input' validations
+     * @param patchItemRequestValidator the validator this relies on for patch/update request 'input' validations
      * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
      *               {@link CertificateItem} instances
      * @param patcher the component used by this to apply JSON merge patches to
      *                {@link CertificateItem} instances
      * @param service the service used by this to manage and store certificate items
      */
-    public CertificateItemsController(final CreateItemRequestValidator validator,
+    public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
+                                      final PatchItemRequestValidator patchItemRequestValidator,
                                       final CertificateItemMapper mapper,
                                       final PatchMerger patcher,
                                       final CertificateItemService service) {
-        this.validator = validator;
+        this.createItemRequestValidator = createItemRequestValidator;
+        this.patchItemRequestValidator = patchItemRequestValidator;
         this.mapper = mapper;
         this.patcher = patcher;
         this.service = service;
@@ -58,7 +63,7 @@ public class CertificateItemsController {
     {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
-        final List<String> errors = validator.getValidationErrors(certificateItemDTO);
+        final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
         }
@@ -95,7 +100,7 @@ public class CertificateItemsController {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 
-        final List<String> errors = validator.getValidationErrors(mergePatchDocument);
+        final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
         }

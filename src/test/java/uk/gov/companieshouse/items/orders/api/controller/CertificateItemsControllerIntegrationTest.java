@@ -183,7 +183,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setItemOptions(options);
         repository.save(savedItem);
 
-        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertInc(UPDATED_CERT_INC);
         itemUpdate.setItemOptions(options);
@@ -209,7 +209,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemReportsFailureToFindItem() throws Exception {
 
         // Given
-        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(UPDATED_CERT_INC);

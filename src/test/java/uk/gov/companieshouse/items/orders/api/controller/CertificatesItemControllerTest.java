@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 
 import javax.json.JsonMergePatch;
 
@@ -48,6 +49,9 @@ public class CertificatesItemControllerTest {
 
     @Mock
     private PatchMerger merger;
+
+    @Mock
+    private PatchItemRequestValidator validator;
 
     @Test
     @DisplayName("Update request updates successfully")

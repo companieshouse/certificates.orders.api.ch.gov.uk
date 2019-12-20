@@ -2,9 +2,11 @@ package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.util.Map;
 
@@ -28,6 +30,12 @@ public class PatchValidationCertificateItemDTO {
     @Null
     @JsonProperty("description_values")
     private Map<String, String> descriptionValues;
+
+    @JsonProperty("item_options")
+    private CertificateItemOptions itemOptions;
+
+    @JsonProperty("company_number")
+    private String companyNumber;
 
     @Null
     @JsonProperty("item_costs")
@@ -62,6 +70,14 @@ public class PatchValidationCertificateItemDTO {
 
     public void setDescriptionValues(Map<String, String> descriptionValues) {
         this.descriptionValues = descriptionValues;
+    }
+
+    public void setItemOptions(CertificateItemOptions itemOptions) {
+        this.itemOptions = itemOptions;
+    }
+
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
     }
 
     public void setItemCosts(ItemCosts itemCosts) {
