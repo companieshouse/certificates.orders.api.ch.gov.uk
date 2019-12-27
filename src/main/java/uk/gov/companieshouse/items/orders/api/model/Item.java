@@ -40,6 +40,8 @@ public class Item {
 
     private Integer quantity;
 
+    private CreatedBy createdBy;
+
     public String getId() {
         return id;
     }
@@ -134,6 +136,14 @@ public class Item {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public CreatedBy getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(CreatedBy createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override

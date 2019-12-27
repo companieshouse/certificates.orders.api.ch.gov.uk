@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.companieshouse.items.orders.api.interceptor.LoggingInterceptor;
+import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
@@ -18,6 +19,7 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new LoggingInterceptor());
+        registry.addInterceptor(new UserAuthenticationInterceptor());
     }
 
     @Bean

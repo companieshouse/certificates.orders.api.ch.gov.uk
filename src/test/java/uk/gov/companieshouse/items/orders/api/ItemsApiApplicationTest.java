@@ -1,20 +1,26 @@
 package uk.gov.companieshouse.items.orders.api;
 
+import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ItemsApiApplicationTest {
@@ -31,7 +37,6 @@ class ItemsApiApplicationTest {
     @Test
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {
-
         // Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setCompanyNumber(null);
@@ -50,6 +55,9 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
@@ -158,6 +166,9 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.contentType(MediaType.APPLICATION_JSON)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isBadRequest();
@@ -173,6 +184,9 @@ class ItemsApiApplicationTest {
 	private void postBadCreateRequestAndExpectError(final CertificateItemDTO itemToCreate, final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(itemToCreate))
 				.exchange()
