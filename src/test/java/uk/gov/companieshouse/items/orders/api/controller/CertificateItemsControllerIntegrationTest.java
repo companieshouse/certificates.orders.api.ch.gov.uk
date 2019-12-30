@@ -16,6 +16,7 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.CreatedBy;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
@@ -59,6 +60,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final int UPDATED_QUANTITY = 10;
     private static final boolean ORIGINAL_CERT_INC = true;
     private static final boolean UPDATED_CERT_INC = false;
+    private static final String ALTERNATIVE_CREATED_BY = "abc123";
 
     @AfterEach
     void tearDown() {
@@ -163,6 +165,9 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem newItem = new CertificateItem();
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
+        CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        newItem.setCreatedBy(createdBy);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -185,9 +190,6 @@ class CertificateItemsControllerIntegrationTest {
     @Test
     @DisplayName("Return not found when a certificate item does not exist")
     void getCertificateItemReturnsNotFound() throws Exception {
-        final ApiError expectedValidationError =
-                new ApiError(NOT_FOUND, singletonList("certificate resource not found"));
-
         // When and then
         mockMvc.perform(get("/certificates/CHS0")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -197,7 +199,32 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Return unauthorised if the user has not created the certificate")
+    void getCertificateItemReturnsUnautorised() throws Exception {
+        // Given
+        // Create certificate item in database
+        final CertificateItem newItem = new CertificateItem();
+        newItem.setId(EXPECTED_ITEM_ID);
+        newItem.setQuantity(QUANTITY);
+        CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ALTERNATIVE_CREATED_BY);
+        newItem.setCreatedBy(createdBy);
+        repository.save(newItem);
+
+
+        // When and then
+        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -209,6 +236,10 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
+        CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        savedItem.setCreatedBy(createdBy);
+
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(ORIGINAL_CERT_INC);
         savedItem.setItemOptions(options);
