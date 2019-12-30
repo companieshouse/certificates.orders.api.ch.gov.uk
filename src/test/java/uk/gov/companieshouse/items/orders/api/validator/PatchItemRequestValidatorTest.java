@@ -143,12 +143,11 @@ class PatchItemRequestValidatorTest {
         assertFieldMustBeNullErrorProduced("kind");
     }
 
-    // TODO PCI-435: We need it to be postal_delivery, not is_postal_delivery
     @Test
     @DisplayName("Postal delivery is read only")
     void getValidationErrorsRejectsReadOnlyPostalDelivery() throws IOException {
         itemUpdate.setPostalDelivery(TOKEN_POSTAL_DELIVERY_VALUE);
-        assertFieldMustBeNullErrorProduced("is_postal_delivery");
+        assertFieldMustBeNullErrorProduced("postal_delivery");
     }
 
     @Test

@@ -23,5 +23,6 @@ class FieldNameConverterTest {
         assertThat(converterUnderTest.toSnakeCase("itemCosts"), is("item_costs"));
         assertThat(converterUnderTest.toSnakeCase("item"), is("item"));
         assertThat(converterUnderTest.toSnakeCase("certIncConLast"), is("cert_inc_con_last"));
+        assertThat(converterUnderTest.toSnakeCase("isPostalDelivery"), is("postal_delivery"));
     }
 }
