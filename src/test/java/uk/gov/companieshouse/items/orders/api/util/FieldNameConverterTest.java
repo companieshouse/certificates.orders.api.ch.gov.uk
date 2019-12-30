@@ -20,7 +20,6 @@ class FieldNameConverterTest {
     void toSnakeCaseWorksAsExpected() {
         assertThat(converterUnderTest.toSnakeCase("itemCosts"), is("item_costs"));
         assertThat(converterUnderTest.toSnakeCase("item"), is("item"));
-        // Does not work for more than two words!
-        assertThat(converterUnderTest.toSnakeCase("certIncConLast"), is("certIncCon_last"));
+        assertThat(converterUnderTest.toSnakeCase("certIncConLast"), is("cert_inc_con_last"));
     }
 }
