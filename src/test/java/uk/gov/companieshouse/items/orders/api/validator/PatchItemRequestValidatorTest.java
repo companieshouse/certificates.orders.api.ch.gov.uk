@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.items.orders.api.util.TestMergePatchFactory;
 
 import javax.json.JsonMergePatch;
@@ -48,8 +49,13 @@ class PatchItemRequestValidatorTest {
         }
 
         @Bean
+        public FieldNameConverter converter() {
+            return new FieldNameConverter();
+        }
+
+        @Bean
         public PatchItemRequestValidator patchItemRequestValidator() {
-            return new PatchItemRequestValidator(objectMapper(), validator());
+            return new PatchItemRequestValidator(objectMapper(), validator(), converter());
         }
 
         @Bean
@@ -112,21 +118,21 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Description identifier is read only")
     void getValidationErrorsRejectsReadOnlyDescriptionIdentifier() throws IOException {
         itemUpdate.setDescriptionIdentifier(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("descriptionIdentifier");
+        assertFieldMustBeNullErrorProduced("description_identifier");
     }
 
     @Test
     @DisplayName("Description values are read only")
     void getValidationErrorsRejectsReadOnlyDescriptionValues() throws IOException {
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
-        assertFieldMustBeNullErrorProduced("descriptionValues");
+        assertFieldMustBeNullErrorProduced("description_values");
     }
 
     @Test
     @DisplayName("Item costs are read only")
     void getValidationErrorsRejectsReadOnlyItemCosts() throws IOException {
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
-        assertFieldMustBeNullErrorProduced("itemCosts");
+        assertFieldMustBeNullErrorProduced("item_costs");
     }
 
     @Test
@@ -157,7 +163,9 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors,
-                containsInAnyOrder("descriptionValues: must be null", "itemCosts: must be null", "kind: must be null"));
+                containsInAnyOrder("description_values: must be null",
+                                   "item_costs: must be null",
+                                   "kind: must be null"));
     }
 
     @Test

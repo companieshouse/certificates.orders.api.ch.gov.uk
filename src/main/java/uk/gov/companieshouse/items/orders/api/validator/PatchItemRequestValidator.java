@@ -3,6 +3,7 @@ package uk.gov.companieshouse.items.orders.api.validator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
 import javax.validation.ConstraintViolation;
@@ -20,15 +21,20 @@ public class PatchItemRequestValidator {
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
+    private final FieldNameConverter converter;
 
     /**
      * Constructor.
      * @param objectMapper the object mapper this relies upon to deserialise JSON
      * @param validator the validator this relies upon to validate DTOs
+     * @param converter the converter this uses to present field names as they appear in the request JSON payload
      */
-    public PatchItemRequestValidator(ObjectMapper objectMapper, Validator validator) {
+    public PatchItemRequestValidator(final ObjectMapper objectMapper,
+                                     final Validator validator,
+                                     final FieldNameConverter converter) {
         this.objectMapper = objectMapper;
         this.validator = validator;
+        this.converter = converter;
     }
 
     /**
@@ -42,7 +48,8 @@ public class PatchItemRequestValidator {
                     objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
             final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
             return violations.stream()
-                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                    .map(violation -> converter.toSnakeCase(violation.getPropertyPath().toString())
+                            + ": " + violation.getMessage())
                     .collect(Collectors.toList());
         } catch (IOException ex) {
             // This exception will not occur because there are no low-level IO operations here.
