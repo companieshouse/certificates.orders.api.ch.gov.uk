@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.util;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,6 +14,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest
 class FieldNameConverterTest {
 
+    @Qualifier("fieldNameConverter")
     @Autowired
     private FieldNameConverter converterUnderTest;
 
