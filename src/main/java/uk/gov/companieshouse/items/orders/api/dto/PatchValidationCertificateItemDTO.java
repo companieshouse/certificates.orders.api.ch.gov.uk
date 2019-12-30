@@ -7,7 +7,6 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Null;
-import java.util.Map;
 
 /**
  * Instantiated from PATCH request JSON body to facilitate PATCH request validation.
@@ -43,40 +42,6 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("id")
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Null
-    @JsonProperty("description")
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @Null
-    @JsonProperty("description_identifier")
-    public String getDescriptionIdentifier() {
-        return descriptionIdentifier;
-    }
-
-    public void setDescriptionIdentifier(String descriptionIdentifier) {
-        this.descriptionIdentifier = descriptionIdentifier;
-    }
-
-    @Null
-    @JsonProperty("description_values")
-    public Map<String, String> getDescriptionValues() {
-        return descriptionValues;
-    }
-
-    public void setDescriptionValues(Map<String, String> descriptionValues) {
-        this.descriptionValues = descriptionValues;
     }
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
