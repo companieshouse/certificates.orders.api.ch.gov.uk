@@ -10,21 +10,7 @@ import java.util.Map;
 /**
  * An instance of this represents the JSON serializable item for use in REST requests and responses.
  */
-public class ItemDTO {
-
-    private String id;
-
-    @Null
-    @JsonProperty("description")
-    private String description;
-
-    @Null
-    @JsonProperty("description_identifier")
-    private String descriptionIdentifier;
-
-    @Null
-    @JsonProperty("description_values")
-    private Map<String, String> descriptionValues;
+public class ItemDTO extends AbstractItemDTO {
 
     @Null
     @JsonProperty("item_costs")
@@ -47,6 +33,8 @@ public class ItemDTO {
         this.id = id;
     }
 
+    @Null
+    @JsonProperty("description")
     public String getDescription() {
         return description;
     }
@@ -55,6 +43,8 @@ public class ItemDTO {
         this.description = description;
     }
 
+    @Null
+    @JsonProperty("description_identifier")
     public String getDescriptionIdentifier() {
         return descriptionIdentifier;
     }
@@ -63,6 +53,8 @@ public class ItemDTO {
         this.descriptionIdentifier = descriptionIdentifier;
     }
 
+    @Null
+    @JsonProperty("description_values")
     public Map<String, String> getDescriptionValues() {
         return descriptionValues;
     }

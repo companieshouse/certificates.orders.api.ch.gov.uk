@@ -12,23 +12,7 @@ import java.util.Map;
 /**
  * Instantiated from PATCH request JSON body to facilitate PATCH request validation.
  */
-public class PatchValidationCertificateItemDTO {
-
-    @Null
-    @JsonProperty("id")
-    private String id;
-
-    @Null
-    @JsonProperty("description")
-    private String description;
-
-    @Null
-    @JsonProperty("description_identifier")
-    private String descriptionIdentifier;
-
-    @Null
-    @JsonProperty("description_values")
-    private Map<String, String> descriptionValues;
+public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
 
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
@@ -55,16 +39,40 @@ public class PatchValidationCertificateItemDTO {
     @Override
     public String toString() { return new Gson().toJson(this); }
 
+    @Null
+    @JsonProperty("id")
+    public String getId() {
+        return id;
+    }
+
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Null
+    @JsonProperty("description")
+    public String getDescription() {
+        return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Null
+    @JsonProperty("description_identifier")
+    public String getDescriptionIdentifier() {
+        return descriptionIdentifier;
+    }
+
     public void setDescriptionIdentifier(String descriptionIdentifier) {
         this.descriptionIdentifier = descriptionIdentifier;
+    }
+
+    @Null
+    @JsonProperty("description_values")
+    public Map<String, String> getDescriptionValues() {
+        return descriptionValues;
     }
 
     public void setDescriptionValues(Map<String, String> descriptionValues) {
