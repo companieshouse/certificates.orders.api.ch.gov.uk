@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.EMPTY_LIST;
+
 /**
  * Implements validation of the request payload specific to the the patch item request only.
  */
@@ -53,7 +55,7 @@ public class PatchItemRequestValidator {
                     .collect(Collectors.toList());
         } catch (IOException ex) {
             // This exception will not occur because there are no low-level IO operations here.
-            return null;
+            return EMPTY_LIST;
         }
     }
 
