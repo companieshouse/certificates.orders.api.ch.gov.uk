@@ -300,7 +300,6 @@ class CertificateItemsControllerIntegrationTest {
         // When and then
         mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
@@ -318,12 +317,23 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setId(UPDATED_ITEM_ID);
 
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        final CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        savedItem.setCreatedBy(createdBy);
+        repository.save(savedItem);
+
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList("id: must be null"));
 
         // When and then
         mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -338,12 +348,23 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(INVALID_QUANTITY);
 
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        final CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        savedItem.setCreatedBy(createdBy);
+        repository.save(savedItem);
+
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
 
         // When and then
         mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -362,6 +383,9 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(ORIGINAL_CERT_INC);
         savedItem.setItemOptions(options);
+        final CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        savedItem.setCreatedBy(createdBy);
         repository.save(savedItem);
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
@@ -369,6 +393,9 @@ class CertificateItemsControllerIntegrationTest {
         // When and then
         mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isNoContent())
@@ -384,6 +411,14 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
 
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        final CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ERIC_IDENTITY_VALUE);
+        savedItem.setCreatedBy(createdBy);
+        repository.save(savedItem);
+
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList("description_values: must be null",
                                                  "item_costs: must be null",
@@ -392,6 +427,9 @@ class CertificateItemsControllerIntegrationTest {
         // When and then
         mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
