@@ -16,7 +16,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.*;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
@@ -32,7 +31,7 @@ public class CertificateItemsController {
     private final CreateItemRequestValidator createItemRequestValidator;
     private final PatchItemRequestValidator patchItemRequestValidator;
     private final CertificateItemMapper mapper;
-    private PatchMerger patcher;
+    private final PatchMerger patcher;
     private final CertificateItemService service;
 
     /**
@@ -96,7 +95,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws IOException {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 
