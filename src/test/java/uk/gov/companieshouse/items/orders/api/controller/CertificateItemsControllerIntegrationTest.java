@@ -219,8 +219,30 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Return unauthorised if Eric headers are not present")
+    void getCertificateItemReturnsUnauthorisedWhenEricHeadersAreNotPresent() throws Exception {
+        // Given
+        final CertificateItem newItem = new CertificateItem();
+        newItem.setId(EXPECTED_ITEM_ID);
+        newItem.setQuantity(QUANTITY);
+        CreatedBy createdBy = new CreatedBy();
+        createdBy.setId(ALTERNATIVE_CREATED_BY);
+        newItem.setCreatedBy(createdBy);
+        repository.save(newItem);
+
+
+        // When and then
+        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
     @DisplayName("Return unauthorised if the user has not created the certificate")
-    void getCertificateItemReturnsUnautorised() throws Exception {
+    void getCertificateItemReturnsUnauthorisedIfUserDidNotCreateCertificate() throws Exception {
         // Given
         // Create certificate item in database
         final CertificateItem newItem = new CertificateItem();

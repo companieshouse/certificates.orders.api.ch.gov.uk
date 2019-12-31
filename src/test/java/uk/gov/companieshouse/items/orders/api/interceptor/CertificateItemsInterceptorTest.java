@@ -45,7 +45,7 @@ public class CertificateItemsInterceptorTest {
     @Test
     @DisplayName("Authorise if authorised user created the certificate")
     public void willAuthoriseIfAuthorisedUserCreatedTheCertificate() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
         CertificateItem item = new CertificateItem();
@@ -63,9 +63,18 @@ public class CertificateItemsInterceptorTest {
     }
 
     @Test
+    @DisplayName("Authorise if method is POST")
+    public void willAuthoriseIfPost() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+
+        assertTrue(certificateItemsInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
     @DisplayName("Does not authorise if authorised user did not create the certificate")
     public void willNotAuthoriseIfAuthorisedUserDidNotCreateTheCertificate() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
         CertificateItem item = new CertificateItem();
@@ -85,7 +94,7 @@ public class CertificateItemsInterceptorTest {
     @Test
     @DisplayName("Does not authorise if authorised user did not create the certificate")
     public void willNotAuthoriseIfCertificateIsNotFound() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
