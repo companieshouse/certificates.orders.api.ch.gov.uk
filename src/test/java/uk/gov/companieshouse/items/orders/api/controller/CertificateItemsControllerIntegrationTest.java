@@ -11,14 +11,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -46,10 +50,30 @@ class CertificateItemsControllerIntegrationTest {
     private CertificateItemRepository repository;
 
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
+    private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
+    private static final int INVALID_QUANTITY = 0;
     private static final boolean ORIGINAL_CERT_INC = true;
     private static final boolean UPDATED_CERT_INC = false;
+    private static final String TOKEN_STRING = "TOKEN VALUE";
+    static final Map<String, String> TOKEN_VALUES = new HashMap<>();
+    private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
+
+    /**
+     * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
+     */
+    private static class TestDTO extends PatchValidationCertificateItemDTO {
+        private String unknownField;
+
+        private TestDTO(String unknownField) {
+            this.unknownField = unknownField;
+        }
+
+        public String getUnknownField() {
+            return unknownField;
+        }
+    }
 
     @AfterEach
     void tearDown() {
@@ -181,7 +205,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setItemOptions(options);
         repository.save(savedItem);
 
-        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertInc(UPDATED_CERT_INC);
         itemUpdate.setItemOptions(options);
@@ -207,7 +231,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemReportsFailureToFindItem() throws Exception {
 
         // Given
-        final CertificateItemDTO itemUpdate = new CertificateItemDTO();
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(UPDATED_CERT_INC);
@@ -219,6 +243,95 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Rejects update request containing read only attribute value")
+    void updateCertificateItemRejectsPatchWithReadOnlyAttributeValue() throws Exception {
+
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setId(UPDATED_ITEM_ID);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList("id: must be null"));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Quantity must be greater than 0")
+    void updateCertificateItemRejectsZeroQuantity() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setQuantity(INVALID_QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Unknown field is ignored")
+    void updateCertificateItemIgnoresUnknownField() throws Exception {
+
+        // Given
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertInc(ORIGINAL_CERT_INC);
+        savedItem.setItemOptions(options);
+        repository.save(savedItem);
+
+        final TestDTO itemUpdate = new TestDTO("Unknown field value");
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isNoContent())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Multiple read only fields rejected")
+    void updateCertificateItemRejectsMultipleReadOnlyFields() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setDescriptionValues(TOKEN_VALUES);
+        itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
+        itemUpdate.setKind(TOKEN_STRING);
+
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList("description_values: must be null",
+                                                 "item_costs: must be null",
+                                                 "kind: must be null"));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
     }
 

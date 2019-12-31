@@ -5,26 +5,11 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Null;
-import java.util.Map;
 
 /**
  * An instance of this represents the JSON serializable item for use in REST requests and responses.
  */
-public class ItemDTO {
-
-    private String id;
-
-    @Null
-    @JsonProperty("description")
-    private String description;
-
-    @Null
-    @JsonProperty("description_identifier")
-    private String descriptionIdentifier;
-
-    @Null
-    @JsonProperty("description_values")
-    private Map<String, String> descriptionValues;
+public class ItemDTO extends AbstractItemDTO {
 
     @Null
     @JsonProperty("item_costs")
@@ -41,34 +26,6 @@ public class ItemDTO {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDescriptionIdentifier() {
-        return descriptionIdentifier;
-    }
-
-    public void setDescriptionIdentifier(String descriptionIdentifier) {
-        this.descriptionIdentifier = descriptionIdentifier;
-    }
-
-    public Map<String, String> getDescriptionValues() {
-        return descriptionValues;
-    }
-
-    public void setDescriptionValues(Map<String, String> descriptionValues) {
-        this.descriptionValues = descriptionValues;
     }
 
     public ItemCosts getItemCosts() {

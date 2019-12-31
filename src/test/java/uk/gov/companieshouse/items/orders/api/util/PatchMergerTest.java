@@ -13,12 +13,7 @@ import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
-import javax.json.Json;
-import javax.json.JsonMergePatch;
-import javax.json.JsonReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -41,6 +36,11 @@ class PatchMergerTest {
         PatchMerger patchMerger() {
             return new PatchMerger(objectMapper());
         }
+
+        @Bean
+        TestMergePatchFactory patchFactory() {
+            return new TestMergePatchFactory(objectMapper());
+        }
     }
 
     private static final String ORIGINAL_COMPANY_NUMBER = "1234";
@@ -58,10 +58,13 @@ class PatchMergerTest {
     private static final boolean CORRECTED_CERT_ACC = false;
 
     @Autowired
-    private PatchMerger patchMerger;
+    private PatchMerger patchMergerUnderTest;
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private TestMergePatchFactory patchFactory;
 
     @Test
     @DisplayName("Unpopulated source string property does not overwrite populated target field")
@@ -73,7 +76,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(empty), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(empty), original, CertificateItem.class);
 
         // Then
         assertThat(patched.getCompanyNumber(), is(ORIGINAL_COMPANY_NUMBER));
@@ -89,7 +92,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(empty), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(empty), original, CertificateItem.class);
 
         // Then
         assertThat(patched.isPostalDelivery(), is(ORIGINAL_POSTAL_DELIVERY));
@@ -105,7 +108,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(empty), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(empty), original, CertificateItem.class);
 
         // Then
         assertThat(patched.getQuantity(), is(ORIGINAL_QUANTITY));
@@ -122,7 +125,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
         assertThat(patched.getCompanyNumber(), is(CORRECTED_COMPANY_NUMBER));
@@ -139,7 +142,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
         assertThat(patched.isPostalDelivery(), is(CORRECTED_POSTAL_DELIVERY));
@@ -156,7 +159,7 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
         assertThat(patched.getQuantity(), is(CORRECTED_QUANTITY));
@@ -181,28 +184,12 @@ class PatchMergerTest {
 
         // When
         final CertificateItem patched =
-                patchMerger.mergePatch(createMergePatchFromPojo(delta), original, CertificateItem.class);
+                patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
         assertThat(patched.getItemOptions().getAdditionalInformation(), is(CORRECTED_ADDITIONAL_INFO));
         assertThat(patched.getItemOptions().isCertAcc(), is(CORRECTED_CERT_ACC));
         assertThat(patched.getItemOptions().isCertArts(), is(ORIGINAL_CERT_ARTS));
-    }
-
-    /**
-     * Performs an equivalent conversion to that carried out by {@link JsonMergePatchHttpMessageConverter} et al to
-     * facilitate integration testing of the {@link PatchMerger} class.
-     * @param pojo the POJO that represents a merge patch
-     * @return the {@link JsonMergePatch} representation
-     * @throws IOException should something unexpected happen
-     */
-    JsonMergePatch createMergePatchFromPojo(final Object pojo) throws IOException {
-        final String json = mapper.writeValueAsString(pojo);
-        final InputStream stream = new ByteArrayInputStream(json.getBytes());
-        final JsonReader reader = Json.createReader(stream);
-        final JsonMergePatch patch = Json.createMergePatch(reader.readValue());
-        stream.close();
-        return patch;
     }
 
 }
