@@ -25,6 +25,7 @@
 		<mockito-junit-jupiter-version>2.18.0</mockito-junit-jupiter-version>
 		<hamcrest-all-version>1.3</hamcrest-all-version>
 		<javax.json-api.version>1.1.4</javax.json-api.version>
+		<guava.version>28.1-jre</guava.version>
 	</properties>
 
 	<dependencies>
@@ -85,6 +86,11 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr353</artifactId>
 			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
 		</dependency>
 
 		<dependency>

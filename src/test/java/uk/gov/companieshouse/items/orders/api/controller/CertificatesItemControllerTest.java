@@ -12,8 +12,11 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 
 import javax.json.JsonMergePatch;
+
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,14 +49,17 @@ public class CertificatesItemControllerTest {
     @Mock
     private PatchMerger merger;
 
+    @Mock
+    private PatchItemRequestValidator validator;
+
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() {
+    void updateUpdatesSuccessfully() throws IOException {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         // When
-        final ResponseEntity<Void> response =
+        final ResponseEntity<Object> response =
                 controllerUnderTest.updateCertificateItem(patch, ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         // Then
