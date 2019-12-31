@@ -1,24 +1,17 @@
 package uk.gov.companieshouse.items.orders.api;
 
-import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
-import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 

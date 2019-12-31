@@ -21,17 +21,12 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
@@ -76,9 +71,6 @@ class CertificateItemsControllerIntegrationTest {
     @Test
     @DisplayName("Successfully creates certificate item")
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
-        when(userAuthenticationInterceptor.preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class),
-                any(Object.class)))
-                .thenReturn(true);
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
         newItem.setCompanyNumber("1234");

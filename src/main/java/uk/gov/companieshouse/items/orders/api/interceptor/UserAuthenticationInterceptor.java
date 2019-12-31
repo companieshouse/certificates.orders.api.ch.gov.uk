@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
 public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     @Override

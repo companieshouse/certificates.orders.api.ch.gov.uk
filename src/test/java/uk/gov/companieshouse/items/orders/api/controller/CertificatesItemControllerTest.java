@@ -14,12 +14,10 @@ import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 
 import javax.json.JsonMergePatch;
-
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;

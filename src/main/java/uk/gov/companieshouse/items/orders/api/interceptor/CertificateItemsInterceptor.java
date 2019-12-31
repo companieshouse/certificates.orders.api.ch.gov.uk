@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,10 +21,13 @@ import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICA
 @Component
 public class CertificateItemsInterceptor extends HandlerInterceptorAdapter {
 
-    @Autowired
-    private CertificateItemService service;
+    private final CertificateItemService service;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+
+    public CertificateItemsInterceptor(CertificateItemService service) {
+        this.service = service;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

@@ -14,7 +14,6 @@ import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +21,8 @@ import java.util.Optional;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CertificateItemsInterceptorTest {
