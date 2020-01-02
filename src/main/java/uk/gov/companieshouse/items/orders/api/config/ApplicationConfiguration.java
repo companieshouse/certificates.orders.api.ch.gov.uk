@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.companieshouse.items.orders.api.interceptor.CertificateItemsInterceptor;
 import uk.gov.companieshouse.items.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
+import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
@@ -19,13 +20,18 @@ import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 public class ApplicationConfiguration implements WebMvcConfigurer {
 
     @Autowired
-    CertificateItemsInterceptor certificateItemsInterceptor;
+    private CertificateItemService certificateItemService;
+
+    @Bean
+    public CertificateItemsInterceptor certificateItemsInterceptor() {
+        return new CertificateItemsInterceptor(certificateItemService);
+    }
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new LoggingInterceptor());
         registry.addInterceptor(new UserAuthenticationInterceptor());
-        registry.addInterceptor(certificateItemsInterceptor).addPathPatterns("/certificates/**");
+        registry.addInterceptor(certificateItemsInterceptor()).addPathPatterns("/certificates/**");
     }
 
     @Bean

@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
-@Component
 public class CertificateItemsInterceptor extends HandlerInterceptorAdapter {
 
     private final CertificateItemService service;
