@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
@@ -58,6 +59,8 @@ public class CertificatesItemControllerTest {
     void updateUpdatesSuccessfully() {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
+        when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
+        when(service.saveCertificateItem(item)).thenReturn(item);
 
         // When
         final ResponseEntity<Object> response =
@@ -65,6 +68,7 @@ public class CertificatesItemControllerTest {
 
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        assertThat(response.getBody(), is(item));
     }
 
     @Test
