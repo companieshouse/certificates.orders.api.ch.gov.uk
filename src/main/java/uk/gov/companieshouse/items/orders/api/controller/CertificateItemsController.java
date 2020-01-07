@@ -112,9 +112,9 @@ public class CertificateItemsController {
 
         final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
 
-        trace("Certificate item updated to " + savedItem, requestId);
+        trace("EXITING updateCertificateItem() with " + savedItem, requestId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(savedItem);
     }
 
     /**

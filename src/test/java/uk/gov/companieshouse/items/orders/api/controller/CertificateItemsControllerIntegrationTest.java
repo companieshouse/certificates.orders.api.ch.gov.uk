@@ -215,7 +215,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -307,7 +307,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print());
     }
 

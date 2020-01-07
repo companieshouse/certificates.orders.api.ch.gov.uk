@@ -55,7 +55,7 @@ public class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() throws IOException {
+    void updateUpdatesSuccessfully() {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
@@ -64,7 +64,7 @@ public class CertificatesItemControllerTest {
                 controllerUnderTest.updateCertificateItem(patch, ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         // Then
-        assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
