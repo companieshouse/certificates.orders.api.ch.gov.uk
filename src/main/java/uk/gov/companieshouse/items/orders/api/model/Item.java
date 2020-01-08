@@ -40,7 +40,7 @@ public class Item {
 
     private Integer quantity;
 
-    private CreatedBy createdBy;
+    private String userId;
 
     public String getId() {
         return id;
@@ -138,12 +138,12 @@ public class Item {
         this.quantity = quantity;
     }
 
-    public CreatedBy getCreatedBy() {
-        return createdBy;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setCreatedBy(CreatedBy createdBy) {
-        this.createdBy = createdBy;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

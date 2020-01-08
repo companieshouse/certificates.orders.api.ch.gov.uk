@@ -9,7 +9,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.CreatedBy;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,9 +49,7 @@ public class CertificateItemsInterceptorTest {
 
         CertificateItem item = new CertificateItem();
         item.setId(ITEM_ID);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        item.setCreatedBy(createdBy);
+        item.setUserId(ERIC_IDENTITY_VALUE);
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
@@ -79,9 +76,7 @@ public class CertificateItemsInterceptorTest {
 
         CertificateItem item = new CertificateItem();
         item.setId(ITEM_ID);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ALTERNATIVE_CREATED_BY);
-        item.setCreatedBy(createdBy);
+        item.setUserId(ALTERNATIVE_CREATED_BY);
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);

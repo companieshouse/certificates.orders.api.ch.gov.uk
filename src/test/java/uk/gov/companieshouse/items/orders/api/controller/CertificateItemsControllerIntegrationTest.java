@@ -17,7 +17,6 @@ import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInte
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.CreatedBy;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
@@ -30,6 +29,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -181,9 +181,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem newItem = new CertificateItem();
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        newItem.setCreatedBy(createdBy);
+        newItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -225,9 +223,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem newItem = new CertificateItem();
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ALTERNATIVE_CREATED_BY);
-        newItem.setCreatedBy(createdBy);
+        newItem.setUserId(ALTERNATIVE_CREATED_BY);
         repository.save(newItem);
 
 
@@ -248,9 +244,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem newItem = new CertificateItem();
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ALTERNATIVE_CREATED_BY);
-        newItem.setCreatedBy(createdBy);
+        newItem.setUserId(ALTERNATIVE_CREATED_BY);
         repository.save(newItem);
 
 
@@ -274,9 +268,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        savedItem.setCreatedBy(createdBy);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
 
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(ORIGINAL_CERT_INC);
@@ -342,9 +334,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
-        final CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        savedItem.setCreatedBy(createdBy);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -364,6 +354,29 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should not modify user_id when performing an update")
+    void updateCertificateItemDoesNotModifyWhenPerformingAnUpdate() throws Exception {
+        // Given
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"));
+
+        final Optional<CertificateItem> foundItem = repository.findById(EXPECTED_ITEM_ID);
+        assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
+    }
+
+    @Test
     @DisplayName("Quantity must be greater than 0")
     void updateCertificateItemRejectsZeroQuantity() throws Exception {
         // Given
@@ -373,9 +386,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
-        final CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        savedItem.setCreatedBy(createdBy);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -405,9 +416,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(ORIGINAL_CERT_INC);
         savedItem.setItemOptions(options);
-        final CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        savedItem.setCreatedBy(createdBy);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
@@ -436,9 +445,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
-        final CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(ERIC_IDENTITY_VALUE);
-        savedItem.setCreatedBy(createdBy);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
         final ApiError expectedValidationErrors =

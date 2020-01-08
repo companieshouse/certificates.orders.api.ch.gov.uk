@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.CreatedBy;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
@@ -72,10 +71,8 @@ public class CertificateItemsController {
         }
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
-        CreatedBy createdBy = new CreatedBy();
-        createdBy.setId(EricHeaderHelper.getIdentity(request));
-        createdBy.setEmail(EricHeaderHelper.getEmail(request));
-        item.setCreatedBy(createdBy);
+        item.setUserId(EricHeaderHelper.getIdentity(request));
+
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 

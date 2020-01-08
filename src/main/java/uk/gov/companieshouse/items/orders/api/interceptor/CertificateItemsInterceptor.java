@@ -38,12 +38,13 @@ public class CertificateItemsInterceptor extends HandlerInterceptorAdapter {
             Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
 
             if(item.isPresent()){
-                boolean authUserIsCreatedBy = item.get().getCreatedBy().getId().equals(identity);
+                String userId = item.get().getUserId();
+                boolean authUserIsCreatedBy = userId.equals(identity);
                 if(authUserIsCreatedBy) {
-                    LOGGER.info("User is permitted to view/edit the resource certificate createdBy="+item.get().getCreatedBy().getId()+", identity="+ identity);
+                    LOGGER.info("User is permitted to view/edit the resource certificate createdBy="+userId+", identity="+ identity);
                     return true;
                 }
-                LOGGER.info("User is not permitted to view/edit the resource certificate createdBy="+item.get().getCreatedBy().getId()+", identity="+ identity);
+                LOGGER.info("User is not permitted to view/edit the resource certificate createdBy="+userId+", identity="+ identity);
             } else {
                 response.setStatus(HttpStatus.NOT_FOUND.value());
                 return false;
