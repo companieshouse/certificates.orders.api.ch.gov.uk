@@ -30,6 +30,7 @@ public class Item {
 
     public void setId(String id) {
         this.id = id;
+        data.setId(id);
     }
 
     public LocalDateTime getCreatedAt() {

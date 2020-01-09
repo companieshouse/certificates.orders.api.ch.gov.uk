@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.items.orders.api.model;
 
 import com.google.gson.Gson;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Map;
 
@@ -14,7 +14,7 @@ public class ItemData {
     @Transient
     public static final String SEQUENCE_NAME = "items_sequence";
 
-    @Id
+    @Field("id")
     private String id;
 
     private String companyNumber;
