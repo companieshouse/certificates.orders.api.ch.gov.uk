@@ -3,15 +3,13 @@ package uk.gov.companieshouse.items.orders.api.util;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 public class EricHeaderHelper {
 
     public static final String ERIC_IDENTITY = "ERIC-Identity";
     public static final String ERIC_IDENTITY_TYPE = "ERIC-Identity-Type";
-    private static final String ERIC_AUTHORISED_USER = "ERIC-Authorised-User";
-    private static final String DELIMITER = ";";
-    private static final String EMAIL_IDENTIFIER = "@";
+
+    private EricHeaderHelper() { }
 
     public static String getIdentity(HttpServletRequest request) {
         return getHeader(request, ERIC_IDENTITY);
