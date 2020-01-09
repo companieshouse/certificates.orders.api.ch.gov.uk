@@ -10,9 +10,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TestMapper {
 
-    @Mapping(target = "data.datum", source = "datum")
+    //@Mapping(target = "data.datum", source = "datum")
     Entity dtoToEntity(Dto dto);
 
-    @Mapping(target = "datum", source = "data.datum")
+    //@Mapping(target = "datum", source = "data.datum")
     Dto entityToDto(Entity entity);
 }

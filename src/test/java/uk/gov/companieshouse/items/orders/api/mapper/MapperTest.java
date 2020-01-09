@@ -33,7 +33,7 @@ public class MapperTest {
 
         assertThat(entity.getId(), is(dto.getId()));
         assertThat(entity.getData(), is(notNullValue()));
-        assertThat(entity.getData().getDatum(), is(dto.getDatum()));
+        assertThat(entity/*.getData()*/.getDatum(), is(dto.getDatum()));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class MapperTest {
         final Dto dto = mapper.entityToDto(entity);
 
         assertThat(dto.getId(), is(entity.getId()));
-        assertThat(dto.getDatum(), is(entity.getData().getDatum()));
+        assertThat(dto.getDatum(), is(entity/*.getData()*/.getDatum()));
     }
 
 }

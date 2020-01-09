@@ -5,6 +5,7 @@ class Entity {
     private EntityData data;
 
     public Entity() {
+        data = new EntityData();
     }
 
     public Entity(String id, EntityData data) {
@@ -26,5 +27,13 @@ class Entity {
 
     public void setData(EntityData data) {
         this.data = data;
+    }
+
+    public String getDatum() {
+        return data.getDatum();
+    }
+
+    public void setDatum(String datum) {
+        data.setDatum(datum);
     }
 }
