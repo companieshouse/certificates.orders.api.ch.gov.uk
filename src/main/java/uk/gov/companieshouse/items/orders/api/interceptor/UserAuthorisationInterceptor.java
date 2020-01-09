@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -17,20 +15,21 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
+import static org.springframework.http.HttpMethod.POST;
 
-public class CertificateItemsInterceptor extends HandlerInterceptorAdapter {
+public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
     private final CertificateItemService service;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    public CertificateItemsInterceptor(CertificateItemService service) {
+    public UserAuthorisationInterceptor(CertificateItemService service) {
         this.service = service;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if(!HttpMethod.POST.matches(request.getMethod())) {
+        if(!POST.matches(request.getMethod())) {
             final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
             final String certificateId = pathVariables.get("id");
 
@@ -48,15 +47,15 @@ public class CertificateItemsInterceptor extends HandlerInterceptorAdapter {
                 if(authUserIsCreatedBy) {
                     LOGGER.info("User is permitted to view/edit the resource certificate userId="+userId+", identity="+ identity);
                     return true;
+                } else {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    LOGGER.info("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                    return false;
                 }
-                LOGGER.info("User is not permitted to view/edit the resource certificate userId="+userId+", identity="+ identity);
             } else {
                 response.setStatus(HttpStatus.NOT_FOUND.value());
                 return false;
             }
-
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return false;
         }
         return true;
     }

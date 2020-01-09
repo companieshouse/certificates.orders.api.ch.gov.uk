@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import uk.gov.companieshouse.items.orders.api.interceptor.CertificateItemsInterceptor;
+import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthorisationInterceptor;
 import uk.gov.companieshouse.items.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
@@ -23,15 +23,15 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     private CertificateItemService certificateItemService;
 
     @Bean
-    public CertificateItemsInterceptor certificateItemsInterceptor() {
-        return new CertificateItemsInterceptor(certificateItemService);
+    public UserAuthorisationInterceptor userAuthorisationInterceptor() {
+        return new UserAuthorisationInterceptor(certificateItemService);
     }
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new LoggingInterceptor());
         registry.addInterceptor(new UserAuthenticationInterceptor());
-        registry.addInterceptor(certificateItemsInterceptor()).addPathPatterns("/certificates/**");
+        registry.addInterceptor(userAuthorisationInterceptor()).addPathPatterns("/certificates/**");
     }
 
     @Bean

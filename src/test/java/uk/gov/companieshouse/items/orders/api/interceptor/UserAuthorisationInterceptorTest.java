@@ -24,10 +24,10 @@ import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDE
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CertificateItemsInterceptorTest {
+public class UserAuthorisationInterceptorTest {
 
     @InjectMocks
-    private CertificateItemsInterceptor certificateItemsInterceptor;
+    private UserAuthorisationInterceptor userAuthorisationInterceptor;
 
     @Mock
     private HttpServletRequest request;
@@ -56,7 +56,7 @@ public class CertificateItemsInterceptorTest {
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
-        assertTrue(certificateItemsInterceptor.preHandle(request, response, null));
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class CertificateItemsInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
 
-        assertTrue(certificateItemsInterceptor.preHandle(request, response, null));
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class CertificateItemsInterceptorTest {
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
-        assertFalse(certificateItemsInterceptor.preHandle(request, response, null));
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class CertificateItemsInterceptorTest {
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
 
-        assertFalse(certificateItemsInterceptor.preHandle(request, response, null));
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
 }

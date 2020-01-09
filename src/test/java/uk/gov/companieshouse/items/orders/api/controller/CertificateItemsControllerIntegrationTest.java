@@ -87,12 +87,6 @@ class CertificateItemsControllerIntegrationTest {
         repository.findById(EXPECTED_ITEM_ID).ifPresent(repository::delete);
     }
 
-    @Before
-    public void setup() {
-        System.out.println("IN SETUP");
-
-    }
-
     @Test
     @DisplayName("Successfully creates certificate item")
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
