@@ -40,6 +40,8 @@ public class Item {
 
     private Integer quantity;
 
+    private String userId;
+
     public String getId() {
         return id;
     }
@@ -134,6 +136,14 @@ public class Item {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

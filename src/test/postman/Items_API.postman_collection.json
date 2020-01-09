@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "50ec2fe0-f5d2-43d5-83e9-04fdc2fd71d1",
+		"_postman_id": "8568cafa-c227-4655-882b-d906ccf41934",
 		"name": "Items API",
 		"description": "Sanity testing for the CHS Ordering Items API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -37,12 +37,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -73,12 +71,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -109,12 +105,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -145,12 +139,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -189,12 +181,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -225,12 +215,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -261,12 +249,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -297,12 +283,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -333,12 +317,10 @@
 											}
 										},
 										"url": {
-											"raw": "http://chs-dev:10020/orderable/certificates",
-											"protocol": "http",
+											"raw": "{{base_url}}/orderable/certificates",
 											"host": [
-												"chs-dev"
+												"{{base_url}}"
 											],
-											"port": "10020",
 											"path": [
 												"orderable",
 												"certificates"
@@ -379,143 +361,9 @@
 									}
 								},
 								"url": {
-									"raw": "http://chs-dev:10020/orderable/certificates",
-									"protocol": "http",
+									"raw": "{{base_url}}/orderable/certificates",
 									"host": [
-										"chs-dev"
-									],
-									"port": "10020",
-									"path": [
-										"orderable",
-										"certificates"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create certificate item - sundance",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Request-ID",
-										"type": "text",
-										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
-									"protocol": "https",
-									"host": [
-										"api",
-										"sundance",
-										"aws",
-										"chdev",
-										"org"
-									],
-									"path": [
-										"orderable",
-										"certificates"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create certificate item - apollo1",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Request-ID",
-										"type": "text",
-										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
-									"protocol": "https",
-									"host": [
-										"api",
-										"sundance",
-										"aws",
-										"chdev",
-										"org"
-									],
-									"path": [
-										"orderable",
-										"certificates"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create certificate item - apollo2",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Request-ID",
-										"type": "text",
-										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "https://api.sundance.aws.chdev.org/orderable/certificates",
-									"protocol": "https",
-									"host": [
-										"api",
-										"sundance",
-										"aws",
-										"chdev",
-										"org"
+										"{{base_url}}"
 									],
 									"path": [
 										"orderable",
@@ -559,12 +407,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000037",
-									"protocol": "http",
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000037",
 									"host": [
-										"chs-dev"
+										"{{base_url}}"
 									],
-									"port": "10020",
 									"path": [
 										"orderable",
 										"certificates",
@@ -601,12 +447,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://chs-dev:10020/orderable/certificates/UNKNOWN",
-									"protocol": "http",
+									"raw": "{{base_url}}/orderable/certificates/UNKNOWN",
 									"host": [
-										"chs-dev"
+										"{{base_url}}"
 									],
-									"port": "10020",
 									"path": [
 										"orderable",
 										"certificates",
@@ -635,12 +479,10 @@
 									}
 								],
 								"url": {
-									"raw": "http://chs-dev:10020/orderable/certificates/CHS00000000000000001",
-									"protocol": "http",
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000001",
 									"host": [
-										"chs-dev"
+										"{{base_url}}"
 									],
-									"port": "10020",
 									"path": [
 										"orderable",
 										"certificates",
@@ -656,6 +498,48 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "Bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "53eb886b-1908-4d99-bb8e-9b96ca252f86",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "dd5269ba-b6f2-4e5b-ac35-8a09d94f0b2a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"protocolProfileBehavior": {}
