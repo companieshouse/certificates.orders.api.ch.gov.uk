@@ -34,7 +34,14 @@ public class UserAuthenticationInterceptorTest {
     }
 
     @Test
-    public void willNotAuthoriseIfEricHeadersAreNotPresent() {
+    public void willNotAuthoriseIfIdentityTypeHeaderIsNotPresent() {
+        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    public void willNotAuthoriseIfIdentityHeaderIsNotPresent() {
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 }
