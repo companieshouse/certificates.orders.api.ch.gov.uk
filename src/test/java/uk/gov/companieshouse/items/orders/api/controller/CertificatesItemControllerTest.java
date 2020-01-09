@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
@@ -54,16 +55,19 @@ public class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() throws IOException {
+    void updateUpdatesSuccessfully() {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
+        when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
+        when(service.saveCertificateItem(item)).thenReturn(item);
 
         // When
         final ResponseEntity<Object> response =
                 controllerUnderTest.updateCertificateItem(patch, ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         // Then
-        assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        assertThat(response.getBody(), is(item));
     }
 
     @Test

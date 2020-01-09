@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
@@ -281,7 +282,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setItemOptions(options);
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -289,7 +290,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -298,6 +299,8 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
+
+        response.andExpect(content().json(objectMapper.writeValueAsString(retrievedCertificateItem)));
     }
 
     @Test
@@ -422,15 +425,24 @@ class CertificateItemsControllerIntegrationTest {
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
+        assertThat(retrievedCertificateItem.isPresent(), is(true));
+        assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
+        assertThat(retrievedCertificateItem.get().getQuantity(), is(QUANTITY));
+        assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(ORIGINAL_CERT_INC));
+
+        response.andExpect(content().json(objectMapper.writeValueAsString(retrievedCertificateItem)));
     }
 
     @Test
