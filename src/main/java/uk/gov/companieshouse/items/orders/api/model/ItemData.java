@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
  * An instance of this represents an item of any type.
  */
-public class Item {
+public class ItemData {
 
     @Transient
     public static final String SEQUENCE_NAME = "items_sequence";
@@ -18,11 +17,23 @@ public class Item {
     @Id
     private String id;
 
-    private LocalDateTime createdAt;
+    private String companyNumber;
 
-    private LocalDateTime updatedAt;
+    private String description;
 
-    private ItemData data  = new ItemData();
+    private String descriptionIdentifier;
+
+    private Map<String, String> descriptionValues;
+
+    private ItemCosts itemCosts;
+
+    private CertificateItemOptions itemOptions;
+
+    private String kind;
+
+    private Boolean isPostalDelivery;
+
+    private Integer quantity;
 
     public String getId() {
         return id;
@@ -32,100 +43,76 @@ public class Item {
         this.id = id;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public ItemData getData() {
-        return data;
-    }
-
-    public void setData(ItemData data) {
-        this.data = data;
-    }
-
     public String getCompanyNumber() {
-        return data.getCompanyNumber();
+        return companyNumber;
     }
 
     public void setCompanyNumber(String companyNumber) {
-        data.setCompanyNumber(companyNumber);
+        this.companyNumber = companyNumber;
     }
 
     public String getDescription() {
-        return data.getDescription();
+        return description;
     }
 
     public void setDescription(String description) {
-        data.setDescription(description);
+        this.description = description;
     }
 
     public String getDescriptionIdentifier() {
-        return data.getDescriptionIdentifier();
+        return descriptionIdentifier;
     }
 
     public void setDescriptionIdentifier(String descriptionIdentifier) {
-        data.setDescriptionIdentifier(descriptionIdentifier);
+        this.descriptionIdentifier = descriptionIdentifier;
     }
 
     public Map<String, String> getDescriptionValues() {
-        return data.getDescriptionValues();
+        return descriptionValues;
     }
 
     public void setDescriptionValues(Map<String, String> descriptionValues) {
-        data.setDescriptionValues(descriptionValues);
+        this.descriptionValues = descriptionValues;
     }
 
     public ItemCosts getItemCosts() {
-        return data.getItemCosts();
+        return itemCosts;
     }
 
     public void setItemCosts(ItemCosts itemCosts) {
-        data.setItemCosts(itemCosts);
+        this.itemCosts = itemCosts;
     }
 
     public CertificateItemOptions getItemOptions() {
-        return data.getItemOptions();
+        return itemOptions;
     }
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
-        data.setItemOptions(itemOptions);
+        this.itemOptions = itemOptions;
     }
 
     public String getKind() {
-        return data.getKind();
+        return kind;
     }
 
     public void setKind(String kind) {
-        data.setKind(kind);
+        this.kind = kind;
     }
 
     public Boolean isPostalDelivery() {
-        return data.isPostalDelivery();
+        return isPostalDelivery;
     }
 
     public void setPostalDelivery(boolean postalDelivery) {
-        data.setPostalDelivery(postalDelivery);
+        isPostalDelivery = postalDelivery;
     }
 
     public Integer getQuantity() {
-        return data.getQuantity();
+        return quantity;
     }
 
     public void setQuantity(Integer quantity) {
-        data.setQuantity(quantity);
+        this.quantity = quantity;
     }
 
     @Override
