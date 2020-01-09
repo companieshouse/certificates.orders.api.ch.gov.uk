@@ -42,8 +42,8 @@ public class UserAuthorisationInterceptorTest {
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
 
     @Test
-    @DisplayName("Authorise if authorised user created the certificate")
-    public void willAuthoriseIfAuthorisedUserCreatedTheCertificate() {
+    @DisplayName("Authorise if authenticated user created the certificate when request method is GET")
+    public void willAuthoriseIfAuthorisedUserCreatedTheCertificateWhenRequestMethodIsGet() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
@@ -60,7 +60,7 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Authorise if method is POST")
+    @DisplayName("Authorise if request method is POST")
     public void willAuthoriseIfPost() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
@@ -69,8 +69,8 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Does not authorise if authorised user did not create the certificate")
-    public void willNotAuthoriseIfAuthorisedUserDidNotCreateTheCertificate() {
+    @DisplayName("Does not authorise if authenticated user did not create the certificate when request method is GET")
+    public void doesNotAuthoriseIfAuthenticatedUserDidNotCreateTheCertificateWhenRequestMethodGet() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
@@ -87,7 +87,7 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Does not authorise if authorised user did not create the certificate")
+    @DisplayName("Does not authorise if Certificate is not found when request method is GET")
     public void willNotAuthoriseIfCertificateIsNotFound() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
