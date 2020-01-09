@@ -367,7 +367,8 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"));
+                .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"))
+                .andExpect(status().isBadRequest());
 
         final Optional<CertificateItem> foundItem = repository.findById(EXPECTED_ITEM_ID);
         assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
