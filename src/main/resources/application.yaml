@@ -14,4 +14,4 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URL}
-      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
+      field-naming-strategy: uk.gov.companieshouse.items.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
