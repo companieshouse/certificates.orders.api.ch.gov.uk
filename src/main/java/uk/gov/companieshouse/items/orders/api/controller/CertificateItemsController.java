@@ -116,10 +116,11 @@ public class CertificateItemsController {
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
 
         final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
+        final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
 
-        trace("EXITING updateCertificateItem() with " + savedItem, requestId);
+        trace("EXITING updateCertificateItem() with " + savedItemDTO, requestId);
 
-        return ResponseEntity.ok().body(savedItem);
+        return ResponseEntity.ok().body(savedItemDTO);
     }
 
     /**

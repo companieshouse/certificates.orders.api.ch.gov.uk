@@ -20,6 +20,16 @@ public class ItemCosts {
     @JsonProperty("total_cost")
     private String totalCost;
 
+    public ItemCosts() {
+    }
+
+    public ItemCosts(String discountApplied, String individualItemCost, String postageCost, String totalCost) {
+        this.discountApplied = discountApplied;
+        this.individualItemCost = individualItemCost;
+        this.postageCost = postageCost;
+        this.totalCost = totalCost;
+    }
+
     public String getDiscountApplied() {
         return discountApplied;
     }

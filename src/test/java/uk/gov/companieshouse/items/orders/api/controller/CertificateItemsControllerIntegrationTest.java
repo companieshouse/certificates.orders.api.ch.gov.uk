@@ -275,6 +275,10 @@ class CertificateItemsControllerIntegrationTest {
         options.setCertInc(UPDATED_CERT_INC);
         itemUpdate.setItemOptions(options);
 
+        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setQuantity(UPDATED_QUANTITY);
+        expectedItem.setItemOptions(options);
+
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -285,6 +289,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -293,8 +298,6 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
-
-        response.andExpect(content().json(objectMapper.writeValueAsString(retrievedCertificateItem)));
     }
 
     @Test
@@ -419,6 +422,10 @@ class CertificateItemsControllerIntegrationTest {
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
 
+        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setQuantity(QUANTITY);
+        expectedItem.setItemOptions(options);
+
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -428,6 +435,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -436,8 +444,6 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(ORIGINAL_CERT_INC));
-
-        response.andExpect(content().json(objectMapper.writeValueAsString(retrievedCertificateItem)));
     }
 
     @Test

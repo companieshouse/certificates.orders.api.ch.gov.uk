@@ -22,23 +22,7 @@ public class Item {
 
     private LocalDateTime updatedAt;
 
-    private String companyNumber;
-
-    private String description;
-
-    private String descriptionIdentifier;
-
-    private Map<String, String> descriptionValues;
-
-    private ItemCosts itemCosts;
-
-    private CertificateItemOptions itemOptions;
-
-    private String kind;
-
-    private Boolean isPostalDelivery;
-
-    private Integer quantity;
+    private ItemData data  = new ItemData();
 
     private String userId;
 
@@ -48,6 +32,7 @@ public class Item {
 
     public void setId(String id) {
         this.id = id;
+        data.setId(id);
     }
 
     public LocalDateTime getCreatedAt() {
@@ -66,76 +51,84 @@ public class Item {
         this.updatedAt = updatedAt;
     }
 
+    public ItemData getData() {
+        return data;
+    }
+
+    public void setData(ItemData data) {
+        this.data = data;
+    }
+
     public String getCompanyNumber() {
-        return companyNumber;
+        return data.getCompanyNumber();
     }
 
     public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
+        data.setCompanyNumber(companyNumber);
     }
 
     public String getDescription() {
-        return description;
+        return data.getDescription();
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        data.setDescription(description);
     }
 
     public String getDescriptionIdentifier() {
-        return descriptionIdentifier;
+        return data.getDescriptionIdentifier();
     }
 
     public void setDescriptionIdentifier(String descriptionIdentifier) {
-        this.descriptionIdentifier = descriptionIdentifier;
+        data.setDescriptionIdentifier(descriptionIdentifier);
     }
 
     public Map<String, String> getDescriptionValues() {
-        return descriptionValues;
+        return data.getDescriptionValues();
     }
 
     public void setDescriptionValues(Map<String, String> descriptionValues) {
-        this.descriptionValues = descriptionValues;
+        data.setDescriptionValues(descriptionValues);
     }
 
     public ItemCosts getItemCosts() {
-        return itemCosts;
+        return data.getItemCosts();
     }
 
     public void setItemCosts(ItemCosts itemCosts) {
-        this.itemCosts = itemCosts;
+        data.setItemCosts(itemCosts);
     }
 
     public CertificateItemOptions getItemOptions() {
-        return itemOptions;
+        return data.getItemOptions();
     }
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
-        this.itemOptions = itemOptions;
+        data.setItemOptions(itemOptions);
     }
 
     public String getKind() {
-        return kind;
+        return data.getKind();
     }
 
     public void setKind(String kind) {
-        this.kind = kind;
+        data.setKind(kind);
     }
 
     public Boolean isPostalDelivery() {
-        return isPostalDelivery;
+        return data.isPostalDelivery();
     }
 
     public void setPostalDelivery(boolean postalDelivery) {
-        isPostalDelivery = postalDelivery;
+        data.setPostalDelivery(postalDelivery);
     }
 
     public Integer getQuantity() {
-        return quantity;
+        return data.getQuantity();
     }
 
     public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+        data.setQuantity(quantity);
     }
 
     public String getUserId() {

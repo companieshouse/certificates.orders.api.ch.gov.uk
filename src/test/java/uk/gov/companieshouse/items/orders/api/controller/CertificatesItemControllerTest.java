@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
@@ -48,10 +50,16 @@ public class CertificatesItemControllerTest {
     private CertificateItem item;
 
     @Mock
+    private CertificateItemDTO dto;
+
+    @Mock
     private PatchMerger merger;
 
     @Mock
     private PatchItemRequestValidator validator;
+
+    @Mock
+    private CertificateItemMapper mapper;
 
     @Test
     @DisplayName("Update request updates successfully")
@@ -60,6 +68,7 @@ public class CertificatesItemControllerTest {
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
         when(service.saveCertificateItem(item)).thenReturn(item);
+        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
 
         // When
         final ResponseEntity<Object> response =
@@ -67,7 +76,7 @@ public class CertificatesItemControllerTest {
 
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody(), is(item));
+        assertThat(response.getBody(), is(dto));
     }
 
     @Test
