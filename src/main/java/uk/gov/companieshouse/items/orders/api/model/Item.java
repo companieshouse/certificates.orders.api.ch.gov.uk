@@ -24,6 +24,8 @@ public class Item {
 
     private ItemData data  = new ItemData();
 
+    private String userId;
+
     public String getId() {
         return id;
     }
@@ -127,6 +129,14 @@ public class Item {
 
     public void setQuantity(Integer quantity) {
         data.setQuantity(quantity);
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

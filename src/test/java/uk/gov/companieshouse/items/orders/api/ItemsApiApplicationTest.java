@@ -13,8 +13,7 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import java.util.HashMap;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ItemsApiApplicationTest {
@@ -31,7 +30,6 @@ class ItemsApiApplicationTest {
     @Test
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {
-
         // Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setCompanyNumber(null);
@@ -50,6 +48,9 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
@@ -158,6 +159,9 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.contentType(MediaType.APPLICATION_JSON)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isBadRequest();
@@ -173,6 +177,9 @@ class ItemsApiApplicationTest {
 	private void postBadCreateRequestAndExpectError(final CertificateItemDTO itemToCreate, final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(itemToCreate))
 				.exchange()

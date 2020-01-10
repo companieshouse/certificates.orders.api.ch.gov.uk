@@ -35,6 +35,10 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("quantity")
     private Integer quantity;
 
+    @Null
+    @JsonProperty("user_id")
+    private String userId;
+
     @Override
     public String toString() { return new Gson().toJson(this); }
 

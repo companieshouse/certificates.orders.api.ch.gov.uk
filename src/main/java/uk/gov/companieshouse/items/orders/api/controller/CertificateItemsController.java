@@ -8,6 +8,7 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
@@ -15,6 +16,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -58,6 +60,7 @@ public class CertificateItemsController {
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+                                                        HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
@@ -68,6 +71,8 @@ public class CertificateItemsController {
         }
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
+        item.setUserId(EricHeaderHelper.getIdentity(request));
+
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
@@ -75,11 +80,11 @@ public class CertificateItemsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
-    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{certificateId}")
-    public ResponseEntity<Object> getCertificateItem(final @PathVariable String certificateId,
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
+    public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+        Optional<CertificateItem> item = service.getCertificateItemById(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
             return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
