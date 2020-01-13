@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
-import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
@@ -28,6 +27,7 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
@@ -66,6 +66,11 @@ class CertificateItemsControllerIntegrationTest {
     private static final String TOKEN_STRING = "TOKEN VALUE";
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
+    private static final String COMPANY_NUMBER = "00006400";
+    private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
+    private static final String UPDATED_COMPANY_NUMBER = "00006444";
+    private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
+    private static final String COMPANY_NUMBER_KEY = "company-number";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -264,6 +269,9 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setCompanyNumber(COMPANY_NUMBER);
+        savedItem.setDescription(DESCRIPTION);
+        savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
 
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(ORIGINAL_CERT_INC);
@@ -274,10 +282,14 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertInc(UPDATED_CERT_INC);
         itemUpdate.setItemOptions(options);
+        itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
+        expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        expectedItem.setDescription(EXPECTED_DESCRIPTION);
+        expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)

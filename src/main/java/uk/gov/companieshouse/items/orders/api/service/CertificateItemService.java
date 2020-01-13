@@ -48,6 +48,7 @@ public class CertificateItemService {
     public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
         final LocalDateTime now = LocalDateTime.now();
         updatedCertificateItem.setUpdatedAt(now);
+        CERTIFICATE.populateDerivedDescriptionFields(updatedCertificateItem, descriptions);
         return repository.save(updatedCertificateItem);
     }
 

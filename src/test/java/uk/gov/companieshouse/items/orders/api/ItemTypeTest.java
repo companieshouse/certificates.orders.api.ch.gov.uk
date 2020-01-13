@@ -43,6 +43,18 @@ class ItemTypeTest {
         itemPopulatedCorrectly(SCAN_ON_DEMAND, "scan-on-demand");
     }
 
+    @Test
+    @DisplayName("Derived description fields are populated correctly")
+    void derivedDescriptionFieldsPopulatedCorrectly() {
+        // Given
+        final Item item = new Item();
+
+        // When
+        CERTIFICATE.populateDerivedDescriptionFields(item, descriptions);
+
+        verifyDerivedDescriptionFields(item);
+    }
+
     /**
      * Utility method that calls {@link ItemType#populateReadOnlyFields(Item, DescriptionProviderService)} and verifies
      * the impact on the item is that expected.
@@ -65,6 +77,10 @@ class ItemTypeTest {
     private void verifyDescriptionFields(final Item item, final String value) {
         assertThat(item.getDescriptionIdentifier(), is(value));
         assertThat(item.getKind(), is(value));
+        verifyDerivedDescriptionFields(item);
+    }
+
+    private void verifyDerivedDescriptionFields(final Item item) {
         verify(descriptions).getDescription(item.getCompanyNumber());
         verify(descriptions).getDescriptionValues(item.getCompanyNumber());
     }

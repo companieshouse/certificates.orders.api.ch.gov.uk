@@ -38,6 +38,16 @@ public enum ItemType {
     }
 
     /**
+     * Populates those description fields that must be derived using the latest item field values.
+     * @param item the item with read only fields
+     * @param descriptions the description string resources provider
+     */
+    public void populateDerivedDescriptionFields(final Item item, final DescriptionProviderService descriptions) {
+        item.setDescription(descriptions.getDescription(item.getCompanyNumber()));
+        item.setDescriptionValues(descriptions.getDescriptionValues(item.getCompanyNumber()));
+    }
+
+    /**
      * Populates the description fields to facilitate UI text rendering.
      * @param item the item bearing text for UI rendering
      * @param descriptions the description string resources provider
@@ -45,8 +55,7 @@ public enum ItemType {
     void populateDescriptionFields(final Item item, final DescriptionProviderService descriptions) {
         item.setDescriptionIdentifier(itemType);
         item.setKind(kind);
-        item.setDescription(descriptions.getDescription(item.getCompanyNumber()));
-        item.setDescriptionValues(descriptions.getDescriptionValues(item.getCompanyNumber()));
+        populateDerivedDescriptionFields(item, descriptions);
     }
 
     /**
