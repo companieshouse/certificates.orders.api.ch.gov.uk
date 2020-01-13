@@ -2,49 +2,59 @@ package uk.gov.companieshouse.items.orders.api;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 
+import static org.mockito.Mockito.verify;
+
 /**
  * Unit tests the {@link ItemType} enum.
  */
+@ExtendWith(MockitoExtension.class)
 class ItemTypeTest {
+
+    @Mock
+    private DescriptionProviderService descriptions;
 
     @Test
     @DisplayName("Certificate item populated correctly")
     void certificateItemPopulatedCorrectly() {
-        itemPopulatedCorrrectly(CERTIFICATE, "certificate");
+        itemPopulatedCorrectly(CERTIFICATE, "certificate");
     }
 
     @Test
     @DisplayName("Certified copy item populated correctly")
     void certifiedCopyItemPopulatedCorrectly() {
-        itemPopulatedCorrrectly(CERTIFIED_COPY, "certified-copy");
+        itemPopulatedCorrectly(CERTIFIED_COPY, "certified-copy");
     }
 
     @Test
     @DisplayName("Scan on demand item populated correctly")
     void scanOnDemandItemPopulatedCorrectly() {
-        itemPopulatedCorrrectly(SCAN_ON_DEMAND, "scan-on-demand");
+        itemPopulatedCorrectly(SCAN_ON_DEMAND, "scan-on-demand");
     }
 
     /**
-     * Utility method that calls {@link ItemType#populateReadOnlyFields(Item)} and verifies
+     * Utility method that calls {@link ItemType#populateReadOnlyFields(Item, DescriptionProviderService)} and verifies
      * the impact on the item is that expected.
      * @param type the {@link ItemType}
      * @param expectedDescriptionFieldsValue the expected description field values
      */
-    private void itemPopulatedCorrrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
+    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
         // Given
         final Item item = new Item();
 
         // When
-        type.populateReadOnlyFields(item);
+        type.populateReadOnlyFields(item, descriptions);
 
         // Then
         verifyDescriptionFields(item, expectedDescriptionFieldsValue);
@@ -55,6 +65,8 @@ class ItemTypeTest {
     private void verifyDescriptionFields(final Item item, final String value) {
         assertThat(item.getDescriptionIdentifier(), is(value));
         assertThat(item.getKind(), is(value));
+        verify(descriptions).getDescription(item.getCompanyNumber());
+        verify(descriptions).getDescriptionValues(item.getCompanyNumber());
     }
 
     private void verifyCostsFields(final Item item) {

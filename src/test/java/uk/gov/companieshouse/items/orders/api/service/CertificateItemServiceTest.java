@@ -39,6 +39,9 @@ class CertificateItemServiceTest {
     @Mock
     private SequenceGeneratorService generator;
 
+    @Mock
+    private DescriptionProviderService descriptions;
+
     @Test
     void getNextIdGetsNextId() {
 

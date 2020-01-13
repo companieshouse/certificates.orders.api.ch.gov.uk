@@ -18,11 +18,14 @@ public class CertificateItemService {
 
     private final CertificateItemRepository repository;
     private final SequenceGeneratorService generator;
+    private final DescriptionProviderService descriptions;
 
     public CertificateItemService(final CertificateItemRepository repository,
-                                  final SequenceGeneratorService generator) {
+                                  final SequenceGeneratorService generator,
+                                  final DescriptionProviderService descriptions) {
         this.repository = repository;
         this.generator = generator;
+        this.descriptions = descriptions;
     }
 
     /**
@@ -31,7 +34,7 @@ public class CertificateItemService {
      * @return the created item
      */
     public CertificateItem createCertificateItem(final CertificateItem item) {
-        CERTIFICATE.populateReadOnlyFields(item);
+        CERTIFICATE.populateReadOnlyFields(item, descriptions);
         item.setId(getNextId());
         setCreationDateTimes(item);
         return repository.save(item);
