@@ -29,14 +29,15 @@ public class DescriptionProviderService {
 
     private static final String LOG_MESSAGE_FILE_KEY = "file";
 
-    private final File ordersDescriptionsFile;
+    private final String companyCertificateDescription;
 
     public DescriptionProviderService() {
-        ordersDescriptionsFile = new File(ORDERS_DESCRIPTIONS_FILEPATH);
+        final File ordersDescriptionsFile = new File(ORDERS_DESCRIPTIONS_FILEPATH);
+        companyCertificateDescription = getCompanyCertificateDescription(ordersDescriptionsFile);
     }
 
     public DescriptionProviderService(final File ordersDescriptionsFile) {
-        this.ordersDescriptionsFile = ordersDescriptionsFile;
+        companyCertificateDescription = getCompanyCertificateDescription(ordersDescriptionsFile);
     }
 
     /**
@@ -45,16 +46,14 @@ public class DescriptionProviderService {
      * @return the configured description, or <code>null</code> if none found.
      */
     public String getDescription(final String companyNumber) {
-
-        if (!ordersDescriptionsFile.exists()) {
-            logOrdersDescriptionsConfigError("Orders descriptions file not found",
-                    LOG_MESSAGE_FILE_KEY,
-                    ordersDescriptionsFile.getAbsolutePath());
+        if (companyCertificateDescription == null) {
+            // Error logged again here at time description is requested.
+            logOrdersDescriptionsConfigError("Company certificate description not found in orders descriptions file",
+                    COMPANY_CERTIFICATE_DESCRIPTION_KEY,
+                    COMPANY_CERTIFICATE_DESCRIPTION_KEY);
             return null;
         }
-
         final Map<String, String> descriptionValues = getDescriptionValues(companyNumber);
-        final String companyCertificateDescription = getCompanyCertificateDescription();
         return StrSubstitutor.replace(companyCertificateDescription, descriptionValues, "{", "}");
     }
 
@@ -70,11 +69,19 @@ public class DescriptionProviderService {
     /**
      * Looks up the company certificate description by its key 'company-certificate' under the
      * 'certificate-description' section of the orders descriptions YAML file.
+     * @param ordersDescriptionsFile the orders descriptions YAML file
      * @return the value found or <code>null</code> if none found.
      */
-    private String getCompanyCertificateDescription() {
+    private String getCompanyCertificateDescription(final File ordersDescriptionsFile) {
 
-        String companyCertificateDescription = null;
+        if (!ordersDescriptionsFile.exists()) {
+            logOrdersDescriptionsConfigError("Orders descriptions file not found",
+                    LOG_MESSAGE_FILE_KEY,
+                    ordersDescriptionsFile.getAbsolutePath());
+            return null;
+        }
+
+        String companyCertificateDesc = null;
         try(final InputStream inputStream = new FileInputStream(ordersDescriptionsFile)) {
             final Yaml yaml = new Yaml();
             final Map<String, Object> orderDescriptions = yaml.load(inputStream);
@@ -87,8 +94,8 @@ public class DescriptionProviderService {
                 return null;
             }
 
-            companyCertificateDescription = certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
-            if (companyCertificateDescription == null) {
+            companyCertificateDesc = certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
+            if (companyCertificateDesc == null) {
                 logOrdersDescriptionsConfigError("Company certificate description not found in orders descriptions file",
                         COMPANY_CERTIFICATE_DESCRIPTION_KEY,
                         COMPANY_CERTIFICATE_DESCRIPTION_KEY);
@@ -97,7 +104,7 @@ public class DescriptionProviderService {
             // This is very unlikely to happen here given File.exists() check above,
             // and that it is not likely to encounter an error closing the stream either.
         }
-        return companyCertificateDescription;
+        return companyCertificateDesc;
     }
 
     /**
