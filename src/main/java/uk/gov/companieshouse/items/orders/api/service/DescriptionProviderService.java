@@ -58,6 +58,11 @@ public class DescriptionProviderService {
         return StrSubstitutor.replace(companyCertificateDescription, descriptionValues, "{", "}");
     }
 
+    /**
+     * Gets the description values.
+     * @param companyNumber the company number making up part of the description values
+     * @return the description values
+     */
     public Map<String, String> getDescriptionValues(final String companyNumber) {
         return singletonMap(COMPANY_NUMBER_KEY, companyNumber);
     }
@@ -73,8 +78,8 @@ public class DescriptionProviderService {
         try(final InputStream inputStream = new FileInputStream(ordersDescriptionsFile)) {
             final Yaml yaml = new Yaml();
             final Map<String, Object> orderDescriptions = yaml.load(inputStream);
-            final Map<String, Object> certificateDescriptions =
-                    (Map<String, Object>) orderDescriptions.get(CERTIFICATE_DESCRIPTION_KEY);
+            final Map<String, String> certificateDescriptions =
+                    (Map<String, String>) orderDescriptions.get(CERTIFICATE_DESCRIPTION_KEY);
             if (certificateDescriptions == null) {
                 logOrdersDescriptionsConfigError("Certificate descriptions not found in orders descriptions file",
                         CERTIFICATE_DESCRIPTION_KEY,
@@ -82,8 +87,7 @@ public class DescriptionProviderService {
                 return null;
             }
 
-            companyCertificateDescription =
-                    (String) certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
+            companyCertificateDescription = certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
             if (companyCertificateDescription == null) {
                 logOrdersDescriptionsConfigError("Company certificate description not found in orders descriptions file",
                         COMPANY_CERTIFICATE_DESCRIPTION_KEY,
