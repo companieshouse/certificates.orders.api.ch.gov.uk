@@ -3,13 +3,15 @@ package uk.gov.companieshouse.items.orders.api.service;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Collections;
+import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Collections.singletonMap;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
 /**
  * Service that provides the description fields to facilitate UI text rendering.
@@ -17,7 +19,7 @@ import java.util.Map;
 @Service
 public class DescriptionProviderService {
 
-    // TODO private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private static final String COMPANY_NUMBER_KEY = "company-number";
     private static final String CERTIFICATE_DESCRIPTION_KEY = "certificate-description";
@@ -25,24 +27,87 @@ public class DescriptionProviderService {
 
     private static final String ORDERS_DESCRIPTIONS_FILEPATH = "api-enumerations/orders_descriptions.yaml";
 
-    public String getDescription(final String companyNumber) throws FileNotFoundException {
-        final Map<String, String> descriptionValues = getDescriptionValues(companyNumber);
-        final Yaml yaml = new Yaml();
-        final File descriptionsFile = new File(ORDERS_DESCRIPTIONS_FILEPATH);
-        if (descriptionsFile.exists()) {
-            final InputStream inputStream = new FileInputStream(descriptionsFile);
-            final Map<String, Object> orderDescriptions = yaml.load(inputStream);
-            final Map<String, Object> certificateDescriptions = (Map<String, Object>) orderDescriptions.get(CERTIFICATE_DESCRIPTION_KEY);
-            final String companyCertificateDescription = (String) certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
-            return StrSubstitutor.replace(companyCertificateDescription, descriptionValues, "{", "}");
-        } else {
-            // TODO Error logging etc
+    private static final String LOG_MESSAGE_FILE_KEY = "file";
+
+    private final File ordersDescriptionsFile;
+
+    public DescriptionProviderService() {
+        ordersDescriptionsFile = new File(ORDERS_DESCRIPTIONS_FILEPATH);
+    }
+
+    public DescriptionProviderService(final File ordersDescriptionsFile) {
+        this.ordersDescriptionsFile = ordersDescriptionsFile;
+    }
+
+    /**
+     * Gets the configured description.
+     * @param companyNumber the company number making up part of the description
+     * @return the configured description, or <code>null</code> if none found.
+     */
+    public String getDescription(final String companyNumber) {
+
+        if (!ordersDescriptionsFile.exists()) {
+            logOrdersDescriptionsConfigError("Orders descriptions file not found",
+                    LOG_MESSAGE_FILE_KEY,
+                    ordersDescriptionsFile.getAbsolutePath());
             return null;
         }
+
+        final Map<String, String> descriptionValues = getDescriptionValues(companyNumber);
+        final String companyCertificateDescription = getCompanyCertificateDescription();
+        return StrSubstitutor.replace(companyCertificateDescription, descriptionValues, "{", "}");
     }
 
     public Map<String, String> getDescriptionValues(final String companyNumber) {
-        return Collections.singletonMap(COMPANY_NUMBER_KEY, companyNumber);
+        return singletonMap(COMPANY_NUMBER_KEY, companyNumber);
+    }
+
+    /**
+     * Looks up the company certificate description by its key 'company-certificate' under the
+     * 'certificate-description' section of the orders descriptions YAML file.
+     * @return the value found or <code>null</code> if none found.
+     */
+    private String getCompanyCertificateDescription() {
+
+        String companyCertificateDescription = null;
+        try(final InputStream inputStream = new FileInputStream(ordersDescriptionsFile)) {
+            final Yaml yaml = new Yaml();
+            final Map<String, Object> orderDescriptions = yaml.load(inputStream);
+            final Map<String, Object> certificateDescriptions =
+                    (Map<String, Object>) orderDescriptions.get(CERTIFICATE_DESCRIPTION_KEY);
+            if (certificateDescriptions == null) {
+                logOrdersDescriptionsConfigError("Certificate descriptions not found in orders descriptions file",
+                        CERTIFICATE_DESCRIPTION_KEY,
+                        CERTIFICATE_DESCRIPTION_KEY);
+                return null;
+            }
+
+            companyCertificateDescription =
+                    (String) certificateDescriptions.get(COMPANY_CERTIFICATE_DESCRIPTION_KEY);
+            if (companyCertificateDescription == null) {
+                logOrdersDescriptionsConfigError("Company certificate description not found in orders descriptions file",
+                        COMPANY_CERTIFICATE_DESCRIPTION_KEY,
+                        COMPANY_CERTIFICATE_DESCRIPTION_KEY);
+            }
+        } catch (IOException ioe) {
+            // This is very unlikely to happen here given File.exists() check above,
+            // and that it is not likely to encounter an error closing the stream either.
+        }
+        return companyCertificateDescription;
+    }
+
+    /**
+     * Logs an error message for issues related to the orders descriptions configuration.
+     * @param errorMessage the error message to log
+     * @param dataMapKey the error message data map key
+     * @param dataMapValue the error message data map value
+     */
+    private void logOrdersDescriptionsConfigError(final String errorMessage,
+                                                  final String dataMapKey,
+                                                  final String dataMapValue) {
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(dataMapKey, dataMapValue);
+        LOGGER.error(errorMessage, dataMap);
     }
 
 }
