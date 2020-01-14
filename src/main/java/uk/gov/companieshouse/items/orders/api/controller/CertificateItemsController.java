@@ -18,6 +18,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
@@ -61,8 +62,7 @@ public class CertificateItemsController {
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
-                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
-    {
+                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws FileNotFoundException {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
@@ -100,7 +100,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws FileNotFoundException {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 

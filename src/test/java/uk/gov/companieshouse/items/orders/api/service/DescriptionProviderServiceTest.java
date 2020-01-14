@@ -1,10 +1,12 @@
 package uk.gov.companieshouse.items.orders.api.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -27,11 +29,13 @@ class DescriptionProviderServiceTest {
     private DescriptionProviderService providerUnderTest;
 
     @Test
-    void getDescriptionProvidesExpectedDescription() {
+    @DisplayName("Provides expected description")
+    void getDescriptionProvidesExpectedDescription() throws FileNotFoundException {
         assertThat(providerUnderTest.getDescription(COMPANY_NUMBER), is(EXPECTED_DESCRIPTION));
     }
 
     @Test
+    @DisplayName("Provides expected description values")
     void getDescriptionValuesProvidesExpectedValues() {
         assertThat(providerUnderTest.getDescriptionValues(COMPANY_NUMBER), is(EXPECTED_DESCRIPTION_VALUES));
     }

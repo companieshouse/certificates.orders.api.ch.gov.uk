@@ -9,6 +9,7 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,7 +54,7 @@ class CertificateItemServiceTest {
     }
 
     @Test
-    void createCertificateItemPopulatesAndSavesItem() {
+    void createCertificateItemPopulatesAndSavesItem() throws FileNotFoundException {
 
         // Given
         when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);

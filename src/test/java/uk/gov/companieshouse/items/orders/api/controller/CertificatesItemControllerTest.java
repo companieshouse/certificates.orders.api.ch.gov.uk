@@ -18,6 +18,7 @@ import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidato
 
 import javax.json.JsonMergePatch;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -63,7 +64,7 @@ public class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() {
+    void updateUpdatesSuccessfully() throws FileNotFoundException {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);

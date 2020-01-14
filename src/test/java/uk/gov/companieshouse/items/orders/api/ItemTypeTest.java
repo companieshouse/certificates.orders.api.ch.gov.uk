@@ -9,6 +9,8 @@ import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.io.FileNotFoundException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -27,25 +29,25 @@ class ItemTypeTest {
 
     @Test
     @DisplayName("Certificate item populated correctly")
-    void certificateItemPopulatedCorrectly() {
+    void certificateItemPopulatedCorrectly() throws FileNotFoundException {
         itemPopulatedCorrectly(CERTIFICATE, "certificate");
     }
 
     @Test
     @DisplayName("Certified copy item populated correctly")
-    void certifiedCopyItemPopulatedCorrectly() {
+    void certifiedCopyItemPopulatedCorrectly() throws FileNotFoundException {
         itemPopulatedCorrectly(CERTIFIED_COPY, "certified-copy");
     }
 
     @Test
     @DisplayName("Scan on demand item populated correctly")
-    void scanOnDemandItemPopulatedCorrectly() {
+    void scanOnDemandItemPopulatedCorrectly() throws FileNotFoundException {
         itemPopulatedCorrectly(SCAN_ON_DEMAND, "scan-on-demand");
     }
 
     @Test
     @DisplayName("Derived description fields are populated correctly")
-    void derivedDescriptionFieldsPopulatedCorrectly() {
+    void derivedDescriptionFieldsPopulatedCorrectly() throws FileNotFoundException {
         // Given
         final Item item = new Item();
 
@@ -61,7 +63,7 @@ class ItemTypeTest {
      * @param type the {@link ItemType}
      * @param expectedDescriptionFieldsValue the expected description field values
      */
-    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
+    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) throws FileNotFoundException {
         // Given
         final Item item = new Item();
 
@@ -74,13 +76,13 @@ class ItemTypeTest {
         verifyPostalDelivery(item, type);
     }
 
-    private void verifyDescriptionFields(final Item item, final String value) {
+    private void verifyDescriptionFields(final Item item, final String value) throws FileNotFoundException {
         assertThat(item.getDescriptionIdentifier(), is(value));
         assertThat(item.getKind(), is(value));
         verifyDerivedDescriptionFields(item);
     }
 
-    private void verifyDerivedDescriptionFields(final Item item) {
+    private void verifyDerivedDescriptionFields(final Item item) throws FileNotFoundException {
         verify(descriptions).getDescription(item.getCompanyNumber());
         verify(descriptions).getDescriptionValues(item.getCompanyNumber());
     }

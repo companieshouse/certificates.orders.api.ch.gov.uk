@@ -4,6 +4,8 @@ import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.io.FileNotFoundException;
+
 /**
  * Instances of this represent the type of the item handled by each API.
  */
@@ -31,7 +33,8 @@ public enum ItemType {
      * @param item the item with read only fields
      * @param descriptions the description string resources provider
      */
-    public void populateReadOnlyFields(final Item item, final DescriptionProviderService descriptions) {
+    public void populateReadOnlyFields(final Item item, final DescriptionProviderService descriptions)
+            throws FileNotFoundException {
         populateDescriptionFields(item, descriptions);
         populateItemCosts(item);
         populatePostalDelivery(item);
@@ -42,7 +45,8 @@ public enum ItemType {
      * @param item the item with read only fields
      * @param descriptions the description string resources provider
      */
-    public void populateDerivedDescriptionFields(final Item item, final DescriptionProviderService descriptions) {
+    public void populateDerivedDescriptionFields(final Item item, final DescriptionProviderService descriptions)
+            throws FileNotFoundException {
         item.setDescription(descriptions.getDescription(item.getCompanyNumber()));
         item.setDescriptionValues(descriptions.getDescriptionValues(item.getCompanyNumber()));
     }
@@ -52,7 +56,8 @@ public enum ItemType {
      * @param item the item bearing text for UI rendering
      * @param descriptions the description string resources provider
      */
-    void populateDescriptionFields(final Item item, final DescriptionProviderService descriptions) {
+    void populateDescriptionFields(final Item item, final DescriptionProviderService descriptions)
+            throws FileNotFoundException {
         item.setDescriptionIdentifier(itemType);
         item.setKind(kind);
         populateDerivedDescriptionFields(item, descriptions);
