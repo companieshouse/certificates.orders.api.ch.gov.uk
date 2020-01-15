@@ -9,3 +9,9 @@ uk:
         orders:
           api:
             path: /certificates
+
+spring:
+  data:
+    mongodb:
+      field-naming-strategy: uk.gov.companieshouse.items.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
+
