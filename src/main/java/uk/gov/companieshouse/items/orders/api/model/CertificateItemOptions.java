@@ -56,6 +56,8 @@ public class CertificateItemOptions {
 
     private Boolean isCertShar;
 
+    private DeliveryTimescale deliveryTimescale;
+
     public String getAdditionalInformation() {
         return additionalInformation;
     }
@@ -251,6 +253,14 @@ public class CertificateItemOptions {
 
     public void setCertShar(boolean certShar) {
         isCertShar = certShar;
+    }
+
+    public DeliveryTimescale getDeliveryTimescale() {
+        return deliveryTimescale;
+    }
+
+    public void setDeliveryTimescale(DeliveryTimescale deliveryTimescale) {
+        this.deliveryTimescale = deliveryTimescale;
     }
 
     @Override
