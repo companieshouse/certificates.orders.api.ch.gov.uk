@@ -5,7 +5,6 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
-import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -34,7 +33,7 @@ public class CertificateItemService {
      * @param item the item to be created
      * @return the created item
      */
-    public CertificateItem createCertificateItem(final CertificateItem item) throws FileNotFoundException {
+    public CertificateItem createCertificateItem(final CertificateItem item) {
         CERTIFICATE.populateReadOnlyFields(item, descriptions);
         item.setId(getNextId());
         setCreationDateTimes(item);
@@ -46,7 +45,7 @@ public class CertificateItemService {
      * @param updatedCertificateItem the certificate item to save
      * @return the latest certificate item state resulting from the save
      */
-    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) throws FileNotFoundException {
+    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
         final LocalDateTime now = LocalDateTime.now();
         updatedCertificateItem.setUpdatedAt(now);
         CERTIFICATE.populateDerivedDescriptionFields(updatedCertificateItem, descriptions);

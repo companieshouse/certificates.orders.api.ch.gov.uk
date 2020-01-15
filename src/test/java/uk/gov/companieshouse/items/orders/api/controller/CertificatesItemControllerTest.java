@@ -17,16 +17,12 @@ import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 
 import javax.json.JsonMergePatch;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
@@ -64,7 +60,7 @@ public class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() throws FileNotFoundException {
+    void updateUpdatesSuccessfully() {
         // Given
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);

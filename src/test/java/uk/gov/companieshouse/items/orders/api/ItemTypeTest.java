@@ -9,14 +9,11 @@ import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
-import java.io.FileNotFoundException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static uk.gov.companieshouse.items.orders.api.ItemType.*;
-
 import static org.mockito.Mockito.verify;
+import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 
 /**
  * Unit tests the {@link ItemType} enum.
@@ -29,25 +26,25 @@ class ItemTypeTest {
 
     @Test
     @DisplayName("Certificate item populated correctly")
-    void certificateItemPopulatedCorrectly() throws FileNotFoundException {
+    void certificateItemPopulatedCorrectly() {
         itemPopulatedCorrectly(CERTIFICATE, "certificate");
     }
 
     @Test
     @DisplayName("Certified copy item populated correctly")
-    void certifiedCopyItemPopulatedCorrectly() throws FileNotFoundException {
+    void certifiedCopyItemPopulatedCorrectly() {
         itemPopulatedCorrectly(CERTIFIED_COPY, "certified-copy");
     }
 
     @Test
     @DisplayName("Scan on demand item populated correctly")
-    void scanOnDemandItemPopulatedCorrectly() throws FileNotFoundException {
+    void scanOnDemandItemPopulatedCorrectly() {
         itemPopulatedCorrectly(SCAN_ON_DEMAND, "scan-on-demand");
     }
 
     @Test
     @DisplayName("Derived description fields are populated correctly")
-    void derivedDescriptionFieldsPopulatedCorrectly() throws FileNotFoundException {
+    void derivedDescriptionFieldsPopulatedCorrectly() {
         // Given
         final Item item = new Item();
 
@@ -63,7 +60,7 @@ class ItemTypeTest {
      * @param type the {@link ItemType}
      * @param expectedDescriptionFieldsValue the expected description field values
      */
-    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) throws FileNotFoundException {
+    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
         // Given
         final Item item = new Item();
 
@@ -76,13 +73,13 @@ class ItemTypeTest {
         verifyPostalDelivery(item, type);
     }
 
-    private void verifyDescriptionFields(final Item item, final String value) throws FileNotFoundException {
+    private void verifyDescriptionFields(final Item item, final String value) {
         assertThat(item.getDescriptionIdentifier(), is(value));
         assertThat(item.getKind(), is(value));
         verifyDerivedDescriptionFields(item);
     }
 
-    private void verifyDerivedDescriptionFields(final Item item) throws FileNotFoundException {
+    private void verifyDerivedDescriptionFields(final Item item) {
         verify(descriptions).getDescription(item.getCompanyNumber());
         verify(descriptions).getDescriptionValues(item.getCompanyNumber());
     }
