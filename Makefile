@@ -7,6 +7,7 @@ all: build
 submodules: api-enumerations/.git
 
 .PHONY: api-enumerations/.git
+api-enumerations/.git:
 	git submodule init
 	git submodule update
 
