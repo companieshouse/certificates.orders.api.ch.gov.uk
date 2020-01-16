@@ -61,8 +61,7 @@ public class CertificateItemsController {
     @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
-                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
-    {
+                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);

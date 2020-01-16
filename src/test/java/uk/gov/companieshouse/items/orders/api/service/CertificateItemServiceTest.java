@@ -11,12 +11,11 @@ import uk.gov.companieshouse.items.orders.api.repository.CertificateItemReposito
 
 import java.time.LocalDateTime;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests the {@link CertificateItemService} class.
@@ -38,6 +37,9 @@ class CertificateItemServiceTest {
 
     @Mock
     private SequenceGeneratorService generator;
+
+    @Mock
+    private DescriptionProviderService descriptions;
 
     @Test
     void getNextIdGetsNextId() {

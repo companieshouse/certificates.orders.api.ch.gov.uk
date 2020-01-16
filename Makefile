@@ -3,6 +3,14 @@ artifact_name       := items.orders.api.ch.gov.uk
 .PHONY: all
 all: build
 
+.PHONY: submodules
+submodules: api-enumerations/.git
+
+.PHONY: api-enumerations/.git
+api-enumerations/.git:
+	git submodule init
+	git submodule update
+
 .PHONY: clean
 clean:
 	mvn clean
@@ -11,7 +19,7 @@ clean:
 	rm -rf ./build-*
 
 .PHONY: build
-build:
+build: submodules
 	mvn compile
 
 .PHONY: test
