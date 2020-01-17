@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Values of this represent the possible delivery timescales.
@@ -9,8 +9,8 @@ public enum DeliveryTimescale {
     STANDARD,
     SAME_DAY;
 
-    @JsonCreator
-    public static DeliveryTimescale fromString(final String raw) {
-        return DeliveryTimescale.valueOf(raw.toUpperCase());
+    @JsonValue
+    public String getJsonName() {
+        return name().toLowerCase();
     }
 }
