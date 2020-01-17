@@ -2,12 +2,14 @@ package uk.gov.companieshouse.items.orders.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.convert.DbRefResolver;
-import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
-import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
-import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.convert.*;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import uk.gov.companieshouse.items.orders.api.converter.DeliveryTimescaleConverter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Custom configuration for Mongo added so that _class attributes are not saved on objects stored in MongoDB.
@@ -29,7 +31,16 @@ public class MongoConfig {
 
         // Don't save _class to mongo
         mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
+        mappingConverter.setCustomConversions(customConversions());
 
         return mappingConverter;
+    }
+
+    @Bean
+    public MongoCustomConversions customConversions()
+    {
+        final List<Converter<?, ?>> converterList = new ArrayList<>();
+        converterList.add(new DeliveryTimescaleConverter());
+        return new MongoCustomConversions(converterList);
     }
 }

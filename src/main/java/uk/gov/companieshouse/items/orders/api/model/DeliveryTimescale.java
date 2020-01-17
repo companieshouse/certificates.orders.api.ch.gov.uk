@@ -10,7 +10,7 @@ public enum DeliveryTimescale {
     SAME_DAY;
 
     @JsonCreator
-    public static DeliveryTimescale fromString(String raw) {
+    public static DeliveryTimescale fromString(final String raw) {
         return DeliveryTimescale.valueOf(raw.toUpperCase());
     }
 }
