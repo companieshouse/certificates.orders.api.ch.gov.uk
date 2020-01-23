@@ -6,7 +6,8 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.convert.*;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import uk.gov.companieshouse.items.orders.api.converter.DeliveryTimescaleConverter;
+import uk.gov.companieshouse.items.orders.api.converter.ReadingDeliveryTimescaleConverter;
+import uk.gov.companieshouse.items.orders.api.converter.WritingDeliveryTimescaleConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,9 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions customConversions()
     {
-        final List<Converter<?, ?>> converterList = new ArrayList<>();
-        converterList.add(new DeliveryTimescaleConverter());
-        return new MongoCustomConversions(converterList);
+        final List<Converter<?, ?>> converters = new ArrayList<>();
+        converters.add(new ReadingDeliveryTimescaleConverter());
+        converters.add(new WritingDeliveryTimescaleConverter());
+        return new MongoCustomConversions(converters);
     }
 }
