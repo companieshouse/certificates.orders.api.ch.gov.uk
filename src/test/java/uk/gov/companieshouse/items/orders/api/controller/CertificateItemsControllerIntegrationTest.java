@@ -34,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -61,7 +62,9 @@ class CertificateItemsControllerIntegrationTest {
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
     private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
+    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
     private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
+    private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
     private static final boolean ORIGINAL_CERT_INC = true;
     private static final boolean UPDATED_CERT_INC = false;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
@@ -192,6 +195,14 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
+        final ItemCosts costs = new ItemCosts();
+        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        expectedItem.setItemCosts(costs);
+
         // When and then
         mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
             .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -285,6 +296,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertInc(UPDATED_CERT_INC);
+        options.setDeliveryTimescale(SAME_DAY);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
 
@@ -294,6 +306,15 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
+
+        final ItemCosts costs = new ItemCosts();
+        final int expectedDiscountApplied = (UPDATED_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(
+                Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        expectedItem.setItemCosts(costs);
 
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
