@@ -60,6 +60,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
+    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
+    private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
     private static final boolean ORIGINAL_CERT_INC = true;
     private static final boolean UPDATED_CERT_INC = false;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
@@ -71,6 +73,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
     private static final String COMPANY_NUMBER_KEY = "company-number";
+    private static final String POSTAGE_COST = "0";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -111,10 +114,11 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setKind("certificate");
         expectedItem.setDescriptionIdentifier("certificate");
         final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
+        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
