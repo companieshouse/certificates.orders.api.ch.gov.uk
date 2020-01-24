@@ -21,7 +21,7 @@ public class DescriptionProviderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    private static final String COMPANY_NUMBER_KEY = "company-number";
+    private static final String COMPANY_NUMBER_KEY = "company_number";
     private static final String CERTIFICATE_DESCRIPTION_KEY = "certificate-description";
     private static final String COMPANY_CERTIFICATE_DESCRIPTION_KEY = "company-certificate";
 
