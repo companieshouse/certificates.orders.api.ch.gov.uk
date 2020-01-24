@@ -19,13 +19,16 @@ public class CertificateItemService {
     private final CertificateItemRepository repository;
     private final SequenceGeneratorService generator;
     private final DescriptionProviderService descriptions;
+    private final CertificateCostCalculatorService calculator;
 
     public CertificateItemService(final CertificateItemRepository repository,
                                   final SequenceGeneratorService generator,
-                                  final DescriptionProviderService descriptions) {
+                                  final DescriptionProviderService descriptions,
+                                  final CertificateCostCalculatorService calculator) {
         this.repository = repository;
         this.generator = generator;
         this.descriptions = descriptions;
+        this.calculator = calculator;
     }
 
     /**
@@ -34,7 +37,7 @@ public class CertificateItemService {
      * @return the created item
      */
     public CertificateItem createCertificateItem(final CertificateItem item) {
-        CERTIFICATE.populateReadOnlyFields(item, descriptions);
+        CERTIFICATE.populateReadOnlyFields(item, descriptions, calculator);
         item.setId(getNextId());
         setCreationDateTimes(item);
         return repository.save(item);

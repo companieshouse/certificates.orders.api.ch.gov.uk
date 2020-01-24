@@ -41,6 +41,9 @@ class CertificateItemServiceTest {
     @Mock
     private DescriptionProviderService descriptions;
 
+    @Mock
+    private CertificateCostCalculatorService calculator;
+
     @Test
     void getNextIdGetsNextId() {
 
@@ -58,6 +61,7 @@ class CertificateItemServiceTest {
         when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);
         final CertificateItem item = new CertificateItem();
         final LocalDateTime intervalStart = LocalDateTime.now();
+        item.setQuantity(1);
 
         // When
         serviceUnderTest.createCertificateItem(item);
