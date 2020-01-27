@@ -4,10 +4,7 @@ artifact_name       := items.orders.api.ch.gov.uk
 all: build
 
 .PHONY: submodules
-submodules: api-enumerations/.git
-
-.PHONY: api-enumerations/.git
-api-enumerations/.git:
+submodules:
 	git submodule init
 	git submodule update
 
