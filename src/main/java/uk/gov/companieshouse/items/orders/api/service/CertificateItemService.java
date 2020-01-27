@@ -40,7 +40,9 @@ public class CertificateItemService {
         CERTIFICATE.populateReadOnlyFields(item, descriptions, calculator);
         item.setId(getNextId());
         setCreationDateTimes(item);
-        return repository.save(item);
+        final CertificateItem itemSaved = repository.save(item);
+        CERTIFICATE.populateItemCosts(itemSaved, calculator);
+        return itemSaved;
     }
 
     /**
@@ -52,7 +54,9 @@ public class CertificateItemService {
         final LocalDateTime now = LocalDateTime.now();
         updatedCertificateItem.setUpdatedAt(now);
         CERTIFICATE.populateDerivedDescriptionFields(updatedCertificateItem, descriptions);
-        return repository.save(updatedCertificateItem);
+        final CertificateItem itemSaved = repository.save(updatedCertificateItem);
+        CERTIFICATE.populateItemCosts(itemSaved, calculator);
+        return itemSaved;
     }
 
     /**
@@ -66,7 +70,9 @@ public class CertificateItemService {
     }
 
     public Optional<CertificateItem> getCertificateItemById(String id) {
-        return repository.findById(id);
+        final Optional<CertificateItem> retrievedItem = repository.findById(id);
+        retrievedItem.ifPresent(item -> CERTIFICATE.populateItemCosts(item, calculator));
+        return retrievedItem;
     }
 
     /**

@@ -40,7 +40,7 @@ public enum ItemType {
                                        final DescriptionProviderService descriptions,
                                        final CertificateCostCalculatorService calculator) {
         populateDescriptionFields(item, descriptions);
-        populateItemCosts(item, calculator);
+        // TODO PCI-506 Remove populateItemCosts(item, calculator);
         populatePostalDelivery(item);
     }
 
@@ -70,7 +70,7 @@ public enum ItemType {
      * @param item the item bearing the item costs
      * @param calculator the item costs calculator
      */
-    void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
+    public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
         final ItemCosts costs =
                 calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
         item.setItemCosts(costs);
