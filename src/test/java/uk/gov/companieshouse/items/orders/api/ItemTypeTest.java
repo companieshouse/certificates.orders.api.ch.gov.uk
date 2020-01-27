@@ -104,7 +104,7 @@ class ItemTypeTest {
 
     /**
      * Utility method that calls
-     * {@link ItemType#populateReadOnlyFields(Item, DescriptionProviderService, CertificateCostCalculatorService)} and
+     * {@link ItemType#populateReadOnlyFields(Item, DescriptionProviderService)} and
      * verifies the impact on the item is that expected.
      * @param type the {@link ItemType}
      * @param expectedDescriptionFieldsValue the expected description field values
@@ -115,7 +115,7 @@ class ItemTypeTest {
         item.setQuantity(1);
 
         // When
-        type.populateReadOnlyFields(item, descriptions, calculator);
+        type.populateReadOnlyFields(item, descriptions);
 
         // Then
         verifyDescriptionFields(item, expectedDescriptionFieldsValue);

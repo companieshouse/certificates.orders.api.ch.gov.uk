@@ -37,7 +37,7 @@ public class CertificateItemService {
      * @return the created item
      */
     public CertificateItem createCertificateItem(final CertificateItem item) {
-        CERTIFICATE.populateReadOnlyFields(item, descriptions, calculator);
+        CERTIFICATE.populateReadOnlyFields(item, descriptions);
         item.setId(getNextId());
         setCreationDateTimes(item);
         final CertificateItem itemSaved = repository.save(item);

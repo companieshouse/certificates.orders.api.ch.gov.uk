@@ -34,11 +34,9 @@ public enum ItemType {
      * Populates the read only fields of the item DTO provided.
      * @param item the item with read only fields
      * @param descriptions the description string resources provider
-     * @param calculator the item costs calculator
      */
     public void populateReadOnlyFields(final Item item,
-                                       final DescriptionProviderService descriptions,
-                                       final CertificateCostCalculatorService calculator) {
+                                       final DescriptionProviderService descriptions) {
         populateDescriptionFields(item, descriptions);
         populatePostalDelivery(item);
     }
