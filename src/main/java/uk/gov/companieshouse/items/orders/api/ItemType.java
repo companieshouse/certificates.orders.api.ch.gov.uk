@@ -40,7 +40,6 @@ public enum ItemType {
                                        final DescriptionProviderService descriptions,
                                        final CertificateCostCalculatorService calculator) {
         populateDescriptionFields(item, descriptions);
-        // TODO PCI-506 Remove populateItemCosts(item, calculator);
         populatePostalDelivery(item);
     }
 
