@@ -18,7 +18,7 @@ class DescriptionProviderServiceTest {
 
     private static final String COMPANY_NUMBER = "00006400";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
-    private static final String COMPANY_NUMBER_KEY = "company-number";
+    private static final String COMPANY_NUMBER_KEY = "company_number";
     private static final Map<String, String> EXPECTED_DESCRIPTION_VALUES =
             singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER);
 

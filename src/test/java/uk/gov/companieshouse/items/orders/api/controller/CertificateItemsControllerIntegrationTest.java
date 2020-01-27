@@ -75,8 +75,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
-    private static final String COMPANY_NUMBER_KEY = "company-number";
     private static final String POSTAGE_COST = "0";
+    private static final String COMPANY_NUMBER_KEY = "company_number";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -103,7 +103,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyNumber("1234");
+        newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertInc(true);
         options.setCertShar(true);
@@ -142,6 +142,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.cert_shar", is(true)))
                 .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
+                .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
