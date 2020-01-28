@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,6 +79,10 @@ class CertificateItemsControllerIntegrationTest {
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
     private static final String POSTAGE_COST = "0";
     private static final String COMPANY_NUMBER_KEY = "company_number";
+
+    private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
+           + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -174,6 +179,38 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with an invalid delivery timescale")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post("/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -519,6 +556,61 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Rejects update request containing an invalid delivery timescale")
+    void updateCertificateItemRejectsMultipleReadOnlyFields2() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect delivery timescale value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("same_day", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect delivery timescale value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
     }
 
     /**
