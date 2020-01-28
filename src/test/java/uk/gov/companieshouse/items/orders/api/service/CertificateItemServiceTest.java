@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -112,11 +113,28 @@ class CertificateItemServiceTest {
     }
 
     @Test
-    @DisplayName("getCertificateItemById retrieves item with item costs")
+    @DisplayName("getCertificateItem retrieves item with item costs")
     void getCertificateItemRetrievesItem() {
 
         // Given
         final CertificateItem item = mockUpCostsCalculation();
+        when(repository.findById(ITEM_SOUGHT_ID_VALUE)).thenReturn(Optional.of(item));
+
+        // When
+        final Optional<CertificateItem> itemRetrieved = serviceUnderTest.getCertificateItem(ITEM_SOUGHT_ID_VALUE);
+
+        // Then
+        verify(repository).findById(ITEM_SOUGHT_ID_VALUE);
+        assertThat(itemRetrieved.isPresent(), is(true));
+        verifyCostsFields(itemRetrieved.get());
+    }
+
+    @Test
+    @DisplayName("getCertificateItemById retrieves item without item costs")
+    void getCertificateItemByIdRetrievesItem() {
+
+        // Given
+        final CertificateItem item = new CertificateItem();
         when(repository.findById(ITEM_SOUGHT_ID_VALUE)).thenReturn(Optional.of(item));
 
         // When
@@ -125,7 +143,7 @@ class CertificateItemServiceTest {
         // Then
         verify(repository).findById(ITEM_SOUGHT_ID_VALUE);
         assertThat(itemRetrieved.isPresent(), is(true));
-        verifyCostsFields(itemRetrieved.get());
+        assertThat(itemRetrieved.get().getItemCosts(), is(nullValue()));
     }
 
     @Test

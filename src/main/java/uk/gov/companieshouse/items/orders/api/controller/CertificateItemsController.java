@@ -83,7 +83,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        Optional<CertificateItem> item = service.getCertificateItemById(id);
+        Optional<CertificateItem> item = service.getCertificateItem(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
             return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);

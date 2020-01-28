@@ -29,6 +29,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -336,6 +337,9 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
+
+        // Costs are calculated on the fly and are NOT to be saved to the DB.
+        assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
     }
 
     @Test
@@ -519,13 +523,16 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
-     * from the database using its expected ID value.
+     * from the database using its expected ID value. Also verifies that item costs have NOT been saved to the DB.
      * @param expectedItemId the expected ID of the newly created item
      */
     private void assertItemSavedCorrectly(final String expectedItemId) {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(expectedItemId));
+
+        // Costs are calculated on the fly and are NOT to be saved to the DB.
+        assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
     }
 
     /**
