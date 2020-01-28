@@ -113,15 +113,15 @@ class CertificateItemServiceTest {
     }
 
     @Test
-    @DisplayName("getCertificateItem retrieves item with item costs")
-    void getCertificateItemRetrievesItem() {
+    @DisplayName("getCertificateItemWithCosts retrieves item with item costs")
+    void getCertificateItemWithCostsRetrievesItemWithCosts() {
 
         // Given
         final CertificateItem item = mockUpCostsCalculation();
         when(repository.findById(ITEM_SOUGHT_ID_VALUE)).thenReturn(Optional.of(item));
 
         // When
-        final Optional<CertificateItem> itemRetrieved = serviceUnderTest.getCertificateItem(ITEM_SOUGHT_ID_VALUE);
+        final Optional<CertificateItem> itemRetrieved = serviceUnderTest.getCertificateItemWithCosts(ITEM_SOUGHT_ID_VALUE);
 
         // Then
         verify(repository).findById(ITEM_SOUGHT_ID_VALUE);

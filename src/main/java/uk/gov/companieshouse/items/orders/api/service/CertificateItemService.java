@@ -71,7 +71,7 @@ public class CertificateItemService {
 
     /**
      * Gets the certificate item by its ID, and returns it as-is, without decorating it in any way.
-     * (Compare with {@link #getCertificateItem(String)}).
+     * (Compare with {@link #getCertificateItemWithCosts(String)}).
      * @param id the ID of the certificate item to be retrieved
      * @return the undecorated item retrieved from the DB
      */
@@ -85,7 +85,7 @@ public class CertificateItemService {
      * @param id the ID of the certificate item to be retrieved
      * @return the item, complete with its calculated costs
      */
-    public Optional<CertificateItem> getCertificateItem(final String id) {
+    public Optional<CertificateItem> getCertificateItemWithCosts(final String id) {
         final Optional<CertificateItem> retrievedItem = repository.findById(id);
         retrievedItem.ifPresent(item -> CERTIFICATE.populateItemCosts(item, calculator));
         return retrievedItem;
