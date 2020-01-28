@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.validator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.singletonList;
 
 /**
  * Implements validation of the request payload specific to the the patch item request only.
@@ -53,6 +55,8 @@ public class PatchItemRequestValidator {
                     .map(violation -> converter.toSnakeCase(violation.getPropertyPath().toString())
                             + ": " + violation.getMessage())
                     .collect(Collectors.toList());
+        } catch (JsonProcessingException jpe) {
+            return singletonList(jpe.getOriginalMessage());
         } catch (IOException ex) {
             // This exception will not occur because there are no low-level IO operations here.
             return EMPTY_LIST;
