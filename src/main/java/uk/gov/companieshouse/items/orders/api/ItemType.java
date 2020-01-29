@@ -1,8 +1,12 @@
 package uk.gov.companieshouse.items.orders.api;
 
+import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
+
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
  * Instances of this represent the type of the item handled by each API.
@@ -31,9 +35,9 @@ public enum ItemType {
      * @param item the item with read only fields
      * @param descriptions the description string resources provider
      */
-    public void populateReadOnlyFields(final Item item, final DescriptionProviderService descriptions) {
+    public void populateReadOnlyFields(final Item item,
+                                       final DescriptionProviderService descriptions) {
         populateDescriptionFields(item, descriptions);
-        populateItemCosts(item);
         populatePostalDelivery(item);
     }
 
@@ -61,16 +65,11 @@ public enum ItemType {
     /**
      * Populates the item costs fields.
      * @param item the item bearing the item costs
+     * @param calculator the item costs calculator
      */
-    void populateItemCosts(final Item item) {
-        final ItemCosts costs = new ItemCosts();
-
-        // TODO PCI-506 Retrieve the actual costs as appropriate.
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
-
+    public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
+        final ItemCosts costs =
+                calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
         item.setItemCosts(costs);
     }
 
@@ -80,5 +79,17 @@ public enum ItemType {
      */
     void populatePostalDelivery(final Item item) {
         item.setPostalDelivery(true);
+    }
+
+    /**
+     * Defaults the delivery timescale to {@link DeliveryTimescale#STANDARD} if not specified.
+     * @param item the item
+     * @return the obtained or defaulted delivery timescale
+     */
+    DeliveryTimescale getOrDefaultDeliveryTimescale(final Item item) {
+        return item.getItemOptions() != null &&
+               item.getItemOptions().getDeliveryTimescale() != null ?
+                item.getItemOptions().getDeliveryTimescale() :
+                STANDARD;
     }
 }

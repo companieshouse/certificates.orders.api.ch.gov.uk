@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,11 +30,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -60,6 +63,10 @@ class CertificateItemsControllerIntegrationTest {
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
+    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
+    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
+    private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
+    private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
     private static final boolean ORIGINAL_CERT_INC = true;
     private static final boolean UPDATED_CERT_INC = false;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
@@ -70,7 +77,12 @@ class CertificateItemsControllerIntegrationTest {
     private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
+    private static final String POSTAGE_COST = "0";
     private static final String COMPANY_NUMBER_KEY = "company_number";
+
+    private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
+           + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -111,10 +123,11 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setKind("certificate");
         expectedItem.setDescriptionIdentifier("certificate");
         final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied("1");
-        costs.setIndividualItemCost("2");
-        costs.setPostageCost("3");
-        costs.setTotalCost("4");
+        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
@@ -175,6 +188,38 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Fails to create certificate item with an invalid delivery timescale")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post("/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
     @DisplayName("Successfully gets a certificate item")
     void getCertificateItemSuccessfully() throws Exception {
         // Given
@@ -188,6 +233,14 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
+
+        final ItemCosts costs = new ItemCosts();
+        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        expectedItem.setItemCosts(costs);
 
         // When and then
         mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
@@ -282,6 +335,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertInc(UPDATED_CERT_INC);
+        options.setDeliveryTimescale(SAME_DAY);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
 
@@ -291,6 +345,15 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
+
+        final ItemCosts costs = new ItemCosts();
+        final int expectedDiscountApplied = (UPDATED_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        costs.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        costs.setPostageCost(POSTAGE_COST);
+        costs.setTotalCost(
+                Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        expectedItem.setItemCosts(costs);
 
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
@@ -311,6 +374,9 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
+
+        // Costs are calculated on the fly and are NOT to be saved to the DB.
+        assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
     }
 
     @Test
@@ -492,15 +558,73 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    @DisplayName("Rejects update request containing an invalid delivery timescale")
+    void updateCertificateItemRejectsMultipleReadOnlyFields2() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect delivery timescale value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("same_day", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect delivery timescale value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
+    }
+
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
-     * from the database using its expected ID value.
+     * from the database using its expected ID value. Also verifies that item costs have NOT been saved to the DB.
      * @param expectedItemId the expected ID of the newly created item
      */
     private void assertItemSavedCorrectly(final String expectedItemId) {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(expectedItemId));
+
+        // Costs are calculated on the fly and are NOT to be saved to the DB.
+        assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
     }
 
     /**

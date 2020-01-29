@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8568cafa-c227-4655-882b-d906ccf41934",
+		"_postman_id": "a4b1ff3a-593e-48e6-982f-ee160c56bd38",
 		"name": "Items API",
 		"description": "Sanity testing for the CHS Ordering Items API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -353,7 +353,46 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true\n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true,\n        \"delivery_timescale\": \"same_day\"\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create certificate item with bad delivery timescale",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"additional_information\": \"Certificate required by HMRC.\",\n        \"cert_acc\": false,\n        \"cert_arts\": false,\n        \"cert_cobj\": false,\n        \"cert_dir\": false,\n        \"cert_dissliq\": false,\n        \"cert_domicil\": false,\n        \"cert_extra_i\": false,\n        \"cert_inc\": true,\n        \"cert_inc_con_last\": false,\n        \"cert_isscap\": false,\n        \"cert_mem\": false,\n        \"cert_mortdoc\": false,\n        \"cert_nomc\": false,\n        \"cert_nonexis\": false,\n        \"cert_only\": false,\n        \"cert_other_c\": false,\n        \"cert_ret\": false,\n        \"cert_roc\": false,\n        \"cert_sec\": false,\n        \"cert_shar\": true,\n        \"delivery_timescale\": \"unknown\"\n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -399,7 +438,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_number\": \"00006444\",\n\t\"item_options\": {},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -407,7 +446,47 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000037",
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000138",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000138"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item bad timescale",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"unknown\"\n\t},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000138",
 									"host": [
 										"{{base_url}}"
 									],
