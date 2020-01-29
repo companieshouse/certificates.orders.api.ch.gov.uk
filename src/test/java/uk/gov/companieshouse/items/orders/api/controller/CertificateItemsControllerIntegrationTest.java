@@ -18,6 +18,7 @@ import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItem
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
@@ -37,6 +38,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -79,6 +81,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
     private static final String POSTAGE_COST = "0";
     private static final String COMPANY_NUMBER_KEY = "company_number";
+    private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
+    private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
 
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
@@ -111,9 +115,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO newItem = new CertificateItemDTO();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(true);
-        options.setCertShar(true);
-        options.setCertDissLiq(false);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
@@ -144,9 +146,7 @@ class CertificateItemsControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
-                .andExpect(jsonPath("$.item_options.cert_inc", is(true)))
-                .andExpect(jsonPath("$.item_options.cert_shar", is(true)))
-                .andExpect(jsonPath("$.item_options.cert_dissliq", is(false)))
+                .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andDo(MockMvcResultHandlers.print());
@@ -162,8 +162,7 @@ class CertificateItemsControllerIntegrationTest {
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(true);
-        options.setCertShar(true);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
@@ -328,14 +327,13 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
 
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(ORIGINAL_CERT_INC);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
         repository.save(savedItem);
 
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
-        options.setCertInc(UPDATED_CERT_INC);
-        options.setDeliveryTimescale(SAME_DAY);
+        options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
 
@@ -373,7 +371,8 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
-        assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(UPDATED_CERT_INC));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
+                is(UPDATED_DELIVERY_TIMESCALE));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
@@ -387,7 +386,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(UPDATED_CERT_INC);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
 
         // When and then
@@ -494,7 +493,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertInc(ORIGINAL_CERT_INC);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
@@ -522,7 +521,7 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(QUANTITY));
-        assertThat(retrievedCertificateItem.get().getItemOptions().isCertInc(), is(ORIGINAL_CERT_INC));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(), is(DELIVERY_TIMESCALE));
     }
 
     @Test

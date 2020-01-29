@@ -13,6 +13,7 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import java.util.HashMap;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -197,8 +198,7 @@ class ItemsApiApplicationTest {
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
 		newCertificateItemDTO.setCompanyNumber("1234");
 		final CertificateItemOptions options = new CertificateItemOptions();
-		options.setCertInc(true);
-		options.setCertShar(true);
+		options.setDeliveryTimescale(STANDARD);
 		newCertificateItemDTO.setItemOptions(options);
 		newCertificateItemDTO.setQuantity(5);
 		return newCertificateItemDTO;
