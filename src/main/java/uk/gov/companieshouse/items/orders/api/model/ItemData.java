@@ -17,6 +17,8 @@ public class ItemData {
     @Field("id")
     private String id;
 
+    private String companyName;
+
     private String companyNumber;
 
     private String customerReference;
@@ -43,6 +45,14 @@ public class ItemData {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public String getCompanyNumber() {

@@ -18,6 +18,10 @@ public class CertificateItemDTO extends ItemDTO {
     private CertificateItemOptions itemOptions;
 
     @NotNull
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @NotNull
     @JsonProperty("company_number")
     private String companyNumber;
 
@@ -30,6 +34,14 @@ public class CertificateItemDTO extends ItemDTO {
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         this.itemOptions = itemOptions;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public String getCompanyNumber() {

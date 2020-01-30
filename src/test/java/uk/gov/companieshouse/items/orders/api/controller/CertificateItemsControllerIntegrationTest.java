@@ -69,8 +69,6 @@ class CertificateItemsControllerIntegrationTest {
     private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
     private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
     private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
-    private static final boolean ORIGINAL_CERT_INC = true;
-    private static final boolean UPDATED_CERT_INC = false;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
     private static final String TOKEN_STRING = "TOKEN VALUE";
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
@@ -85,10 +83,11 @@ class CertificateItemsControllerIntegrationTest {
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
     private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
     private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
-
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
            + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
+    private static final String COMPANY_NAME = "Phillips & Daughters";
+    private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -115,6 +114,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
@@ -171,7 +171,8 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
+                new ApiError(BAD_REQUEST, asList("company_number: must not be null",
+                                                 "company_name: must not be null"));
 
         // When and Then
         mockMvc.perform(post("/certificates")
@@ -328,6 +329,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setCompanyName(COMPANY_NAME);
         savedItem.setCompanyNumber(COMPANY_NUMBER);
         savedItem.setCustomerReference(CUSTOMER_REFERENCE);
         savedItem.setDescription(DESCRIPTION);
@@ -342,12 +344,14 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
+        itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
+        expectedItem.setCompanyName(UPDATED_COMPANY_NAME);
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
@@ -382,6 +386,7 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));

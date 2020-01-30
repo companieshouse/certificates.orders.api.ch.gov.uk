@@ -59,6 +59,14 @@ public class Item {
         this.data = data;
     }
 
+    public String getCompanyName() {
+        return data.getCompanyName();
+    }
+
+    public void setCompanyName(String companyName) {
+        data.setCompanyName(companyName);
+    }
+
     public String getCompanyNumber() {
         return data.getCompanyNumber();
     }

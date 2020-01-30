@@ -37,6 +37,7 @@ public class CertificateItemMapperTest {
     private static final String KIND = "certificate";
     private static final boolean POSTAL_DELIVERY = true;
     private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
+    private static final String COMPANY_NAME = "Phillips & Daughters";
 
     private static final CertificateItemOptions ITEM_OPTIONS;
 
@@ -56,6 +57,7 @@ public class CertificateItemMapperTest {
     void testCertificateItemDtoToEntityMapping() {
         final CertificateItemDTO dto = new CertificateItemDTO();
         dto.setId(ID);
+        dto.setCompanyName(COMPANY_NAME);
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);
         dto.setQuantity(QUANTITY);
@@ -71,6 +73,7 @@ public class CertificateItemMapperTest {
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
         assertThat(item.getData().getId(), is(dto.getId()));
+        assertThat(item.getCompanyName(), is(dto.getCompanyName()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(dto.getQuantity()));
@@ -87,6 +90,7 @@ public class CertificateItemMapperTest {
     void testCertificateItemEntityToDtoMapping() {
         final CertificateItem item = new CertificateItem();
         item.setId(ID);
+        item.setCompanyName(COMPANY_NAME);
         item.setCompanyNumber(COMPANY_NUMBER);
         item.setCustomerReference(CUSTOMER_REFERENCE);
         item.setQuantity(QUANTITY);
@@ -100,6 +104,7 @@ public class CertificateItemMapperTest {
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
+        assertThat(dto.getCompanyName(), is(item.getCompanyName()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
         assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
         assertThat(dto.getQuantity(), is(item.getQuantity()));

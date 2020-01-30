@@ -16,6 +16,9 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
+    @JsonProperty("company_name")
+    private String companyName;
+
     @JsonProperty("company_number")
     private String companyNumber;
 
@@ -53,6 +56,10 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         this.itemOptions = itemOptions;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public void setCompanyNumber(String companyNumber) {
