@@ -18,6 +18,7 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
  * Unit tests the {@link CertificateItemMapper} class.
@@ -41,8 +42,7 @@ public class CertificateItemMapperTest {
 
     static {
         ITEM_OPTIONS = new CertificateItemOptions();
-        ITEM_OPTIONS.setAdditionalInformation("Additional info");
-        ITEM_OPTIONS.setCertAcc(CERT_ACC);
+        ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
     }
 
     @Configuration

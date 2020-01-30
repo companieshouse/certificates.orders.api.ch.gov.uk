@@ -12,11 +12,14 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
  * Unit tests the {@link PatchMerger} class.
@@ -50,12 +53,8 @@ class PatchMergerTest {
     private static final int ORIGINAL_QUANTITY = 20;
     private static final int CORRECTED_QUANTITY = 2;
 
-    private static final String ORIGINAL_ADDITIONAL_INFO = "We have our reasons.";
-    private static final boolean ORIGINAL_CERT_ACC = true;
-    private static final boolean ORIGINAL_CERT_ARTS = true;
-
-    private static final String CORRECTED_ADDITIONAL_INFO = "We have our top secret reasons.";
-    private static final boolean CORRECTED_CERT_ACC = false;
+    private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
+    private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -171,15 +170,13 @@ class PatchMergerTest {
         // Given
         final CertificateItem original = new CertificateItem();
         final CertificateItemOptions originalOptions = new CertificateItemOptions();
-        originalOptions.setAdditionalInformation(ORIGINAL_ADDITIONAL_INFO);
-        originalOptions.setCertAcc(ORIGINAL_CERT_ACC);
-        originalOptions.setCertArts(ORIGINAL_CERT_ARTS);
+        originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        // TODO PCI-669 Add an item option that is NOT updated
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
         final CertificateItemOptions deltaOptions = new CertificateItemOptions();
-        deltaOptions.setAdditionalInformation(CORRECTED_ADDITIONAL_INFO);
-        deltaOptions.setCertAcc(CORRECTED_CERT_ACC);
+        deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -187,9 +184,8 @@ class PatchMergerTest {
                 patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
-        assertThat(patched.getItemOptions().getAdditionalInformation(), is(CORRECTED_ADDITIONAL_INFO));
-        assertThat(patched.getItemOptions().isCertAcc(), is(CORRECTED_CERT_ACC));
-        assertThat(patched.getItemOptions().isCertArts(), is(ORIGINAL_CERT_ARTS));
+        assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
+        // TODO PCI-669 Add an assertion about an item option that is NOT updated
     }
 
 }
