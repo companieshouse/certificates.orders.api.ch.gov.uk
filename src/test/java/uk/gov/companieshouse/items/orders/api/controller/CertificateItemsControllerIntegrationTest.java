@@ -83,6 +83,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String COMPANY_NUMBER_KEY = "company_number";
     private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
+    private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
+    private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
 
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
@@ -118,6 +120,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
@@ -134,6 +137,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
         expectedItem.setQuantity(QUANTITY);
+        expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         // When and Then
         mockMvc.perform(post("/certificates")
@@ -227,6 +231,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
         newItem.setUserId(ERIC_IDENTITY_VALUE);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -240,6 +245,7 @@ class CertificateItemsControllerIntegrationTest {
         costs.setPostageCost(POSTAGE_COST);
         costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
+        expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         // When and then
         mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
@@ -323,6 +329,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         savedItem.setCompanyNumber(COMPANY_NUMBER);
+        savedItem.setCustomerReference(CUSTOMER_REFERENCE);
         savedItem.setDescription(DESCRIPTION);
         savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
 
@@ -336,11 +343,13 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 

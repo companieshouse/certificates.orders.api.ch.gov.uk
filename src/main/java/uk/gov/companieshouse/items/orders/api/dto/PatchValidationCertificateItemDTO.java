@@ -19,6 +19,9 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("company_number")
     private String companyNumber;
 
+    @JsonProperty("customer_reference")
+    private String customerReference;
+
     @Null
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
@@ -54,6 +57,10 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public void setItemCosts(ItemCosts itemCosts) {

@@ -67,6 +67,14 @@ public class Item {
         data.setCompanyNumber(companyNumber);
     }
 
+    public String getCustomerReference() {
+        return data.getCustomerReference();
+    }
+
+    public void setCustomerReference(String companyReference) {
+        data.setCustomerReference(companyReference);
+    }
+
     public String getDescription() {
         return data.getDescription();
     }

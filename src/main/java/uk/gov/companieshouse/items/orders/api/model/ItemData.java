@@ -19,6 +19,8 @@ public class ItemData {
 
     private String companyNumber;
 
+    private String customerReference;
+
     private String description;
 
     private String descriptionIdentifier;
@@ -49,6 +51,14 @@ public class ItemData {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public String getDescription() {
