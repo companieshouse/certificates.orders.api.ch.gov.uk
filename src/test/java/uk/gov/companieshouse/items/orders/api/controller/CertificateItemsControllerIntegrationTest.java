@@ -559,7 +559,7 @@ class CertificateItemsControllerIntegrationTest {
 
     @Test
     @DisplayName("Rejects update request containing an invalid delivery timescale")
-    void updateCertificateItemRejectsMultipleReadOnlyFields2() throws Exception {
+    void updateCertificateItemRejectsInvalidDeliveryTimescale() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
