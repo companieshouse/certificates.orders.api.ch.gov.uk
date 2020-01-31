@@ -20,8 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
@@ -58,6 +57,9 @@ class CertificateItemServiceTest {
     @Mock
     private CertificateCostCalculatorService calculator;
 
+    @Mock
+    private EtagGeneratorService etagGenerator;
+
     @Test
     @DisplayName("getNextId gets the expected next ID value")
     void getNextIdGetsNextId() {
@@ -67,10 +69,11 @@ class CertificateItemServiceTest {
 
         // When and Then
         assertThat(serviceUnderTest.getNextId(), is(EXPECTED_ID_VALUE));
+        verify(etagGenerator, never()).generateEtag();
     }
 
     @Test
-    @DisplayName("createCertificateItem creates and saves item with timestamps, returns item with costs")
+    @DisplayName("createCertificateItem creates and saves item with timestamps, generates etag, returns item with costs")
     void createCertificateItemPopulatesAndSavesItem() {
 
         // Given
@@ -89,10 +92,11 @@ class CertificateItemServiceTest {
         verifyCreationTimestampsWithinExecutionInterval(item, intervalStart, intervalEnd);
         verify(repository).save(item);
         verifyCostsFields(item);
+        verify(etagGenerator).generateEtag();
     }
 
     @Test
-    @DisplayName("saveCertificateItem saves item, updates updated at timestamp, returns item with costs")
+    @DisplayName("saveCertificateItem saves item, updates updated at timestamp, generates etag, returns item with costs")
     void saveCertificateItemUpdatesCertificateItem() {
 
         // Given
@@ -110,6 +114,7 @@ class CertificateItemServiceTest {
         verify(repository).save(item);
         verifyCostsFields(item);
         verifyUpdatedAtTimestampWithinExecutionInterval(item, intervalStart, intervalEnd);
+        verify(etagGenerator).generateEtag();
     }
 
     @Test
@@ -127,6 +132,7 @@ class CertificateItemServiceTest {
         verify(repository).findById(ITEM_SOUGHT_ID_VALUE);
         assertThat(itemRetrieved.isPresent(), is(true));
         verifyCostsFields(itemRetrieved.get());
+        verify(etagGenerator, never()).generateEtag();
     }
 
     @Test
@@ -144,6 +150,7 @@ class CertificateItemServiceTest {
         verify(repository).findById(ITEM_SOUGHT_ID_VALUE);
         assertThat(itemRetrieved.isPresent(), is(true));
         assertThat(itemRetrieved.get().getItemCosts(), is(nullValue()));
+        verify(etagGenerator, never()).generateEtag();
     }
 
     @Test

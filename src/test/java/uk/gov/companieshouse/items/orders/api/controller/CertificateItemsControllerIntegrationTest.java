@@ -21,6 +21,7 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
+import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -59,6 +61,9 @@ class CertificateItemsControllerIntegrationTest {
 
     @MockBean
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
+
+    @MockBean
+    private EtagGeneratorService etagGenerator;
 
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
     private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
@@ -88,6 +93,7 @@ class CertificateItemsControllerIntegrationTest {
            + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
+    private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -138,6 +144,9 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setPostalDelivery(true);
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        expectedItem.setEtag(TOKEN_ETAG);
+
+        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
         // When and Then
         mockMvc.perform(post("/certificates")
@@ -233,6 +242,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         newItem.setUserId(ERIC_IDENTITY_VALUE);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
+        newItem.setEtag(TOKEN_ETAG);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -247,6 +257,7 @@ class CertificateItemsControllerIntegrationTest {
         costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        expectedItem.setEtag(TOKEN_ETAG);
 
         // When and then
         mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
@@ -365,6 +376,9 @@ class CertificateItemsControllerIntegrationTest {
         costs.setTotalCost(
                 Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
+        expectedItem.setEtag(TOKEN_ETAG);
+
+        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
         // When and then
         final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)

@@ -33,6 +33,8 @@ public class ItemData {
 
     private CertificateItemOptions itemOptions;
 
+    private String etag;
+
     private String kind;
 
     private Boolean isPostalDelivery;
@@ -109,6 +111,14 @@ public class ItemData {
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         this.itemOptions = itemOptions;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
     public String getKind() {

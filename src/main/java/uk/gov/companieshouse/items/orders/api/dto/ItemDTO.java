@@ -15,6 +15,10 @@ public class ItemDTO extends AbstractItemDTO {
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
 
+    @Null
+    @JsonProperty("etag")
+    private String etag;
+
     @JsonProperty("kind")
     private String kind;
 
@@ -34,6 +38,14 @@ public class ItemDTO extends AbstractItemDTO {
 
     public void setItemCosts(ItemCosts itemCosts) {
         this.itemCosts = itemCosts;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
     public String getKind() {

@@ -123,6 +123,14 @@ public class Item {
         data.setItemOptions(itemOptions);
     }
 
+    public String getEtag() {
+        return data.getEtag();
+    }
+
+    public void setEtag(String etag) {
+        data.setEtag(etag);
+    }
+
     public String getKind() {
         return data.getKind();
     }

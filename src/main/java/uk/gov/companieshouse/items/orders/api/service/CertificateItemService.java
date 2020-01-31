@@ -20,15 +20,18 @@ public class CertificateItemService {
     private final SequenceGeneratorService generator;
     private final DescriptionProviderService descriptions;
     private final CertificateCostCalculatorService calculator;
+    private final EtagGeneratorService etagGenerator;
 
     public CertificateItemService(final CertificateItemRepository repository,
                                   final SequenceGeneratorService generator,
                                   final DescriptionProviderService descriptions,
-                                  final CertificateCostCalculatorService calculator) {
+                                  final CertificateCostCalculatorService calculator,
+                                  final EtagGeneratorService etagGenerator) {
         this.repository = repository;
         this.generator = generator;
         this.descriptions = descriptions;
         this.calculator = calculator;
+        this.etagGenerator = etagGenerator;
     }
 
     /**
@@ -40,6 +43,7 @@ public class CertificateItemService {
         CERTIFICATE.populateReadOnlyFields(item, descriptions);
         item.setId(getNextId());
         setCreationDateTimes(item);
+        item.setEtag(etagGenerator.generateEtag());
         final CertificateItem itemSaved = repository.save(item);
         CERTIFICATE.populateItemCosts(itemSaved, calculator);
         return itemSaved;
@@ -54,6 +58,7 @@ public class CertificateItemService {
         final LocalDateTime now = LocalDateTime.now();
         updatedCertificateItem.setUpdatedAt(now);
         CERTIFICATE.populateDerivedDescriptionFields(updatedCertificateItem, descriptions);
+        updatedCertificateItem.setEtag(etagGenerator.generateEtag());
         final CertificateItem itemSaved = repository.save(updatedCertificateItem);
         CERTIFICATE.populateItemCosts(itemSaved, calculator);
         return itemSaved;
