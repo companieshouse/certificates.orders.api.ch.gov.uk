@@ -12,12 +12,14 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.CertificateType;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
@@ -55,6 +57,7 @@ class PatchMergerTest {
 
     private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
+    private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -170,8 +173,8 @@ class PatchMergerTest {
         // Given
         final CertificateItem original = new CertificateItem();
         final CertificateItemOptions originalOptions = new CertificateItemOptions();
+        originalOptions.setCertificateType(CERTIFICATE_TYPE);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        // TODO PCI-669 Add an item option that is NOT updated
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -184,8 +187,8 @@ class PatchMergerTest {
                 patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
+        assertThat(patched.getItemOptions().getCertificateType(), is(CERTIFICATE_TYPE));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
-        // TODO PCI-669 Add an assertion about an item option that is NOT updated
     }
 
 }

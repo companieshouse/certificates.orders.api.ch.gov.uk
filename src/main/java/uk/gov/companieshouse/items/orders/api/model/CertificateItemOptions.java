@@ -9,7 +9,17 @@ import com.google.gson.Gson;
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemOptions {
 
+    private CertificateType certificateType;
+
     private DeliveryTimescale deliveryTimescale;
+
+    public CertificateType getCertificateType() {
+        return certificateType;
+    }
+
+    public void setCertificateType(CertificateType certificateType) {
+        this.certificateType = certificateType;
+    }
 
     public DeliveryTimescale getDeliveryTimescale() {
         return deliveryTimescale;
