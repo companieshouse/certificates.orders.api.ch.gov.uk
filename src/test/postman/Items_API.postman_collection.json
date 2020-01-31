@@ -328,6 +328,40 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "Create certificate item read only etag",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_name\": \"Smith & Co\",\t\n\t\"company_number\": \"00006400\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same_day\"\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/orderable/certificates",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "Test what happen when requests are made containing values for read only attributes.",
@@ -460,6 +494,46 @@
 							"response": []
 						},
 						{
+							"name": "Update certificate item read only etag",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000154",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000154"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Update certificate item bad timescale",
 							"request": {
 								"method": "PATCH",
@@ -584,7 +658,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "X8ltu6H4RwSEM_rDmvWLpnhDQ62UkSNzozKHViexRzORZsmnvkwhFP3HgKozFmOhxFu5KLF2Ya1cCEEs0dAWfw",
+				"value": "",
 				"type": "string"
 			},
 			{
