@@ -60,6 +60,7 @@ class CertificateItemsControllerIntegrationTest {
     @MockBean
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
 
+    private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
     private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
     private static final int QUANTITY = 5;
@@ -136,7 +137,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
 
         // When and Then
-        mockMvc.perform(post("/certificates")
+        mockMvc.perform(post(CERTIFICATES_URL)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -170,7 +171,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
 
         // When and Then
-        mockMvc.perform(post("/certificates")
+        mockMvc.perform(post(CERTIFICATES_URL)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -202,7 +203,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
 
         // When and Then
-        mockMvc.perform(post("/certificates")
+        mockMvc.perform(post(CERTIFICATES_URL)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -242,7 +243,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemCosts(costs);
 
         // When and then
-        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
             .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -258,7 +259,7 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Return not found when a certificate item does not exist")
     void getCertificateItemReturnsNotFound() throws Exception {
         // When and then
-        mockMvc.perform(get("/certificates/CHS0")
+        mockMvc.perform(get( CERTIFICATES_URL+"CHS0")
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -281,7 +282,7 @@ class CertificateItemsControllerIntegrationTest {
 
 
         // When and then
-        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -302,7 +303,7 @@ class CertificateItemsControllerIntegrationTest {
 
 
         // When and then
-        mockMvc.perform(get("/certificates/"+EXPECTED_ITEM_ID)
+        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -354,7 +355,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemCosts(costs);
 
         // When and then
-        final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
@@ -390,7 +391,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setItemOptions(options);
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -419,7 +420,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList("id: must be null"));
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -442,7 +443,7 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -472,7 +473,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -505,7 +506,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemOptions(options);
 
         // When and then
-        final ResultActions response = mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -545,7 +546,7 @@ class CertificateItemsControllerIntegrationTest {
                                                  "kind: must be null"));
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -576,7 +577,7 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
 
         // When and then
-        mockMvc.perform(patch("/certificates/" + EXPECTED_ITEM_ID)
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                 .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
