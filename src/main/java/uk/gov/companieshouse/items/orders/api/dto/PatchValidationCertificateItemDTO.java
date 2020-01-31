@@ -16,12 +16,22 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
+    @JsonProperty("company_name")
+    private String companyName;
+
     @JsonProperty("company_number")
     private String companyNumber;
+
+    @JsonProperty("customer_reference")
+    private String customerReference;
 
     @Null
     @JsonProperty("item_costs")
     private ItemCosts itemCosts;
+
+    @Null
+    @JsonProperty("etag")
+    private String etag;
 
     @Null
     @JsonProperty("kind")
@@ -52,12 +62,24 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
         this.itemOptions = itemOptions;
     }
 
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
     }
 
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
+    }
+
     public void setItemCosts(ItemCosts itemCosts) {
         this.itemCosts = itemCosts;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
     public void setKind(String kind) {

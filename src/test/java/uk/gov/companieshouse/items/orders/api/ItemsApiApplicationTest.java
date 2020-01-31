@@ -28,6 +28,17 @@ class ItemsApiApplicationTest {
 		// No implementation required here to test that context loads.
 	}
 
+	@Test
+	@DisplayName("Create rejects missing company name")
+	void createCertificateItemRejectsMissingCompanyName() {
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setCompanyName(null);
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "company_name: must not be null");
+	}
+
     @Test
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {
@@ -196,6 +207,7 @@ class ItemsApiApplicationTest {
 	 */
 	private CertificateItemDTO createValidNewItem() {
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
+		newCertificateItemDTO.setCompanyName("Smith & Co");
 		newCertificateItemDTO.setCompanyNumber("1234");
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setDeliveryTimescale(STANDARD);

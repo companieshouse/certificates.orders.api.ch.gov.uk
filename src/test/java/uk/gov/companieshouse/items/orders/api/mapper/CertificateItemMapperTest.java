@@ -36,7 +36,9 @@ public class CertificateItemMapperTest {
     private static final ItemCosts ITEM_COSTS = new ItemCosts("1", "2", "3", "4");
     private static final String KIND = "certificate";
     private static final boolean POSTAL_DELIVERY = true;
-    private static final boolean CERT_ACC = true;
+    private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
+    private static final String COMPANY_NAME = "Phillips & Daughters";
+    private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
 
     private static final CertificateItemOptions ITEM_OPTIONS;
 
@@ -56,7 +58,9 @@ public class CertificateItemMapperTest {
     void testCertificateItemDtoToEntityMapping() {
         final CertificateItemDTO dto = new CertificateItemDTO();
         dto.setId(ID);
+        dto.setCompanyName(COMPANY_NAME);
         dto.setCompanyNumber(COMPANY_NUMBER);
+        dto.setCustomerReference(CUSTOMER_REFERENCE);
         dto.setQuantity(QUANTITY);
         dto.setDescription(DESCRIPTION);
         dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
@@ -70,7 +74,9 @@ public class CertificateItemMapperTest {
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
         assertThat(item.getData().getId(), is(dto.getId()));
+        assertThat(item.getCompanyName(), is(dto.getCompanyName()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
+        assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(dto.getQuantity()));
         assertThat(item.getDescription(), is(dto.getDescription()));
         assertThat(item.getDescriptionIdentifier(), is(dto.getDescriptionIdentifier()));
@@ -85,7 +91,9 @@ public class CertificateItemMapperTest {
     void testCertificateItemEntityToDtoMapping() {
         final CertificateItem item = new CertificateItem();
         item.setId(ID);
+        item.setCompanyName(COMPANY_NAME);
         item.setCompanyNumber(COMPANY_NUMBER);
+        item.setCustomerReference(CUSTOMER_REFERENCE);
         item.setQuantity(QUANTITY);
         item.setDescription(DESCRIPTION);
         item.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
@@ -94,10 +102,14 @@ public class CertificateItemMapperTest {
         item.setKind(KIND);
         item.setPostalDelivery(POSTAL_DELIVERY);
         item.setItemOptions(ITEM_OPTIONS);
+        item.setEtag(TOKEN_ETAG);
+
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
+        assertThat(dto.getCompanyName(), is(item.getCompanyName()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
+        assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
         assertThat(dto.getQuantity(), is(item.getQuantity()));
         assertThat(dto.getDescription(), is(item.getDescription()));
         assertThat(dto.getDescriptionIdentifier(), is(item.getDescriptionIdentifier()));
@@ -106,6 +118,7 @@ public class CertificateItemMapperTest {
         assertThat(dto.getKind(), is(item.getKind()));
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
         assertThat(dto.getItemOptions(), is(item.getItemOptions()));
+        assertThat(dto.getEtag(), is(item.getEtag()));
     }
 
 }

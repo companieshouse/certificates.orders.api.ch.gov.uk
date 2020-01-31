@@ -18,8 +18,15 @@ public class CertificateItemDTO extends ItemDTO {
     private CertificateItemOptions itemOptions;
 
     @NotNull
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @NotNull
     @JsonProperty("company_number")
     private String companyNumber;
+
+    @JsonProperty("customer_reference")
+    private String customerReference;
 
     public CertificateItemOptions getItemOptions() {
         return itemOptions;
@@ -29,12 +36,28 @@ public class CertificateItemDTO extends ItemDTO {
         this.itemOptions = itemOptions;
     }
 
-    public String getCompanyNumber() {
-        return companyNumber;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
     }
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCompanyNumber() {
+        return companyNumber;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
     }
 
     @Override

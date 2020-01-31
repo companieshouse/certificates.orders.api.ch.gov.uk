@@ -59,12 +59,28 @@ public class Item {
         this.data = data;
     }
 
+    public String getCompanyName() {
+        return data.getCompanyName();
+    }
+
+    public void setCompanyName(String companyName) {
+        data.setCompanyName(companyName);
+    }
+
     public String getCompanyNumber() {
         return data.getCompanyNumber();
     }
 
     public void setCompanyNumber(String companyNumber) {
         data.setCompanyNumber(companyNumber);
+    }
+
+    public String getCustomerReference() {
+        return data.getCustomerReference();
+    }
+
+    public void setCustomerReference(String companyReference) {
+        data.setCustomerReference(companyReference);
     }
 
     public String getDescription() {
@@ -105,6 +121,14 @@ public class Item {
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         data.setItemOptions(itemOptions);
+    }
+
+    public String getEtag() {
+        return data.getEtag();
+    }
+
+    public void setEtag(String etag) {
+        data.setEtag(etag);
     }
 
     public String getKind() {

@@ -21,6 +21,7 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
+import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -60,6 +62,9 @@ class CertificateItemsControllerIntegrationTest {
     @MockBean
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
 
+    @MockBean
+    private EtagGeneratorService etagGenerator;
+
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
     private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
@@ -70,8 +75,6 @@ class CertificateItemsControllerIntegrationTest {
     private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
     private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
     private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
-    private static final boolean ORIGINAL_CERT_INC = true;
-    private static final boolean UPDATED_CERT_INC = false;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
     private static final String TOKEN_STRING = "TOKEN VALUE";
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
@@ -84,10 +87,14 @@ class CertificateItemsControllerIntegrationTest {
     private static final String COMPANY_NUMBER_KEY = "company_number";
     private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
-
+    private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
+    private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
            + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
+    private static final String COMPANY_NAME = "Phillips & Daughters";
+    private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
+    private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -114,11 +121,13 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
@@ -135,6 +144,10 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
         expectedItem.setQuantity(QUANTITY);
+        expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        expectedItem.setEtag(TOKEN_ETAG);
+
+        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -166,9 +179,12 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        newItem.setEtag(TOKEN_ETAG);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList("company_number: must not be null"));
+                new ApiError(BAD_REQUEST, asList("company_number: must not be null",
+                                                 "company_name: must not be null",
+                                                 "etag: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -228,6 +244,8 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
         newItem.setUserId(ERIC_IDENTITY_VALUE);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
+        newItem.setEtag(TOKEN_ETAG);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -241,6 +259,8 @@ class CertificateItemsControllerIntegrationTest {
         costs.setPostageCost(POSTAGE_COST);
         costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
+        expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        expectedItem.setEtag(TOKEN_ETAG);
 
         // When and then
         mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
@@ -323,7 +343,9 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setCompanyName(COMPANY_NAME);
         savedItem.setCompanyNumber(COMPANY_NUMBER);
+        savedItem.setCustomerReference(CUSTOMER_REFERENCE);
         savedItem.setDescription(DESCRIPTION);
         savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
 
@@ -336,12 +358,16 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
+        itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
+        expectedItem.setCompanyName(UPDATED_COMPANY_NAME);
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
@@ -353,6 +379,9 @@ class CertificateItemsControllerIntegrationTest {
         costs.setTotalCost(
                 Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
+        expectedItem.setEtag(TOKEN_ETAG);
+
+        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -374,6 +403,7 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
@@ -533,6 +563,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
+        itemUpdate.setEtag(TOKEN_ETAG);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -543,7 +574,8 @@ class CertificateItemsControllerIntegrationTest {
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList("description_values: must be null",
                                                  "item_costs: must be null",
-                                                 "kind: must be null"));
+                                                 "kind: must be null",
+                                                 "etag: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -560,7 +592,7 @@ class CertificateItemsControllerIntegrationTest {
 
     @Test
     @DisplayName("Rejects update request containing an invalid delivery timescale")
-    void updateCertificateItemRejectsMultipleReadOnlyFields2() throws Exception {
+    void updateCertificateItemRejectsInvalidDeliveryTimescale() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();

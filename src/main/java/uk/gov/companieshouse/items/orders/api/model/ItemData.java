@@ -17,7 +17,11 @@ public class ItemData {
     @Field("id")
     private String id;
 
+    private String companyName;
+
     private String companyNumber;
+
+    private String customerReference;
 
     private String description;
 
@@ -28,6 +32,8 @@ public class ItemData {
     private ItemCosts itemCosts;
 
     private CertificateItemOptions itemOptions;
+
+    private String etag;
 
     private String kind;
 
@@ -43,12 +49,28 @@ public class ItemData {
         this.id = id;
     }
 
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
     public String getCompanyNumber() {
         return companyNumber;
     }
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public String getDescription() {
@@ -89,6 +111,14 @@ public class ItemData {
 
     public void setItemOptions(CertificateItemOptions itemOptions) {
         this.itemOptions = itemOptions;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
     public String getKind() {
