@@ -36,28 +36,28 @@ public class CertificateItemDTO extends ItemDTO {
         this.itemOptions = itemOptions;
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
-
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
 
-    public String getCompanyNumber() {
-        return companyNumber;
+    public String getCompanyName() {
+        return companyName;
     }
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
     }
 
-    public String getCustomerReference() {
-        return customerReference;
+    public String getCompanyNumber() {
+        return companyNumber;
     }
 
     public void setCustomerReference(String customerReference) {
         this.customerReference = customerReference;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
     }
 
     @Override
