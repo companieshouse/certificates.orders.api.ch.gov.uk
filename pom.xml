@@ -28,6 +28,7 @@
 		<javax.json-api.version>1.1.4</javax.json-api.version>
 		<guava.version>28.1-jre</guava.version>
 		<snakeyaml.version>1.25</snakeyaml.version>
+		<start-class>uk.gov.companieshouse.items.orders.api.ItemsApiApplication</start-class>
 	</properties>
 
 	<dependencies>
