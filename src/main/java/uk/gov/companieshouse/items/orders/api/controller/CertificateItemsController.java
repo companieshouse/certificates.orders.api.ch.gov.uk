@@ -58,7 +58,7 @@ public class CertificateItemsController {
         this.service = service;
     }
 
-    @PostMapping("${uk.gov.companieshouse.items.orders.api.path}")
+    @PostMapping("${uk.gov.companieshouse.items.orders.api.certificates}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
@@ -79,7 +79,7 @@ public class CertificateItemsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
     }
 
-    @GetMapping("${uk.gov.companieshouse.items.orders.api.path}/{id}")
+    @GetMapping("${uk.gov.companieshouse.items.orders.api.certificates}/{id}")
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
@@ -94,7 +94,7 @@ public class CertificateItemsController {
         }
     }
 
-    @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.path}/{id}",
+    @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.certificates}/{id}",
                   consumes = "application/merge-patch+json")
     public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
