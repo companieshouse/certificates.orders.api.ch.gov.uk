@@ -144,6 +144,13 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
+    @DisplayName("Etag is read only")
+    void getValidationErrorsRejectsReadOnlyEtag() throws IOException {
+        itemUpdate.setEtag(TOKEN_STRING);
+        assertFieldMustBeNullErrorProduced("etag");
+    }
+
+    @Test
     @DisplayName("Postal delivery is read only")
     void getValidationErrorsRejectsReadOnlyPostalDelivery() throws IOException {
         itemUpdate.setPostalDelivery(TOKEN_POSTAL_DELIVERY_VALUE);
@@ -157,6 +164,7 @@ class PatchItemRequestValidatorTest {
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
+        itemUpdate.setEtag(TOKEN_STRING);
         final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
 
         // When
@@ -166,7 +174,8 @@ class PatchItemRequestValidatorTest {
         assertThat(errors,
                 containsInAnyOrder("description_values: must be null",
                                    "item_costs: must be null",
-                                   "kind: must be null"));
+                                   "kind: must be null",
+                                   "etag: must be null"));
     }
 
     @Test

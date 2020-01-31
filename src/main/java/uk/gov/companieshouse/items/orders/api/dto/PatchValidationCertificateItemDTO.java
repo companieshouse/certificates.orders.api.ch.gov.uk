@@ -30,6 +30,10 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     private ItemCosts itemCosts;
 
     @Null
+    @JsonProperty("etag")
+    private String etag;
+
+    @Null
     @JsonProperty("kind")
     private String kind;
 
@@ -72,6 +76,10 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
 
     public void setItemCosts(ItemCosts itemCosts) {
         this.itemCosts = itemCosts;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
     public void setKind(String kind) {

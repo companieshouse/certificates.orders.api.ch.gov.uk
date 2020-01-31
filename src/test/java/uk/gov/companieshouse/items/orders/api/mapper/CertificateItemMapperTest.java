@@ -38,6 +38,7 @@ public class CertificateItemMapperTest {
     private static final boolean POSTAL_DELIVERY = true;
     private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
     private static final String COMPANY_NAME = "Phillips & Daughters";
+    private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
 
     private static final CertificateItemOptions ITEM_OPTIONS;
 
@@ -101,6 +102,8 @@ public class CertificateItemMapperTest {
         item.setKind(KIND);
         item.setPostalDelivery(POSTAL_DELIVERY);
         item.setItemOptions(ITEM_OPTIONS);
+        item.setEtag(TOKEN_ETAG);
+
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
@@ -115,6 +118,7 @@ public class CertificateItemMapperTest {
         assertThat(dto.getKind(), is(item.getKind()));
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
         assertThat(dto.getItemOptions(), is(item.getItemOptions()));
+        assertThat(dto.getEtag(), is(item.getEtag()));
     }
 
 }

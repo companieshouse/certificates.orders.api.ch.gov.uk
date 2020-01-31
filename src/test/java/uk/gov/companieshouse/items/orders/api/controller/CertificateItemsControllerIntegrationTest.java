@@ -179,10 +179,12 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        newItem.setEtag(TOKEN_ETAG);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
-                                                 "company_name: must not be null"));
+                                                 "company_name: must not be null",
+                                                 "etag: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -561,6 +563,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
+        itemUpdate.setEtag(TOKEN_ETAG);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -571,7 +574,8 @@ class CertificateItemsControllerIntegrationTest {
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList("description_values: must be null",
                                                  "item_costs: must be null",
-                                                 "kind: must be null"));
+                                                 "kind: must be null",
+                                                 "etag: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
