@@ -38,6 +38,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
@@ -101,6 +103,12 @@ class CertificateItemsControllerIntegrationTest {
          + " from String \"unknown\": value not one of declared Enum instance names: "
          + "[dissolution_liquidation, incorporation_with_all_name_changes, incorporation, "
          + "incorporation_with_last_name_changes]";
+    private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
+    private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
+    private static final String INVALID_DELIVERY_METHOD_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryMethod`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + "[postal, collection]";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -131,6 +139,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
@@ -168,6 +177,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
@@ -267,6 +277,38 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeIncorporationCertificateTypeInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with an invalid delivery method")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryMethod(DELIVERY_METHOD);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makePostalDeliveryMethodInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -391,6 +433,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
         repository.save(savedItem);
@@ -398,6 +441,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
+        options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
@@ -445,6 +489,8 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
                 is(UPDATED_CERTIFICATE_TYPE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryMethod(),
+                is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
@@ -696,6 +742,37 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    @DisplayName("Rejects update request containing an invalid delivery method")
+    void updateCertificateItemRejectsInvalidDeliveryMethod() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryMethod(DELIVERY_METHOD);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makePostalDeliveryMethodInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "incorporation" certificate type value with "unknown" for validation testing purposes.
@@ -718,6 +795,30 @@ class CertificateItemsControllerIntegrationTest {
     private String makeIncorporationCertificateTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(itemUpdate).replace("incorporation", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "postal" delivery method value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect delivery method value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePostalDeliveryMethodInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("postal", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "postal" certificate type value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect certificate type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePostalDeliveryMethodInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("postal", "unknown");
     }
 
     /**

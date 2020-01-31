@@ -10,7 +10,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.CertificateType;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import java.util.Map;
@@ -20,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
@@ -47,6 +47,7 @@ public class CertificateItemMapperTest {
     static {
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
+        ITEM_OPTIONS.setDeliveryMethod(POSTAL);
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
     }
 
