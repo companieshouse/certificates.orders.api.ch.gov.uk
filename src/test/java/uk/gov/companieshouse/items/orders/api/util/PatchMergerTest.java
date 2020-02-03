@@ -17,6 +17,8 @@ import java.io.IOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.CARDIFF;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
@@ -59,6 +61,8 @@ class PatchMergerTest {
     private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
     private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
+    private static final CollectionLocation COLLECTION_LOCATION = BELFAST;
+    private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CARDIFF;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -175,12 +179,14 @@ class PatchMergerTest {
         final CertificateItem original = new CertificateItem();
         final CertificateItemOptions originalOptions = new CertificateItemOptions();
         originalOptions.setCertificateType(CERTIFICATE_TYPE);
+        originalOptions.setCollectionLocation(COLLECTION_LOCATION);
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
         final CertificateItemOptions deltaOptions = new CertificateItemOptions();
+        deltaOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         delta.setItemOptions(deltaOptions);
@@ -191,6 +197,7 @@ class PatchMergerTest {
 
         // Then
         assertThat(patched.getItemOptions().getCertificateType(), is(CERTIFICATE_TYPE));
+        assertThat(patched.getItemOptions().getCollectionLocation(), is(UPDATED_COLLECTION_LOCATION));
         assertThat(patched.getItemOptions().getDeliveryMethod(), is(UPDATED_DELIVERY_METHOD));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
     }

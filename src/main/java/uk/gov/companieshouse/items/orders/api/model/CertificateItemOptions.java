@@ -11,6 +11,8 @@ public class CertificateItemOptions {
 
     private CertificateType certificateType;
 
+    private CollectionLocation collectionLocation;
+
     private DeliveryMethod deliveryMethod;
 
     private DeliveryTimescale deliveryTimescale;
@@ -21,6 +23,14 @@ public class CertificateItemOptions {
 
     public void setCertificateType(CertificateType certificateType) {
         this.certificateType = certificateType;
+    }
+
+    public CollectionLocation getCollectionLocation() {
+        return collectionLocation;
+    }
+
+    public void setCollectionLocation(CollectionLocation collectionLocation) {
+        this.collectionLocation = collectionLocation;
     }
 
     public DeliveryMethod getDeliveryMethod() {

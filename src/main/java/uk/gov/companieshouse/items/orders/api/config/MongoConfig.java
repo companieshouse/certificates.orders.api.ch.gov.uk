@@ -42,6 +42,8 @@ public class MongoConfig {
         final List<Converter<?, ?>> converters = new ArrayList<>();
         converters.add(new ReadingCertificateTypeConverter());
         converters.add(new WritingCertificateTypeConverter());
+        converters.add(new ReadingCollectionLocationConverter());
+        converters.add(new WritingCollectionLocationConverter());
         converters.add(new ReadingDeliveryMethodConverter());
         converters.add(new WritingDeliveryMethodConverter());
         converters.add(new ReadingDeliveryTimescaleConverter());

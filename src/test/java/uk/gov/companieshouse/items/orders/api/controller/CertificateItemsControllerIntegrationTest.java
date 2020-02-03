@@ -38,6 +38,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.CARDIFF;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
@@ -109,6 +111,12 @@ class CertificateItemsControllerIntegrationTest {
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryMethod`"
                     + " from String \"unknown\": value not one of declared Enum instance names: "
                     + "[postal, collection]";
+    private static final CollectionLocation COLLECTION_LOCATION = BELFAST;
+    private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CARDIFF;
+    private static final String INVALID_COLLECTION_LOCATION_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.CollectionLocation`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + "[london, cardiff, edinburgh, belfast]";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -139,6 +147,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setCollectionLocation(COLLECTION_LOCATION);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
@@ -177,6 +186,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
@@ -277,6 +287,38 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeIncorporationCertificateTypeInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with an invalid collection location")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCollectionLocation(COLLECTION_LOCATION);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makeBelfastCollectionLocationInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -433,6 +475,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setCollectionLocation(COLLECTION_LOCATION);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
@@ -441,6 +484,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
+        options.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
@@ -489,6 +533,8 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
                 is(UPDATED_CERTIFICATE_TYPE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getCollectionLocation(),
+                is(UPDATED_COLLECTION_LOCATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryMethod(),
                 is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
@@ -742,6 +788,38 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+
+    @Test
+    @DisplayName("Rejects update request containing an invalid collection location")
+    void updateCertificateItemRejectsInvalidCollectionLocation() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCollectionLocation(COLLECTION_LOCATION);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     @Test
     @DisplayName("Rejects update request containing an invalid delivery method")
     void updateCertificateItemRejectsInvalidDeliveryMethod() throws Exception {
@@ -795,6 +873,30 @@ class CertificateItemsControllerIntegrationTest {
     private String makeIncorporationCertificateTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(itemUpdate).replace("incorporation", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "belfast" collection location value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect delivery method value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeBelfastCollectionLocationInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("belfast", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "belfast" collection location value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect certificate type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeBelfastCollectionLocationInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("belfast", "unknown");
     }
 
     /**
