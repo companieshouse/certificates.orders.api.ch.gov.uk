@@ -13,6 +13,8 @@ public class CertificateItemOptions {
 
     private CollectionLocation collectionLocation;
 
+    private String contactNumber;
+
     private DeliveryMethod deliveryMethod;
 
     private DeliveryTimescale deliveryTimescale;
@@ -31,6 +33,14 @@ public class CertificateItemOptions {
 
     public void setCollectionLocation(CollectionLocation collectionLocation) {
         this.collectionLocation = collectionLocation;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
     public DeliveryMethod getDeliveryMethod() {

@@ -56,13 +56,15 @@ class PatchMergerTest {
     private static final int ORIGINAL_QUANTITY = 20;
     private static final int CORRECTED_QUANTITY = 2;
 
-    private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
-    private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
     private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
-    private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
-    private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
     private static final CollectionLocation COLLECTION_LOCATION = BELFAST;
     private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CARDIFF;
+    private static final String CONTACT_NUMBER = "+44 1234 123456";
+    private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
+    private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
+    private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
+    private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
+    private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -180,6 +182,7 @@ class PatchMergerTest {
         final CertificateItemOptions originalOptions = new CertificateItemOptions();
         originalOptions.setCertificateType(CERTIFICATE_TYPE);
         originalOptions.setCollectionLocation(COLLECTION_LOCATION);
+        originalOptions.setContactNumber(CONTACT_NUMBER);
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
         original.setItemOptions(originalOptions);
@@ -187,6 +190,7 @@ class PatchMergerTest {
         final CertificateItem delta = new CertificateItem();
         final CertificateItemOptions deltaOptions = new CertificateItemOptions();
         deltaOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        deltaOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         delta.setItemOptions(deltaOptions);
@@ -198,6 +202,7 @@ class PatchMergerTest {
         // Then
         assertThat(patched.getItemOptions().getCertificateType(), is(CERTIFICATE_TYPE));
         assertThat(patched.getItemOptions().getCollectionLocation(), is(UPDATED_COLLECTION_LOCATION));
+        assertThat(patched.getItemOptions().getContactNumber(), is(UPDATED_CONTACT_NUMBER));
         assertThat(patched.getItemOptions().getDeliveryMethod(), is(UPDATED_DELIVERY_METHOD));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
     }

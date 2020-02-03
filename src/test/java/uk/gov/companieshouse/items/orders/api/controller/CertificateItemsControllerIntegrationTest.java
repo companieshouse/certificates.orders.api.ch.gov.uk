@@ -119,6 +119,8 @@ class CertificateItemsControllerIntegrationTest {
                     + "[london, cardiff, edinburgh, belfast]";
     private static final String MISSING_COLLECTION_LOCATION_METHOD =
             "collection_location: must not be null when delivery method is collection";
+    private static final String CONTACT_NUMBER = "+44 1234 123456";
+    private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -150,6 +152,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
+        options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
@@ -189,6 +192,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
                 .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
+                .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
@@ -511,6 +515,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
+        options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
@@ -520,6 +525,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
         options.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        options.setContactNumber(UPDATED_CONTACT_NUMBER);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
@@ -570,6 +576,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_CERTIFICATE_TYPE));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCollectionLocation(),
                 is(UPDATED_COLLECTION_LOCATION));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getContactNumber(),
+                is(UPDATED_CONTACT_NUMBER));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryMethod(),
                 is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
