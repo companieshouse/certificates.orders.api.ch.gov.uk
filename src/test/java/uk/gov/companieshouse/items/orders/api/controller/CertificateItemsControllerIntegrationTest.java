@@ -121,6 +121,8 @@ class CertificateItemsControllerIntegrationTest {
             "collection_location: must not be null when delivery method is collection";
     private static final String CONTACT_NUMBER = "+44 1234 123456";
     private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
+    private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -155,6 +157,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
@@ -195,6 +198,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.include_company_objects_information",
+                        is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andDo(MockMvcResultHandlers.print());
@@ -518,6 +523,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         savedItem.setItemOptions(options);
         repository.save(savedItem);
 
@@ -528,6 +534,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(UPDATED_CONTACT_NUMBER);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
@@ -582,6 +589,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeCompanyObjectsInformation(),
+                is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.

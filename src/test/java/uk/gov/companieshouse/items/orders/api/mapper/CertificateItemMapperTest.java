@@ -43,6 +43,7 @@ public class CertificateItemMapperTest {
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
     private static final String CONTACT_NUMBER = "+44 1234 123456";
+    private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
 
     private static final CertificateItemOptions ITEM_OPTIONS;
 
@@ -53,6 +54,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setContactNumber(CONTACT_NUMBER);
         ITEM_OPTIONS.setDeliveryMethod(POSTAL);
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
+        ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
     }
 
     @Configuration

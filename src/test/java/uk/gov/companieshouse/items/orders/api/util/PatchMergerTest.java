@@ -65,6 +65,8 @@ class PatchMergerTest {
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
     private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
+    private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -185,6 +187,7 @@ class PatchMergerTest {
         originalOptions.setContactNumber(CONTACT_NUMBER);
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -193,6 +196,7 @@ class PatchMergerTest {
         deltaOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -205,6 +209,8 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getContactNumber(), is(UPDATED_CONTACT_NUMBER));
         assertThat(patched.getItemOptions().getDeliveryMethod(), is(UPDATED_DELIVERY_METHOD));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(patched.getItemOptions().getIncludeCompanyObjectsInformation(),
+                is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
     }
 
 }

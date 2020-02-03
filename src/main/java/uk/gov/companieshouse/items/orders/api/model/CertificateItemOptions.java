@@ -19,6 +19,8 @@ public class CertificateItemOptions {
 
     private DeliveryTimescale deliveryTimescale;
 
+    private Boolean includeCompanyObjectsInformation;
+
     public CertificateType getCertificateType() {
         return certificateType;
     }
@@ -57,6 +59,14 @@ public class CertificateItemOptions {
 
     public void setDeliveryTimescale(DeliveryTimescale deliveryTimescale) {
         this.deliveryTimescale = deliveryTimescale;
+    }
+
+    public Boolean getIncludeCompanyObjectsInformation() {
+        return includeCompanyObjectsInformation;
+    }
+
+    public void setIncludeCompanyObjectsInformation(Boolean includeCompanyObjectsInformation) {
+        this.includeCompanyObjectsInformation = includeCompanyObjectsInformation;
     }
 
     @Override
