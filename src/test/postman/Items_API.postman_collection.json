@@ -150,6 +150,45 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "Create certificate item missing collection location",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Request-ID",
+												"type": "text",
+												"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"delivery_method\": \"collection\",\n        \"delivery_timescale\": \"same_day\"\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/orderable/certificates",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "Test what happens when attributes are missing from request payloads.",
@@ -481,6 +520,46 @@
 								},
 								"url": {
 									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000152",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000152"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item missing collection location",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation_with_all_name_changes\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000157",
 									"host": [
 										"{{base_url}}"
 									],

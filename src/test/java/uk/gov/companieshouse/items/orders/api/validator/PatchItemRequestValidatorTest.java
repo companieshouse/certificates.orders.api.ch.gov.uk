@@ -12,6 +12,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.items.orders.api.util.TestMergePatchFactory;
@@ -205,6 +208,37 @@ class PatchItemRequestValidatorTest {
         // Then
         assertThat(errors, is(empty()));
     }
+
+    @Test
+    @DisplayName("Collection location is optional by default")
+    void collectionLocationIsOptionalByDefault() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+
+    @Test
+    @DisplayName("Collection location is mandatory for collection delivery method")
+    void collectionLocationIsMandatoryForCollectionDeliveryMethod() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains("collection_location: must not be null when delivery method is collection"));
+    }
+
 
     /**
      * Utility method that asserts that the validator produces a "<field name>: must be null"

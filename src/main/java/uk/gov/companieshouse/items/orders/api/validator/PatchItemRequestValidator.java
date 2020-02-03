@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
 
 /**
  * Implements validation of the request payload specific to the the patch item request only.
@@ -61,6 +64,21 @@ public class PatchItemRequestValidator {
             // This exception will not occur because there are no low-level IO operations here.
             return EMPTY_LIST;
         }
+    }
+
+    /**
+     * Validates the patched item provided, returning any errors found.
+     * @param patchedItem the item to be validated
+     * @return the errors found, which will be empty if the item is found to be valid
+     */
+    public List<String> getValidationErrors(final CertificateItem patchedItem) {
+        final CertificateItemOptions options = patchedItem.getItemOptions();
+        if (options != null &&
+                options.getDeliveryMethod() == COLLECTION &&
+                options.getCollectionLocation() == null) {
+            return singletonList("collection_location: must not be null when delivery method is collection");
+        }
+        return EMPTY_LIST;
     }
 
 }
