@@ -69,6 +69,8 @@ class PatchMergerTest {
     private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
     private static final boolean INCLUDE_EMAIL_COPY = false;
     private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
+    private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -191,6 +193,7 @@ class PatchMergerTest {
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -201,6 +204,7 @@ class PatchMergerTest {
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -215,8 +219,9 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
         assertThat(patched.getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
-        assertThat(patched.getItemOptions().getIncludeEmailCopy(),
-                is(UPDATED_INCLUDE_EMAIL_COPY));
+        assertThat(patched.getItemOptions().getIncludeEmailCopy(), is(UPDATED_INCLUDE_EMAIL_COPY));
+        assertThat(patched.getItemOptions().getIncludeGoodStandingInformation(),
+                is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
     }
 
 }

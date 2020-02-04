@@ -23,6 +23,8 @@ public class CertificateItemOptions {
 
     private Boolean includeEmailCopy;
 
+    private Boolean includeGoodStandingInformation;
+
     public CertificateType getCertificateType() {
         return certificateType;
     }
@@ -77,6 +79,14 @@ public class CertificateItemOptions {
 
     public void setIncludeEmailCopy(Boolean includeEmailCopy) {
         this.includeEmailCopy = includeEmailCopy;
+    }
+
+    public Boolean getIncludeGoodStandingInformation() {
+        return includeGoodStandingInformation;
+    }
+
+    public void setIncludeGoodStandingInformation(Boolean includeGoodStandingInformation) {
+        this.includeGoodStandingInformation = includeGoodStandingInformation;
     }
 
     @Override

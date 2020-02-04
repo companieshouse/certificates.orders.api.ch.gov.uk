@@ -128,6 +128,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
     private static final String INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE =
             "include_email_copy: can only be true when delivery timescale is same_day";
+    private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -164,6 +166,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
@@ -206,8 +209,9 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.item_options.include_company_objects_information",
                         is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
-                .andExpect(jsonPath("$.item_options.include_email_copy",
-                        is(INCLUDE_EMAIL_COPY)))
+                .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
+                .andExpect(jsonPath("$.item_options.include_good_standing_information",
+                        is(INCLUDE_GOOD_STANDING_INFORMATION)))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andDo(MockMvcResultHandlers.print());
@@ -636,6 +640,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         savedItem.setItemOptions(options);
         repository.save(savedItem);
 
@@ -648,6 +653,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
@@ -706,6 +712,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeEmailCopy(),
                 is(UPDATED_INCLUDE_EMAIL_COPY));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeGoodStandingInformation(),
+                is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.

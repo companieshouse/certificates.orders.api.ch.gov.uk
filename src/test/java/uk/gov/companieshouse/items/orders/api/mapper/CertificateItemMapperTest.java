@@ -45,6 +45,7 @@ public class CertificateItemMapperTest {
     private static final String CONTACT_NUMBER = "+44 1234 123456";
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
     private static final boolean INCLUDE_EMAIL_COPY = true;
+    private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = false;
 
     private static final CertificateItemOptions ITEM_OPTIONS;
 
@@ -57,6 +58,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
         ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         ITEM_OPTIONS.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        ITEM_OPTIONS.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
     }
 
     @Configuration
