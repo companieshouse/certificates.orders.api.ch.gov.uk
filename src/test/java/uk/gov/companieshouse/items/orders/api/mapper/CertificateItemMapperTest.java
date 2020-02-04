@@ -98,7 +98,7 @@ public class CertificateItemMapperTest {
         assertThat(item.getItemCosts(), is(dto.getItemCosts()));
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
-        assertThat(item.getItemOptions(), is(dto.getItemOptions()));
+        assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
     }
 
     @Test
@@ -131,8 +131,27 @@ public class CertificateItemMapperTest {
         assertThat(dto.getItemCosts(), is(item.getItemCosts()));
         assertThat(dto.getKind(), is(item.getKind()));
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
-        assertThat(dto.getItemOptions(), is(item.getItemOptions()));
+        assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
         assertThat(dto.getEtag(), is(item.getEtag()));
+    }
+
+    /**
+     * Utility that asserts that each member of the options objects passed it has the same value
+     * in both. The alternative would be to generate CertificateItemOptions equals() and hashCode()
+     * and thoroughly unit test those.
+     * @param options1 options
+     * @param options2 options
+     */
+    private void assertItemOptionsSame(final CertificateItemOptions options1,
+                                       final CertificateItemOptions options2) {
+        assertThat(options1.getCertificateType(), is(options2.getCertificateType()));
+        assertThat(options1.getCollectionLocation(), is(options2.getCollectionLocation()));
+        assertThat(options1.getContactNumber(), is(options2.getContactNumber()));
+        assertThat(options1.getDeliveryMethod(), is(options2.getDeliveryMethod()));
+        assertThat(options1.getDeliveryTimescale(), is(options2.getDeliveryTimescale()));
+        assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
+        assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
+        assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
     }
 
 }
