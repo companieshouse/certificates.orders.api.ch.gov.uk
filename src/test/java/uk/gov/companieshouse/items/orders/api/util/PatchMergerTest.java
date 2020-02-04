@@ -67,6 +67,8 @@ class PatchMergerTest {
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
+    private static final boolean INCLUDE_EMAIL_COPY = false;
+    private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -188,6 +190,7 @@ class PatchMergerTest {
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -197,6 +200,7 @@ class PatchMergerTest {
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -211,6 +215,8 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
         assertThat(patched.getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
+        assertThat(patched.getItemOptions().getIncludeEmailCopy(),
+                is(UPDATED_INCLUDE_EMAIL_COPY));
     }
 
 }

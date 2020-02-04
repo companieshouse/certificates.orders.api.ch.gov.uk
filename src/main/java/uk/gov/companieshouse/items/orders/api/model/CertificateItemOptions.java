@@ -21,6 +21,8 @@ public class CertificateItemOptions {
 
     private Boolean includeCompanyObjectsInformation;
 
+    private Boolean includeEmailCopy;
+
     public CertificateType getCertificateType() {
         return certificateType;
     }
@@ -67,6 +69,14 @@ public class CertificateItemOptions {
 
     public void setIncludeCompanyObjectsInformation(Boolean includeCompanyObjectsInformation) {
         this.includeCompanyObjectsInformation = includeCompanyObjectsInformation;
+    }
+
+    public Boolean getIncludeEmailCopy() {
+        return includeEmailCopy;
+    }
+
+    public void setIncludeEmailCopy(Boolean includeEmailCopy) {
+        this.includeEmailCopy = includeEmailCopy;
     }
 
     @Override
