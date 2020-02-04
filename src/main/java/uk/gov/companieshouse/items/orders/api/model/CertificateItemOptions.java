@@ -9,7 +9,53 @@ import com.google.gson.Gson;
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemOptions {
 
+    private CertificateType certificateType;
+
+    private CollectionLocation collectionLocation;
+
+    private String contactNumber;
+
+    private DeliveryMethod deliveryMethod;
+
     private DeliveryTimescale deliveryTimescale;
+
+    private Boolean includeCompanyObjectsInformation;
+
+    private Boolean includeEmailCopy;
+
+    private Boolean includeGoodStandingInformation;
+
+    public CertificateType getCertificateType() {
+        return certificateType;
+    }
+
+    public void setCertificateType(CertificateType certificateType) {
+        this.certificateType = certificateType;
+    }
+
+    public CollectionLocation getCollectionLocation() {
+        return collectionLocation;
+    }
+
+    public void setCollectionLocation(CollectionLocation collectionLocation) {
+        this.collectionLocation = collectionLocation;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public DeliveryMethod getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(DeliveryMethod deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
 
     public DeliveryTimescale getDeliveryTimescale() {
         return deliveryTimescale;
@@ -17,6 +63,30 @@ public class CertificateItemOptions {
 
     public void setDeliveryTimescale(DeliveryTimescale deliveryTimescale) {
         this.deliveryTimescale = deliveryTimescale;
+    }
+
+    public Boolean getIncludeCompanyObjectsInformation() {
+        return includeCompanyObjectsInformation;
+    }
+
+    public void setIncludeCompanyObjectsInformation(Boolean includeCompanyObjectsInformation) {
+        this.includeCompanyObjectsInformation = includeCompanyObjectsInformation;
+    }
+
+    public Boolean getIncludeEmailCopy() {
+        return includeEmailCopy;
+    }
+
+    public void setIncludeEmailCopy(Boolean includeEmailCopy) {
+        this.includeEmailCopy = includeEmailCopy;
+    }
+
+    public Boolean getIncludeGoodStandingInformation() {
+        return includeGoodStandingInformation;
+    }
+
+    public void setIncludeGoodStandingInformation(Boolean includeGoodStandingInformation) {
+        this.includeGoodStandingInformation = includeGoodStandingInformation;
     }
 
     @Override

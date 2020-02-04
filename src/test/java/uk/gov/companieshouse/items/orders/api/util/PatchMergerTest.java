@@ -10,14 +10,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.items.orders.api.model.*;
 
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
+import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.CARDIFF;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
@@ -53,8 +56,21 @@ class PatchMergerTest {
     private static final int ORIGINAL_QUANTITY = 20;
     private static final int CORRECTED_QUANTITY = 2;
 
+    private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
+    private static final CollectionLocation COLLECTION_LOCATION = BELFAST;
+    private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CARDIFF;
+    private static final String CONTACT_NUMBER = "+44 1234 123456";
+    private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
+    private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
+    private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
     private static final DeliveryTimescale DELIVERY_TIMESCALE = STANDARD;
     private static final DeliveryTimescale UPDATED_DELIVERY_TIMESCALE = SAME_DAY;
+    private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
+    private static final boolean INCLUDE_EMAIL_COPY = false;
+    private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
+    private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -170,13 +186,25 @@ class PatchMergerTest {
         // Given
         final CertificateItem original = new CertificateItem();
         final CertificateItemOptions originalOptions = new CertificateItemOptions();
+        originalOptions.setCertificateType(CERTIFICATE_TYPE);
+        originalOptions.setCollectionLocation(COLLECTION_LOCATION);
+        originalOptions.setContactNumber(CONTACT_NUMBER);
+        originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        // TODO PCI-669 Add an item option that is NOT updated
+        originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
         final CertificateItemOptions deltaOptions = new CertificateItemOptions();
+        deltaOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        deltaOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
+        deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -184,8 +212,16 @@ class PatchMergerTest {
                 patchMergerUnderTest.mergePatch(patchFactory.patchFromPojo(delta), original, CertificateItem.class);
 
         // Then
+        assertThat(patched.getItemOptions().getCertificateType(), is(CERTIFICATE_TYPE));
+        assertThat(patched.getItemOptions().getCollectionLocation(), is(UPDATED_COLLECTION_LOCATION));
+        assertThat(patched.getItemOptions().getContactNumber(), is(UPDATED_CONTACT_NUMBER));
+        assertThat(patched.getItemOptions().getDeliveryMethod(), is(UPDATED_DELIVERY_METHOD));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
-        // TODO PCI-669 Add an assertion about an item option that is NOT updated
+        assertThat(patched.getItemOptions().getIncludeCompanyObjectsInformation(),
+                is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
+        assertThat(patched.getItemOptions().getIncludeEmailCopy(), is(UPDATED_INCLUDE_EMAIL_COPY));
+        assertThat(patched.getItemOptions().getIncludeGoodStandingInformation(),
+                is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
     }
 
 }

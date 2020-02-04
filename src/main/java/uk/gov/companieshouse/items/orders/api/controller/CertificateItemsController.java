@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
@@ -20,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
+import static org.springframework.http.HttpStatus.*;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
 @RestController
@@ -66,7 +66,7 @@ public class CertificateItemsController {
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
@@ -76,7 +76,7 @@ public class CertificateItemsController {
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCertificateItemDTO);
+        return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
     }
 
     @GetMapping("${uk.gov.companieshouse.items.orders.api.certificates}/{id}")
@@ -86,11 +86,11 @@ public class CertificateItemsController {
         Optional<CertificateItem> item = service.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
-            return ResponseEntity.status(HttpStatus.OK).body(createdCertificateItemDTO);
+            return ResponseEntity.status(OK).body(createdCertificateItemDTO);
         } else {
             final List<String> errors = new ArrayList<>();
             errors.add("certificate resource not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(HttpStatus.NOT_FOUND, errors));
+            return ResponseEntity.status(NOT_FOUND).body(new ApiError(NOT_FOUND, errors));
         }
     }
 
@@ -105,7 +105,7 @@ public class CertificateItemsController {
 
         final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(HttpStatus.BAD_REQUEST, errors));
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
         final CertificateItem itemRetrieved = service.getCertificateItemById(id)
@@ -113,6 +113,10 @@ public class CertificateItemsController {
 
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
+        final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(patchedItem);
+        if (!patchedErrors.isEmpty()) {
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
+        }
 
         final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);

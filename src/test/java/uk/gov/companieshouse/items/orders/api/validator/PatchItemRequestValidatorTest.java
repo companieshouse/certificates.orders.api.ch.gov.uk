@@ -12,14 +12,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.items.orders.api.util.TestMergePatchFactory;
 
 import javax.json.JsonMergePatch;
 import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,9 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
@@ -204,6 +210,107 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Collection location is optional by default")
+    void collectionLocationIsOptionalByDefault() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Collection location is mandatory for collection delivery method")
+    void collectionLocationIsMandatoryForCollectionDeliveryMethod() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains("collection_location: must not be null when delivery method is collection"));
+    }
+
+    @Test
+    @DisplayName("Company objects and good standing info may be requested by default")
+    void companyObjectsAndGoodStandingInfoMayBeRequestedByDefault() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Neither company objects nor good standing info should be requested for dissolution liquidation")
+    void companyObjectsGoodStandingInfoMustNotBeRequestedForDissolutionLiquidation() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, containsInAnyOrder(
+                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation",
+                "include_good_standing_information: must not be true when certificate type is dissolution_liquidation"));
+    }
+
+    @Test
+    @DisplayName("(Only) include email copy for same day delivery timescale")
+    void includeEmailCopyForSameDayDeliveryTimescale() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        options.setIncludeEmailCopy(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Do not include email copy for standard delivery timescale")
+    void doNotIncludeEmailCopyForStandardDeliveryTimescale() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(STANDARD);
+        options.setIncludeEmailCopy(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains(
+                "include_email_copy: can only be true when delivery timescale is same_day"));
     }
 
     /**
