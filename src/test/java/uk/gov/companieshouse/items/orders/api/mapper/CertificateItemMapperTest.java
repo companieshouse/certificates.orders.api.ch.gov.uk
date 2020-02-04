@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.model.DirectorDetails;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import java.util.Map;
@@ -47,15 +48,34 @@ public class CertificateItemMapperTest {
     private static final boolean INCLUDE_EMAIL_COPY = true;
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = false;
 
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final boolean INCLUDE_DOB_TYPE = true;
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean INCLUDE_OCCUPATION = true;
+
     private static final CertificateItemOptions ITEM_OPTIONS;
+    private static final DirectorDetails DIRECTOR_DETAILS;
 
     static {
+        DIRECTOR_DETAILS = new DirectorDetails();
+        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
         ITEM_OPTIONS.setCollectionLocation(BELFAST);
         ITEM_OPTIONS.setContactNumber(CONTACT_NUMBER);
         ITEM_OPTIONS.setDeliveryMethod(POSTAL);
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
+        ITEM_OPTIONS.setDirectorDetails(DIRECTOR_DETAILS);
         ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         ITEM_OPTIONS.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         ITEM_OPTIONS.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
@@ -152,6 +172,24 @@ public class CertificateItemMapperTest {
         assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
         assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
         assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
+        assertDirectorDetailsSame(options1.getDirectorDetails(), options2.getDirectorDetails());
+    }
+
+    /**
+     * Utility that asserts that each member of the director details options objects passed it has the same value
+     * in both.
+     * @param director1 director options
+     * @param director2 director options
+     */
+    private void assertDirectorDetailsSame(final DirectorDetails director1,
+                                           final DirectorDetails director2) {
+        assertThat(director1.getIncludeAddress(), is(director2.getIncludeAddress()));
+        assertThat(director1.getIncludeAppointmentDate(), is(director2.getIncludeAppointmentDate()));
+        assertThat(director1.getIncludeBasicInformation(), is(director2.getIncludeBasicInformation()));
+        assertThat(director1.getIncludeCountryOfResidence(), is(director2.getIncludeCountryOfResidence()));
+        assertThat(director1.getIncludeDobType(), is(director2.getIncludeDobType()));
+        assertThat(director1.getIncludeNationality(), is(director2.getIncludeNationality()));
+        assertThat(director1.getIncludeOccupation(), is(director2.getIncludeOccupation()));
     }
 
 }

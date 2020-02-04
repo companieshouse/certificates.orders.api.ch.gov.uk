@@ -133,6 +133,43 @@ class CertificateItemsControllerIntegrationTest {
     private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
     "include_good_standing_information: must not be true when certificate type is dissolution_liquidation";
 
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean UPDATED_INCLUDE_ADDRESS = false;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean UPDATED_INCLUDE_APPOINTMENT_DATE = true;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
+    private static final boolean INCLUDE_DOB_TYPE = true;
+    private static final boolean UPDATED_INCLUDE_DOB_TYPE = false;
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
+    private static final boolean INCLUDE_OCCUPATION = true;
+    private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
+
+    private static final DirectorDetails DIRECTOR_DETAILS;
+    private static final DirectorDetails UPDATED_DIRECTOR_DETAILS;
+
+    static {
+        DIRECTOR_DETAILS = new DirectorDetails();
+        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+        UPDATED_DIRECTOR_DETAILS = new DirectorDetails();
+        UPDATED_DIRECTOR_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
+        UPDATED_DIRECTOR_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeBasicInformation(UPDATED_INCLUDE_BASIC_INFORMATION);
+        UPDATED_DIRECTOR_DETAILS.setIncludeCountryOfResidence(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
+        UPDATED_DIRECTOR_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+    }
+
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
      */
@@ -166,6 +203,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
@@ -209,6 +247,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.director_details",
+                        is(objectMapper.convertValue(DIRECTOR_DETAILS, Map.class))))
                 .andExpect(jsonPath("$.item_options.include_company_objects_information",
                         is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
                 .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
@@ -642,6 +682,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
@@ -655,6 +696,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(UPDATED_CONTACT_NUMBER);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        options.setDirectorDetails(UPDATED_DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
@@ -712,6 +754,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getDirectorDetails(),
+                is(UPDATED_DIRECTOR_DETAILS));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeEmailCopy(),
