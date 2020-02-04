@@ -447,6 +447,45 @@
 							"response": []
 						},
 						{
+							"name": "Create certificate item with include company objects and dissolution liquidation",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"dissolution_liquidation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same_day\",\n        \"include_company_objects_information\": true\n    },\n\t\"quantity\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Create certificate item with bad delivery timescale",
 							"request": {
 								"method": "POST",
@@ -527,6 +566,46 @@
 										"orderable",
 										"certificates",
 										"CHS00000000000000152"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item with dissolution liquidation",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"dissolution_liquidation\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000161",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000161"
 									]
 								}
 							},

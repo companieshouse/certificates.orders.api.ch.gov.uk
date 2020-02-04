@@ -21,8 +21,8 @@ import uk.gov.companieshouse.items.orders.api.util.TestMergePatchFactory;
 
 import javax.json.JsonMergePatch;
 import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
@@ -222,7 +223,6 @@ class PatchItemRequestValidatorTest {
         assertThat(errors, is(empty()));
     }
 
-
     @Test
     @DisplayName("Collection location is mandatory for collection delivery method")
     void collectionLocationIsMandatoryForCollectionDeliveryMethod() {
@@ -239,6 +239,39 @@ class PatchItemRequestValidatorTest {
         assertThat(errors, contains("collection_location: must not be null when delivery method is collection"));
     }
 
+    @Test
+    @DisplayName("Company objects information info may be requested by default")
+    void companyObjectsInfoMayBeRequestedByDefault() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setIncludeCompanyObjectsInformation(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Company objects info must not be requested for dissolution liquidation")
+    void companyObjectsInfoMustNotBeRequestedForDissolutionLiquidation() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        options.setIncludeCompanyObjectsInformation(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains(
+                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation"));
+    }
 
     /**
      * Utility method that asserts that the validator produces a "<field name>: must be null"

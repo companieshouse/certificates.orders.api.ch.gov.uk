@@ -36,8 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
-import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.*;
 import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
 import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.CARDIFF;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
@@ -117,12 +116,14 @@ class CertificateItemsControllerIntegrationTest {
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.CollectionLocation`"
                     + " from String \"unknown\": value not one of declared Enum instance names: "
                     + "[london, cardiff, edinburgh, belfast]";
-    private static final String MISSING_COLLECTION_LOCATION_METHOD =
+    private static final String MISSING_COLLECTION_LOCATION_MESSAGE =
             "collection_location: must not be null when delivery method is collection";
     private static final String CONTACT_NUMBER = "+44 1234 123456";
     private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
+    private static final String DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE =
+            "include_company_objects_information: must not be true when certificate type is dissolution_liquidation";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -352,7 +353,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_METHOD));
+                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -395,6 +396,40 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makePostalDeliveryMethodInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with invalid include company objects true for dissolution liquidation")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeCompanyObjects() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyName(COMPANY_NAME);
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        options.setIncludeCompanyObjectsInformation(true);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -887,7 +922,7 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_METHOD));
+                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -918,7 +953,7 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_METHOD));
+                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -963,6 +998,76 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
     }
+
+    @Test
+    @DisplayName("Rejects update request with include company objects and dissolution liquidation")
+    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsAndDissolutionLiquidation() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        options.setIncludeCompanyObjectsInformation(true);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
+    @Test
+    @DisplayName("Rejects update request with include company objects updating dissolution liquidation item")
+    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsUpdatingDissolutionLiquidationItemW()
+            throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setIncludeCompanyObjectsInformation(true);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        final CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCertificateType(DISSOLUTION_LIQUIDATION);
+        savedItem.setItemOptions(savedOptions);
+
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces

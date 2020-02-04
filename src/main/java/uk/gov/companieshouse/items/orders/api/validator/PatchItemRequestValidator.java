@@ -18,13 +18,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
-import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
 
 /**
  * Implements validation of the request payload specific to the the patch item request only.
  */
 @Component
-public class PatchItemRequestValidator {
+public class PatchItemRequestValidator extends RequestValidator {
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
@@ -73,12 +72,7 @@ public class PatchItemRequestValidator {
      */
     public List<String> getValidationErrors(final CertificateItem patchedItem) {
         final CertificateItemOptions options = patchedItem.getItemOptions();
-        if (options != null &&
-                options.getDeliveryMethod() == COLLECTION &&
-                options.getCollectionLocation() == null) {
-            return singletonList("collection_location: must not be null when delivery method is collection");
-        }
-        return EMPTY_LIST;
+        return getValidationErrors(options);
     }
 
 }
