@@ -29,9 +29,15 @@ public class RequestValidator {
                 options.getCollectionLocation() == null) {
             errors.add("collection_location: must not be null when delivery method is collection");
         }
-        if (options.getCertificateType() == DISSOLUTION_LIQUIDATION && options.getIncludeCompanyObjectsInformation()) {
-            errors.add(
-                    "include_company_objects_information: must not be true when certificate type is dissolution_liquidation");
+        if (options.getCertificateType() == DISSOLUTION_LIQUIDATION) {
+            if (options.getIncludeCompanyObjectsInformation()) {
+                errors.add(
+                        "include_company_objects_information: must not be true when certificate type is dissolution_liquidation");
+            }
+            if (options.getIncludeGoodStandingInformation()) {
+                errors.add(
+                        "include_good_standing_information: must not be true when certificate type is dissolution_liquidation");
+            }
         }
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {

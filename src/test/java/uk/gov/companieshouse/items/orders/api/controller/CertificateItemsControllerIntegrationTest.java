@@ -130,6 +130,8 @@ class CertificateItemsControllerIntegrationTest {
             "include_email_copy: can only be true when delivery timescale is same_day";
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
+    private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
+    "include_good_standing_information: must not be true when certificate type is dissolution_liquidation";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -416,8 +418,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Fails to create certificate item with invalid include company objects true for dissolution liquidation")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeCompanyObjects() throws Exception {
+    @DisplayName("Fails to create certificate item with include company objects, good standing true for dissolution liquidation")
+    void createCertificateItemFailsToCreateCertificateItemWithIncludeCompanyObjectsAndGoodStanding() throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
@@ -426,11 +428,13 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(DISSOLUTION_LIQUIDATION);
         options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+                new ApiError(BAD_REQUEST,
+                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1088,13 +1092,15 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request with include company objects and dissolution liquidation")
-    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsAndDissolutionLiquidation() throws Exception {
+    @DisplayName("Rejects update request with include company objects, good standing info and dissolution liquidation")
+    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsGoodStandingInfoAndDissolutionLiquidation()
+            throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(DISSOLUTION_LIQUIDATION);
         options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1104,7 +1110,8 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+                new ApiError(BAD_REQUEST,
+                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1120,13 +1127,14 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request with include company objects updating dissolution liquidation item")
-    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsUpdatingDissolutionLiquidationItem()
+    @DisplayName("Rejects update request with include company objects, good standing info updating dissolution liquidation item")
+    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsGoodStandingInfoUpdatingDissolutionLiquidationItem()
             throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1140,7 +1148,8 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE));
+                new ApiError(BAD_REQUEST,
+                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)

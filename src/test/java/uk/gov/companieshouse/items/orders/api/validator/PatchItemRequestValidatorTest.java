@@ -242,12 +242,13 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Company objects information info may be requested by default")
-    void companyObjectsInfoMayBeRequestedByDefault() {
+    @DisplayName("Company objects and good standing info may be requested by default")
+    void companyObjectsAndGoodStandingInfoMayBeRequestedByDefault() {
         // Given
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
         patchedItem.setItemOptions(options);
 
         // When
@@ -258,21 +259,23 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Company objects info must not be requested for dissolution liquidation")
-    void companyObjectsInfoMustNotBeRequestedForDissolutionLiquidation() {
+    @DisplayName("Neither company objects nor good standing info should be requested for dissolution liquidation")
+    void companyObjectsGoodStandingInfoMustNotBeRequestedForDissolutionLiquidation() {
         // Given
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(DISSOLUTION_LIQUIDATION);
         options.setIncludeCompanyObjectsInformation(true);
+        options.setIncludeGoodStandingInformation(true);
         patchedItem.setItemOptions(options);
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
 
         // Then
-        assertThat(errors, contains(
-                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation"));
+        assertThat(errors, containsInAnyOrder(
+                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation",
+                "include_good_standing_information: must not be true when certificate type is dissolution_liquidation"));
     }
 
     @Test
