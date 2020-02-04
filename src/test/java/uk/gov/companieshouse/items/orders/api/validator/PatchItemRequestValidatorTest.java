@@ -31,6 +31,8 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
@@ -271,6 +273,41 @@ class PatchItemRequestValidatorTest {
         // Then
         assertThat(errors, contains(
                 "include_company_objects_information: must not be true when certificate type is dissolution_liquidation"));
+    }
+
+    @Test
+    @DisplayName("(Only) include email copy for same day delivery timescale")
+    void includeEmailCopyForSameDayDeliveryTimescale() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(SAME_DAY);
+        options.setIncludeEmailCopy(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Do not include email copy for standard delivery timescale")
+    void doNotIncludeEmailCopyForStandardDeliveryTimescale() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDeliveryTimescale(STANDARD);
+        options.setIncludeEmailCopy(true);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains(
+                "include_email_copy: can only be true when delivery timescale is same_day"));
     }
 
     /**

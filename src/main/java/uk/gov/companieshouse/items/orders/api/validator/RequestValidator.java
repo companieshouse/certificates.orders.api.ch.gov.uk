@@ -5,8 +5,10 @@ import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Boolean.TRUE;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
+import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 
 /**
  * Implements common request payload validation.
@@ -30,6 +32,10 @@ public class RequestValidator {
         if (options.getCertificateType() == DISSOLUTION_LIQUIDATION && options.getIncludeCompanyObjectsInformation()) {
             errors.add(
                     "include_company_objects_information: must not be true when certificate type is dissolution_liquidation");
+        }
+        if (TRUE.equals(options.getIncludeEmailCopy()) &&
+                (options.getDeliveryTimescale() != SAME_DAY)) {
+            errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
         return errors;
     }
