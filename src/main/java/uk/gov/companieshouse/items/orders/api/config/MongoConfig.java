@@ -48,6 +48,8 @@ public class MongoConfig {
         converters.add(new WritingDeliveryMethodConverter());
         converters.add(new ReadingDeliveryTimescaleConverter());
         converters.add(new WritingDeliveryTimescaleConverter());
+        converters.add(new ReadingIncludeDobTypeConverter());
+        converters.add(new WritingIncludeDobTypeConverter());
         return new MongoCustomConversions(converters);
     }
 }

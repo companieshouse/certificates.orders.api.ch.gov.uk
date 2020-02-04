@@ -43,6 +43,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -141,8 +143,11 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
-    private static final boolean INCLUDE_DOB_TYPE = true;
-    private static final boolean UPDATED_INCLUDE_DOB_TYPE = false;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
+    private static final IncludeDobType  UPDATED_INCLUDE_DOB_TYPE = FULL;
+    private static final String INVALID_INCLUDE_DOB_TYPE_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.IncludeDobType`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: [partial, full]";
     private static final boolean INCLUDE_NATIONALITY= false;
     private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
     private static final boolean INCLUDE_OCCUPATION = true;
@@ -554,6 +559,40 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with an invalid include DOB type")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final DirectorDetails director = new DirectorDetails();
+        director.setIncludeDobType(INCLUDE_DOB_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(director);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makePartialIncludeDobTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1274,6 +1313,38 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    @DisplayName("Rejects update request containing an invalid include DOB type")
+    void updateCertificateItemRejectsInvalidIncludeDobType() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final DirectorDetails director = new DirectorDetails();
+        director.setIncludeDobType(INCLUDE_DOB_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(director);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
@@ -1369,6 +1440,30 @@ class CertificateItemsControllerIntegrationTest {
     private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePartialIncludeDobTypeInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("partial", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePartialIncludeDobTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("partial", "unknown");
     }
 
     /**

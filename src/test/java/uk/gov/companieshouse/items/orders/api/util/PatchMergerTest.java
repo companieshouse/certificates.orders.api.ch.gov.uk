@@ -23,6 +23,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link PatchMerger} class.
@@ -80,8 +82,8 @@ class PatchMergerTest {
     private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
-    private static final boolean INCLUDE_DOB_TYPE = true;
-    private static final boolean UPDATED_INCLUDE_DOB_TYPE = false;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
+    private static final IncludeDobType  UPDATED_INCLUDE_DOB_TYPE = FULL;
     private static final boolean INCLUDE_NATIONALITY= false;
     private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
     private static final boolean INCLUDE_OCCUPATION = true;

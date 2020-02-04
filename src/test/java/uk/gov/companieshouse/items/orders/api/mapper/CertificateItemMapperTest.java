@@ -8,10 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.DirectorDetails;
-import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.model.*;
 
 import java.util.Map;
 
@@ -23,6 +20,7 @@ import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCOR
 import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link CertificateItemMapper} class.
@@ -52,7 +50,7 @@ public class CertificateItemMapperTest {
     private static final boolean INCLUDE_APPOINTMENT_DATE = false;
     private static final boolean INCLUDE_BASIC_INFORMATION = true;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
-    private static final boolean INCLUDE_DOB_TYPE = true;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
     private static final boolean INCLUDE_NATIONALITY= false;
     private static final boolean INCLUDE_OCCUPATION = true;
 

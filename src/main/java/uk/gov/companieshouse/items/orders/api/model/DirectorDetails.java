@@ -13,7 +13,7 @@ public class DirectorDetails {
     private Boolean includeAppointmentDate;
     private Boolean includeBasicInformation;
     private Boolean includeCountryOfResidence;
-    private Boolean includeDobType;
+    private IncludeDobType includeDobType;
     private Boolean includeNationality;
     private Boolean includeOccupation;
 
@@ -49,11 +49,11 @@ public class DirectorDetails {
         this.includeCountryOfResidence = includeCountryOfResidence;
     }
 
-    public Boolean getIncludeDobType() {
+    public IncludeDobType getIncludeDobType() {
         return includeDobType;
     }
 
-    public void setIncludeDobType(Boolean includeDobType) {
+    public void setIncludeDobType(IncludeDobType includeDobType) {
         this.includeDobType = includeDobType;
     }
 
