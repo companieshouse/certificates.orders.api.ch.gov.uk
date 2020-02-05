@@ -17,6 +17,7 @@
 		<java.version>1.8</java.version>
 		<structured-logging.version>1.9.0</structured-logging.version>
 		<api-helper-java.version>1.1.0-rc1</api-helper-java.version>
+		<rest-service-common-library.version>0.0.3</rest-service-common-library.version>
 		<commons.lang.version>2.6</commons.lang.version>
 		<commons.beanutils.version>1.9.4</commons.beanutils.version>
 		<gson.version>2.8.0</gson.version>
@@ -58,6 +59,12 @@
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>api-helper-java</artifactId>
 			<version>${api-helper-java.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>rest-service-common-library</artifactId>
+			<version>${rest-service-common-library.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
