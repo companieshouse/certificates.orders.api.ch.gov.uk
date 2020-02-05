@@ -43,6 +43,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -133,6 +135,46 @@ class CertificateItemsControllerIntegrationTest {
     private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
     "include_good_standing_information: must not be true when certificate type is dissolution_liquidation";
 
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean UPDATED_INCLUDE_ADDRESS = false;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean UPDATED_INCLUDE_APPOINTMENT_DATE = true;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
+    private static final IncludeDobType  UPDATED_INCLUDE_DOB_TYPE = FULL;
+    private static final String INVALID_INCLUDE_DOB_TYPE_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.IncludeDobType`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: [partial, full]";
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
+    private static final boolean INCLUDE_OCCUPATION = true;
+    private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
+
+    private static final DirectorDetails DIRECTOR_DETAILS;
+    private static final DirectorDetails UPDATED_DIRECTOR_DETAILS;
+
+    static {
+        DIRECTOR_DETAILS = new DirectorDetails();
+        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+        UPDATED_DIRECTOR_DETAILS = new DirectorDetails();
+        UPDATED_DIRECTOR_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
+        UPDATED_DIRECTOR_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeBasicInformation(UPDATED_INCLUDE_BASIC_INFORMATION);
+        UPDATED_DIRECTOR_DETAILS.setIncludeCountryOfResidence(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
+        UPDATED_DIRECTOR_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+    }
+
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
      */
@@ -166,6 +208,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
@@ -209,6 +252,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.director_details",
+                        is(objectMapper.convertValue(DIRECTOR_DETAILS, Map.class))))
                 .andExpect(jsonPath("$.item_options.include_company_objects_information",
                         is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
                 .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
@@ -523,6 +568,40 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Fails to create certificate item with an invalid include DOB type")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final DirectorDetails director = new DirectorDetails();
+        director.setIncludeDobType(INCLUDE_DOB_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(director);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makePartialIncludeDobTypeInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
     @DisplayName("Successfully gets a certificate item")
     void getCertificateItemSuccessfully() throws Exception {
         // Given
@@ -642,6 +721,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
@@ -655,6 +735,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setContactNumber(UPDATED_CONTACT_NUMBER);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        options.setDirectorDetails(UPDATED_DIRECTOR_DETAILS);
         options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
@@ -712,6 +793,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_DELIVERY_METHOD));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
                 is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getDirectorDetails(),
+                is(UPDATED_DIRECTOR_DETAILS));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeEmailCopy(),
@@ -1230,6 +1313,38 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    @DisplayName("Rejects update request containing an invalid include DOB type")
+    void updateCertificateItemRejectsInvalidIncludeDobType() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final DirectorDetails director = new DirectorDetails();
+        director.setIncludeDobType(INCLUDE_DOB_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(director);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
@@ -1325,6 +1440,30 @@ class CertificateItemsControllerIntegrationTest {
     private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePartialIncludeDobTypeInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("partial", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makePartialIncludeDobTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("partial", "unknown");
     }
 
     /**

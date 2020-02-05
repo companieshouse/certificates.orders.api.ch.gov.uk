@@ -19,6 +19,8 @@ public class CertificateItemOptions {
 
     private DeliveryTimescale deliveryTimescale;
 
+    private DirectorDetails directorDetails;
+
     private Boolean includeCompanyObjectsInformation;
 
     private Boolean includeEmailCopy;
@@ -63,6 +65,14 @@ public class CertificateItemOptions {
 
     public void setDeliveryTimescale(DeliveryTimescale deliveryTimescale) {
         this.deliveryTimescale = deliveryTimescale;
+    }
+
+    public DirectorDetails getDirectorDetails() {
+        return directorDetails;
+    }
+
+    public void setDirectorDetails(DirectorDetails directorDetails) {
+        this.directorDetails = directorDetails;
     }
 
     public Boolean getIncludeCompanyObjectsInformation() {

@@ -23,6 +23,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link PatchMerger} class.
@@ -71,6 +73,43 @@ class PatchMergerTest {
     private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
+
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean UPDATED_INCLUDE_ADDRESS = false;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean UPDATED_INCLUDE_APPOINTMENT_DATE = true;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
+    private static final IncludeDobType  UPDATED_INCLUDE_DOB_TYPE = FULL;
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
+    private static final boolean INCLUDE_OCCUPATION = true;
+    private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
+
+    private static final DirectorDetails DIRECTOR_DETAILS;
+    private static final DirectorDetails UPDATED_DIRECTOR_DETAILS;
+
+    static {
+        DIRECTOR_DETAILS = new DirectorDetails();
+        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+        UPDATED_DIRECTOR_DETAILS = new DirectorDetails();
+        UPDATED_DIRECTOR_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
+        UPDATED_DIRECTOR_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeBasicInformation(UPDATED_INCLUDE_BASIC_INFORMATION);
+        UPDATED_DIRECTOR_DETAILS.setIncludeCountryOfResidence(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
+        UPDATED_DIRECTOR_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
+        UPDATED_DIRECTOR_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+    }
 
     @Autowired
     private PatchMerger patchMergerUnderTest;
@@ -194,6 +233,7 @@ class PatchMergerTest {
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        originalOptions.setDirectorDetails(DIRECTOR_DETAILS);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -205,6 +245,7 @@ class PatchMergerTest {
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
+        deltaOptions.setDirectorDetails(UPDATED_DIRECTOR_DETAILS);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -222,6 +263,15 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getIncludeEmailCopy(), is(UPDATED_INCLUDE_EMAIL_COPY));
         assertThat(patched.getItemOptions().getIncludeGoodStandingInformation(),
                 is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
+
+        final DirectorDetails patchedDirector = patched.getItemOptions().getDirectorDetails();
+        assertThat(patchedDirector.getIncludeAddress(), is(UPDATED_INCLUDE_ADDRESS));
+        assertThat(patchedDirector.getIncludeAppointmentDate(), is(UPDATED_INCLUDE_APPOINTMENT_DATE));
+        assertThat(patchedDirector.getIncludeBasicInformation(), is(UPDATED_INCLUDE_BASIC_INFORMATION));
+        assertThat(patchedDirector.getIncludeCountryOfResidence(), is(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE));
+        assertThat(patchedDirector.getIncludeDobType(), is(UPDATED_INCLUDE_DOB_TYPE));
+        assertThat(patchedDirector.getIncludeNationality(), is(UPDATED_INCLUDE_NATIONALITY));
+        assertThat(patchedDirector.getIncludeOccupation(), is(UPDATED_INCLUDE_OCCUPATION));
     }
 
 }
