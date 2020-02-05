@@ -27,6 +27,8 @@ public class CertificateItemOptions {
 
     private Boolean includeGoodStandingInformation;
 
+    private RegisteredOfficeAddressDetails registeredOfficeAddressDetails;
+
     private DirectorOrSecretaryDetails secretaryDetails;
 
     public CertificateType getCertificateType() {
@@ -99,6 +101,14 @@ public class CertificateItemOptions {
 
     public void setIncludeGoodStandingInformation(Boolean includeGoodStandingInformation) {
         this.includeGoodStandingInformation = includeGoodStandingInformation;
+    }
+
+    public RegisteredOfficeAddressDetails getRegisteredOfficeAddressDetails() {
+        return registeredOfficeAddressDetails;
+    }
+
+    public void setRegisteredOfficeAddressDetails(RegisteredOfficeAddressDetails registeredOfficeAddressDetails) {
+        this.registeredOfficeAddressDetails = registeredOfficeAddressDetails;
     }
 
     public DirectorOrSecretaryDetails getSecretaryDetails() {

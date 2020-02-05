@@ -20,6 +20,7 @@ import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCOR
 import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
@@ -54,8 +55,12 @@ public class CertificateItemMapperTest {
     private static final boolean INCLUDE_NATIONALITY= false;
     private static final boolean INCLUDE_OCCUPATION = true;
 
+    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = CURRENT;
+    private static final boolean INCLUDE_DATES = true;
+
     private static final CertificateItemOptions ITEM_OPTIONS;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -67,6 +72,10 @@ public class CertificateItemMapperTest {
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
 
+        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
         ITEM_OPTIONS.setCollectionLocation(BELFAST);
@@ -77,6 +86,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         ITEM_OPTIONS.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         ITEM_OPTIONS.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
     }
 
@@ -172,6 +182,7 @@ public class CertificateItemMapperTest {
         assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
         assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
         assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
+        assertAddressDetailsSame(options1.getRegisteredOfficeAddressDetails(), options2.getRegisteredOfficeAddressDetails());
         assertDetailsSame(options1.getSecretaryDetails(), options2.getSecretaryDetails());
     }
 
@@ -190,6 +201,18 @@ public class CertificateItemMapperTest {
         assertThat(details1.getIncludeDobType(), is(details2.getIncludeDobType()));
         assertThat(details1.getIncludeNationality(), is(details2.getIncludeNationality()));
         assertThat(details1.getIncludeOccupation(), is(details2.getIncludeOccupation()));
+    }
+
+    /**
+     * Utility that asserts that each member of the registered office address details options objects passed it has
+     * the same value in both.
+     * @param details1 registered office address options
+     * @param details2 registered office address options
+     */
+    private void assertAddressDetailsSame(final RegisteredOfficeAddressDetails details1,
+                                          final RegisteredOfficeAddressDetails details2) {
+        assertThat(details1.getIncludeAddressRecordsType(), is(details2.getIncludeAddressRecordsType()));
+        assertThat(details1.getIncludeDates(), is(details2.getIncludeDates()));
     }
 
 }
