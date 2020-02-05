@@ -5,9 +5,9 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
- * An instance of this represents the director details item options selected.
+ * An instance of this represents the director or secretary details item options selected.
  */
-public class DirectorDetails {
+public class DirectorOrSecretaryDetails {
 
     private Boolean includeAddress;
     private Boolean includeAppointmentDate;
@@ -79,8 +79,8 @@ public class DirectorDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DirectorDetails)) return false;
-        DirectorDetails that = (DirectorDetails) o;
+        if (!(o instanceof DirectorOrSecretaryDetails)) return false;
+        DirectorOrSecretaryDetails that = (DirectorOrSecretaryDetails) o;
         return Objects.equals(includeAddress, that.includeAddress) &&
                 Objects.equals(includeAppointmentDate, that.includeAppointmentDate) &&
                 Objects.equals(includeBasicInformation, that.includeBasicInformation) &&
