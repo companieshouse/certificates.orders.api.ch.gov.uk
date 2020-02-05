@@ -89,26 +89,26 @@ class PatchMergerTest {
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
 
-    private static final DirectorDetails DIRECTOR_DETAILS;
-    private static final DirectorDetails UPDATED_DIRECTOR_DETAILS;
+    private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final DirectorOrSecretaryDetails UPDATED_DIRECTOR_OR_SECRETARY_DETAILS;
 
     static {
-        DIRECTOR_DETAILS = new DirectorDetails();
-        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
-        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
-        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
-        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
-        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
-        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
-        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
-        UPDATED_DIRECTOR_DETAILS = new DirectorDetails();
-        UPDATED_DIRECTOR_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
-        UPDATED_DIRECTOR_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
-        UPDATED_DIRECTOR_DETAILS.setIncludeBasicInformation(UPDATED_INCLUDE_BASIC_INFORMATION);
-        UPDATED_DIRECTOR_DETAILS.setIncludeCountryOfResidence(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE);
-        UPDATED_DIRECTOR_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
-        UPDATED_DIRECTOR_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
-        UPDATED_DIRECTOR_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+        DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(UPDATED_INCLUDE_BASIC_INFORMATION);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
+        UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
     }
 
     @Autowired
@@ -230,10 +230,11 @@ class PatchMergerTest {
         originalOptions.setContactNumber(CONTACT_NUMBER);
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        originalOptions.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
-        originalOptions.setDirectorDetails(DIRECTOR_DETAILS);
+        originalOptions.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -242,10 +243,11 @@ class PatchMergerTest {
         deltaOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        deltaOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
-        deltaOptions.setDirectorDetails(UPDATED_DIRECTOR_DETAILS);
+        deltaOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         delta.setItemOptions(deltaOptions);
 
         // When
@@ -264,7 +266,7 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getIncludeGoodStandingInformation(),
                 is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
 
-        final DirectorDetails patchedDirector = patched.getItemOptions().getDirectorDetails();
+        final DirectorOrSecretaryDetails patchedDirector = patched.getItemOptions().getDirectorDetails();
         assertThat(patchedDirector.getIncludeAddress(), is(UPDATED_INCLUDE_ADDRESS));
         assertThat(patchedDirector.getIncludeAppointmentDate(), is(UPDATED_INCLUDE_APPOINTMENT_DATE));
         assertThat(patchedDirector.getIncludeBasicInformation(), is(UPDATED_INCLUDE_BASIC_INFORMATION));
@@ -272,6 +274,15 @@ class PatchMergerTest {
         assertThat(patchedDirector.getIncludeDobType(), is(UPDATED_INCLUDE_DOB_TYPE));
         assertThat(patchedDirector.getIncludeNationality(), is(UPDATED_INCLUDE_NATIONALITY));
         assertThat(patchedDirector.getIncludeOccupation(), is(UPDATED_INCLUDE_OCCUPATION));
+
+        final DirectorOrSecretaryDetails patchedSecretary = patched.getItemOptions().getSecretaryDetails();
+        assertThat(patchedSecretary.getIncludeAddress(), is(UPDATED_INCLUDE_ADDRESS));
+        assertThat(patchedSecretary.getIncludeAppointmentDate(), is(UPDATED_INCLUDE_APPOINTMENT_DATE));
+        assertThat(patchedSecretary.getIncludeBasicInformation(), is(UPDATED_INCLUDE_BASIC_INFORMATION));
+        assertThat(patchedSecretary.getIncludeCountryOfResidence(), is(UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE));
+        assertThat(patchedSecretary.getIncludeDobType(), is(UPDATED_INCLUDE_DOB_TYPE));
+        assertThat(patchedSecretary.getIncludeNationality(), is(UPDATED_INCLUDE_NATIONALITY));
+        assertThat(patchedSecretary.getIncludeOccupation(), is(UPDATED_INCLUDE_OCCUPATION));
     }
 
 }

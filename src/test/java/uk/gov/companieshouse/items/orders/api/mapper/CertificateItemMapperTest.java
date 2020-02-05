@@ -55,17 +55,17 @@ public class CertificateItemMapperTest {
     private static final boolean INCLUDE_OCCUPATION = true;
 
     private static final CertificateItemOptions ITEM_OPTIONS;
-    private static final DirectorDetails DIRECTOR_DETAILS;
+    private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
 
     static {
-        DIRECTOR_DETAILS = new DirectorDetails();
-        DIRECTOR_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
-        DIRECTOR_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
-        DIRECTOR_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
-        DIRECTOR_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
-        DIRECTOR_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
-        DIRECTOR_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
-        DIRECTOR_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+        DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
 
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
@@ -73,10 +73,11 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setContactNumber(CONTACT_NUMBER);
         ITEM_OPTIONS.setDeliveryMethod(POSTAL);
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
-        ITEM_OPTIONS.setDirectorDetails(DIRECTOR_DETAILS);
+        ITEM_OPTIONS.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         ITEM_OPTIONS.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         ITEM_OPTIONS.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
     }
 
     @Configuration
@@ -167,27 +168,28 @@ public class CertificateItemMapperTest {
         assertThat(options1.getContactNumber(), is(options2.getContactNumber()));
         assertThat(options1.getDeliveryMethod(), is(options2.getDeliveryMethod()));
         assertThat(options1.getDeliveryTimescale(), is(options2.getDeliveryTimescale()));
+        assertDetailsSame(options1.getDirectorDetails(), options2.getDirectorDetails());
         assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
         assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
         assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
-        assertDirectorDetailsSame(options1.getDirectorDetails(), options2.getDirectorDetails());
+        assertDetailsSame(options1.getSecretaryDetails(), options2.getSecretaryDetails());
     }
 
     /**
-     * Utility that asserts that each member of the director details options objects passed it has the same value
-     * in both.
-     * @param director1 director options
-     * @param director2 director options
+     * Utility that asserts that each member of the director or secretary details options objects passed it has
+     * the same value in both.
+     * @param details1 director/secretary options
+     * @param details2 director/secretary options
      */
-    private void assertDirectorDetailsSame(final DirectorDetails director1,
-                                           final DirectorDetails director2) {
-        assertThat(director1.getIncludeAddress(), is(director2.getIncludeAddress()));
-        assertThat(director1.getIncludeAppointmentDate(), is(director2.getIncludeAppointmentDate()));
-        assertThat(director1.getIncludeBasicInformation(), is(director2.getIncludeBasicInformation()));
-        assertThat(director1.getIncludeCountryOfResidence(), is(director2.getIncludeCountryOfResidence()));
-        assertThat(director1.getIncludeDobType(), is(director2.getIncludeDobType()));
-        assertThat(director1.getIncludeNationality(), is(director2.getIncludeNationality()));
-        assertThat(director1.getIncludeOccupation(), is(director2.getIncludeOccupation()));
+    private void assertDetailsSame(final DirectorOrSecretaryDetails details1,
+                                   final DirectorOrSecretaryDetails details2) {
+        assertThat(details1.getIncludeAddress(), is(details2.getIncludeAddress()));
+        assertThat(details1.getIncludeAppointmentDate(), is(details2.getIncludeAppointmentDate()));
+        assertThat(details1.getIncludeBasicInformation(), is(details2.getIncludeBasicInformation()));
+        assertThat(details1.getIncludeCountryOfResidence(), is(details2.getIncludeCountryOfResidence()));
+        assertThat(details1.getIncludeDobType(), is(details2.getIncludeDobType()));
+        assertThat(details1.getIncludeNationality(), is(details2.getIncludeNationality()));
+        assertThat(details1.getIncludeOccupation(), is(details2.getIncludeOccupation()));
     }
 
 }

@@ -19,13 +19,15 @@ public class CertificateItemOptions {
 
     private DeliveryTimescale deliveryTimescale;
 
-    private DirectorDetails directorDetails;
+    private DirectorOrSecretaryDetails directorDetails;
 
     private Boolean includeCompanyObjectsInformation;
 
     private Boolean includeEmailCopy;
 
     private Boolean includeGoodStandingInformation;
+
+    private DirectorOrSecretaryDetails secretaryDetails;
 
     public CertificateType getCertificateType() {
         return certificateType;
@@ -67,12 +69,12 @@ public class CertificateItemOptions {
         this.deliveryTimescale = deliveryTimescale;
     }
 
-    public DirectorDetails getDirectorDetails() {
+    public DirectorOrSecretaryDetails getDirectorDetails() {
         return directorDetails;
     }
 
-    public void setDirectorDetails(DirectorDetails directorDetails) {
-        this.directorDetails = directorDetails;
+    public void setDirectorDetails(DirectorOrSecretaryDetails directorOrSecretaryDetails) {
+        this.directorDetails = directorOrSecretaryDetails;
     }
 
     public Boolean getIncludeCompanyObjectsInformation() {
@@ -97,6 +99,14 @@ public class CertificateItemOptions {
 
     public void setIncludeGoodStandingInformation(Boolean includeGoodStandingInformation) {
         this.includeGoodStandingInformation = includeGoodStandingInformation;
+    }
+
+    public DirectorOrSecretaryDetails getSecretaryDetails() {
+        return secretaryDetails;
+    }
+
+    public void setSecretaryDetails(DirectorOrSecretaryDetails secretaryDetails) {
+        this.secretaryDetails = secretaryDetails;
     }
 
     @Override
