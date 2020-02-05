@@ -1,13 +1,11 @@
 package uk.gov.companieshouse.items.orders.api.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.Links;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
@@ -37,10 +35,6 @@ public class CertificateItemsController {
     private final CertificateItemMapper mapper;
     private final PatchMerger patcher;
     private final CertificateItemService service;
-
-    // TODO PCI-674 Remove this experimental code
-    @Value("${uk.gov.companieshouse.items.orders.api.certificates}")
-    private String pathToSelf;
 
     /**
      * Constructor.
@@ -80,11 +74,6 @@ public class CertificateItemsController {
 
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
-
-        // TODO PCI-674 Remove this experimental code
-        final Links links = new Links();
-        links.setSelf(pathToSelf + "/" + createdCertificateItemDTO.getId());
-        createdCertificateItemDTO.setLinks(links);
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);

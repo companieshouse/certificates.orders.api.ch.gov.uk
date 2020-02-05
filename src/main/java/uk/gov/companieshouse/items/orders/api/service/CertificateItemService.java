@@ -21,17 +21,20 @@ public class CertificateItemService {
     private final DescriptionProviderService descriptions;
     private final CertificateCostCalculatorService calculator;
     private final EtagGeneratorService etagGenerator;
+    private final LinksGeneratorService linksGenerator;
 
     public CertificateItemService(final CertificateItemRepository repository,
                                   final SequenceGeneratorService generator,
                                   final DescriptionProviderService descriptions,
                                   final CertificateCostCalculatorService calculator,
-                                  final EtagGeneratorService etagGenerator) {
+                                  final EtagGeneratorService etagGenerator,
+                                  final LinksGeneratorService linksGenerator) {
         this.repository = repository;
         this.generator = generator;
         this.descriptions = descriptions;
         this.calculator = calculator;
         this.etagGenerator = etagGenerator;
+        this.linksGenerator = linksGenerator;
     }
 
     /**
@@ -44,6 +47,7 @@ public class CertificateItemService {
         item.setId(getNextId());
         setCreationDateTimes(item);
         item.setEtag(etagGenerator.generateEtag());
+        item.setLinks(linksGenerator.generateLinks(item.getId()));
         final CertificateItem itemSaved = repository.save(item);
         CERTIFICATE.populateItemCosts(itemSaved, calculator);
         return itemSaved;
