@@ -15,7 +15,6 @@ import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidato
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.service.links.CoreLinkKeys;
-import uk.gov.companieshouse.service.links.Links;
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
@@ -83,9 +82,7 @@ public class CertificateItemsController {
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
         // TODO PCI-674 Remove this experimental code
-        final Links links = new Links();
-        links.setLink(CoreLinkKeys.SELF, pathToSelf + "/" + createdCertificateItemDTO.getId());
-        createdCertificateItemDTO.setLinks(links);
+        createdCertificateItemDTO.setLink(CoreLinkKeys.SELF, pathToSelf + "/" + createdCertificateItemDTO.getId());
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);

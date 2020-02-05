@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Represents state common to all item DTOs.
  */
-public abstract class AbstractItemDTO {
+public abstract class AbstractItemDTO extends Links {
 
     protected String id;
 
@@ -19,7 +19,7 @@ public abstract class AbstractItemDTO {
 
     protected Map<String, String> descriptionValues;
 
-    private Links links;
+//    private Links links;
 
     public void setId(String id) {
         this.id = id;
@@ -55,12 +55,13 @@ public abstract class AbstractItemDTO {
         this.descriptionValues = descriptionValues;
     }
 
-    @Null
-    public Links getLinks() {
-        return links;
-    }
+//    @Null
+//    @JsonProperty("links")
+//    public Links getLinks() {
+//        return links;
+//    }
 
-    public void setLinks(Links links) {
-        this.links = links;
-    }
+//    public void setLinks(Links links) {
+//        this.links = links;
+//    }
 }
