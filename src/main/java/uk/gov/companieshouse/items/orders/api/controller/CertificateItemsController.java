@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.items.orders.api.model.Links;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
@@ -14,7 +15,6 @@ import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidat
 import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.service.links.CoreLinkKeys;
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +82,9 @@ public class CertificateItemsController {
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
         // TODO PCI-674 Remove this experimental code
-        createdCertificateItemDTO.setLink(CoreLinkKeys.SELF, pathToSelf + "/" + createdCertificateItemDTO.getId());
+        final Links links = new Links();
+        links.setSelf(pathToSelf + "/" + createdCertificateItemDTO.getId());
+        createdCertificateItemDTO.setLinks(links);
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);

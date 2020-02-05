@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.companieshouse.service.links.Links;
+import uk.gov.companieshouse.items.orders.api.model.Links;
 
 import javax.validation.constraints.Null;
 import java.util.Map;
@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Represents state common to all item DTOs.
  */
-public abstract class AbstractItemDTO extends Links {
+public abstract class AbstractItemDTO {
 
     protected String id;
 
@@ -19,7 +19,7 @@ public abstract class AbstractItemDTO extends Links {
 
     protected Map<String, String> descriptionValues;
 
-//    private Links links;
+    private Links links;
 
     public void setId(String id) {
         this.id = id;
@@ -55,13 +55,13 @@ public abstract class AbstractItemDTO extends Links {
         this.descriptionValues = descriptionValues;
     }
 
-//    @Null
-//    @JsonProperty("links")
-//    public Links getLinks() {
-//        return links;
-//    }
+    @Null
+    @JsonProperty("links")
+    public Links getLinks() {
+        return links;
+    }
 
-//    public void setLinks(Links links) {
-//        this.links = links;
-//    }
+    public void setLinks(Links links) {
+        this.links = links;
+    }
 }
