@@ -43,6 +43,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
@@ -153,8 +155,20 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
 
+    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = CURRENT;
+    private static final IncludeAddressRecordsType UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE = CURRENT_PREVIOUS_AND_PRIOR;
+    private static final String INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE =
+            "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + "[current_previous_and_prior, all, current_and_previous, current]";
+    private static final boolean INCLUDE_DATES = true;
+    private static final boolean UPDATED_INCLUDE_DATES = false;
+
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final DirectorOrSecretaryDetails UPDATED_DIRECTOR_OR_SECRETARY_DETAILS;
+
+    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
+    private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -165,6 +179,7 @@ class CertificateItemsControllerIntegrationTest {
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
@@ -173,6 +188,14 @@ class CertificateItemsControllerIntegrationTest {
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+
+        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE);
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(UPDATED_INCLUDE_DATES);
     }
 
     /**
@@ -212,6 +235,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
@@ -260,6 +284,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
                 .andExpect(jsonPath("$.item_options.include_good_standing_information",
                         is(INCLUDE_GOOD_STANDING_INFORMATION)))
+                .andExpect(jsonPath("$.item_options.registered_office_address_details",
+                        is(objectMapper.convertValue(REGISTERED_OFFICE_ADDRESS_DETAILS, Map.class))))
                 .andExpect(jsonPath("$.postal_delivery", is(true)))
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andExpect(jsonPath("$.item_options.secretary_details",
@@ -605,6 +631,40 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Fails to create certificate item with an invalid include address records type")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
     @DisplayName("Successfully gets a certificate item")
     void getCertificateItemSuccessfully() throws Exception {
         // Given
@@ -728,6 +788,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         savedItem.setItemOptions(options);
         repository.save(savedItem);
@@ -743,6 +804,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
+        options.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
@@ -806,9 +868,12 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_INCLUDE_EMAIL_COPY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeGoodStandingInformation(),
                 is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
-        assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getRegisteredOfficeAddressDetails(),
+                is(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS));
         assertThat(retrievedCertificateItem.get().getItemOptions().getSecretaryDetails(),
                 is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
+        assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
+
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
@@ -1353,6 +1418,39 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    @DisplayName("Rejects update request containing an invalid include address records type")
+    void updateCertificateItemRejectsInvalidIncludeAddressRecordsType() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "incorporation" certificate type value with "unknown" for validation testing purposes.
@@ -1471,6 +1569,30 @@ class CertificateItemsControllerIntegrationTest {
     private String makePartialIncludeDobTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(itemUpdate).replace("partial", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "current" include address records type value with "unknown" for validation testing purposes.
+     * @param newItem the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeCurrentIncludeAddressRecordsTypeInvalid(final CertificateItemDTO newItem)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(newItem).replace("current", "unknown");
+    }
+
+    /**
+     * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
+     * the "current" include address records type value with "unknown" for validation testing purposes.
+     * @param itemUpdate the item to be serialised to JSON with an incorrect include DOB type value
+     * @return the corrupted JSON representation of the item
+     * @throws JsonProcessingException should something unexpected happen
+     */
+    private String makeCurrentIncludeAddressRecordsTypeInvalid(final PatchValidationCertificateItemDTO itemUpdate)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(itemUpdate).replace("current", "unknown");
     }
 
     /**

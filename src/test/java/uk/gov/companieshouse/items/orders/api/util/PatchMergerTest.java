@@ -23,6 +23,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLEC
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
@@ -89,8 +91,15 @@ class PatchMergerTest {
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
 
+    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = CURRENT;
+    private static final IncludeAddressRecordsType UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE = CURRENT_PREVIOUS_AND_PRIOR;
+    private static final boolean INCLUDE_DATES = true;
+    private static final boolean UPDATED_INCLUDE_DATES = false;
+
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final DirectorOrSecretaryDetails UPDATED_DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
+    private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -101,6 +110,7 @@ class PatchMergerTest {
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(UPDATED_INCLUDE_ADDRESS);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(UPDATED_INCLUDE_APPOINTMENT_DATE);
@@ -109,6 +119,14 @@ class PatchMergerTest {
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+
+        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE);
+        UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(UPDATED_INCLUDE_DATES);
     }
 
     @Autowired
@@ -234,6 +252,7 @@ class PatchMergerTest {
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        originalOptions.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         originalOptions.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         original.setItemOptions(originalOptions);
 
@@ -247,6 +266,7 @@ class PatchMergerTest {
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
+        deltaOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
         deltaOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         delta.setItemOptions(deltaOptions);
 
@@ -283,6 +303,11 @@ class PatchMergerTest {
         assertThat(patchedSecretary.getIncludeDobType(), is(UPDATED_INCLUDE_DOB_TYPE));
         assertThat(patchedSecretary.getIncludeNationality(), is(UPDATED_INCLUDE_NATIONALITY));
         assertThat(patchedSecretary.getIncludeOccupation(), is(UPDATED_INCLUDE_OCCUPATION));
+
+        final RegisteredOfficeAddressDetails patchedOffice =
+                patched.getItemOptions().getRegisteredOfficeAddressDetails();
+        assertThat(patchedOffice.getIncludeAddressRecordsType(), is(UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE));
+        assertThat(patchedOffice.getIncludeDates(), is(UPDATED_INCLUDE_DATES));
     }
 
 }
