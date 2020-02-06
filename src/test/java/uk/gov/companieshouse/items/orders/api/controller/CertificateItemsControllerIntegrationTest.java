@@ -170,6 +170,9 @@ class CertificateItemsControllerIntegrationTest {
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
 
+    private static final String SELF_PATH = "/orderable/certificates";
+    private static final Links LINKS;
+
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
@@ -196,6 +199,9 @@ class CertificateItemsControllerIntegrationTest {
         UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
         UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE);
         UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(UPDATED_INCLUDE_DATES);
+
+        LINKS = new Links();
+        LINKS.setSelf(SELF_PATH + "/" + EXPECTED_ITEM_ID);
     }
 
     /**
@@ -257,6 +263,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setPostalDelivery(true);
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        expectedItem.setLinks(LINKS);
         expectedItem.setEtag(TOKEN_ETAG);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
@@ -290,6 +297,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andExpect(jsonPath("$.item_options.secretary_details",
                         is(objectMapper.convertValue(DIRECTOR_OR_SECRETARY_DETAILS, Map.class))))
+                .andExpect(jsonPath("$.links",
+                        is(objectMapper.convertValue(LINKS, Map.class))))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -307,11 +316,13 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
+        newItem.setLinks(LINKS);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
                                                  "company_name: must not be null",
-                                                 "etag: must be null"));
+                                                 "etag: must be null",
+                                                 "links: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -675,6 +686,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setUserId(ERIC_IDENTITY_VALUE);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
         newItem.setEtag(TOKEN_ETAG);
+        newItem.setLinks(LINKS);
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
@@ -690,6 +702,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
+        expectedItem.setLinks(LINKS);
 
         // When and then
         mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
@@ -791,6 +804,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         savedItem.setItemOptions(options);
+        savedItem.setLinks(LINKS);
         repository.save(savedItem);
 
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
@@ -829,6 +843,7 @@ class CertificateItemsControllerIntegrationTest {
                 Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
+        expectedItem.setLinks(LINKS);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -873,7 +888,7 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getItemOptions().getSecretaryDetails(),
                 is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
-
+        assertThat(retrievedCertificateItem.get().getLinks(), is(LINKS));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
@@ -1034,6 +1049,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
         itemUpdate.setEtag(TOKEN_ETAG);
+        itemUpdate.setLinks(LINKS);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1045,7 +1061,8 @@ class CertificateItemsControllerIntegrationTest {
                 new ApiError(BAD_REQUEST, asList("description_values: must be null",
                                                  "item_costs: must be null",
                                                  "kind: must be null",
-                                                 "etag: must be null"));
+                                                 "etag: must be null",
+                                                 "links: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
