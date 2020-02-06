@@ -918,36 +918,6 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request containing read only attribute value")
-    void updateCertificateItemRejectsPatchWithReadOnlyAttributeValue() throws Exception {
-
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        itemUpdate.setId(UPDATED_ITEM_ID);
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList("id: must be null"));
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
     @DisplayName("Should not modify user_id when performing an update")
     void updateCertificateItemDoesNotModifyWhenPerformingAnUpdate() throws Exception {
         // Given
@@ -1050,6 +1020,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setKind(TOKEN_STRING);
         itemUpdate.setEtag(TOKEN_ETAG);
         itemUpdate.setLinks(LINKS);
+        itemUpdate.setId(UPDATED_ITEM_ID);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1062,7 +1033,8 @@ class CertificateItemsControllerIntegrationTest {
                                                  "item_costs: must be null",
                                                  "kind: must be null",
                                                  "etag: must be null",
-                                                 "links: must be null"));
+                                                 "links: must be null",
+                                                 "id: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
