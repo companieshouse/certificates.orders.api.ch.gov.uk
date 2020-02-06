@@ -139,6 +139,14 @@ public class Item {
         data.setKind(kind);
     }
 
+    public Links getLinks() {
+        return data.getLinks();
+    }
+
+    public void setLinks(Links links) {
+        data.setLinks(links);
+    }
+
     public Boolean isPostalDelivery() {
         return data.isPostalDelivery();
     }

@@ -60,6 +60,9 @@ class CertificateItemServiceTest {
     @Mock
     private EtagGeneratorService etagGenerator;
 
+    @Mock
+    private LinksGeneratorService linksGenerator;
+
     @Test
     @DisplayName("getNextId gets the expected next ID value")
     void getNextIdGetsNextId() {
@@ -73,7 +76,7 @@ class CertificateItemServiceTest {
     }
 
     @Test
-    @DisplayName("createCertificateItem creates and saves item with timestamps, generates etag, returns item with costs")
+    @DisplayName("createCertificateItem creates and saves item with timestamps, etag and links, returns item with costs")
     void createCertificateItemPopulatesAndSavesItem() {
 
         // Given
@@ -93,6 +96,7 @@ class CertificateItemServiceTest {
         verify(repository).save(item);
         verifyCostsFields(item);
         verify(etagGenerator).generateEtag();
+        verify(linksGenerator).generateLinks(EXPECTED_ID_VALUE);
     }
 
     @Test

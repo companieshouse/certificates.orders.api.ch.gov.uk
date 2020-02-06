@@ -37,6 +37,8 @@ public class ItemData {
 
     private String kind;
 
+    private Links links;
+
     private Boolean isPostalDelivery;
 
     private Integer quantity;
@@ -127,6 +129,14 @@ public class ItemData {
 
     public void setKind(String kind) {
         this.kind = kind;
+    }
+
+    public Links getLinks() {
+        return links;
+    }
+
+    public void setLinks(Links links) {
+        this.links = links;
     }
 
     public Boolean isPostalDelivery() {
