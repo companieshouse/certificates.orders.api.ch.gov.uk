@@ -13,11 +13,11 @@ public abstract class AbstractItemDTO {
 
     protected String id;
 
-    protected String description;
+    private String description;
 
-    protected String descriptionIdentifier;
+    private String descriptionIdentifier;
 
-    protected Map<String, String> descriptionValues;
+    private Map<String, String> descriptionValues;
 
     private Links links;
 
