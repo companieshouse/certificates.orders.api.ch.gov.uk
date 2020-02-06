@@ -3,6 +3,7 @@ package uk.gov.companieshouse.items.orders.api.validator;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,16 @@ import java.util.List;
  */
 @Component
 public class CreateItemRequestValidator extends RequestValidator {
+
+    private final FieldNameConverter converter;
+
+    /**
+     * Constructor.
+     * @param converter the converter this uses to present field names as they appear in the request JSON payload
+     */
+    public CreateItemRequestValidator(FieldNameConverter converter) {
+        this.converter = converter;
+    }
 
     /**
      * Validates the item provided, returning any errors found.
@@ -24,7 +35,7 @@ public class CreateItemRequestValidator extends RequestValidator {
             errors.add("id: must be null in a create item request");
         }
         final CertificateItemOptions options = item.getItemOptions();
-        errors.addAll(getValidationErrors(options));
+        errors.addAll(getValidationErrors(options, converter));
         return errors;
     }
 

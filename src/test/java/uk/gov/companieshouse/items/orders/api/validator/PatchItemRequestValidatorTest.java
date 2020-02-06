@@ -12,10 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItemDTO;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.items.orders.api.model.DeliveryMethod;
-import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.model.*;
 import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.items.orders.api.util.TestMergePatchFactory;
 
@@ -33,6 +30,7 @@ import static org.hamcrest.Matchers.*;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
@@ -311,6 +309,118 @@ class PatchItemRequestValidatorTest {
         // Then
         assertThat(errors, contains(
                 "include_email_copy: can only be true when delivery timescale is same_day"));
+    }
+
+
+    @Test
+    @DisplayName("Do not include other details without basic information")
+    void doNotIncludeOtherDetailsWithoutBasicInformation() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
+        details.setIncludeAddress(true);
+        details.setIncludeAppointmentDate(true);
+        details.setIncludeCountryOfResidence(true);
+        details.setIncludeDobType(PARTIAL);
+        details.setIncludeNationality(true);
+        details.setIncludeOccupation(true);
+        options.setDirectorDetails(details);
+        options.setSecretaryDetails(details);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains(
+                "director_details: include_address, include_appointment_date, include_country_of_residence,"
+                        + " include_nationality, include_occupation must not be true when include_basic_information"
+                        + " is false",
+                "director_details: include_dob_type must not be non-null when include_basic_information is false",
+                "secretary_details: include_address, include_appointment_date, include_country_of_residence,"
+                        + " include_nationality, include_occupation must not be true when include_basic_information"
+                        + " is false",
+                "secretary_details: include_dob_type must not be non-null when include_basic_information is false"));
+    }
+
+    @Test
+    @DisplayName("Can include other details with basic information")
+    void canIncludeOtherDetailsWithBasicInformation() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
+        details.setIncludeAddress(true);
+        details.setIncludeAppointmentDate(true);
+        details.setIncludeBasicInformation(true);
+        details.setIncludeCountryOfResidence(true);
+        details.setIncludeDobType(PARTIAL);
+        details.setIncludeNationality(true);
+        details.setIncludeOccupation(true);
+        options.setDirectorDetails(details);
+        options.setSecretaryDetails(details);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Reports only the incorrectly set fields")
+    void reportsOnlyIncorrectlySetFields() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
+        details.setIncludeAddress(true);
+        details.setIncludeAppointmentDate(false);
+        details.setIncludeNationality(true);
+        details.setIncludeOccupation(true);
+        options.setDirectorDetails(details);
+        options.setSecretaryDetails(details);
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, contains(
+                "director_details: include_address, include_nationality, include_occupation must not be true when "
+                        + "include_basic_information is false",
+                "secretary_details: include_address, include_nationality, include_occupation must not be true when "
+                        + "include_basic_information is false"));
+    }
+
+    @Test
+    @DisplayName("Handles absence of item options smoothly")
+    void handlesAbsenceOfItemOptionsSmoothly() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Handles absence of details smoothly")
+    void handlesAbsenceOfDetailsSmoothly() {
+        // Given
+        final CertificateItem patchedItem = new CertificateItem();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        patchedItem.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+
+        // Then
+        assertThat(errors, is(empty()));
     }
 
     /**

@@ -142,7 +142,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_APPOINTMENT_DATE = false;
     private static final boolean UPDATED_INCLUDE_APPOINTMENT_DATE = true;
     private static final boolean INCLUDE_BASIC_INFORMATION = true;
-    private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = false;
+    private static final boolean UPDATED_INCLUDE_BASIC_INFORMATION = true;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
     private static final IncludeDobType INCLUDE_DOB_TYPE = PARTIAL;
@@ -166,6 +166,13 @@ class CertificateItemsControllerIntegrationTest {
 
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final DirectorOrSecretaryDetails UPDATED_DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final DirectorOrSecretaryDetails CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final String CONFLICTING_DIRECTOR_DETAILS_MESSAGE =
+            "director_details: include_address, include_nationality, include_occupation must not be true when "
+                    + "include_basic_information is false";
+    private static final String CONFLICTING_SECRETARY_DETAILS_MESSAGE =
+            "secretary_details: include_address, include_nationality, include_occupation must not be true when "
+                    + "include_basic_information is false";
 
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
@@ -191,6 +198,12 @@ class CertificateItemsControllerIntegrationTest {
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(UPDATED_INCLUDE_DOB_TYPE);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(UPDATED_INCLUDE_NATIONALITY);
         UPDATED_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(UPDATED_INCLUDE_OCCUPATION);
+
+        CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(true);
+        CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(false);
+        CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(true);
+        CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(true);
 
         REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
@@ -657,6 +670,41 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    @DisplayName("Fails to create certificate item with conflicting details settings")
+    void createCertificateItemFailsToCreateCertificateItemWithConflictingDetailsSettings() throws Exception {
+
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyName(COMPANY_NAME);
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1426,6 +1474,39 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Rejects update request with conflicting details settings")
+    void updateCertificateItemRejectsConflictingDetailsSettings() throws Exception {
+        // Given
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemUpdate.setItemOptions(options);
+
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(savedItem);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)

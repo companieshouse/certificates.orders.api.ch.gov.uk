@@ -72,7 +72,7 @@ public class PatchItemRequestValidator extends RequestValidator {
      */
     public List<String> getValidationErrors(final CertificateItem patchedItem) {
         final CertificateItemOptions options = patchedItem.getItemOptions();
-        return getValidationErrors(options);
+        return getValidationErrors(options, converter);
     }
 
 }
