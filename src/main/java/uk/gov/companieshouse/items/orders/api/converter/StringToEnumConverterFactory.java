@@ -4,6 +4,8 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.data.convert.ReadingConverter;
 
+import static uk.gov.companieshouse.items.orders.api.converter.EnumValueNameConverter.convertEnumValueJsonToName;
+
 @ReadingConverter
 public final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
@@ -19,7 +21,7 @@ public final class StringToEnumConverterFactory implements ConverterFactory<Stri
         }
 
         public T convert(String source) {
-            return (T) Enum.valueOf(this.enumType, source.trim().toUpperCase().replace("-", "_"));
+            return (T) Enum.valueOf(this.enumType, convertEnumValueJsonToName(source));
         }
     }
 }

@@ -2,6 +2,8 @@ package uk.gov.companieshouse.items.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import static uk.gov.companieshouse.items.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
+
 public enum CertificateType {
     INCORPORATION,
     INCORPORATION_WITH_ALL_NAME_CHANGES,
@@ -10,6 +12,6 @@ public enum CertificateType {
 
     @JsonValue
     public String getJsonName() {
-        return name().toLowerCase().replace("_", "-");
+        return convertEnumValueNameToJson(this);
     }
 }
