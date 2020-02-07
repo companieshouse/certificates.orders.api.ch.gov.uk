@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -22,6 +24,7 @@ import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,6 +67,9 @@ class CertificateItemsControllerIntegrationTest {
 
     @Autowired
     private CertificateItemRepository repository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @MockBean
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
@@ -216,6 +222,9 @@ class CertificateItemsControllerIntegrationTest {
         LINKS = new Links();
         LINKS.setSelf(SELF_PATH + "/" + EXPECTED_ITEM_ID);
     }
+
+    private static final List<String> ITEM_OPTIONS_ENUM_FIELDS =
+            asList("certificate_type", "collection_location", "delivery_method", "delivery_timescale");
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -940,6 +949,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+
+        assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
 
     @Test
@@ -1677,6 +1688,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+
+        assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
 
     /**
@@ -1687,6 +1700,20 @@ class CertificateItemsControllerIntegrationTest {
     private void assertItemWasNotSaved(final String expectedItemId) {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(false));
+    }
+
+    /**
+     * Checks that the enum values have been saved in the expected format.
+     * @param enumFieldNames the item options enum fields to be checked
+     */
+    private void assertItemOptionsEnumValueNamesSavedCorrectly(final List<String> enumFieldNames) {
+        final Document certificate = mongoTemplate.findById(EXPECTED_ITEM_ID, Document.class, "certificates");
+        final Document data = (Document) certificate.get("data");
+        final Document itemOptions = (Document) data.get("item_options");
+        for (final String field: enumFieldNames) {
+            final String fieldValue = itemOptions.getString(field);
+            assertThat("Enum " + field + " value not of expected format!", fieldValue, is(fieldValue.toLowerCase()));
+        }
     }
 
 }
