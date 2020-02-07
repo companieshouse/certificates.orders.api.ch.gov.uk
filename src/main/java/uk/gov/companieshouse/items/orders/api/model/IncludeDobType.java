@@ -8,6 +8,6 @@ public enum IncludeDobType {
 
     @JsonValue
     public String getJsonName() {
-        return name().toLowerCase();
+        return name().toLowerCase().replace("_", "-");
     }
 }

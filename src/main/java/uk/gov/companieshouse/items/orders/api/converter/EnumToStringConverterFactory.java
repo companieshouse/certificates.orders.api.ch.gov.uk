@@ -14,7 +14,7 @@ public final class EnumToStringConverterFactory implements ConverterFactory<Enum
 
     private final class EnumToStringConverter<T extends Enum> implements Converter<T, String> {
         public String convert(T source) {
-            return source.name().toLowerCase();
+            return source.name().toLowerCase().replace("_", "-");
         }
     }
 }

@@ -19,7 +19,7 @@ public final class StringToEnumConverterFactory implements ConverterFactory<Stri
         }
 
         public T convert(String source) {
-            return (T) Enum.valueOf(this.enumType, source.trim().toUpperCase());
+            return (T) Enum.valueOf(this.enumType, source.trim().toUpperCase().replace("-", "_"));
         }
     }
 }

@@ -103,7 +103,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
-            + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
+            + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
@@ -112,8 +112,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_CERTIFICATE_TYPE_MESSAGE =
         "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.CertificateType`"
          + " from String \"unknown\": value not one of declared Enum instance names: "
-         + "[dissolution_liquidation, incorporation_with_all_name_changes, incorporation, "
-         + "incorporation_with_last_name_changes]";
+         + "[incorporation-with-all-name-changes, dissolution-liquidation, incorporation, "
+         + "incorporation-with-last-name-changes]";
     private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
     private static final String INVALID_DELIVERY_METHOD_MESSAGE =
@@ -166,7 +166,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType`"
                     + " from String \"unknown\": value not one of declared Enum instance names: "
-                    + "[current_previous_and_prior, all, current_and_previous, current]";
+                    + "[all, current-previous-and-prior, current, current-and-previous]";
     private static final boolean INCLUDE_DATES = true;
     private static final boolean UPDATED_INCLUDE_DATES = false;
 
@@ -1606,26 +1606,26 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
-     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
      * @param newItem the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
     private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemDTO newItem)
             throws JsonProcessingException {
-        return objectMapper.writeValueAsString(newItem).replace("same_day", "unknown");
+        return objectMapper.writeValueAsString(newItem).replace("same-day", "unknown");
     }
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
-     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
      * @param itemUpdate the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
     private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
-        return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
+        return objectMapper.writeValueAsString(itemUpdate).replace("same-day", "unknown");
     }
 
     /**

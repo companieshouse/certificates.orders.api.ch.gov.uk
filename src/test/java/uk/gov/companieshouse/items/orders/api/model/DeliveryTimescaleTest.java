@@ -19,7 +19,7 @@ class DeliveryTimescaleTest {
        final String sameDayJson = mapper.writeValueAsString(DeliveryTimescale.SAME_DAY);
 
        assertThat(standardJson, is("\"standard\""));
-       assertThat(sameDayJson, is("\"same_day\""));
+       assertThat(sameDayJson, is("\"same-day\""));
    }
 
 }

@@ -10,6 +10,6 @@ public enum IncludeAddressRecordsType {
 
     @JsonValue
     public String getJsonName() {
-        return name().toLowerCase();
+        return name().toLowerCase().replace("_", "-");
     }
 }

@@ -27,7 +27,7 @@ public enum DeliveryTimescale {
 
     @JsonValue
     public String getJsonName() {
-        return name().toLowerCase();
+        return name().toLowerCase().replace("_", "-");
     }
 
     public int getIndividualCertificateCost() {
