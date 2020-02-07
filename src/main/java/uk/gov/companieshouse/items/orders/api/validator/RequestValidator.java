@@ -1,10 +1,12 @@
 package uk.gov.companieshouse.items.orders.api.validator;
 
-import org.springframework.util.ReflectionUtils;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.DirectorOrSecretaryDetails;
 import uk.gov.companieshouse.items.orders.api.util.FieldNameConverter;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.stream;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
@@ -20,6 +23,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAM
  * Implements common request payload validation.
  */
 public class RequestValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     /**
      * Validates the options provided, returning any errors found.
@@ -73,8 +78,8 @@ public class RequestValidator {
         final List<String> incorrectlySetFields = stream(fields)
                 .filter(field ->
                         !field.getName().equals("includeBasicInformation") &&
-                        field.getType().equals(Boolean.class) &&
-                        isTrue(field, details))
+                                field.getType().equals(Boolean.class) &&
+                                isTrue(field, details))
                 .map(field -> converter.toSnakeCase(field.getName()))
                 .collect(Collectors.toList());
         if (!incorrectlySetFields.isEmpty()) {
@@ -95,8 +100,15 @@ public class RequestValidator {
      * (<code>false</code>)
      */
     boolean isTrue(final Field field, final DirectorOrSecretaryDetails details) {
-        field.setAccessible(true);
-        final Boolean include = (Boolean) ReflectionUtils.getField(field, details);
+        Boolean include;
+        try {
+            include = (Boolean) new PropertyDescriptor(field.getName(), details.getClass())
+                    .getReadMethod().invoke(details);
+        } catch (Exception e) {
+            // This should only arise should someone alter or remove the getter for a field.
+            LOGGER.error("Error invoking getter for " + details.getClass().getSimpleName() + "." + field.getName(), e);
+            include = null;
+        }
         return TRUE.equals(include);
     }
 
