@@ -14,7 +14,8 @@ import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.ItemType.*;
@@ -123,8 +124,8 @@ class ItemTypeTest {
     }
 
     private void verifyDescriptionFields(final Item item, final String value) {
-        assertThat(item.getDescriptionIdentifier(), is(value));
-        assertThat(item.getKind(), is(value));
+        assertThat("Description identifier not expected value!", item.getDescriptionIdentifier(), is(value));
+        assertThat("Kind not expected value!", item.getKind(), is("item#" + value));
         verifyDerivedDescriptionFields(item);
     }
 

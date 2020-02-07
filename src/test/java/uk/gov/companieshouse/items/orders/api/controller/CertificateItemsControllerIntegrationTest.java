@@ -272,7 +272,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
-        expectedItem.setKind("certificate");
+        expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
         final ItemCosts costs = new ItemCosts();
         final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;

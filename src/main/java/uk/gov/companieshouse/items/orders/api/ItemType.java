@@ -13,9 +13,9 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STA
  */
 public enum ItemType {
 
-    CERTIFICATE("certificate", "certificate"),
-    CERTIFIED_COPY("certified-copy", "certified-copy"),
-    SCAN_ON_DEMAND("scan-on-demand", "scan-on-demand") {
+    CERTIFICATE("certificate", "item#certificate"),
+    CERTIFIED_COPY("certified-copy", "item#certified-copy"),
+    SCAN_ON_DEMAND("scan-on-demand", "item#scan-on-demand") {
         @Override
         public void populatePostalDelivery(final Item item) {
             item.setPostalDelivery(false);
