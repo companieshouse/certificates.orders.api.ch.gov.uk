@@ -20,6 +20,7 @@ public final class StringToEnumConverterFactory implements ConverterFactory<Stri
             this.enumType = enumType;
         }
 
+        @SuppressWarnings("squid:S1905") // SonarQube false positive - cast is necessary.
         public T convert(String source) {
             return (T) Enum.valueOf(this.enumType, convertEnumValueJsonToName(source));
         }
