@@ -2,11 +2,12 @@ package uk.gov.companieshouse.items.orders.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.convert.*;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import uk.gov.companieshouse.items.orders.api.converter.*;
+import uk.gov.companieshouse.items.orders.api.converter.EnumToStringConverterFactory;
+import uk.gov.companieshouse.items.orders.api.converter.StringToEnumConverterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,19 +40,9 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions customConversions()
     {
-        final List<Converter<?, ?>> converters = new ArrayList<>();
-        converters.add(new ReadingCertificateTypeConverter());
-        converters.add(new WritingCertificateTypeConverter());
-        converters.add(new ReadingCollectionLocationConverter());
-        converters.add(new WritingCollectionLocationConverter());
-        converters.add(new ReadingDeliveryMethodConverter());
-        converters.add(new WritingDeliveryMethodConverter());
-        converters.add(new ReadingDeliveryTimescaleConverter());
-        converters.add(new WritingDeliveryTimescaleConverter());
-        converters.add(new ReadingIncludeDobTypeConverter());
-        converters.add(new WritingIncludeDobTypeConverter());
-        converters.add(new ReadingIncludeAddressRecordsTypeConverter());
-        converters.add(new WritingIncludeAddressRecordsTypeConverter());
+        final List<ConverterFactory<?, ?>> converters = new ArrayList<>();
+        converters.add(new StringToEnumConverterFactory());
+        converters.add(new EnumToStringConverterFactory());
         return new MongoCustomConversions(converters);
     }
 }

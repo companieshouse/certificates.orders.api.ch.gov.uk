@@ -2,6 +2,7 @@ package uk.gov.companieshouse.items.orders.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -22,6 +24,7 @@ import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -65,6 +68,9 @@ class CertificateItemsControllerIntegrationTest {
     @Autowired
     private CertificateItemRepository repository;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @MockBean
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
 
@@ -97,7 +103,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
-            + " from String \"unknown\": value not one of declared Enum instance names: [same_day, standard]";
+            + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
@@ -106,8 +112,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_CERTIFICATE_TYPE_MESSAGE =
         "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.CertificateType`"
          + " from String \"unknown\": value not one of declared Enum instance names: "
-         + "[dissolution_liquidation, incorporation_with_all_name_changes, incorporation, "
-         + "incorporation_with_last_name_changes]";
+         + "[incorporation-with-all-name-changes, dissolution-liquidation, incorporation, "
+         + "incorporation-with-last-name-changes]";
     private static final DeliveryMethod DELIVERY_METHOD = POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = COLLECTION;
     private static final String INVALID_DELIVERY_METHOD_MESSAGE =
@@ -160,7 +166,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType`"
                     + " from String \"unknown\": value not one of declared Enum instance names: "
-                    + "[current_previous_and_prior, all, current_and_previous, current]";
+                    + "[all, current-previous-and-prior, current, current-and-previous]";
     private static final boolean INCLUDE_DATES = true;
     private static final boolean UPDATED_INCLUDE_DATES = false;
 
@@ -217,6 +223,9 @@ class CertificateItemsControllerIntegrationTest {
         LINKS.setSelf(SELF_PATH + "/" + EXPECTED_ITEM_ID);
     }
 
+    private static final List<String> ITEM_OPTIONS_ENUM_FIELDS =
+            asList("certificate_type", "collection_location", "delivery_method", "delivery_timescale");
+
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
      */
@@ -263,7 +272,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
-        expectedItem.setKind("certificate");
+        expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
         final ItemCosts costs = new ItemCosts();
         final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
@@ -940,6 +949,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+
+        assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
 
     @Test
@@ -1595,26 +1606,26 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
-     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
      * @param newItem the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
     private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemDTO newItem)
             throws JsonProcessingException {
-        return objectMapper.writeValueAsString(newItem).replace("same_day", "unknown");
+        return objectMapper.writeValueAsString(newItem).replace("same-day", "unknown");
     }
 
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
-     * the "same_day" delivery timescale value with "unknown" for validation testing purposes.
+     * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
      * @param itemUpdate the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
     private String makeSameDayDeliveryTimescaleInvalid(final PatchValidationCertificateItemDTO itemUpdate)
             throws JsonProcessingException {
-        return objectMapper.writeValueAsString(itemUpdate).replace("same_day", "unknown");
+        return objectMapper.writeValueAsString(itemUpdate).replace("same-day", "unknown");
     }
 
     /**
@@ -1677,6 +1688,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+
+        assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
 
     /**
@@ -1687,6 +1700,20 @@ class CertificateItemsControllerIntegrationTest {
     private void assertItemWasNotSaved(final String expectedItemId) {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
         assertThat(retrievedCertificateItem.isPresent(), is(false));
+    }
+
+    /**
+     * Checks that the enum values have been saved in the expected format.
+     * @param enumFieldNames the item options enum fields to be checked
+     */
+    private void assertItemOptionsEnumValueNamesSavedCorrectly(final List<String> enumFieldNames) {
+        final Document certificate = mongoTemplate.findById(EXPECTED_ITEM_ID, Document.class, "certificates");
+        final Document data = (Document) certificate.get("data");
+        final Document itemOptions = (Document) data.get("item_options");
+        for (final String field: enumFieldNames) {
+            final String fieldValue = itemOptions.getString(field);
+            assertThat("Enum " + field + " value not of expected format!", fieldValue, is(fieldValue.toLowerCase()));
+        }
     }
 
 }
