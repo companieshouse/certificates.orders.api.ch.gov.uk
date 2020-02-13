@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.GET;
 
 public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
@@ -29,34 +30,56 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if(!POST.matches(request.getMethod())) {
-            final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-            final String certificateId = pathVariables.get("id");
+        final String identityType = EricHeaderHelper.getIdentityType(request);
+        boolean isApiKeyRequest = EricHeaderHelper.API_KEY_IDENTITY_TYPE.equals(identityType);
+        boolean isOAuth2Request = EricHeaderHelper.OAUTH2_IDENTITY_TYPE.equals(identityType);
 
-            final String identity = EricHeaderHelper.getIdentity(request);
-            Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
-
-            if(item.isPresent()){
-                String userId = item.get().getUserId();
-                if(userId == null) {
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    LOGGER.error("No user id found on certificate item, all certificates should have a user id");
-                    return false;
-                }
-                boolean authUserIsCreatedBy = userId.equals(identity);
-                if(authUserIsCreatedBy) {
-                    LOGGER.info("User is permitted to view/edit the resource certificate userId="+userId+", identity="+ identity);
-                    return true;
-                } else {
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    LOGGER.info("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
-                    return false;
-                }
+        if(isApiKeyRequest) {
+            if(GET.matches(request.getMethod())) {
+                LOGGER.info("API is permitted to view the resource");
+                return true;
             } else {
-                response.setStatus(HttpStatus.NOT_FOUND.value());
+                LOGGER.error("API is not permitted to perform a "+request.getMethod());
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return false;
             }
         }
-        return true;
+
+        if(isOAuth2Request) {
+            if (!POST.matches(request.getMethod())) {
+                final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+                final String certificateId = pathVariables.get("id");
+
+                final String identity = EricHeaderHelper.getIdentity(request);
+                Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+
+                if (item.isPresent()) {
+                    String userId = item.get().getUserId();
+                    if (userId == null) {
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        LOGGER.error("No user id found on certificate item, all certificates should have a user id");
+                        return false;
+                    }
+                    boolean authUserIsCreatedBy = userId.equals(identity);
+                    if (authUserIsCreatedBy) {
+                        LOGGER.info("User is permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                        return true;
+                    } else {
+                        LOGGER.error("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        return false;
+                    }
+                } else {
+                    response.setStatus(HttpStatus.NOT_FOUND.value());
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        LOGGER.error("Unrecognised identity type");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        return false;
     }
+
 }

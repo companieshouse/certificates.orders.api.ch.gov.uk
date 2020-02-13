@@ -20,8 +20,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserAuthorisationInterceptorTest {
@@ -54,16 +53,17 @@ public class UserAuthorisationInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    @DisplayName("Authorise if request method is POST")
-    public void willAuthoriseIfPost() {
+    @DisplayName("Authorise if request method is POST for a user")
+    public void willAuthoriseIfPostAndOAuth2() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
@@ -81,23 +81,40 @@ public class UserAuthorisationInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    @DisplayName("Does not authorise if Certificate is not found when request method is GET")
-    public void willNotAuthoriseIfCertificateIsNotFound() {
+    @DisplayName("Does not authorise if Certificate is not found when request method is GET for a user")
+    public void willNotAuthoriseIfCertificateIsNotFoundAndOAuth2() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
+    @Test
+    @DisplayName("Authorise if get and an API key is used")
+    public void willAuthoriseIfRequestIsGetAndAPIKey() {
+        when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Authorise if get and an API key is used")
+    public void willNotAuthoriseIfRequestIsPostAndAPIKey() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
 }

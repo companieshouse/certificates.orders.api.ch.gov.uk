@@ -29,7 +29,7 @@ public class UserAuthenticationInterceptorTest {
     @Test
     public void willAuthoriseIfEricHeadersArePresent() {
         when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         assertTrue(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 
@@ -41,7 +41,7 @@ public class UserAuthenticationInterceptorTest {
 
     @Test
     public void willNotAuthoriseIfIdentityHeaderIsNotPresent() {
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 }
