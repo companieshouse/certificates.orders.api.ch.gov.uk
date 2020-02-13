@@ -47,7 +47,7 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
         return false;
     }
 
-    public boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
+    private boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
         if(GET.matches(request.getMethod())) {
             LOGGER.info("API is permitted to view the resource");
             return true;
@@ -58,7 +58,7 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
-    public boolean validateOAuth2(HttpServletRequest request, HttpServletResponse response) {
+    private boolean validateOAuth2(HttpServletRequest request, HttpServletResponse response) {
         if (!POST.matches(request.getMethod())) {
             final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
             final String certificateId = pathVariables.get("id");
