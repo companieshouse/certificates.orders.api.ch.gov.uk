@@ -39,6 +39,7 @@ public class UserAuthorisationInterceptorTest {
 
     private static final String ITEM_ID = "CHS00000000000000001";
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
+    private static final String INVALID_IDENTITY_TYPE_VALUE = "test";
 
     @Test
     @DisplayName("Authorise if authenticated user created the certificate when request method is GET")
@@ -124,6 +125,14 @@ public class UserAuthorisationInterceptorTest {
     public void willNotAuthoriseIfRequestIsPostAndAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Does not Authorise if POST and unrecognised identity type")
+    public void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(INVALID_IDENTITY_TYPE_VALUE);
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 }
