@@ -103,7 +103,7 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Authorise if get and an API key is used")
+    @DisplayName("Authorise if GET and an API key is used")
     public void willAuthoriseIfRequestIsGetAndAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
@@ -111,7 +111,7 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Authorise if get and an API key is used")
+    @DisplayName("Does not Authorise if POST and an API key is used")
     public void willNotAuthoriseIfRequestIsPostAndAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);

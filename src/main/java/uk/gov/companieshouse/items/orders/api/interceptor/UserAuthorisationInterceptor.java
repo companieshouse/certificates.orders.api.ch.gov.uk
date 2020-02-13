@@ -35,51 +35,59 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
         boolean isOAuth2Request = EricHeaderHelper.OAUTH2_IDENTITY_TYPE.equals(identityType);
 
         if(isApiKeyRequest) {
-            if(GET.matches(request.getMethod())) {
-                LOGGER.info("API is permitted to view the resource");
-                return true;
-            } else {
-                LOGGER.error("API is not permitted to perform a "+request.getMethod());
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                return false;
-            }
+            return validateAPI(request, response);
         }
 
         if(isOAuth2Request) {
-            if (!POST.matches(request.getMethod())) {
-                final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-                final String certificateId = pathVariables.get("id");
-
-                final String identity = EricHeaderHelper.getIdentity(request);
-                Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
-
-                if (item.isPresent()) {
-                    String userId = item.get().getUserId();
-                    if (userId == null) {
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                        LOGGER.error("No user id found on certificate item, all certificates should have a user id");
-                        return false;
-                    }
-                    boolean authUserIsCreatedBy = userId.equals(identity);
-                    if (authUserIsCreatedBy) {
-                        LOGGER.info("User is permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
-                        return true;
-                    } else {
-                        LOGGER.error("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                        return false;
-                    }
-                } else {
-                    response.setStatus(HttpStatus.NOT_FOUND.value());
-                    return false;
-                }
-            }
-            return true;
+            return validateOAuth2(request, response);
         }
 
         LOGGER.error("Unrecognised identity type");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         return false;
+    }
+
+    public boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
+        if(GET.matches(request.getMethod())) {
+            LOGGER.info("API is permitted to view the resource");
+            return true;
+        } else {
+            LOGGER.error("API is not permitted to perform a "+request.getMethod());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return false;
+        }
+    }
+
+    public boolean validateOAuth2(HttpServletRequest request, HttpServletResponse response) {
+        if (!POST.matches(request.getMethod())) {
+            final Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+            final String certificateId = pathVariables.get("id");
+
+            final String identity = EricHeaderHelper.getIdentity(request);
+            Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+
+            if (item.isPresent()) {
+                String userId = item.get().getUserId();
+                if (userId == null) {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    LOGGER.error("No user id found on certificate item, all certificates should have a user id");
+                    return false;
+                }
+                boolean authUserIsCreatedBy = userId.equals(identity);
+                if (authUserIsCreatedBy) {
+                    LOGGER.info("User is permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                    return true;
+                } else {
+                    LOGGER.error("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    return false;
+                }
+            } else {
+                response.setStatus(HttpStatus.NOT_FOUND.value());
+                return false;
+            }
+        }
+        return true;
     }
 
 }
