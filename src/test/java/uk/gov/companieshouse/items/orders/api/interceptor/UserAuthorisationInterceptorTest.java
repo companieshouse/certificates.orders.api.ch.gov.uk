@@ -88,6 +88,15 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
+    @DisplayName("Does not Authorise if request method is GET and there is no user")
+    public void willNotAuthoriseIfMethodIsGetAndNoIdentity() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
     @DisplayName("Does not authorise if Certificate is not found when request method is GET for a user")
     public void willNotAuthoriseIfCertificateIsNotFoundAndOAuth2() {
         Map<String, String> map = new HashMap<>();
