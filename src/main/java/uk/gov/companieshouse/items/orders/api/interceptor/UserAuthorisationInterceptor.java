@@ -31,14 +31,13 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         final String identityType = EricHeaderHelper.getIdentityType(request);
-        boolean isApiKeyRequest = EricHeaderHelper.API_KEY_IDENTITY_TYPE.equals(identityType);
-        boolean isOAuth2Request = EricHeaderHelper.OAUTH2_IDENTITY_TYPE.equals(identityType);
+        boolean isApiKeyRequest = identityType.equals(EricHeaderHelper.API_KEY_IDENTITY_TYPE);
+        boolean isOAuth2Request = identityType.equals(EricHeaderHelper.OAUTH2_IDENTITY_TYPE);
 
         if(isApiKeyRequest) {
             return validateAPI(request, response);
         }
-
-        if(isOAuth2Request) {
+        else if(isOAuth2Request) {
             return validateOAuth2(request, response);
         }
 

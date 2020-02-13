@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -19,10 +19,11 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserAuthorisationInterceptorTest {
 
     @InjectMocks
@@ -53,8 +54,8 @@ public class UserAuthorisationInterceptorTest {
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
@@ -81,8 +82,8 @@ public class UserAuthorisationInterceptorTest {
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
@@ -105,8 +106,8 @@ public class UserAuthorisationInterceptorTest {
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
