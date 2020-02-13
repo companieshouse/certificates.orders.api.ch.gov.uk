@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
@@ -19,11 +19,11 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserAuthorisationInterceptorTest {
 
     @InjectMocks
@@ -40,6 +40,7 @@ public class UserAuthorisationInterceptorTest {
 
     private static final String ITEM_ID = "CHS00000000000000001";
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
+    private static final String INVALID_IDENTITY_TYPE_VALUE = "test";
 
     @Test
     @DisplayName("Authorise if authenticated user created the certificate when request method is GET")
@@ -53,17 +54,18 @@ public class UserAuthorisationInterceptorTest {
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    @DisplayName("Authorise if request method is POST")
-    public void willAuthoriseIfPost() {
+    @DisplayName("Authorise if request method is POST for a user")
+    public void willAuthoriseIfPostAndOAuth2() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
@@ -80,24 +82,57 @@ public class UserAuthorisationInterceptorTest {
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    @DisplayName("Does not authorise if Certificate is not found when request method is GET")
-    public void willNotAuthoriseIfCertificateIsNotFound() {
+    @DisplayName("Does not Authorise if request method is GET and there is no user")
+    public void willNotAuthoriseIfMethodIsGetAndNoIdentity() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Does not authorise if Certificate is not found when request method is GET for a user")
+    public void willNotAuthoriseIfCertificateIsNotFoundAndOAuth2() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(map);
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
 
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
+    @Test
+    @DisplayName("Authorise if GET and an API key is used")
+    public void willAuthoriseIfRequestIsGetAndAPIKey() {
+        when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Does not Authorise if POST and an API key is used")
+    public void willNotAuthoriseIfRequestIsPostAndAPIKey() {
+        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Does not Authorise if POST and unrecognised identity type")
+    public void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(INVALID_IDENTITY_TYPE_VALUE);
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
 }

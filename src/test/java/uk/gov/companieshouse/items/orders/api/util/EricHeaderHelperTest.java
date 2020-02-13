@@ -25,8 +25,8 @@ public class EricHeaderHelperTest {
 
     @Test
     public void testGetIdentityType() {
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
-        assertEquals(ERIC_IDENTITY_TYPE_VALUE, EricHeaderHelper.getIdentityType(request));
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
+        assertEquals(ERIC_IDENTITY_TYPE_OAUTH2_VALUE, EricHeaderHelper.getIdentityType(request));
     }
 
 }

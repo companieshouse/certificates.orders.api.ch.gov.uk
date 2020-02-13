@@ -60,7 +60,7 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +171,7 @@ class ItemsApiApplicationTest {
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
 				.contentType(MediaType.APPLICATION_JSON)
-				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.body(fromObject(newCertificateItemDTO))
@@ -189,7 +189,7 @@ class ItemsApiApplicationTest {
 	private void postBadCreateRequestAndExpectError(final CertificateItemDTO itemToCreate, final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-				.header(ERIC_IDENTITY_TYPE_HEADER_NAME,ERIC_IDENTITY_TYPE_VALUE)
+				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.contentType(MediaType.APPLICATION_JSON)

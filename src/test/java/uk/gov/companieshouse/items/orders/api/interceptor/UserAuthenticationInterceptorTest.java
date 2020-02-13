@@ -1,20 +1,21 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserAuthenticationInterceptorTest {
 
     @InjectMocks
@@ -28,20 +29,21 @@ public class UserAuthenticationInterceptorTest {
 
     @Test
     public void willAuthoriseIfEricHeadersArePresent() {
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
+        doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
+        doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         assertTrue(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 
     @Test
     public void willNotAuthoriseIfIdentityTypeHeaderIsNotPresent() {
-        when(request.getHeader(ERIC_IDENTITY_HEADER_NAME)).thenReturn(ERIC_IDENTITY_VALUE);
+        doReturn(null).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
+        doReturn(null).when(request).getHeader(REQUEST_ID_HEADER_NAME);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 
     @Test
     public void willNotAuthoriseIfIdentityHeaderIsNotPresent() {
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_VALUE);
+        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 }
