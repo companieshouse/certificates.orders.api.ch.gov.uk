@@ -131,7 +131,6 @@ public class UserAuthorisationInterceptorTest {
     @Test
     @DisplayName("Does not Authorise if POST and unrecognised identity type")
     public void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
-        when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(INVALID_IDENTITY_TYPE_VALUE);
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
