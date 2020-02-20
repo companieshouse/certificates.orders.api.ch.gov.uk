@@ -54,14 +54,6 @@ A Postman collection has been created for this API. It may be imported into Post
 
 ```
 src/test/postman/Items_API.postman_collection.json
-```
-
-The Postman collection facilitates the manual testing of all of the 
-[Certificates API methods](https://developer-specs.kermit.aws.chdev.org/order-company-products/reference/certificates).
-
-It can be configured to work against a deployment of the API to a local developer Vagrant environment or to an AWS 
-environment as described in 
-[Using Postman](https://companieshouse.atlassian.net/wiki/spaces/~229231946/pages/1317339144/Using+Postman+Collections+Variables+and+Environments).
- 
+``` 
 
 
