@@ -21,6 +21,8 @@ public class CertificateItemOptions {
 
     private DirectorOrSecretaryDetails directorDetails;
 
+    private String forename;
+
     private Boolean includeCompanyObjectsInformation;
 
     private Boolean includeEmailCopy;
@@ -30,6 +32,8 @@ public class CertificateItemOptions {
     private RegisteredOfficeAddressDetails registeredOfficeAddressDetails;
 
     private DirectorOrSecretaryDetails secretaryDetails;
+
+    private String surname;
 
     public CertificateType getCertificateType() {
         return certificateType;
@@ -79,6 +83,14 @@ public class CertificateItemOptions {
         this.directorDetails = directorOrSecretaryDetails;
     }
 
+    public String getForename() {
+        return forename;
+    }
+
+    public void setForename(String forename) {
+        this.forename = forename;
+    }
+
     public Boolean getIncludeCompanyObjectsInformation() {
         return includeCompanyObjectsInformation;
     }
@@ -117,6 +129,14 @@ public class CertificateItemOptions {
 
     public void setSecretaryDetails(DirectorOrSecretaryDetails secretaryDetails) {
         this.secretaryDetails = secretaryDetails;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     @Override
