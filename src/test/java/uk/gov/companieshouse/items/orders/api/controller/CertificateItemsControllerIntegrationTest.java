@@ -128,6 +128,10 @@ class CertificateItemsControllerIntegrationTest {
                     + "[london, cardiff, edinburgh, belfast]";
     private static final String MISSING_COLLECTION_LOCATION_MESSAGE =
             "collection_location: must not be null when delivery method is collection";
+    private static final String MISSING_COLLECTION_FORENAME_MESSAGE =
+            "forename: must not be null when delivery method is collection";
+    private static final String MISSING_COLLECTION_SURNAME_MESSAGE =
+            "surname: must not be null when delivery method is collection";
     private static final String CONTACT_NUMBER = "+44 1234 123456";
     private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
@@ -460,8 +464,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Fails to create certificate item with a missing collection location")
-    void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionLocation() throws Exception {
+    @DisplayName("Fails to create certificate item with missing collection details")
+    void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionDetails() throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
@@ -472,8 +476,10 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
+                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
+                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -485,7 +491,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -1202,8 +1208,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request with collection delivery method and a missing collection location")
-    void updateCertificateItemRejectsMissingCollectionLocation() throws Exception {
+    @DisplayName("Rejects update request with missing collection details")
+    void updateCertificateItemRejectsMissingCollectionDetails() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
@@ -1216,8 +1222,10 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
+                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
+                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1228,7 +1236,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
     }
 

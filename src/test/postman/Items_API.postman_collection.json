@@ -152,7 +152,7 @@
 									"response": []
 								},
 								{
-									"name": "Create certificate item missing collection location",
+									"name": "Create certificate item missing collection location, forename and surname",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -844,7 +844,7 @@
 							"response": []
 						},
 						{
-							"name": "Update certificate item missing collection location",
+							"name": "Update certificate item missing collection location, forename and surname",
 							"request": {
 								"method": "PATCH",
 								"header": [
