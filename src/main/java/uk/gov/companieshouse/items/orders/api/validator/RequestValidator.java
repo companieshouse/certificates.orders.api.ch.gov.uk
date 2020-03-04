@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.stream;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.COLLECTION;
@@ -37,10 +38,7 @@ public class RequestValidator {
         if (options == null) {
             return errors;
         }
-        if (options.getDeliveryMethod() == COLLECTION &&
-                options.getCollectionLocation() == null) {
-            errors.add("collection_location: must not be null when delivery method is collection");
-        }
+        errors.addAll(getCollectionDeliveryValidationErrors(options));
         if (options.getCertificateType() == DISSOLUTION_LIQUIDATION) {
             if (options.getIncludeCompanyObjectsInformation()) {
                 errors.add(
@@ -88,6 +86,27 @@ public class RequestValidator {
         }
         if (details.getIncludeDobType() != null) {
             errors.add(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false");
+        }
+        return errors;
+    }
+
+    /**
+     * Validates the collection delivery related fields on the options provided.
+     * @param options the options to be validated
+     * @return the resulting errors, which will be empty if the fields are found to be valid
+     */
+    List<String> getCollectionDeliveryValidationErrors(final CertificateItemOptions options) {
+        final List<String> errors = new ArrayList<>();
+        if (options.getDeliveryMethod() == COLLECTION) {
+            if (options.getCollectionLocation() == null) {
+                errors.add("collection_location: must not be null when delivery method is collection");
+            }
+            if (isBlank(options.getForename())) {
+                errors.add("forename: must not be blank when delivery method is collection");
+            }
+            if (isBlank(options.getSurname())) {
+                errors.add("surname: must not be blank when delivery method is collection");
+            }
         }
         return errors;
     }

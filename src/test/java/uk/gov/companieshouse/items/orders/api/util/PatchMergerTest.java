@@ -101,6 +101,10 @@ class PatchMergerTest {
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
 
+    private static final String FORENAME = "John";
+    private static final String UPDATED_FORENAME = "Jon";
+    private static final String SURNAME = "Smith";
+
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
@@ -249,11 +253,13 @@ class PatchMergerTest {
         originalOptions.setDeliveryMethod(DELIVERY_METHOD);
         originalOptions.setDeliveryTimescale(DELIVERY_TIMESCALE);
         originalOptions.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        originalOptions.setForename(FORENAME);
         originalOptions.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         originalOptions.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         originalOptions.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         originalOptions.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         originalOptions.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        originalOptions.setSurname(SURNAME);
         original.setItemOptions(originalOptions);
 
         final CertificateItem delta = new CertificateItem();
@@ -263,6 +269,7 @@ class PatchMergerTest {
         deltaOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         deltaOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         deltaOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        deltaOptions.setForename(UPDATED_FORENAME);
         deltaOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         deltaOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         deltaOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
@@ -280,11 +287,13 @@ class PatchMergerTest {
         assertThat(patched.getItemOptions().getContactNumber(), is(UPDATED_CONTACT_NUMBER));
         assertThat(patched.getItemOptions().getDeliveryMethod(), is(UPDATED_DELIVERY_METHOD));
         assertThat(patched.getItemOptions().getDeliveryTimescale(), is(UPDATED_DELIVERY_TIMESCALE));
+        assertThat(patched.getItemOptions().getForename(), is(UPDATED_FORENAME));
         assertThat(patched.getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(patched.getItemOptions().getIncludeEmailCopy(), is(UPDATED_INCLUDE_EMAIL_COPY));
         assertThat(patched.getItemOptions().getIncludeGoodStandingInformation(),
                 is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
+        assertThat(patched.getItemOptions().getSurname(), is(SURNAME));
 
         final DirectorOrSecretaryDetails patchedDirector = patched.getItemOptions().getDirectorDetails();
         assertThat(patchedDirector.getIncludeAddress(), is(UPDATED_INCLUDE_ADDRESS));
