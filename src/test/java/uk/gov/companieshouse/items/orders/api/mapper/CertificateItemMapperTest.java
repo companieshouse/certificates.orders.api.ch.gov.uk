@@ -62,6 +62,9 @@ public class CertificateItemMapperTest {
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
 
+    private static final String FORENAME = "John";
+    private static final String SURNAME = "Smith";
+
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
@@ -83,11 +86,13 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setDeliveryMethod(POSTAL);
         ITEM_OPTIONS.setDeliveryTimescale(STANDARD);
         ITEM_OPTIONS.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        ITEM_OPTIONS.setForename(FORENAME);
         ITEM_OPTIONS.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         ITEM_OPTIONS.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         ITEM_OPTIONS.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        ITEM_OPTIONS.setSurname(SURNAME);
     }
 
     @Configuration
@@ -179,11 +184,13 @@ public class CertificateItemMapperTest {
         assertThat(options1.getDeliveryMethod(), is(options2.getDeliveryMethod()));
         assertThat(options1.getDeliveryTimescale(), is(options2.getDeliveryTimescale()));
         assertDetailsSame(options1.getDirectorDetails(), options2.getDirectorDetails());
+        assertThat(options1.getForename(), is(options2.getForename()));
         assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
         assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
         assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
         assertAddressDetailsSame(options1.getRegisteredOfficeAddressDetails(), options2.getRegisteredOfficeAddressDetails());
         assertDetailsSame(options1.getSecretaryDetails(), options2.getSecretaryDetails());
+        assertThat(options1.getSurname(), is(options2.getSurname()));
     }
 
     /**

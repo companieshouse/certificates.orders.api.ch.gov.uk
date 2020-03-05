@@ -224,8 +224,8 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Collection location is mandatory for collection delivery method")
-    void collectionLocationIsMandatoryForCollectionDeliveryMethod() {
+    @DisplayName("Collection details are mandatory for collection delivery method")
+    void collectionDetailsAreMandatoryForCollectionDeliveryMethod() {
         // Given
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
@@ -236,7 +236,10 @@ class PatchItemRequestValidatorTest {
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
 
         // Then
-        assertThat(errors, contains("collection_location: must not be null when delivery method is collection"));
+        assertThat(errors, containsInAnyOrder(
+                "collection_location: must not be null when delivery method is collection",
+                "forename: must not be blank when delivery method is collection",
+                "surname: must not be blank when delivery method is collection"));
     }
 
     @Test

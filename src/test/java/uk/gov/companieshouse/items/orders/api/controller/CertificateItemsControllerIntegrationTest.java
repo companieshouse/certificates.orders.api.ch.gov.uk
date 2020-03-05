@@ -128,6 +128,10 @@ class CertificateItemsControllerIntegrationTest {
                     + "[london, cardiff, edinburgh, belfast]";
     private static final String MISSING_COLLECTION_LOCATION_MESSAGE =
             "collection_location: must not be null when delivery method is collection";
+    private static final String MISSING_COLLECTION_FORENAME_MESSAGE =
+            "forename: must not be blank when delivery method is collection";
+    private static final String MISSING_COLLECTION_SURNAME_MESSAGE =
+            "surname: must not be blank when delivery method is collection";
     private static final String CONTACT_NUMBER = "+44 1234 123456";
     private static final String UPDATED_CONTACT_NUMBER = "+44 1234 123457";
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
@@ -225,6 +229,9 @@ class CertificateItemsControllerIntegrationTest {
 
     private static final List<String> ITEM_OPTIONS_ENUM_FIELDS =
             asList("certificate_type", "collection_location", "delivery_method", "delivery_timescale");
+    private static final String FORENAME = "John";
+    private static final String SURNAME = "Smith";
+    private static final String UPDATED_SURNAME = "Smyth";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -260,11 +267,13 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setForename(FORENAME);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSurname(SURNAME);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
@@ -308,6 +317,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
                 .andExpect(jsonPath("$.item_options.director_details",
                         is(objectMapper.convertValue(DIRECTOR_OR_SECRETARY_DETAILS, Map.class))))
+                .andExpect(jsonPath("$.item_options.forename",
+                        is(FORENAME)))
                 .andExpect(jsonPath("$.item_options.include_company_objects_information",
                         is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
                 .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
@@ -319,6 +330,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
                 .andExpect(jsonPath("$.item_options.secretary_details",
                         is(objectMapper.convertValue(DIRECTOR_OR_SECRETARY_DETAILS, Map.class))))
+                .andExpect(jsonPath("$.item_options.surname",
+                        is(SURNAME)))
                 .andExpect(jsonPath("$.links",
                         is(objectMapper.convertValue(LINKS, Map.class))))
                 .andDo(MockMvcResultHandlers.print());
@@ -460,8 +473,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Fails to create certificate item with a missing collection location")
-    void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionLocation() throws Exception {
+    @DisplayName("Fails to create certificate item with missing collection details")
+    void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionDetails() throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
@@ -472,8 +485,10 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
+                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
+                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -485,7 +500,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -855,11 +870,13 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(DELIVERY_METHOD);
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setForename(FORENAME);
         options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSurname(SURNAME);
         savedItem.setItemOptions(options);
         savedItem.setLinks(LINKS);
         repository.save(savedItem);
@@ -872,11 +889,13 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
         options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
         options.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setForename(FORENAME);
         options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
         options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
         options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
         options.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSurname(UPDATED_SURNAME);
         itemUpdate.setItemOptions(options);
         itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
@@ -934,6 +953,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_DELIVERY_TIMESCALE));
         assertThat(retrievedCertificateItem.get().getItemOptions().getDirectorDetails(),
                 is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getForename(),
+                is(FORENAME));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeCompanyObjectsInformation(),
                 is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeEmailCopy(),
@@ -944,6 +965,8 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS));
         assertThat(retrievedCertificateItem.get().getItemOptions().getSecretaryDetails(),
                 is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getSurname(),
+                is(UPDATED_SURNAME));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
         assertThat(retrievedCertificateItem.get().getLinks(), is(LINKS));
 
@@ -1202,8 +1225,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request with collection delivery method and a missing collection location")
-    void updateCertificateItemRejectsMissingCollectionLocation() throws Exception {
+    @DisplayName("Rejects update request with missing collection details")
+    void updateCertificateItemRejectsMissingCollectionDetails() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
@@ -1216,8 +1239,10 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
+                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
+                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1228,13 +1253,13 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
-    @DisplayName("Rejects update request with a missing collection location to an item with collection delivery method")
-    void updateCertificateItemRejectsMissingCollectionLocationToCollectionDeliveryMethodItem() throws Exception {
+    @DisplayName("Rejects update request with missing collection details to an item with collection delivery method")
+    void updateCertificateItemRejectsMissingCollectionDetailsToCollectionDeliveryMethodItem() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
 
@@ -1247,8 +1272,10 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(MISSING_COLLECTION_LOCATION_MESSAGE));
+        final ApiError expectedValidationErrors =
+                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
+                        MISSING_COLLECTION_FORENAME_MESSAGE,
+                        MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1259,7 +1286,7 @@ class CertificateItemsControllerIntegrationTest {
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
     }
 

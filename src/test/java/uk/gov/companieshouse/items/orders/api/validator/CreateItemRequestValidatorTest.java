@@ -58,8 +58,8 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Collection location is mandatory for collection delivery method")
-    void collectionLocationIsMandatoryForCollectionDeliveryMethod() {
+    @DisplayName("Collection details are mandatory for collection delivery method")
+    void collectionDetailsAreMandatoryForCollectionDeliveryMethod() {
         // Given
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
@@ -70,7 +70,10 @@ class CreateItemRequestValidatorTest {
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
 
         // Then
-        assertThat(errors, contains("collection_location: must not be null when delivery method is collection"));
+        assertThat(errors, containsInAnyOrder(
+                "collection_location: must not be null when delivery method is collection",
+                "forename: must not be blank when delivery method is collection",
+                "surname: must not be blank when delivery method is collection"));
     }
 
     @Test
