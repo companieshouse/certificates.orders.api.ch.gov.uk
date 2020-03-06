@@ -42,7 +42,7 @@ class CertificateItemServiceTest {
     private static final String DISCOUNT_APPLIED = "1";
     private static final String INDIVIDUAL_ITEM_COST = "2";
     private static final String POSTAGE_COST = "3";
-    private static final String TOTAL_COST = "4";
+    private static final String CALCULATED_COST = "4";
 
     @InjectMocks
     private CertificateItemService serviceUnderTest;
@@ -184,7 +184,7 @@ class CertificateItemServiceTest {
         cost.setDiscountApplied(DISCOUNT_APPLIED);
         cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
         cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(TOTAL_COST);
+        cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         return item;
@@ -201,7 +201,7 @@ class CertificateItemServiceTest {
         assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
         assertThat(cost.getIndividualItemCost(), Matchers.is(INDIVIDUAL_ITEM_COST));
         assertThat(cost.getPostageCost(), Matchers.is(POSTAGE_COST));
-        assertThat(cost.getTotalCost(), Matchers.is(TOTAL_COST));
+        assertThat(cost.getCalculatedCost(), Matchers.is(CALCULATED_COST));
     }
 
     /**

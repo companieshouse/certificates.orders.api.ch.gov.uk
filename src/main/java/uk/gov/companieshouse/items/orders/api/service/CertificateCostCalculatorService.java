@@ -26,12 +26,11 @@ public class CertificateCostCalculatorService {
         final List<ItemCosts> costs = new ArrayList<>();
         for (int count = 1; count <= quantity; count++) {
             final ItemCosts cost = new ItemCosts();
-            final int discountApplied = (quantity - 1) * deliveryTimescale.getExtraCertificateDiscount();
+            final int discountApplied = count > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
             cost.setDiscountApplied(Integer.toString(discountApplied));
             cost.setIndividualItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
             cost.setPostageCost(POSTAGE_COST);
-            cost.setTotalCost(
-                    Integer.toString(quantity * deliveryTimescale.getIndividualCertificateCost() - discountApplied));
+            cost.setCalculatedCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost() - discountApplied));
             costs.add(cost);
         }
         return costs;

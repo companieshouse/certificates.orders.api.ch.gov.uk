@@ -1561,13 +1561,13 @@ class CertificateItemsControllerIntegrationTest {
                                                   final int certificateCost,
                                                   final int extraCertificateDiscount) {
         final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
         for (int count = 1; count <= quantity; count++) {
-            final int expectedDiscountApplied = (quantity - 1) * extraCertificateDiscount;
+            final ItemCosts cost = new ItemCosts();
+            final int expectedDiscountApplied = count > 1 ? extraCertificateDiscount : 0;
             cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
             cost.setIndividualItemCost(Integer.toString(certificateCost));
             cost.setPostageCost(POSTAGE_COST);
-            cost.setTotalCost(Integer.toString(quantity * certificateCost - expectedDiscountApplied));
+            cost.setCalculatedCost((Integer.toString(certificateCost - expectedDiscountApplied)));
             costs.add(cost);
         }
         return costs;

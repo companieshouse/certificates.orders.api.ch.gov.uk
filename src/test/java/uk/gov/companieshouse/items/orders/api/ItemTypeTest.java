@@ -34,7 +34,7 @@ class ItemTypeTest {
     private static final String DISCOUNT_APPLIED = "1";
     private static final String INDIVIDUAL_ITEM_COST = "2";
     private static final String POSTAGE_COST = "3";
-    private static final String TOTAL_COST = "4";
+    private static final String CALCULATED_COST = "4";
 
     @Mock
     private DescriptionProviderService descriptions;
@@ -95,7 +95,7 @@ class ItemTypeTest {
         cost.setDiscountApplied(DISCOUNT_APPLIED);
         cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
         cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(TOTAL_COST);
+        cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         final Item item = new Item();
@@ -150,7 +150,7 @@ class ItemTypeTest {
         assertThat(cost.getDiscountApplied(), is(DISCOUNT_APPLIED));
         assertThat(cost.getIndividualItemCost(), is(INDIVIDUAL_ITEM_COST));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
-        assertThat(cost.getTotalCost(), is(TOTAL_COST));
+        assertThat(cost.getCalculatedCost(), is(CALCULATED_COST));
     }
 
     private void verifyPostalDelivery(final Item item, final ItemType type) {

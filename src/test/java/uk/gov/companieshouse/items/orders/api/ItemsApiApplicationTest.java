@@ -107,7 +107,7 @@ class ItemsApiApplicationTest {
 		cost.setDiscountApplied("1");
 		cost.setIndividualItemCost("2");
 		cost.setPostageCost("3");
-		cost.setTotalCost("4");
+		cost.setCalculatedCost("4");
 		costs.add(cost);
 		newCertificateItemDTO.setItemCosts(costs);
 

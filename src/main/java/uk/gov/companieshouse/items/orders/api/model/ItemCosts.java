@@ -17,17 +17,17 @@ public class ItemCosts {
     @JsonProperty("postage_cost")
     private String postageCost;
 
-    @JsonProperty("total_cost")
-    private String totalCost;
+    @JsonProperty("calculated_cost")
+    private String calculatedCost;
 
     public ItemCosts() {
     }
 
-    public ItemCosts(String discountApplied, String individualItemCost, String postageCost, String totalCost) {
+    public ItemCosts(String discountApplied, String individualItemCost, String postageCost, String calculatedCost) {
         this.discountApplied = discountApplied;
         this.individualItemCost = individualItemCost;
         this.postageCost = postageCost;
-        this.totalCost = totalCost;
+        this.calculatedCost = calculatedCost;
     }
 
     public String getDiscountApplied() {
@@ -54,12 +54,12 @@ public class ItemCosts {
         this.postageCost = postageCost;
     }
 
-    public String getTotalCost() {
-        return totalCost;
+    public String getCalculatedCost() {
+        return calculatedCost;
     }
 
-    public void setTotalCost(String totalCost) {
-        this.totalCost = totalCost;
+    public void setCalculatedCost(String calculatedCost) {
+        this.calculatedCost = calculatedCost;
     }
 
     @Override

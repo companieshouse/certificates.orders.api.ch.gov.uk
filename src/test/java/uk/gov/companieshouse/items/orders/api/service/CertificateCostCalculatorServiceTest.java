@@ -24,6 +24,7 @@ public class CertificateCostCalculatorServiceTest {
     private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
     private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
     private static final int MULTIPLE_QUANTITY = 3;
+    private static final int SINGLE_QUANTITY = 1;
 
     private final CertificateCostCalculatorService calculatorUnderTest = new CertificateCostCalculatorService();
 
@@ -32,14 +33,15 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardSingleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD);
+        assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
 
         // Then
         assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
-        assertThat(cost.getTotalCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
 
     }
 
@@ -57,14 +59,14 @@ public class CertificateCostCalculatorServiceTest {
 
             assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
 
-            final int expectedDiscountApplied = (MULTIPLE_QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+            final int expectedDiscountApplied = index > 0 ? STANDARD_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
             assertThat(cost.getPostageCost(), is(POSTAGE_COST));
 
-            final String expectedTotalCost =
-                    Integer.toString(3 * Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
-            assertThat(cost.getTotalCost(), is(expectedTotalCost));
+            final String expectedCalculatedCost =
+                    Integer.toString(Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
+            assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
         }
 
     }
@@ -74,14 +76,15 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDaySingleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+        assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
 
         // Then
         assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
-        assertThat(cost.getTotalCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
 
     }
 
@@ -100,14 +103,14 @@ public class CertificateCostCalculatorServiceTest {
 
             assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
 
-            final int expectedDiscountApplied = (MULTIPLE_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+            final int expectedDiscountApplied = index > 0 ? SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
             assertThat(cost.getPostageCost(), is(POSTAGE_COST));
 
-            final String expectedTotalCost =
-                    Integer.toString(3 * Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
-            assertThat(cost.getTotalCost(), is(expectedTotalCost));
+            final String expectedCalculatedCost =
+                    Integer.toString(Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
+            assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
         }
 
     }
