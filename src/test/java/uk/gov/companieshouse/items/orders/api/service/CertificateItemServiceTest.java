@@ -13,6 +13,8 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -177,11 +179,13 @@ class CertificateItemServiceTest {
     private CertificateItem mockUpCostsCalculation() {
         final CertificateItem item = new CertificateItem();
         item.setQuantity(1);
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied(DISCOUNT_APPLIED);
-        costs.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(TOTAL_COST);
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
+        cost.setDiscountApplied(DISCOUNT_APPLIED);
+        cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(TOTAL_COST);
+        costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         return item;
     }
@@ -191,12 +195,13 @@ class CertificateItemServiceTest {
      * @param item the item
      */
     private void verifyCostsFields(final Item item) {
-        final ItemCosts costs = item.getItemCosts();
-        assertThat(costs, Matchers.is(notNullValue()));
-        assertThat(costs.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
-        assertThat(costs.getIndividualItemCost(), Matchers.is(INDIVIDUAL_ITEM_COST));
-        assertThat(costs.getPostageCost(), Matchers.is(POSTAGE_COST));
-        assertThat(costs.getTotalCost(), Matchers.is(TOTAL_COST));
+        final List<ItemCosts> costs = item.getItemCosts();
+        final ItemCosts cost = costs.get(0);
+        assertThat(cost, Matchers.is(notNullValue()));
+        assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
+        assertThat(cost.getIndividualItemCost(), Matchers.is(INDIVIDUAL_ITEM_COST));
+        assertThat(cost.getPostageCost(), Matchers.is(POSTAGE_COST));
+        assertThat(cost.getTotalCost(), Matchers.is(TOTAL_COST));
     }
 
     /**

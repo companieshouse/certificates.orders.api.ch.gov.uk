@@ -10,6 +10,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -36,7 +38,7 @@ public class CertificateItemMapperTest {
     private static final String DESCRIPTION = "Certificate";
     private static final String DESCRIPTION_IDENTIFIER = "Description Identifier";
     private static final Map<String, String> DESCRIPTION_VALUES = singletonMap("key1", "value1");
-    private static final ItemCosts ITEM_COSTS = new ItemCosts("1", "2", "3", "4");
+    private static final List<ItemCosts> ITEM_COSTS;
     private static final String KIND = "certificate";
     private static final boolean POSTAL_DELIVERY = true;
     private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
@@ -93,6 +95,9 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setSurname(SURNAME);
+
+        ITEM_COSTS = new ArrayList<>();
+        ITEM_COSTS.add(new ItemCosts("1", "2", "3", "4"));
     }
 
     @Configuration

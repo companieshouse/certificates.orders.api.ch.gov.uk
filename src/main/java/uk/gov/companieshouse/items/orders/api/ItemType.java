@@ -6,6 +6,8 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.util.List;
+
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
@@ -68,7 +70,7 @@ public enum ItemType {
      * @param calculator the item costs calculator
      */
     public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
-        final ItemCosts costs =
+        final List<ItemCosts> costs =
                 calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
         item.setItemCosts(costs);
     }

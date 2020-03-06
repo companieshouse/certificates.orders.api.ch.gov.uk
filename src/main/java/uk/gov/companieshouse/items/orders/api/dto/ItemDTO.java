@@ -5,6 +5,7 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Null;
+import java.util.List;
 
 /**
  * An instance of this represents the JSON serializable item for use in REST requests and responses.
@@ -13,7 +14,7 @@ public class ItemDTO extends AbstractItemDTO {
 
     @Null
     @JsonProperty("item_costs")
-    private ItemCosts itemCosts;
+    private List<ItemCosts> itemCosts;
 
     @Null
     @JsonProperty("etag")
@@ -32,11 +33,11 @@ public class ItemDTO extends AbstractItemDTO {
         return id;
     }
 
-    public ItemCosts getItemCosts() {
+    public List<ItemCosts> getItemCosts() {
         return itemCosts;
     }
 
-    public void setItemCosts(ItemCosts itemCosts) {
+    public void setItemCosts(List<ItemCosts> itemCosts) {
         this.itemCosts = itemCosts;
     }
 

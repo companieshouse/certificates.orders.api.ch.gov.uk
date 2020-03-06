@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,11 +108,11 @@ public class Item {
         data.setDescriptionValues(descriptionValues);
     }
 
-    public ItemCosts getItemCosts() {
+    public List<ItemCosts> getItemCosts() {
         return data.getItemCosts();
     }
 
-    public void setItemCosts(ItemCosts itemCosts) {
+    public void setItemCosts(List<ItemCosts> itemCosts) {
         data.setItemCosts(itemCosts);
     }
 

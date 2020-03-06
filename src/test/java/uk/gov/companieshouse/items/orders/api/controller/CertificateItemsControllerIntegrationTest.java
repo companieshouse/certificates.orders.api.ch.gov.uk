@@ -23,10 +23,7 @@ import uk.gov.companieshouse.items.orders.api.repository.CertificateItemReposito
 import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -283,12 +280,14 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
-        final ItemCosts costs = new ItemCosts();
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
         final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        cost.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        costs.add(cost);
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
@@ -765,12 +764,14 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
-        final ItemCosts costs = new ItemCosts();
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
         final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        cost.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        costs.add(cost);
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
@@ -910,13 +911,15 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
-        final ItemCosts costs = new ItemCosts();
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
         final int expectedDiscountApplied = (UPDATED_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(
+        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+        cost.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(
                 Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        costs.add(cost);
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);

@@ -11,6 +11,9 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -87,11 +90,13 @@ class ItemTypeTest {
     @DisplayName("Calculated costs are populated correctly")
     void itemCostsArePopulatedCorrectly() {
         // Given
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied(DISCOUNT_APPLIED);
-        costs.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(TOTAL_COST);
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
+        cost.setDiscountApplied(DISCOUNT_APPLIED);
+        cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(TOTAL_COST);
+        costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         final Item item = new Item();
         item.setQuantity(1);
@@ -139,12 +144,13 @@ class ItemTypeTest {
      * @param item the item
      */
     private void verifyCostsFields(final Item item) {
-        final ItemCosts costs = item.getItemCosts();
+        final List<ItemCosts> costs = item.getItemCosts();
         assertThat(costs, is(notNullValue()));
-        assertThat(costs.getDiscountApplied(), is(DISCOUNT_APPLIED));
-        assertThat(costs.getIndividualItemCost(), is(INDIVIDUAL_ITEM_COST));
-        assertThat(costs.getPostageCost(), is(POSTAGE_COST));
-        assertThat(costs.getTotalCost(), is(TOTAL_COST));
+        final ItemCosts cost = costs.get(0);
+        assertThat(cost.getDiscountApplied(), is(DISCOUNT_APPLIED));
+        assertThat(cost.getIndividualItemCost(), is(INDIVIDUAL_ITEM_COST));
+        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
+        assertThat(cost.getTotalCost(), is(TOTAL_COST));
     }
 
     private void verifyPostalDelivery(final Item item, final ItemType type) {

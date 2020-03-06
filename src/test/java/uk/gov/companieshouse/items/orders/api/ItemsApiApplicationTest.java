@@ -10,7 +10,9 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
@@ -100,11 +102,13 @@ class ItemsApiApplicationTest {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		final ItemCosts costs = new ItemCosts();
-		costs.setDiscountApplied("1");
-		costs.setIndividualItemCost("2");
-		costs.setPostageCost("3");
-		costs.setTotalCost("4");
+		final List<ItemCosts> costs = new ArrayList<>();
+		final ItemCosts cost = new ItemCosts();
+		cost.setDiscountApplied("1");
+		cost.setIndividualItemCost("2");
+		cost.setPostageCost("3");
+		cost.setTotalCost("4");
+		costs.add(cost);
 		newCertificateItemDTO.setItemCosts(costs);
 
 

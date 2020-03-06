@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Service that calculates certificate item costs.
  */
@@ -18,15 +21,17 @@ public class CertificateCostCalculatorService {
      * @param deliveryTimescale the delivery time scale specified
      * @return the {@link ItemCosts} calculated
      */
-    public ItemCosts calculateCosts(final int quantity, final DeliveryTimescale deliveryTimescale) {
+    public List<ItemCosts> calculateCosts(final int quantity, final DeliveryTimescale deliveryTimescale) {
         checkArguments(quantity, deliveryTimescale);
-        final ItemCosts costs = new ItemCosts();
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
         final int discountApplied = (quantity - 1) * deliveryTimescale.getExtraCertificateDiscount();
-        costs.setDiscountApplied(Integer.toString(discountApplied));
-        costs.setIndividualItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(
+        cost.setDiscountApplied(Integer.toString(discountApplied));
+        cost.setIndividualItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
+        cost.setPostageCost(POSTAGE_COST);
+        cost.setTotalCost(
                 Integer.toString(quantity * deliveryTimescale.getIndividualCertificateCost() - discountApplied));
+        costs.add(cost);
         return costs;
     }
 

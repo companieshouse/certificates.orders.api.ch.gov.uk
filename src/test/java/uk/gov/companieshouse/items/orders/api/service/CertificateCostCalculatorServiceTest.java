@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -29,13 +31,14 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardSingleCertificateCostCorrectly() {
 
         // Given and when
-        final ItemCosts costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.STANDARD);
+        final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(costs.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        assertThat(costs.getDiscountApplied(), is(NO_DISCOUNT));
-        assertThat(costs.getPostageCost(), is(POSTAGE_COST));
-        assertThat(costs.getTotalCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
+        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
+        assertThat(cost.getTotalCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
 
     }
 
@@ -44,19 +47,20 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final ItemCosts costs = calculatorUnderTest.calculateCosts(3, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(3, DeliveryTimescale.STANDARD);
+        final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(costs.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
 
         final int expectedDiscountApplied = (3 - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        assertThat(costs.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
+        assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
-        assertThat(costs.getPostageCost(), is(POSTAGE_COST));
+        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
 
         final String expectedTotalCost =
                 Integer.toString(3 * Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
-        assertThat(costs.getTotalCost(), is(expectedTotalCost));
+        assertThat(cost.getTotalCost(), is(expectedTotalCost));
 
     }
 
@@ -65,13 +69,14 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDaySingleCertificateCostCorrectly() {
 
         // Given and when
-        final ItemCosts costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(1, DeliveryTimescale.SAME_DAY);
+        final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(costs.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
-        assertThat(costs.getDiscountApplied(), is(NO_DISCOUNT));
-        assertThat(costs.getPostageCost(), is(POSTAGE_COST));
-        assertThat(costs.getTotalCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
+        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
+        assertThat(cost.getTotalCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
 
     }
 
@@ -80,19 +85,20 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDayMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final ItemCosts costs = calculatorUnderTest.calculateCosts(3, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(3, DeliveryTimescale.SAME_DAY);
+        final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(costs.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
 
         final int expectedDiscountApplied = (3 - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
-        assertThat(costs.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
+        assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
-        assertThat(costs.getPostageCost(), is(POSTAGE_COST));
+        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
 
         final String expectedTotalCost =
                 Integer.toString(3 * Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
-        assertThat(costs.getTotalCost(), is(expectedTotalCost));
+        assertThat(cost.getTotalCost(), is(expectedTotalCost));
 
     }
 

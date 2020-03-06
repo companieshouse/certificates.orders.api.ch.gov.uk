@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public class ItemData {
 
     private Map<String, String> descriptionValues;
 
-    private ItemCosts itemCosts;
+    private List<ItemCosts> itemCosts;
 
     private CertificateItemOptions itemOptions;
 
@@ -99,11 +100,11 @@ public class ItemData {
         this.descriptionValues = descriptionValues;
     }
 
-    public ItemCosts getItemCosts() {
+    public List<ItemCosts> getItemCosts() {
         return itemCosts;
     }
 
-    public void setItemCosts(ItemCosts itemCosts) {
+    public void setItemCosts(List<ItemCosts> itemCosts) {
         this.itemCosts = itemCosts;
     }
 
