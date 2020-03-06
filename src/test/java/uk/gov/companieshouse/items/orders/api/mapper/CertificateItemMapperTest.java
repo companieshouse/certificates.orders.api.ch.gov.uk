@@ -24,6 +24,7 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.CERTIFICATE;
 
 /**
  * Unit tests the {@link CertificateItemMapper} class.
@@ -97,7 +98,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setSurname(SURNAME);
 
         ITEM_COSTS = new ArrayList<>();
-        ITEM_COSTS.add(new ItemCosts("1", "2", "3", "4"));
+        ITEM_COSTS.add(new ItemCosts("1", "2", "3", "4", CERTIFICATE));
     }
 
     @Configuration

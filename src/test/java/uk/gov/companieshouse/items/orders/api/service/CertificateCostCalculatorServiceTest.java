@@ -5,11 +5,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.model.ProductType;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
 
 /**
  * Unit tests the {@link CertificateCostCalculatorService} class.
@@ -42,6 +44,7 @@ public class CertificateCostCalculatorServiceTest {
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getProductType(), is(CERTIFICATE));
 
     }
 
@@ -67,6 +70,8 @@ public class CertificateCostCalculatorServiceTest {
             final String expectedCalculatedCost =
                     Integer.toString(Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
             assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
+            final ProductType expectedProductType = index > 0 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE;
+            assertThat(cost.getProductType(), is(expectedProductType));
         }
 
     }
@@ -85,6 +90,7 @@ public class CertificateCostCalculatorServiceTest {
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getProductType(), is(CERTIFICATE_SAME_DAY));
 
     }
 
@@ -111,6 +117,8 @@ public class CertificateCostCalculatorServiceTest {
             final String expectedCalculatedCost =
                     Integer.toString(Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
             assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
+            final ProductType expectedProductType = index > 0 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE_SAME_DAY;
+            assertThat(cost.getProductType(), is(expectedProductType));
         }
 
     }

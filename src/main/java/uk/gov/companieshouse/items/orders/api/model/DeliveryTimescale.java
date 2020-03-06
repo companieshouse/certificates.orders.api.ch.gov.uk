@@ -3,6 +3,7 @@ package uk.gov.companieshouse.items.orders.api.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import static uk.gov.companieshouse.items.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
 
 /**
  * Values of this represent the possible delivery timescales.
@@ -19,6 +20,11 @@ public enum DeliveryTimescale {
         @Override
         public int getExtraCertificateDiscount() {
             return SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+        }
+
+        @Override
+        public ProductType getFirstCertificateProductType() {
+            return CERTIFICATE_SAME_DAY;
         }
     };
 
@@ -38,5 +44,13 @@ public enum DeliveryTimescale {
 
     public int getExtraCertificateDiscount() {
         return STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+    }
+
+    public ProductType getFirstCertificateProductType() {
+        return CERTIFICATE;
+    }
+
+    public ProductType getAdditionalCertificatesProductType() {
+        return CERTIFICATE_ADDITIONAL_COPY;
     }
 }

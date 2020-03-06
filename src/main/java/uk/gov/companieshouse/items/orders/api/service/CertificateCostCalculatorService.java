@@ -3,6 +3,7 @@ package uk.gov.companieshouse.items.orders.api.service;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.model.ProductType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,10 @@ public class CertificateCostCalculatorService {
             cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
             cost.setPostageCost(POSTAGE_COST);
             cost.setCalculatedCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost() - discountApplied));
+            final ProductType productType =
+                    count > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :
+                                deliveryTimescale.getFirstCertificateProductType();
+            cost.setProductType(productType);
             costs.add(cost);
         }
         return costs;
