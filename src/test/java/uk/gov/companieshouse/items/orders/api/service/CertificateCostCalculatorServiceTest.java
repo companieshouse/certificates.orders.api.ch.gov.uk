@@ -38,7 +38,7 @@ public class CertificateCostCalculatorServiceTest {
         final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
@@ -57,7 +57,7 @@ public class CertificateCostCalculatorServiceTest {
         for (int index = 0; index < MULTIPLE_QUANTITY; index++) {
             final ItemCosts cost = costs.get(index);
 
-            assertThat(cost.getIndividualItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+            assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
 
             final int expectedDiscountApplied = index > 0 ? STANDARD_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
@@ -81,7 +81,7 @@ public class CertificateCostCalculatorServiceTest {
         final ItemCosts cost = costs.get(0);
 
         // Then
-        assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
@@ -101,7 +101,7 @@ public class CertificateCostCalculatorServiceTest {
 
             final ItemCosts cost = costs.get(index);
 
-            assertThat(cost.getIndividualItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+            assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
 
             final int expectedDiscountApplied = index > 0 ? SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));

@@ -32,7 +32,7 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STA
 class ItemTypeTest {
 
     private static final String DISCOUNT_APPLIED = "1";
-    private static final String INDIVIDUAL_ITEM_COST = "2";
+    private static final String ITEM_COST = "2";
     private static final String POSTAGE_COST = "3";
     private static final String CALCULATED_COST = "4";
 
@@ -93,7 +93,7 @@ class ItemTypeTest {
         final List<ItemCosts> costs = new ArrayList<>();
         final ItemCosts cost = new ItemCosts();
         cost.setDiscountApplied(DISCOUNT_APPLIED);
-        cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
+        cost.setItemCost(ITEM_COST);
         cost.setPostageCost(POSTAGE_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
@@ -148,7 +148,7 @@ class ItemTypeTest {
         assertThat(costs, is(notNullValue()));
         final ItemCosts cost = costs.get(0);
         assertThat(cost.getDiscountApplied(), is(DISCOUNT_APPLIED));
-        assertThat(cost.getIndividualItemCost(), is(INDIVIDUAL_ITEM_COST));
+        assertThat(cost.getItemCost(), is(ITEM_COST));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(CALCULATED_COST));
     }

@@ -1565,7 +1565,7 @@ class CertificateItemsControllerIntegrationTest {
             final ItemCosts cost = new ItemCosts();
             final int expectedDiscountApplied = count > 1 ? extraCertificateDiscount : 0;
             cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-            cost.setIndividualItemCost(Integer.toString(certificateCost));
+            cost.setItemCost(Integer.toString(certificateCost));
             cost.setPostageCost(POSTAGE_COST);
             cost.setCalculatedCost((Integer.toString(certificateCost - expectedDiscountApplied)));
             costs.add(cost);

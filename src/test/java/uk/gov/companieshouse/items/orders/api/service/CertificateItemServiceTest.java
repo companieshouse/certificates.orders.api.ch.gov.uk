@@ -40,7 +40,7 @@ class CertificateItemServiceTest {
     private static final String ITEM_SOUGHT_ID_VALUE = "CHS00000000000000057";
 
     private static final String DISCOUNT_APPLIED = "1";
-    private static final String INDIVIDUAL_ITEM_COST = "2";
+    private static final String ITEM_COST = "2";
     private static final String POSTAGE_COST = "3";
     private static final String CALCULATED_COST = "4";
 
@@ -182,7 +182,7 @@ class CertificateItemServiceTest {
         final List<ItemCosts> costs = new ArrayList<>();
         final ItemCosts cost = new ItemCosts();
         cost.setDiscountApplied(DISCOUNT_APPLIED);
-        cost.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
+        cost.setItemCost(ITEM_COST);
         cost.setPostageCost(POSTAGE_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
@@ -199,7 +199,7 @@ class CertificateItemServiceTest {
         final ItemCosts cost = costs.get(0);
         assertThat(cost, Matchers.is(notNullValue()));
         assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
-        assertThat(cost.getIndividualItemCost(), Matchers.is(INDIVIDUAL_ITEM_COST));
+        assertThat(cost.getItemCost(), Matchers.is(ITEM_COST));
         assertThat(cost.getPostageCost(), Matchers.is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), Matchers.is(CALCULATED_COST));
     }

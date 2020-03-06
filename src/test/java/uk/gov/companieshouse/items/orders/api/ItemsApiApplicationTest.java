@@ -105,7 +105,7 @@ class ItemsApiApplicationTest {
 		final List<ItemCosts> costs = new ArrayList<>();
 		final ItemCosts cost = new ItemCosts();
 		cost.setDiscountApplied("1");
-		cost.setIndividualItemCost("2");
+		cost.setItemCost("2");
 		cost.setPostageCost("3");
 		cost.setCalculatedCost("4");
 		costs.add(cost);
