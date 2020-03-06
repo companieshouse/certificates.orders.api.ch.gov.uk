@@ -280,14 +280,10 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
-        final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
-        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        cost.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
-        costs.add(cost);
+        final List<ItemCosts> costs =
+                generateExpectedCosts(QUANTITY,
+                        STANDARD_INDIVIDUAL_CERTIFICATE_COST,
+                        STANDARD_EXTRA_CERTIFICATE_DISCOUNT);
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
@@ -764,14 +760,10 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
-        final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
-        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        cost.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
-        costs.add(cost);
+        final List<ItemCosts> costs =
+                generateExpectedCosts(QUANTITY,
+                        STANDARD_INDIVIDUAL_CERTIFICATE_COST,
+                        STANDARD_EXTRA_CERTIFICATE_DISCOUNT);
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
@@ -911,15 +903,10 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
-        final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
-        final int expectedDiscountApplied = (UPDATED_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
-        cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        cost.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
-        cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(
-                Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
-        costs.add(cost);
+        final List<ItemCosts> costs =
+                generateExpectedCosts(UPDATED_QUANTITY,
+                        SAME_DAY_INDIVIDUAL_CERTIFICATE_COST,
+                        SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT);
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
@@ -1560,6 +1547,30 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    /**
+     * Generates the costs we expect to be calculated given the quantity of certificates, the certificate cost
+     * and the certificate discount.
+     * @param quantity the quantity of certificates
+     * @param certificateCost the cost of an individual discount
+     * @param extraCertificateDiscount the discount applied per certificate for each extra certificate after the first
+     * @return the expected costs
+     */
+    private List<ItemCosts> generateExpectedCosts(final int quantity,
+                                                  final int certificateCost,
+                                                  final int extraCertificateDiscount) {
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
+        for (int count = 1; count <= quantity; count++) {
+            final int expectedDiscountApplied = (quantity - 1) * extraCertificateDiscount;
+            cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+            cost.setIndividualItemCost(Integer.toString(certificateCost));
+            cost.setPostageCost(POSTAGE_COST);
+            cost.setTotalCost(Integer.toString(quantity * certificateCost - expectedDiscountApplied));
+            costs.add(cost);
+        }
+        return costs;
     }
 
     /**

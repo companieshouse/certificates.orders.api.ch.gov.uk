@@ -17,21 +17,23 @@ public class CertificateCostCalculatorService {
 
     /**
      * Calculates the certificate item costs given the quantity and delivery timescale.
-     * @param quantity the quantity of certificate items specified
+     * @param quantity the quantity of certificate items specified. Assumed to be >= 1.
      * @param deliveryTimescale the delivery time scale specified
-     * @return the {@link ItemCosts} calculated
+     * @return the {@link List<ItemCosts>} calculated
      */
     public List<ItemCosts> calculateCosts(final int quantity, final DeliveryTimescale deliveryTimescale) {
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
-        final int discountApplied = (quantity - 1) * deliveryTimescale.getExtraCertificateDiscount();
-        cost.setDiscountApplied(Integer.toString(discountApplied));
-        cost.setIndividualItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-        cost.setPostageCost(POSTAGE_COST);
-        cost.setTotalCost(
-                Integer.toString(quantity * deliveryTimescale.getIndividualCertificateCost() - discountApplied));
-        costs.add(cost);
+        for (int count = 1; count <= quantity; count++) {
+            final ItemCosts cost = new ItemCosts();
+            final int discountApplied = (quantity - 1) * deliveryTimescale.getExtraCertificateDiscount();
+            cost.setDiscountApplied(Integer.toString(discountApplied));
+            cost.setIndividualItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
+            cost.setPostageCost(POSTAGE_COST);
+            cost.setTotalCost(
+                    Integer.toString(quantity * deliveryTimescale.getIndividualCertificateCost() - discountApplied));
+            costs.add(cost);
+        }
         return costs;
     }
 
