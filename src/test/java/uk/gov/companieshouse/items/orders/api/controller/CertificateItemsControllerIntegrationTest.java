@@ -47,6 +47,7 @@ import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecords
 import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -280,10 +281,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
-        final List<ItemCosts> costs =
-                generateExpectedCosts(QUANTITY,
-                        STANDARD_INDIVIDUAL_CERTIFICATE_COST,
-                        STANDARD_EXTRA_CERTIFICATE_DISCOUNT);
+        final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
@@ -760,10 +758,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
-        final List<ItemCosts> costs =
-                generateExpectedCosts(QUANTITY,
-                        STANDARD_INDIVIDUAL_CERTIFICATE_COST,
-                        STANDARD_EXTRA_CERTIFICATE_DISCOUNT);
+        final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
@@ -903,10 +898,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
-        final List<ItemCosts> costs =
-                generateExpectedCosts(UPDATED_QUANTITY,
-                        SAME_DAY_INDIVIDUAL_CERTIFICATE_COST,
-                        SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT);
+        final List<ItemCosts> costs = generateExpectedCosts(UPDATED_QUANTITY, UPDATED_DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
@@ -1550,27 +1542,42 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     /**
-     * Generates the costs we expect to be calculated given the quantity of certificates, the certificate cost
-     * and the certificate discount.
+     * Generates the costs we expect to be calculated given the quantity of certificates and the delivery timescale.
      * @param quantity the quantity of certificates
-     * @param certificateCost the cost of an individual discount
-     * @param extraCertificateDiscount the discount applied per certificate for each extra certificate after the first
+     * @param timescale the delivery timescale, standard or same day
      * @return the expected costs
      */
     private List<ItemCosts> generateExpectedCosts(final int quantity,
-                                                  final int certificateCost,
-                                                  final int extraCertificateDiscount) {
+                                                  final DeliveryTimescale timescale) {
         final List<ItemCosts> costs = new ArrayList<>();
-        for (int count = 1; count <= quantity; count++) {
+        final int certificateCost =
+                timescale == SAME_DAY ? SAME_DAY_INDIVIDUAL_CERTIFICATE_COST : STANDARD_INDIVIDUAL_CERTIFICATE_COST;
+        final int extraCertificateDiscount =
+                timescale == SAME_DAY ? SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT : STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
             final ItemCosts cost = new ItemCosts();
-            final int expectedDiscountApplied = count > 1 ? extraCertificateDiscount : 0;
+            final int expectedDiscountApplied = certificateNumber > 1 ? extraCertificateDiscount : 0;
             cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
             cost.setItemCost(Integer.toString(certificateCost));
             cost.setPostageCost(POSTAGE_COST);
             cost.setCalculatedCost((Integer.toString(certificateCost - expectedDiscountApplied)));
+            cost.setProductType(getProductType(certificateNumber, timescale));
             costs.add(cost);
         }
         return costs;
+    }
+
+    /**
+     * Derives the product type from the certificate number and the delivery timescale.
+     * @param certificateNumber the number of the certificate (1 is the first, > 1 => additional)
+     * @param timescale the delivery timescale, standard or same day
+     * @return the derived product type
+     */
+    private ProductType getProductType(final int certificateNumber, final DeliveryTimescale timescale) {
+        if (timescale.equals(SAME_DAY)) {
+            return certificateNumber > 1 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE_SAME_DAY;
+        }
+        return certificateNumber > 1 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE;
     }
 
     /**
