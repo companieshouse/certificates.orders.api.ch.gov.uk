@@ -18,11 +18,12 @@ public class CertificateCostCalculatorService {
 
     /**
      * Calculates the certificate item costs given the quantity and delivery timescale.
-     * @param quantity the quantity of certificate items specified. Assumed to be >= 1.
+     * @param client the client of this calculator. This calculation method both interrogates and updates the client.
      * @param deliveryTimescale the delivery time scale specified
-     * @return the {@link List<ItemCosts>} calculated
      */
-    public List<ItemCosts> calculateCosts(final int quantity, final DeliveryTimescale deliveryTimescale) {
+    public void calculateCosts(final CertificateCostCalculatorClient client,
+                               final DeliveryTimescale deliveryTimescale) {
+        final int quantity = client.getQuantity();
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> costs = new ArrayList<>();
         for (int count = 1; count <= quantity; count++) {
@@ -38,7 +39,8 @@ public class CertificateCostCalculatorService {
             cost.setProductType(productType);
             costs.add(cost);
         }
-        return costs;
+        client.setPostageCost(POSTAGE_COST);
+        client.setItemCosts(costs);
     }
 
     /**

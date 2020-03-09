@@ -67,6 +67,7 @@ public class CertificateItemMapperTest {
 
     private static final String FORENAME = "John";
     private static final String SURNAME = "Smith";
+    private static final String POSTAGE_COST = "0";
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -123,6 +124,7 @@ public class CertificateItemMapperTest {
         dto.setKind(KIND);
         dto.setPostalDelivery(POSTAL_DELIVERY);
         dto.setItemOptions(ITEM_OPTIONS);
+        dto.setPostageCost(POSTAGE_COST);
         final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
 
         assertThat(item.getId(), is(dto.getId()));
@@ -139,6 +141,7 @@ public class CertificateItemMapperTest {
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
+        assertThat(item.getPostageCost(), is(dto.getPostageCost()));
     }
 
     @Test
@@ -157,6 +160,7 @@ public class CertificateItemMapperTest {
         item.setPostalDelivery(POSTAL_DELIVERY);
         item.setItemOptions(ITEM_OPTIONS);
         item.setEtag(TOKEN_ETAG);
+        item.setPostageCost(POSTAGE_COST);
 
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
@@ -173,6 +177,7 @@ public class CertificateItemMapperTest {
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
         assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
         assertThat(dto.getEtag(), is(item.getEtag()));
+        assertThat(dto.getPostageCost(), is(item.getPostageCost()));
     }
 
     /**

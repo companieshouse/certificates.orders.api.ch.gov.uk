@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.model.ProductType;
 
@@ -35,7 +36,10 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardSingleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD);
+        final Item item = new Item();
+        item.setQuantity(SINGLE_QUANTITY);
+        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = item.getItemCosts();
         assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
 
@@ -53,7 +57,10 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.STANDARD);
+        final Item item = new Item();
+        item.setQuantity(MULTIPLE_QUANTITY);
+        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = item.getItemCosts();
 
         // Then
         assertThat(costs.size(), is(MULTIPLE_QUANTITY));
@@ -81,7 +88,10 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDaySingleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+        final Item item = new Item();
+        item.setQuantity(SINGLE_QUANTITY);
+        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = item.getItemCosts();
         assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
 
@@ -99,7 +109,10 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDayMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final List<ItemCosts> costs = calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+        final Item item = new Item();
+        item.setQuantity(MULTIPLE_QUANTITY);
+        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = item.getItemCosts();
 
         // Then
         assertThat(costs.size(), is(MULTIPLE_QUANTITY));
@@ -126,18 +139,22 @@ public class CertificateCostCalculatorServiceTest {
     @Test
     @DisplayName("Too few items result in an IllegalArgumentException")
     void tooFewItemsTriggerIllegalArgumentException() {
+        final Item item = new Item();
+        item.setQuantity(0);
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(0, DeliveryTimescale.STANDARD));
+                                        () -> calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD));
         assertThat(exception.getMessage(), is("quantity must be greater than or equal to 1!"));
     }
 
     @Test
     @DisplayName("null delivery timescale results in an IllegalArgumentException")
     void noDeliveryTimescaleTriggersIllegalArgumentException() {
+        final Item item = new Item();
+        item.setQuantity(1);
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(1, null));
+                                        () -> calculatorUnderTest.calculateCosts(item, null));
         assertThat(exception.getMessage(), is("deliveryTimescale must not be null!"));
     }
 

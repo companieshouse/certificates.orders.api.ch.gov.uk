@@ -7,21 +7,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.Item;
-import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
-import uk.gov.companieshouse.items.orders.api.model.ProductType;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
@@ -31,11 +22,6 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STA
  */
 @ExtendWith(MockitoExtension.class)
 class ItemTypeTest {
-
-    private static final String DISCOUNT_APPLIED = "1";
-    private static final String ITEM_COST = "2";
-    private static final String POSTAGE_COST = "3";
-    private static final String CALCULATED_COST = "4";
 
     @Mock
     private DescriptionProviderService descriptions;
@@ -91,24 +77,13 @@ class ItemTypeTest {
     @DisplayName("Calculated costs are populated correctly")
     void itemCostsArePopulatedCorrectly() {
         // Given
-        final List<ItemCosts> costs = new ArrayList<>();
-        final ItemCosts cost = new ItemCosts();
-        cost.setDiscountApplied(DISCOUNT_APPLIED);
-        cost.setItemCost(ITEM_COST);
-        cost.setPostageCost(POSTAGE_COST);
-        cost.setCalculatedCost(CALCULATED_COST);
-        cost.setProductType(ProductType.CERTIFICATE);
-        costs.add(cost);
-        when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         final Item item = new Item();
-        item.setQuantity(1);
 
         // When
         CERTIFICATE.populateItemCosts(item, calculator);
 
         // Then
-        verify(calculator).calculateCosts(anyInt(), eq(STANDARD));
-        verifyCostsFields(item);
+        verify(calculator).calculateCosts(item, STANDARD);
     }
 
     /**
@@ -140,21 +115,6 @@ class ItemTypeTest {
     private void verifyDerivedDescriptionFields(final Item item) {
         verify(descriptions).getDescription(item.getCompanyNumber());
         verify(descriptions).getDescriptionValues(item.getCompanyNumber());
-    }
-
-    /**
-     * Verifies that the item costs have been populated as expected.
-     * @param item the item
-     */
-    private void verifyCostsFields(final Item item) {
-        final List<ItemCosts> costs = item.getItemCosts();
-        assertThat(costs, is(notNullValue()));
-        final ItemCosts cost = costs.get(0);
-        assertThat(cost.getDiscountApplied(), is(DISCOUNT_APPLIED));
-        assertThat(cost.getItemCost(), is(ITEM_COST));
-        assertThat(cost.getPostageCost(), is(POSTAGE_COST));
-        assertThat(cost.getCalculatedCost(), is(CALCULATED_COST));
-        assertThat(cost.getProductType(), is(ProductType.CERTIFICATE));
     }
 
     private void verifyPostalDelivery(final Item item, final ItemType type) {

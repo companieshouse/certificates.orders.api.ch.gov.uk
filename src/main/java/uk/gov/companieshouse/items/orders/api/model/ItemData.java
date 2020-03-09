@@ -40,6 +40,8 @@ public class ItemData {
 
     private Links links;
 
+    private String postageCost;
+
     private Boolean isPostalDelivery;
 
     private Integer quantity;
@@ -138,6 +140,14 @@ public class ItemData {
 
     public void setLinks(Links links) {
         this.links = links;
+    }
+
+    public String getPostageCost() {
+        return postageCost;
+    }
+
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
     }
 
     public Boolean isPostalDelivery() {

@@ -21,6 +21,8 @@ public abstract class AbstractItemDTO {
 
     private Links links;
 
+    private String postageCost;
+
     public void setId(String id) {
         this.id = id;
     }
@@ -63,5 +65,15 @@ public abstract class AbstractItemDTO {
 
     public void setLinks(Links links) {
         this.links = links;
+    }
+
+    @Null
+    @JsonProperty("postage_cost")
+    public String getPostageCost() {
+        return postageCost;
+    }
+
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
     }
 }

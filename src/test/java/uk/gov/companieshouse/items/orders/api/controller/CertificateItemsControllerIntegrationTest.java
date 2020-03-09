@@ -327,6 +327,8 @@ class CertificateItemsControllerIntegrationTest {
                         is(SURNAME)))
                 .andExpect(jsonPath("$.links",
                         is(objectMapper.convertValue(LINKS, Map.class))))
+                .andExpect(jsonPath("$.postage_cost",
+                        is(POSTAGE_COST)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -345,12 +347,14 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
         newItem.setLinks(LINKS);
+        newItem.setPostageCost(POSTAGE_COST);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
                                                  "company_name: must not be null",
                                                  "etag: must be null",
-                                                 "links: must be null"));
+                                                 "links: must be null",
+                                                 "postage_cost: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -763,6 +767,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
+        expectedItem.setPostageCost(POSTAGE_COST);
 
         // When and then
         mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
@@ -902,6 +907,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
+        expectedItem.setPostageCost(POSTAGE_COST);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -1085,6 +1091,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setEtag(TOKEN_ETAG);
         itemUpdate.setLinks(LINKS);
         itemUpdate.setId(UPDATED_ITEM_ID);
+        itemUpdate.setPostageCost(POSTAGE_COST);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1098,7 +1105,8 @@ class CertificateItemsControllerIntegrationTest {
                                                  "kind: must be null",
                                                  "etag: must be null",
                                                  "links: must be null",
-                                                 "id: must be null"));
+                                                 "id: must be null",
+                                                 "postage_cost: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
