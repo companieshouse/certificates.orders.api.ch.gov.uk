@@ -183,7 +183,6 @@ class CertificateItemServiceTest {
         final ItemCosts cost = new ItemCosts();
         cost.setDiscountApplied(DISCOUNT_APPLIED);
         cost.setItemCost(ITEM_COST);
-        cost.setPostageCost(POSTAGE_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(
@@ -201,7 +200,6 @@ class CertificateItemServiceTest {
         assertThat(cost, Matchers.is(notNullValue()));
         assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
         assertThat(cost.getItemCost(), Matchers.is(ITEM_COST));
-        assertThat(cost.getPostageCost(), Matchers.is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), Matchers.is(CALCULATED_COST));
         assertThat(item.getPostageCost(), is(POSTAGE_COST));
     }

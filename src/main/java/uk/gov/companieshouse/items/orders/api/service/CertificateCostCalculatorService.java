@@ -31,7 +31,6 @@ public class CertificateCostCalculatorService {
             final int discountApplied = count > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
             cost.setDiscountApplied(Integer.toString(discountApplied));
             cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-            cost.setPostageCost(POSTAGE_COST);
             cost.setCalculatedCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost() - discountApplied));
             final ProductType productType =
                     count > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :

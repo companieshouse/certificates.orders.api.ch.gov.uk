@@ -289,6 +289,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setLinks(LINKS);
         expectedItem.setEtag(TOKEN_ETAG);
+        expectedItem.setPostageCost(POSTAGE_COST);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -960,6 +961,7 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
@@ -1556,7 +1558,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the expected costs
      */
     private List<ItemCosts> generateExpectedCosts(final int quantity,
-                                                  final DeliveryTimescale timescale) {
+                                                             final DeliveryTimescale timescale) {
         final List<ItemCosts> costs = new ArrayList<>();
         final int certificateCost =
                 timescale == SAME_DAY ? SAME_DAY_INDIVIDUAL_CERTIFICATE_COST : STANDARD_INDIVIDUAL_CERTIFICATE_COST;
@@ -1567,7 +1569,6 @@ class CertificateItemsControllerIntegrationTest {
             final int expectedDiscountApplied = certificateNumber > 1 ? extraCertificateDiscount : 0;
             cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
             cost.setItemCost(Integer.toString(certificateCost));
-            cost.setPostageCost(POSTAGE_COST);
             cost.setCalculatedCost((Integer.toString(certificateCost - expectedDiscountApplied)));
             cost.setProductType(getProductType(certificateNumber, timescale));
             costs.add(cost);
@@ -1744,6 +1745,7 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }

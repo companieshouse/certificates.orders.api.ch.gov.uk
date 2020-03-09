@@ -99,7 +99,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setSurname(SURNAME);
 
         ITEM_COSTS = new ArrayList<>();
-        ITEM_COSTS.add(new ItemCosts("1", "2", "3", "4", CERTIFICATE));
+        ITEM_COSTS.add(new ItemCosts("1", "2", "3", CERTIFICATE));
     }
 
     @Configuration

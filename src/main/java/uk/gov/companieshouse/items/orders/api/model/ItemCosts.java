@@ -14,9 +14,6 @@ public class ItemCosts {
     @JsonProperty("item_cost")
     private String itemCost;
 
-    @JsonProperty("postage_cost")
-    private String postageCost;
-
     @JsonProperty("calculated_cost")
     private String calculatedCost;
 
@@ -28,12 +25,10 @@ public class ItemCosts {
 
     public ItemCosts(String discountApplied,
                      String itemCost,
-                     String postageCost,
                      String calculatedCost,
                      ProductType productType) {
         this.discountApplied = discountApplied;
         this.itemCost = itemCost;
-        this.postageCost = postageCost;
         this.calculatedCost = calculatedCost;
         this.productType = productType;
     }
@@ -52,14 +47,6 @@ public class ItemCosts {
 
     public void setItemCost(String itemCost) {
         this.itemCost = itemCost;
-    }
-
-    public String getPostageCost() {
-        return postageCost;
-    }
-
-    public void setPostageCost(String postageCost) {
-        this.postageCost = postageCost;
     }
 
     public String getCalculatedCost() {
