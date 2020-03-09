@@ -36,19 +36,19 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardSingleCertificateCostCorrectly() {
 
         // Given and when
-        final Item item = new Item();
-        item.setQuantity(SINGLE_QUANTITY);
-        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD);
-        final List<ItemCosts> costs = item.getItemCosts();
-        assertThat(costs.size(), is(SINGLE_QUANTITY));
-        final ItemCosts cost = costs.get(0);
+        final CertificateCostCalculation calculation =
+                calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = calculation.getItemCosts();
 
         // Then
+        assertThat(costs.size(), is(SINGLE_QUANTITY));
+        final ItemCosts cost = costs.get(0);
         assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getProductType(), is(CERTIFICATE));
+        assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
 
     }
 
@@ -57,10 +57,9 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesStandardMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final Item item = new Item();
-        item.setQuantity(MULTIPLE_QUANTITY);
-        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD);
-        final List<ItemCosts> costs = item.getItemCosts();
+        final CertificateCostCalculation calculation =
+                calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.STANDARD);
+        final List<ItemCosts> costs = calculation.getItemCosts();
 
         // Then
         assertThat(costs.size(), is(MULTIPLE_QUANTITY));
@@ -81,6 +80,8 @@ public class CertificateCostCalculatorServiceTest {
             assertThat(cost.getProductType(), is(expectedProductType));
         }
 
+        assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+
     }
 
     @Test
@@ -88,19 +89,19 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDaySingleCertificateCostCorrectly() {
 
         // Given and when
-        final Item item = new Item();
-        item.setQuantity(SINGLE_QUANTITY);
-        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.SAME_DAY);
-        final List<ItemCosts> costs = item.getItemCosts();
-        assertThat(costs.size(), is(SINGLE_QUANTITY));
-        final ItemCosts cost = costs.get(0);
+        final CertificateCostCalculation calculation =
+            calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = calculation.getItemCosts();
 
         // Then
+        assertThat(costs.size(), is(SINGLE_QUANTITY));
+        final ItemCosts cost = costs.get(0);
         assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getProductType(), is(CERTIFICATE_SAME_DAY));
+        assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
 
     }
 
@@ -109,10 +110,9 @@ public class CertificateCostCalculatorServiceTest {
     void calculatesSameDayMultipleCertificateCostCorrectly() {
 
         // Given and when
-        final Item item = new Item();
-        item.setQuantity(MULTIPLE_QUANTITY);
-        calculatorUnderTest.calculateCosts(item, DeliveryTimescale.SAME_DAY);
-        final List<ItemCosts> costs = item.getItemCosts();
+        final CertificateCostCalculation calculation =
+            calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+        final List<ItemCosts> costs = calculation.getItemCosts();
 
         // Then
         assertThat(costs.size(), is(MULTIPLE_QUANTITY));
@@ -134,27 +134,25 @@ public class CertificateCostCalculatorServiceTest {
             assertThat(cost.getProductType(), is(expectedProductType));
         }
 
+        assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+
     }
 
     @Test
     @DisplayName("Too few items result in an IllegalArgumentException")
     void tooFewItemsTriggerIllegalArgumentException() {
-        final Item item = new Item();
-        item.setQuantity(0);
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(item, DeliveryTimescale.STANDARD));
+                                        () -> calculatorUnderTest.calculateCosts(0, DeliveryTimescale.STANDARD));
         assertThat(exception.getMessage(), is("quantity must be greater than or equal to 1!"));
     }
 
     @Test
     @DisplayName("null delivery timescale results in an IllegalArgumentException")
     void noDeliveryTimescaleTriggersIllegalArgumentException() {
-        final Item item = new Item();
-        item.setQuantity(1);
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(item, null));
+                                        () -> calculatorUnderTest.calculateCosts(1, null));
         assertThat(exception.getMessage(), is("deliveryTimescale must not be null!"));
     }
 

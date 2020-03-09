@@ -186,8 +186,8 @@ class CertificateItemServiceTest {
         cost.setPostageCost(POSTAGE_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
-        item.setItemCosts(costs);
-        item.setPostageCost(POSTAGE_COST);
+        when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(
+                new CertificateCostCalculation(costs, POSTAGE_COST));
         return item;
     }
 

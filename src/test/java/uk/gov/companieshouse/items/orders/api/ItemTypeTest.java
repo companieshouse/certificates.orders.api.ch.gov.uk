@@ -7,12 +7,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.Item;
+import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculation;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.items.orders.api.ItemType.*;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
@@ -22,6 +30,8 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STA
  */
 @ExtendWith(MockitoExtension.class)
 class ItemTypeTest {
+
+    private static final String POSTAGE_COST = "0";
 
     @Mock
     private DescriptionProviderService descriptions;
@@ -78,12 +88,18 @@ class ItemTypeTest {
     void itemCostsArePopulatedCorrectly() {
         // Given
         final Item item = new Item();
+        item.setQuantity(1);
+        final List<ItemCosts> costs = new ArrayList<>();
+        when(calculator.calculateCosts(anyInt(),
+                eq(STANDARD))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST));
 
         // When
         CERTIFICATE.populateItemCosts(item, calculator);
 
         // Then
-        verify(calculator).calculateCosts(item, STANDARD);
+        verify(calculator).calculateCosts(1, STANDARD);
+        assertThat(item.getItemCosts(), is(costs));
+        assertThat(item.getPostageCost(), is(POSTAGE_COST));
     }
 
     /**

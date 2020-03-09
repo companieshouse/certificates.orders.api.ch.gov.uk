@@ -3,7 +3,6 @@ package uk.gov.companieshouse.items.orders.api.model;
 import com.google.gson.Gson;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.Map;
 /**
  * An instance of this represents an item of any type.
  */
-public class Item implements CertificateCostCalculatorClient {
+public class Item {
 
     @Transient
     public static final String SEQUENCE_NAME = "items_sequence";
