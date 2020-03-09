@@ -32,6 +32,7 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STA
 class ItemTypeTest {
 
     private static final String POSTAGE_COST = "0";
+    private static final String TOTAL_ITEM_COST = "100";
 
     @Mock
     private DescriptionProviderService descriptions;
@@ -91,7 +92,7 @@ class ItemTypeTest {
         item.setQuantity(1);
         final List<ItemCosts> costs = new ArrayList<>();
         when(calculator.calculateCosts(anyInt(),
-                eq(STANDARD))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST));
+                eq(STANDARD))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
 
         // When
         CERTIFICATE.populateItemCosts(item, calculator);
@@ -100,6 +101,7 @@ class ItemTypeTest {
         verify(calculator).calculateCosts(1, STANDARD);
         assertThat(item.getItemCosts(), is(costs));
         assertThat(item.getPostageCost(), is(POSTAGE_COST));
+        assertThat(item.getTotalItemCost(), is(TOTAL_ITEM_COST));
     }
 
     /**

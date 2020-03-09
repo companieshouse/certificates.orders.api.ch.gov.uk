@@ -172,6 +172,14 @@ public class Item {
         data.setQuantity(quantity);
     }
 
+    public String getTotalItemCost() {
+        return data.getTotalItemCost();
+    }
+
+    public void setTotalItemCost(String totalItemCost) {
+        data.setTotalItemCost(totalItemCost);
+    }
+
     public String getUserId() {
         return userId;
     }

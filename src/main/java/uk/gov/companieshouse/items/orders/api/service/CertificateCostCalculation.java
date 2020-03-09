@@ -10,11 +10,13 @@ import java.util.List;
 public class CertificateCostCalculation {
 
     private final List<ItemCosts> itemCosts;
-   private final String postageCost;
+    private final String postageCost;
+    private final String totalItemCost;
 
-    public CertificateCostCalculation(List<ItemCosts> itemCosts, String postageCost) {
+    public CertificateCostCalculation(List<ItemCosts> itemCosts, String postageCost, String totalItemCost) {
         this.itemCosts = itemCosts;
         this.postageCost = postageCost;
+        this.totalItemCost = totalItemCost;
     }
 
     public List<ItemCosts> getItemCosts() {
@@ -25,4 +27,7 @@ public class CertificateCostCalculation {
         return postageCost;
     }
 
+    public String getTotalItemCost() {
+        return totalItemCost;
+    }
 }

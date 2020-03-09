@@ -230,6 +230,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String FORENAME = "John";
     private static final String SURNAME = "Smith";
     private static final String UPDATED_SURNAME = "Smyth";
+    private static final String TOKEN_TOTAL_ITEM_COST = "100";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -290,6 +291,8 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setLinks(LINKS);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setPostageCost(POSTAGE_COST);
+        final String totalItemCost = calculateExpectedTotalItemCost(costs, POSTAGE_COST);
+        expectedItem.setTotalItemCost(totalItemCost);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -330,6 +333,8 @@ class CertificateItemsControllerIntegrationTest {
                         is(objectMapper.convertValue(LINKS, Map.class))))
                 .andExpect(jsonPath("$.postage_cost",
                         is(POSTAGE_COST)))
+                .andExpect(jsonPath("$.total_item_cost",
+                        is(totalItemCost)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -349,13 +354,15 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setEtag(TOKEN_ETAG);
         newItem.setLinks(LINKS);
         newItem.setPostageCost(POSTAGE_COST);
+        newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
                                                  "company_name: must not be null",
                                                  "etag: must be null",
                                                  "links: must be null",
-                                                 "postage_cost: must be null"));
+                                                 "postage_cost: must be null",
+                                                 "total_item_cost: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -769,6 +776,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
         expectedItem.setPostageCost(POSTAGE_COST);
+        expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         // When and then
         mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
@@ -909,6 +917,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
         expectedItem.setPostageCost(POSTAGE_COST);
+        expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -962,6 +971,7 @@ class CertificateItemsControllerIntegrationTest {
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
         assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
@@ -1094,6 +1104,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setLinks(LINKS);
         itemUpdate.setId(UPDATED_ITEM_ID);
         itemUpdate.setPostageCost(POSTAGE_COST);
+        itemUpdate.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1108,7 +1119,8 @@ class CertificateItemsControllerIntegrationTest {
                                                  "etag: must be null",
                                                  "links: must be null",
                                                  "id: must be null",
-                                                 "postage_cost: must be null"));
+                                                 "postage_cost: must be null",
+                                                 "total_item_cost: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1746,6 +1758,7 @@ class CertificateItemsControllerIntegrationTest {
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
         assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
@@ -1772,6 +1785,19 @@ class CertificateItemsControllerIntegrationTest {
             final String fieldValue = itemOptions.getString(field);
             assertThat("Enum " + field + " value not of expected format!", fieldValue, is(fieldValue.toLowerCase()));
         }
+    }
+
+    /**
+     * Utility that calculates the expected total item cost for the item costs and postage cost provided.
+     * @param costs the item costs
+     * @param postageCost the postage cost
+     * @return the expected total item cost (as a String)
+     */
+    private String calculateExpectedTotalItemCost(final List<ItemCosts> costs, final String postageCost) {
+        final Integer total = costs.stream()
+                .map(itemCosts -> Integer.parseInt(itemCosts.getCalculatedCost()))
+                .reduce(0, Integer::sum) + Integer.parseInt(postageCost);
+        return total.toString();
     }
 
 }

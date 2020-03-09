@@ -26,19 +26,23 @@ public class CertificateCostCalculatorService {
                                                      final DeliveryTimescale deliveryTimescale) {
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> costs = new ArrayList<>();
+        int totalItemCost = 0;
         for (int count = 1; count <= quantity; count++) {
             final ItemCosts cost = new ItemCosts();
             final int discountApplied = count > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
             cost.setDiscountApplied(Integer.toString(discountApplied));
             cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-            cost.setCalculatedCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost() - discountApplied));
+            final int calculatedCost = deliveryTimescale.getIndividualCertificateCost() - discountApplied;
+            totalItemCost += calculatedCost;
+            cost.setCalculatedCost(Integer.toString(calculatedCost));
             final ProductType productType =
                     count > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :
                                 deliveryTimescale.getFirstCertificateProductType();
             cost.setProductType(productType);
             costs.add(cost);
         }
-        return new CertificateCostCalculation(costs, POSTAGE_COST);
+        totalItemCost += Integer.parseInt(POSTAGE_COST);
+        return new CertificateCostCalculation(costs, POSTAGE_COST, Integer.toString(totalItemCost));
     }
 
     /**

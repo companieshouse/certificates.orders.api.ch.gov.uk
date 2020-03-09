@@ -72,6 +72,7 @@ public enum ItemType {
                 calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
         item.setPostageCost(calculation.getPostageCost());
         item.setItemCosts(calculation.getItemCosts());
+        item.setTotalItemCost(calculation.getTotalItemCost());
     }
 
     /**

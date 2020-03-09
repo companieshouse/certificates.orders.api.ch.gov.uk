@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
-import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.model.ProductType;
 
@@ -48,6 +47,7 @@ public class CertificateCostCalculatorServiceTest {
         assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getProductType(), is(CERTIFICATE));
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+        assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
 
     }
 
@@ -78,6 +78,7 @@ public class CertificateCostCalculatorServiceTest {
         }
 
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+        assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
 
     }
 
@@ -98,6 +99,7 @@ public class CertificateCostCalculatorServiceTest {
         assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
         assertThat(cost.getProductType(), is(CERTIFICATE_SAME_DAY));
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+        assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
 
     }
 
@@ -129,6 +131,7 @@ public class CertificateCostCalculatorServiceTest {
         }
 
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
+        assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
 
     }
 
@@ -148,6 +151,19 @@ public class CertificateCostCalculatorServiceTest {
                 Assertions.assertThrows(IllegalArgumentException.class,
                                         () -> calculatorUnderTest.calculateCosts(1, null));
         assertThat(exception.getMessage(), is("deliveryTimescale must not be null!"));
+    }
+
+    /**
+     * Utility that calculates the expected total item cost for the item costs and postage cost provided.
+     * @param costs the item costs
+     * @param postageCost the postage cost
+     * @return the expected total item cost (as a String)
+     */
+    private String calculateExpectedTotalItemCost(final List<ItemCosts> costs, final String postageCost) {
+        final Integer total = costs.stream()
+                               .map(itemCosts -> Integer.parseInt(itemCosts.getCalculatedCost()))
+                               .reduce(0, Integer::sum) + Integer.parseInt(postageCost);
+        return total.toString();
     }
 
 }

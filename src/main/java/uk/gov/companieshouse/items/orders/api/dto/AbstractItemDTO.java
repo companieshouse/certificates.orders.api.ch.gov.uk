@@ -23,6 +23,8 @@ public abstract class AbstractItemDTO {
 
     private String postageCost;
 
+    private String totalItemCost;
+
     public void setId(String id) {
         this.id = id;
     }
@@ -75,5 +77,15 @@ public abstract class AbstractItemDTO {
 
     public void setPostageCost(String postageCost) {
         this.postageCost = postageCost;
+    }
+
+    @Null
+    @JsonProperty("total_item_cost")
+    public String getTotalItemCost() {
+        return totalItemCost;
+    }
+
+    public void setTotalItemCost(String totalItemCost) {
+        this.totalItemCost = totalItemCost;
     }
 }
