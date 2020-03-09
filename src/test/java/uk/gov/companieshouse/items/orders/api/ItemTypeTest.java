@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.Item;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.model.ProductType;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
@@ -96,6 +97,7 @@ class ItemTypeTest {
         cost.setItemCost(ITEM_COST);
         cost.setPostageCost(POSTAGE_COST);
         cost.setCalculatedCost(CALCULATED_COST);
+        cost.setProductType(ProductType.CERTIFICATE);
         costs.add(cost);
         when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
         final Item item = new Item();
@@ -105,6 +107,7 @@ class ItemTypeTest {
         CERTIFICATE.populateItemCosts(item, calculator);
 
         // Then
+        verify(calculator).calculateCosts(anyInt(), eq(STANDARD));
         verifyCostsFields(item);
     }
 
@@ -151,6 +154,7 @@ class ItemTypeTest {
         assertThat(cost.getItemCost(), is(ITEM_COST));
         assertThat(cost.getPostageCost(), is(POSTAGE_COST));
         assertThat(cost.getCalculatedCost(), is(CALCULATED_COST));
+        assertThat(cost.getProductType(), is(ProductType.CERTIFICATE));
     }
 
     private void verifyPostalDelivery(final Item item, final ItemType type) {
