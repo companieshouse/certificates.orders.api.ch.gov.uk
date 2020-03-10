@@ -26,23 +26,47 @@ public class CertificateCostCalculatorService {
                                                      final DeliveryTimescale deliveryTimescale) {
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> costs = new ArrayList<>();
-        int totalItemCost = 0;
-        for (int count = 1; count <= quantity; count++) {
-            final ItemCosts cost = new ItemCosts();
-            final int discountApplied = count > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
-            cost.setDiscountApplied(Integer.toString(discountApplied));
-            cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-            final int calculatedCost = deliveryTimescale.getIndividualCertificateCost() - discountApplied;
-            totalItemCost += calculatedCost;
-            cost.setCalculatedCost(Integer.toString(calculatedCost));
-            final ProductType productType =
-                    count > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :
-                                deliveryTimescale.getFirstCertificateProductType();
-            cost.setProductType(productType);
+        for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
+            final ItemCosts cost = calculateSingleItemCosts(certificateNumber, deliveryTimescale);
             costs.add(cost);
         }
-        totalItemCost += Integer.parseInt(POSTAGE_COST);
-        return new CertificateCostCalculation(costs, POSTAGE_COST, Integer.toString(totalItemCost));
+        final String totalItemCost = calculateTotalItemCost(costs, POSTAGE_COST);
+        return new CertificateCostCalculation(costs, POSTAGE_COST, totalItemCost);
+    }
+
+    /**
+     * Calculates the costs for a single certificate.
+     * @param certificateNumber the number of the certificate, used to determine whether the certificate is the first
+     *                          and therefore full price, or an additional certificate, and therefore discounted
+     * @param deliveryTimescale the delivery timescale
+     * @return the costs for the certificate
+     */
+    private ItemCosts calculateSingleItemCosts(final int certificateNumber, final DeliveryTimescale deliveryTimescale) {
+        final ItemCosts cost = new ItemCosts();
+        final int discountApplied = certificateNumber > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
+        cost.setDiscountApplied(Integer.toString(discountApplied));
+        cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
+        final int calculatedCost = deliveryTimescale.getIndividualCertificateCost() - discountApplied;
+        cost.setCalculatedCost(Integer.toString(calculatedCost));
+        final ProductType productType =
+                certificateNumber > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :
+                        deliveryTimescale.getFirstCertificateProductType();
+        cost.setProductType(productType);
+        return cost;
+    }
+
+    /**
+     * Utility that calculates the total item cost from the item costs and postage cost provided. This is the total
+     * cost of all of the certificates, including postage.
+     * @param costs the item costs
+     * @param postageCost the postage cost
+     * @return the total item cost (as a String)
+     */
+    private String calculateTotalItemCost(final List<ItemCosts> costs, final String postageCost) {
+        final int total = costs.stream()
+                .map(itemCosts -> Integer.parseInt(itemCosts.getCalculatedCost()))
+                .reduce(0, Integer::sum) + Integer.parseInt(postageCost);
+        return Integer.toString(total);
     }
 
     /**
