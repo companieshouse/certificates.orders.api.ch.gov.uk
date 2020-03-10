@@ -165,6 +165,31 @@ class ItemsApiApplicationTest {
 	}
 
 	@Test
+	@DisplayName("Create rejects read only postage cost")
+	void createCertificateItemRejectsReadOnlyPostageCost() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setPostageCost("0");
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "postage_cost: must be null");
+	}
+
+
+	@Test
+	@DisplayName("Create rejects read only total item cost")
+	void createCertificateItemRejectsReadOnlyTotalItemCost() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setTotalItemCost("100");
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "total_item_cost: must be null");
+	}
+
+	@Test
 	@DisplayName("Create rejects missing X-Request-ID")
 	void createCertificateItemRejectsMissingRequestId() {
 
