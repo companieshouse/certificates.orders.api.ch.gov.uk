@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import uk.gov.companieshouse.items.orders.api.config.CostsConfig;
 
 import static uk.gov.companieshouse.items.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
 import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
@@ -13,13 +14,13 @@ public enum DeliveryTimescale {
     SAME_DAY {
 
         @Override
-        public int getIndividualCertificateCost() {
-            return SAME_DAY_INDIVIDUAL_CERTIFICATE_COST;
+        public int getIndividualCertificateCost(final CostsConfig costs) {
+            return costs.getSameDayCost();
         }
 
         @Override
-        public int getExtraCertificateDiscount() {
-            return SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+        public int getExtraCertificateDiscount(final CostsConfig costs) {
+            return costs.getSameDayDiscount();
         }
 
         @Override
@@ -28,22 +29,17 @@ public enum DeliveryTimescale {
         }
     };
 
-    private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
-    private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
-    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
-    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
-
     @JsonValue
     public String getJsonName() {
         return convertEnumValueNameToJson(this);
     }
 
-    public int getIndividualCertificateCost() {
-        return STANDARD_INDIVIDUAL_CERTIFICATE_COST;
+    public int getIndividualCertificateCost(final CostsConfig costs) {
+        return costs.getStandardCost();
     }
 
-    public int getExtraCertificateDiscount() {
-        return STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+    public int getExtraCertificateDiscount(final CostsConfig costs) {
+        return costs.getStandardDiscount();
     }
 
     public ProductType getFirstCertificateProductType() {

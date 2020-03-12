@@ -3,6 +3,8 @@ package uk.gov.companieshouse.items.orders.api.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.model.ProductType;
@@ -14,8 +16,9 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
 
 /**
- * Unit tests the {@link CertificateCostCalculatorService} class.
+ * Unit/integration tests the {@link CertificateCostCalculatorService} class.
  */
+@SpringBootTest
 public class CertificateCostCalculatorServiceTest {
 
     private static final String POSTAGE_COST = "0";
@@ -28,7 +31,8 @@ public class CertificateCostCalculatorServiceTest {
     private static final int MULTIPLE_QUANTITY = 3;
     private static final int SINGLE_QUANTITY = 1;
 
-    private final CertificateCostCalculatorService calculatorUnderTest = new CertificateCostCalculatorService();
+    @Autowired
+    private CertificateCostCalculatorService calculatorUnderTest;
 
     @Test
     @DisplayName("Calculates standard delivery single certificate cost correctly")

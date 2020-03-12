@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.service;
 
 import org.springframework.stereotype.Service;
+import uk.gov.companieshouse.items.orders.api.config.CostsConfig;
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.model.ProductType;
@@ -16,6 +17,16 @@ public class CertificateCostCalculatorService {
 
     private static final String POSTAGE_COST = "0";
 
+    private final CostsConfig costs;
+
+    /**
+     * Constructor.
+     * @param costs the configured costs used by this in its calculations
+     */
+    public CertificateCostCalculatorService(final CostsConfig costs) {
+        this.costs = costs;
+    }
+
     /**
      * Calculates the certificate item costs given the quantity and delivery timescale.
      * @param quantity the quantity of certificate items specified. Assumed to be >= 1.
@@ -25,13 +36,13 @@ public class CertificateCostCalculatorService {
     public CertificateCostCalculation calculateCosts(final int quantity,
                                                      final DeliveryTimescale deliveryTimescale) {
         checkArguments(quantity, deliveryTimescale);
-        final List<ItemCosts> costs = new ArrayList<>();
+        final List<ItemCosts> itemCosts = new ArrayList<>();
         for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
             final ItemCosts cost = calculateSingleItemCosts(certificateNumber, deliveryTimescale);
-            costs.add(cost);
+            itemCosts.add(cost);
         }
-        final String totalItemCost = calculateTotalItemCost(costs, POSTAGE_COST);
-        return new CertificateCostCalculation(costs, POSTAGE_COST, totalItemCost);
+        final String totalItemCost = calculateTotalItemCost(itemCosts, POSTAGE_COST);
+        return new CertificateCostCalculation(itemCosts, POSTAGE_COST, totalItemCost);
     }
 
     /**
@@ -43,10 +54,10 @@ public class CertificateCostCalculatorService {
      */
     private ItemCosts calculateSingleItemCosts(final int certificateNumber, final DeliveryTimescale deliveryTimescale) {
         final ItemCosts cost = new ItemCosts();
-        final int discountApplied = certificateNumber > 1 ? deliveryTimescale.getExtraCertificateDiscount() : 0;
+        final int discountApplied = certificateNumber > 1 ? deliveryTimescale.getExtraCertificateDiscount(costs) : 0;
         cost.setDiscountApplied(Integer.toString(discountApplied));
-        cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost()));
-        final int calculatedCost = deliveryTimescale.getIndividualCertificateCost() - discountApplied;
+        cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost(costs)));
+        final int calculatedCost = deliveryTimescale.getIndividualCertificateCost(costs) - discountApplied;
         cost.setCalculatedCost(Integer.toString(calculatedCost));
         final ProductType productType =
                 certificateNumber > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :

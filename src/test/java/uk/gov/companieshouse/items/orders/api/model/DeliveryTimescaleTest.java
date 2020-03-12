@@ -3,6 +3,7 @@ package uk.gov.companieshouse.items.orders.api.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import uk.gov.companieshouse.items.orders.api.config.CostsConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -14,6 +15,21 @@ import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
  * Unit/integration tests the {@link DeliveryTimescale} enum.
  */
 class DeliveryTimescaleTest {
+
+    private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
+    private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
+    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
+    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
+
+    private static final CostsConfig COSTS;
+
+    static {
+        COSTS = new CostsConfig();
+        COSTS.setStandardCost(STANDARD_INDIVIDUAL_CERTIFICATE_COST);
+        COSTS.setSameDayCost(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST);
+        COSTS.setStandardDiscount(STANDARD_EXTRA_CERTIFICATE_DISCOUNT);
+        COSTS.setSameDayDiscount(SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT);
+    }
 
    @Test
    void serialisesCorrectlyToJson() throws JsonProcessingException {
@@ -27,18 +43,18 @@ class DeliveryTimescaleTest {
 
    @Test
     void standardTimescaleCostsAreCorrect() {
-       assertThat(STANDARD.getIndividualCertificateCost(),          is(15));
-       assertThat(STANDARD.getExtraCertificateDiscount(),           is(5));
-       assertThat(STANDARD.getFirstCertificateProductType(),        is(CERTIFICATE));
-       assertThat(STANDARD.getAdditionalCertificatesProductType(),  is(CERTIFICATE_ADDITIONAL_COPY));
+       assertThat(STANDARD.getIndividualCertificateCost(COSTS),         is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+       assertThat(STANDARD.getExtraCertificateDiscount(COSTS),          is(STANDARD_EXTRA_CERTIFICATE_DISCOUNT));
+       assertThat(STANDARD.getFirstCertificateProductType(),            is(CERTIFICATE));
+       assertThat(STANDARD.getAdditionalCertificatesProductType(),      is(CERTIFICATE_ADDITIONAL_COPY));
    }
 
     @Test
     void sameDayTimescaleCostsAreCorrect() {
-        assertThat(SAME_DAY.getIndividualCertificateCost(),         is(50));
-        assertThat(SAME_DAY.getExtraCertificateDiscount(),          is(40));
-        assertThat(SAME_DAY.getFirstCertificateProductType(),       is(CERTIFICATE_SAME_DAY));
-        assertThat(SAME_DAY.getAdditionalCertificatesProductType(), is(CERTIFICATE_ADDITIONAL_COPY));
+        assertThat(SAME_DAY.getIndividualCertificateCost(COSTS),         is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(SAME_DAY.getExtraCertificateDiscount(COSTS),          is(SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT));
+        assertThat(SAME_DAY.getFirstCertificateProductType(),            is(CERTIFICATE_SAME_DAY));
+        assertThat(SAME_DAY.getAdditionalCertificatesProductType(),      is(CERTIFICATE_ADDITIONAL_COPY));
     }
 
 }

@@ -12,3 +12,10 @@ spring:
     mongodb:
       uri: ${MONGODB_URL}
       field-naming-strategy: uk.gov.companieshouse.items.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
+
+# TODO Can we move these values to costs.yaml?
+costs:
+  standard_cost: 15
+  same_day_cost: 50
+  standard_discount: 5
+  same_day_discount: 40
