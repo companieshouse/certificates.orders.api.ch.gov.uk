@@ -1,0 +1,5 @@
+costs:
+  standard_cost: 15
+  same_day_cost: 50
+  standard_discount: 5
+  same_day_discount: 40

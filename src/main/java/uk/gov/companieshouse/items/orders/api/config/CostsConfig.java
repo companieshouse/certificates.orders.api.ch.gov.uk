@@ -10,7 +10,7 @@ import javax.validation.constraints.Min;
 
 @Configuration
 @Component
-@PropertySource("classpath:costs.properties")
+@PropertySource(value = "classpath:costs.yaml", factory = YamlPropertyLoaderFactory.class)
 @ConfigurationProperties(prefix = "costs")
 @Validated
 public class CostsConfig {
