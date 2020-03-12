@@ -6,11 +6,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.io.support.EncodedResource;
 
+import javax.annotation.Nonnull;
+
 import java.io.IOException;
 
 /**
  * Workaround to allow use of YAML properties files. See
- * https://stackoverflow.com/questions/21271468/spring-propertysource-using-yaml.1
+ * https://stackoverflow.com/questions/21271468/spring-propertysource-using-yaml.
  */
 public class YamlPropertyLoaderFactory extends DefaultPropertySourceFactory {
 
@@ -18,10 +20,8 @@ public class YamlPropertyLoaderFactory extends DefaultPropertySourceFactory {
     private static final int ONLY_PROPERTY_SOURCE = 0;
 
     @Override
-    public PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
-        if (resource == null){
-            return super.createPropertySource(name, resource);
-        }
+    public PropertySource<?> createPropertySource(final String name, final @Nonnull EncodedResource resource)
+            throws IOException {
         final Resource res = resource.getResource();
         return new YamlPropertySourceLoader().load(res.getFilename(), res).get(ONLY_PROPERTY_SOURCE);
     }
