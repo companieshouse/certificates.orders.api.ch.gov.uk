@@ -10,7 +10,7 @@ import javax.validation.constraints.Min;
 
 @Configuration
 @Component
-@PropertySource("classpath:costs.yaml") // TODO This does not work for YAML files.
+@PropertySource("classpath:costs.properties")
 @ConfigurationProperties(prefix = "costs")
 @Validated
 public class CostsConfig {
