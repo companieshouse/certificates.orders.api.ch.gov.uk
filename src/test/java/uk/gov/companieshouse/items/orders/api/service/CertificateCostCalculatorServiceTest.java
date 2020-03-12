@@ -14,6 +14,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
  * Unit/integration tests the {@link CertificateCostCalculatorService} class.
@@ -23,11 +24,11 @@ public class CertificateCostCalculatorServiceTest {
 
     private static final String POSTAGE_COST = "0";
     private static final String NO_DISCOUNT = "0";
-    private static final String STANDARD_INDIVIDUAL_CERTIFICATE_COST = "15";
-    private static final String SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = "50";
+    private static final String STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING =
+            Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST);
+    private static final String SAME_DAY_INDIVIDUAL_CERTIFICATE_COST_STRING =
+            Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST);
 
-    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
-    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
     private static final int MULTIPLE_QUANTITY = 3;
     private static final int SINGLE_QUANTITY = 1;
 
@@ -46,9 +47,9 @@ public class CertificateCostCalculatorServiceTest {
         // Then
         assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
-        assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
-        assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getCalculatedCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING));
         assertThat(cost.getProductType(), is(CERTIFICATE));
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
         assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
@@ -69,13 +70,13 @@ public class CertificateCostCalculatorServiceTest {
         for (int index = 0; index < MULTIPLE_QUANTITY; index++) {
             final ItemCosts cost = costs.get(index);
 
-            assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
+            assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING));
 
             final int expectedDiscountApplied = index > 0 ? STANDARD_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
             final String expectedCalculatedCost =
-                    Integer.toString(Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
+                    Integer.toString(Integer.parseInt(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING) - expectedDiscountApplied);
             assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
             final ProductType expectedProductType = index > 0 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE;
             assertThat(cost.getProductType(), is(expectedProductType));
@@ -98,9 +99,9 @@ public class CertificateCostCalculatorServiceTest {
         // Then
         assertThat(costs.size(), is(SINGLE_QUANTITY));
         final ItemCosts cost = costs.get(0);
-        assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST_STRING));
         assertThat(cost.getDiscountApplied(), is(NO_DISCOUNT));
-        assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+        assertThat(cost.getCalculatedCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST_STRING));
         assertThat(cost.getProductType(), is(CERTIFICATE_SAME_DAY));
         assertThat(calculation.getPostageCost(), is(POSTAGE_COST));
         assertThat(calculation.getTotalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
@@ -122,13 +123,13 @@ public class CertificateCostCalculatorServiceTest {
 
             final ItemCosts cost = costs.get(index);
 
-            assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
+            assertThat(cost.getItemCost(), is(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST_STRING));
 
             final int expectedDiscountApplied = index > 0 ? SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT : 0;
             assertThat(cost.getDiscountApplied(), is(Integer.toString(expectedDiscountApplied)));
 
             final String expectedCalculatedCost =
-                    Integer.toString(Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST) - expectedDiscountApplied);
+                    Integer.toString(Integer.parseInt(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST_STRING) - expectedDiscountApplied);
             assertThat(cost.getCalculatedCost(), is(expectedCalculatedCost));
             final ProductType expectedProductType = index > 0 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE_SAME_DAY;
             assertThat(cost.getProductType(), is(expectedProductType));

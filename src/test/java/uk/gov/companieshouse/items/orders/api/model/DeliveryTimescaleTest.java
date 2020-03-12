@@ -10,16 +10,12 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
  * Unit/integration tests the {@link DeliveryTimescale} enum.
  */
 class DeliveryTimescaleTest {
-
-    private static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
-    private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
-    private static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
-    private static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
 
     private static final CostsConfig COSTS;
 
