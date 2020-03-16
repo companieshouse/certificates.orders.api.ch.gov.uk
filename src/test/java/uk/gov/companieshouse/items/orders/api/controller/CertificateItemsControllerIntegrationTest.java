@@ -23,10 +23,7 @@ import uk.gov.companieshouse.items.orders.api.repository.CertificateItemReposito
 import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -50,6 +47,7 @@ import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecords
 import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.FULL;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.*;
 import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 /**
@@ -232,6 +230,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String FORENAME = "John";
     private static final String SURNAME = "Smith";
     private static final String UPDATED_SURNAME = "Smyth";
+    private static final String TOKEN_TOTAL_ITEM_COST = "100";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -283,12 +282,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
-        final ItemCosts costs = new ItemCosts();
-        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setItemOptions(options);
         expectedItem.setPostalDelivery(true);
@@ -296,6 +290,9 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setLinks(LINKS);
         expectedItem.setEtag(TOKEN_ETAG);
+        expectedItem.setPostageCost(POSTAGE_COST);
+        final String totalItemCost = calculateExpectedTotalItemCost(costs, POSTAGE_COST);
+        expectedItem.setTotalItemCost(totalItemCost);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -334,6 +331,10 @@ class CertificateItemsControllerIntegrationTest {
                         is(SURNAME)))
                 .andExpect(jsonPath("$.links",
                         is(objectMapper.convertValue(LINKS, Map.class))))
+                .andExpect(jsonPath("$.postage_cost",
+                        is(POSTAGE_COST)))
+                .andExpect(jsonPath("$.total_item_cost",
+                        is(totalItemCost)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -352,12 +353,16 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
         newItem.setLinks(LINKS);
+        newItem.setPostageCost(POSTAGE_COST);
+        newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
                                                  "company_name: must not be null",
                                                  "etag: must be null",
-                                                 "links: must be null"));
+                                                 "links: must be null",
+                                                 "postage_cost: must be null",
+                                                 "total_item_cost: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -765,16 +770,13 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
-        final ItemCosts costs = new ItemCosts();
-        final int expectedDiscountApplied = (QUANTITY - 1) * STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(STANDARD_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(Integer.toString(QUANTITY * STANDARD_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
+        expectedItem.setPostageCost(POSTAGE_COST);
+        expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         // When and then
         mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
@@ -910,16 +912,12 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
         expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
 
-        final ItemCosts costs = new ItemCosts();
-        final int expectedDiscountApplied = (UPDATED_QUANTITY - 1) * SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
-        costs.setDiscountApplied(Integer.toString(expectedDiscountApplied));
-        costs.setIndividualItemCost(Integer.toString(SAME_DAY_INDIVIDUAL_CERTIFICATE_COST));
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(
-                Integer.toString(UPDATED_QUANTITY * SAME_DAY_INDIVIDUAL_CERTIFICATE_COST - expectedDiscountApplied));
+        final List<ItemCosts> costs = generateExpectedCosts(UPDATED_QUANTITY, UPDATED_DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
         expectedItem.setEtag(TOKEN_ETAG);
         expectedItem.setLinks(LINKS);
+        expectedItem.setPostageCost(POSTAGE_COST);
+        expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
 
@@ -972,6 +970,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
@@ -1103,6 +1103,8 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setEtag(TOKEN_ETAG);
         itemUpdate.setLinks(LINKS);
         itemUpdate.setId(UPDATED_ITEM_ID);
+        itemUpdate.setPostageCost(POSTAGE_COST);
+        itemUpdate.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1116,7 +1118,9 @@ class CertificateItemsControllerIntegrationTest {
                                                  "kind: must be null",
                                                  "etag: must be null",
                                                  "links: must be null",
-                                                 "id: must be null"));
+                                                 "id: must be null",
+                                                 "postage_cost: must be null",
+                                                 "total_item_cost: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1560,6 +1564,44 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     /**
+     * Generates the costs we expect to be calculated given the quantity of certificates and the delivery timescale.
+     * @param quantity the quantity of certificates
+     * @param timescale the delivery timescale, standard or same day
+     * @return the expected costs
+     */
+    private List<ItemCosts> generateExpectedCosts(final int quantity,
+                                                             final DeliveryTimescale timescale) {
+        final List<ItemCosts> costs = new ArrayList<>();
+        final int certificateCost =
+                timescale == SAME_DAY ? SAME_DAY_INDIVIDUAL_CERTIFICATE_COST : STANDARD_INDIVIDUAL_CERTIFICATE_COST;
+        final int extraCertificateDiscount =
+                timescale == SAME_DAY ? SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT : STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+        for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
+            final ItemCosts cost = new ItemCosts();
+            final int expectedDiscountApplied = certificateNumber > 1 ? extraCertificateDiscount : 0;
+            cost.setDiscountApplied(Integer.toString(expectedDiscountApplied));
+            cost.setItemCost(Integer.toString(certificateCost));
+            cost.setCalculatedCost((Integer.toString(certificateCost - expectedDiscountApplied)));
+            cost.setProductType(getProductType(certificateNumber, timescale));
+            costs.add(cost);
+        }
+        return costs;
+    }
+
+    /**
+     * Derives the product type from the certificate number and the delivery timescale.
+     * @param certificateNumber the number of the certificate (1 is the first, > 1 => additional)
+     * @param timescale the delivery timescale, standard or same day
+     * @return the derived product type
+     */
+    private ProductType getProductType(final int certificateNumber, final DeliveryTimescale timescale) {
+        if (timescale.equals(SAME_DAY)) {
+            return certificateNumber > 1 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE_SAME_DAY;
+        }
+        return certificateNumber > 1 ? CERTIFICATE_ADDITIONAL_COPY : CERTIFICATE;
+    }
+
+    /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "incorporation" certificate type value with "unknown" for validation testing purposes.
      * @param newItem the item to be serialised to JSON with an incorrect certificate type value
@@ -1715,6 +1757,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
         assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
     }
@@ -1741,6 +1785,19 @@ class CertificateItemsControllerIntegrationTest {
             final String fieldValue = itemOptions.getString(field);
             assertThat("Enum " + field + " value not of expected format!", fieldValue, is(fieldValue.toLowerCase()));
         }
+    }
+
+    /**
+     * Utility that calculates the expected total item cost for the item costs and postage cost provided.
+     * @param costs the item costs
+     * @param postageCost the postage cost
+     * @return the expected total item cost (as a String)
+     */
+    private String calculateExpectedTotalItemCost(final List<ItemCosts> costs, final String postageCost) {
+        final Integer total = costs.stream()
+                .map(itemCosts -> Integer.parseInt(itemCosts.getCalculatedCost()))
+                .reduce(0, Integer::sum) + Integer.parseInt(postageCost);
+        return total.toString();
     }
 
 }

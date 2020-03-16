@@ -13,6 +13,8 @@ import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,9 +40,10 @@ class CertificateItemServiceTest {
     private static final String ITEM_SOUGHT_ID_VALUE = "CHS00000000000000057";
 
     private static final String DISCOUNT_APPLIED = "1";
-    private static final String INDIVIDUAL_ITEM_COST = "2";
-    private static final String POSTAGE_COST = "3";
-    private static final String TOTAL_COST = "4";
+    private static final String ITEM_COST = "2";
+    private static final String POSTAGE_COST = "0";
+    private static final String CALCULATED_COST = "4";
+    private static final String TOTAL_ITEM_COST = "8";
 
     @InjectMocks
     private CertificateItemService serviceUnderTest;
@@ -177,12 +180,14 @@ class CertificateItemServiceTest {
     private CertificateItem mockUpCostsCalculation() {
         final CertificateItem item = new CertificateItem();
         item.setQuantity(1);
-        final ItemCosts costs = new ItemCosts();
-        costs.setDiscountApplied(DISCOUNT_APPLIED);
-        costs.setIndividualItemCost(INDIVIDUAL_ITEM_COST);
-        costs.setPostageCost(POSTAGE_COST);
-        costs.setTotalCost(TOTAL_COST);
-        when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(costs);
+        final List<ItemCosts> costs = new ArrayList<>();
+        final ItemCosts cost = new ItemCosts();
+        cost.setDiscountApplied(DISCOUNT_APPLIED);
+        cost.setItemCost(ITEM_COST);
+        cost.setCalculatedCost(CALCULATED_COST);
+        costs.add(cost);
+        when(calculator.calculateCosts(anyInt(), eq(STANDARD))).thenReturn(
+                new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
         return item;
     }
 
@@ -191,12 +196,14 @@ class CertificateItemServiceTest {
      * @param item the item
      */
     private void verifyCostsFields(final Item item) {
-        final ItemCosts costs = item.getItemCosts();
-        assertThat(costs, Matchers.is(notNullValue()));
-        assertThat(costs.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
-        assertThat(costs.getIndividualItemCost(), Matchers.is(INDIVIDUAL_ITEM_COST));
-        assertThat(costs.getPostageCost(), Matchers.is(POSTAGE_COST));
-        assertThat(costs.getTotalCost(), Matchers.is(TOTAL_COST));
+        final List<ItemCosts> costs = item.getItemCosts();
+        final ItemCosts cost = costs.get(0);
+        assertThat(cost, Matchers.is(notNullValue()));
+        assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
+        assertThat(cost.getItemCost(), Matchers.is(ITEM_COST));
+        assertThat(cost.getCalculatedCost(), Matchers.is(CALCULATED_COST));
+        assertThat(item.getPostageCost(), is(POSTAGE_COST));
+        assertThat(item.getTotalItemCost(), is(TOTAL_ITEM_COST));
     }
 
     /**

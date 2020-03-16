@@ -10,7 +10,9 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
@@ -100,11 +102,12 @@ class ItemsApiApplicationTest {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		final ItemCosts costs = new ItemCosts();
-		costs.setDiscountApplied("1");
-		costs.setIndividualItemCost("2");
-		costs.setPostageCost("3");
-		costs.setTotalCost("4");
+		final List<ItemCosts> costs = new ArrayList<>();
+		final ItemCosts cost = new ItemCosts();
+		cost.setDiscountApplied("1");
+		cost.setItemCost("2");
+		cost.setCalculatedCost("4");
+		costs.add(cost);
 		newCertificateItemDTO.setItemCosts(costs);
 
 
@@ -159,6 +162,31 @@ class ItemsApiApplicationTest {
 
 		// When and Then
 		postBadCreateRequestAndExpectError(newCertificateItemDTO, "id: must be null in a create item request");
+	}
+
+	@Test
+	@DisplayName("Create rejects read only postage cost")
+	void createCertificateItemRejectsReadOnlyPostageCost() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setPostageCost("0");
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "postage_cost: must be null");
+	}
+
+
+	@Test
+	@DisplayName("Create rejects read only total item cost")
+	void createCertificateItemRejectsReadOnlyTotalItemCost() {
+
+		// Given
+		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		newCertificateItemDTO.setTotalItemCost("100");
+
+		// When and Then
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "total_item_cost: must be null");
 	}
 
 	@Test

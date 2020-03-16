@@ -11,23 +11,26 @@ public class ItemCosts {
     @JsonProperty("discount_applied")
     private String discountApplied;
 
-    @JsonProperty("individual_item_cost")
-    private String individualItemCost;
+    @JsonProperty("item_cost")
+    private String itemCost;
 
-    @JsonProperty("postage_cost")
-    private String postageCost;
+    @JsonProperty("calculated_cost")
+    private String calculatedCost;
 
-    @JsonProperty("total_cost")
-    private String totalCost;
+    @JsonProperty("product_type")
+    private ProductType productType;
 
     public ItemCosts() {
     }
 
-    public ItemCosts(String discountApplied, String individualItemCost, String postageCost, String totalCost) {
+    public ItemCosts(String discountApplied,
+                     String itemCost,
+                     String calculatedCost,
+                     ProductType productType) {
         this.discountApplied = discountApplied;
-        this.individualItemCost = individualItemCost;
-        this.postageCost = postageCost;
-        this.totalCost = totalCost;
+        this.itemCost = itemCost;
+        this.calculatedCost = calculatedCost;
+        this.productType = productType;
     }
 
     public String getDiscountApplied() {
@@ -38,28 +41,28 @@ public class ItemCosts {
         this.discountApplied = discountApplied;
     }
 
-    public String getIndividualItemCost() {
-        return individualItemCost;
+    public String getItemCost() {
+        return itemCost;
     }
 
-    public void setIndividualItemCost(String individualItemCost) {
-        this.individualItemCost = individualItemCost;
+    public void setItemCost(String itemCost) {
+        this.itemCost = itemCost;
     }
 
-    public String getPostageCost() {
-        return postageCost;
+    public String getCalculatedCost() {
+        return calculatedCost;
     }
 
-    public void setPostageCost(String postageCost) {
-        this.postageCost = postageCost;
+    public void setCalculatedCost(String calculatedCost) {
+        this.calculatedCost = calculatedCost;
     }
 
-    public String getTotalCost() {
-        return totalCost;
+    public ProductType getProductType() {
+        return productType;
     }
 
-    public void setTotalCost(String totalCost) {
-        this.totalCost = totalCost;
+    public void setProductType(ProductType productType) {
+        this.productType = productType;
     }
 
     @Override

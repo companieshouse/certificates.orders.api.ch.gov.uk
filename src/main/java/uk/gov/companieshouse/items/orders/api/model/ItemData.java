@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public class ItemData {
 
     private Map<String, String> descriptionValues;
 
-    private ItemCosts itemCosts;
+    private List<ItemCosts> itemCosts;
 
     private CertificateItemOptions itemOptions;
 
@@ -39,9 +40,13 @@ public class ItemData {
 
     private Links links;
 
+    private String postageCost;
+
     private Boolean isPostalDelivery;
 
     private Integer quantity;
+
+    private String totalItemCost;
 
     public String getId() {
         return id;
@@ -99,11 +104,11 @@ public class ItemData {
         this.descriptionValues = descriptionValues;
     }
 
-    public ItemCosts getItemCosts() {
+    public List<ItemCosts> getItemCosts() {
         return itemCosts;
     }
 
-    public void setItemCosts(ItemCosts itemCosts) {
+    public void setItemCosts(List<ItemCosts> itemCosts) {
         this.itemCosts = itemCosts;
     }
 
@@ -139,6 +144,14 @@ public class ItemData {
         this.links = links;
     }
 
+    public String getPostageCost() {
+        return postageCost;
+    }
+
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
+    }
+
     public Boolean isPostalDelivery() {
         return isPostalDelivery;
     }
@@ -153,6 +166,14 @@ public class ItemData {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getTotalItemCost() {
+        return totalItemCost;
+    }
+
+    public void setTotalItemCost(String totalItemCost) {
+        this.totalItemCost = totalItemCost;
     }
 
     @Override

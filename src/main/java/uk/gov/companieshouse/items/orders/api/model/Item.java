@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,11 +108,11 @@ public class Item {
         data.setDescriptionValues(descriptionValues);
     }
 
-    public ItemCosts getItemCosts() {
+    public List<ItemCosts> getItemCosts() {
         return data.getItemCosts();
     }
 
-    public void setItemCosts(ItemCosts itemCosts) {
+    public void setItemCosts(List<ItemCosts> itemCosts) {
         data.setItemCosts(itemCosts);
     }
 
@@ -147,6 +148,14 @@ public class Item {
         data.setLinks(links);
     }
 
+    public String getPostageCost() {
+        return data.getPostageCost();
+    }
+
+    public void setPostageCost(String postageCost) {
+        data.setPostageCost(postageCost);
+    }
+
     public Boolean isPostalDelivery() {
         return data.isPostalDelivery();
     }
@@ -161,6 +170,14 @@ public class Item {
 
     public void setQuantity(Integer quantity) {
         data.setQuantity(quantity);
+    }
+
+    public String getTotalItemCost() {
+        return data.getTotalItemCost();
+    }
+
+    public void setTotalItemCost(String totalItemCost) {
+        data.setTotalItemCost(totalItemCost);
     }
 
     public String getUserId() {

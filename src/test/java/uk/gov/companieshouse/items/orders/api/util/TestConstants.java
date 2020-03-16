@@ -13,4 +13,9 @@ public class TestConstants {
     public static final String ERIC_AUTHORISED_USER_HEADER_NAME = "ERIC-Authorised-User";
     public static final String ERIC_AUTHORISED_USER_VALUE = "demo@ch.gov.uk; forename=demoForename; surname=demoSurname";
 
+    public static final int STANDARD_INDIVIDUAL_CERTIFICATE_COST = 15;
+    public static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
+    public static final int STANDARD_EXTRA_CERTIFICATE_DISCOUNT = 5;
+    public static final int SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT = 40;
+
 }

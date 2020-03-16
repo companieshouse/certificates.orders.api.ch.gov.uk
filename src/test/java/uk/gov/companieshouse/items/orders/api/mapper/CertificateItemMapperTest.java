@@ -10,6 +10,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -22,6 +24,7 @@ import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeAddressRecordsType.CURRENT;
 import static uk.gov.companieshouse.items.orders.api.model.IncludeDobType.PARTIAL;
+import static uk.gov.companieshouse.items.orders.api.model.ProductType.CERTIFICATE;
 
 /**
  * Unit tests the {@link CertificateItemMapper} class.
@@ -36,7 +39,7 @@ public class CertificateItemMapperTest {
     private static final String DESCRIPTION = "Certificate";
     private static final String DESCRIPTION_IDENTIFIER = "Description Identifier";
     private static final Map<String, String> DESCRIPTION_VALUES = singletonMap("key1", "value1");
-    private static final ItemCosts ITEM_COSTS = new ItemCosts("1", "2", "3", "4");
+    private static final List<ItemCosts> ITEM_COSTS;
     private static final String KIND = "certificate";
     private static final boolean POSTAL_DELIVERY = true;
     private static final String CUSTOMER_REFERENCE = "Certificate ordered by NJ.";
@@ -64,6 +67,8 @@ public class CertificateItemMapperTest {
 
     private static final String FORENAME = "John";
     private static final String SURNAME = "Smith";
+    private static final String POSTAGE_COST = "0";
+    private static final String TOTAL_ITEM_COST = "100";
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -93,6 +98,9 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setSurname(SURNAME);
+
+        ITEM_COSTS = new ArrayList<>();
+        ITEM_COSTS.add(new ItemCosts("1", "2", "3", CERTIFICATE));
     }
 
     @Configuration
@@ -117,6 +125,9 @@ public class CertificateItemMapperTest {
         dto.setKind(KIND);
         dto.setPostalDelivery(POSTAL_DELIVERY);
         dto.setItemOptions(ITEM_OPTIONS);
+        dto.setPostageCost(POSTAGE_COST);
+        dto.setTotalItemCost(TOTAL_ITEM_COST);
+
         final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
 
         assertThat(item.getId(), is(dto.getId()));
@@ -133,6 +144,8 @@ public class CertificateItemMapperTest {
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
+        assertThat(item.getPostageCost(), is(dto.getPostageCost()));
+        assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
 
     @Test
@@ -151,6 +164,8 @@ public class CertificateItemMapperTest {
         item.setPostalDelivery(POSTAL_DELIVERY);
         item.setItemOptions(ITEM_OPTIONS);
         item.setEtag(TOKEN_ETAG);
+        item.setPostageCost(POSTAGE_COST);
+        item.setTotalItemCost(TOTAL_ITEM_COST);
 
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
@@ -167,6 +182,8 @@ public class CertificateItemMapperTest {
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
         assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
         assertThat(dto.getEtag(), is(item.getEtag()));
+        assertThat(dto.getPostageCost(), is(item.getPostageCost()));
+        assertThat(dto.getTotalItemCost(), is(item.getTotalItemCost()));
     }
 
     /**

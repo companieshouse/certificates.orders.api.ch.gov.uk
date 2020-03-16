@@ -2,7 +2,7 @@ package uk.gov.companieshouse.items.orders.api;
 
 import uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.items.orders.api.model.Item;
-import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculation;
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
@@ -68,9 +68,11 @@ public enum ItemType {
      * @param calculator the item costs calculator
      */
     public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
-        final ItemCosts costs =
+        final CertificateCostCalculation calculation =
                 calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
-        item.setItemCosts(costs);
+        item.setPostageCost(calculation.getPostageCost());
+        item.setItemCosts(calculation.getItemCosts());
+        item.setTotalItemCost(calculation.getTotalItemCost());
     }
 
     /**
