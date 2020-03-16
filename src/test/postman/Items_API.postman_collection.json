@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "588b91cb-ceae-4195-b3e0-83c9324181ef",
+		"_postman_id": "fe4a1714-1292-4f60-b346-b6915ecc1900",
 		"name": "Items API",
 		"description": "Sanity testing for the CHS Ordering Items API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -670,14 +670,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000176",
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000192",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"orderable",
 										"certificates",
-										"CHS00000000000000176"
+										"CHS00000000000000192"
 									]
 								}
 							},
@@ -1088,7 +1088,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "",
+				"value": "lsOEqJSVp40kJT3Ayh8YYh51nk_BPE5sjUHeE6KPW3jwGqErMlqSyy8_6hkm0Ronz0yKqHVKn8lsECbGX2pZKA",
 				"type": "string"
 			},
 			{

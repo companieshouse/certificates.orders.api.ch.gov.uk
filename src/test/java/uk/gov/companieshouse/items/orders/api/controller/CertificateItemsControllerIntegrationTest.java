@@ -102,7 +102,6 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
             + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
-    private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
     private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
@@ -257,7 +256,6 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
@@ -483,7 +481,6 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(COLLECTION);
@@ -550,7 +547,6 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(DISSOLUTION_LIQUIDATION);
@@ -587,7 +583,6 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(STANDARD);
@@ -622,7 +617,6 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeEmailCopy(true);
@@ -723,7 +717,6 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
@@ -859,7 +852,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setCompanyName(COMPANY_NAME);
         savedItem.setCompanyNumber(COMPANY_NUMBER);
         savedItem.setCustomerReference(CUSTOMER_REFERENCE);
         savedItem.setDescription(DESCRIPTION);
@@ -899,14 +891,12 @@ class CertificateItemsControllerIntegrationTest {
         options.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSurname(UPDATED_SURNAME);
         itemUpdate.setItemOptions(options);
-        itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
-        expectedItem.setCompanyName(UPDATED_COMPANY_NAME);
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
         expectedItem.setDescription(EXPECTED_DESCRIPTION);
@@ -965,7 +955,6 @@ class CertificateItemsControllerIntegrationTest {
                 is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
         assertThat(retrievedCertificateItem.get().getItemOptions().getSurname(),
                 is(UPDATED_SURNAME));
-        assertThat(retrievedCertificateItem.get().getCompanyName(), is(UPDATED_COMPANY_NAME));
         assertThat(retrievedCertificateItem.get().getLinks(), is(LINKS));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.
@@ -1097,6 +1086,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsMultipleReadOnlyFields() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setCompanyName(UPDATED_COMPANY_NAME);
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
         itemUpdate.setKind(TOKEN_STRING);
@@ -1113,7 +1103,8 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final ApiError expectedValidationErrors =
-                new ApiError(BAD_REQUEST, asList("description_values: must be null",
+                new ApiError(BAD_REQUEST, asList("company_name: must be null",
+                                                 "description_values: must be null",
                                                  "item_costs: must be null",
                                                  "kind: must be null",
                                                  "etag: must be null",
