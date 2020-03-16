@@ -16,7 +16,7 @@
 							"name": "Missing attributes",
 							"item": [
 								{
-									"name": "Create certificate item missing company name and number",
+									"name": "Create certificate item missing company number",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -63,7 +63,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    }\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    }\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -97,7 +97,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"000064000\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"000064000\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -131,7 +131,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -170,7 +170,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"delivery_method\": \"collection\",\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"delivery_method\": \"collection\",\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -212,7 +212,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"item_costs\": {},\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"item_costs\": {},\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -246,7 +246,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"description\": \"description text\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description\": \"description text\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -280,7 +280,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"description_identifier\": \"description identifier text\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description_identifier\": \"description identifier text\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -314,7 +314,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"description_values\": {},\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"description_values\": {},\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -348,7 +348,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\t\n\t\"company_number\": \"00006400\",\n\t\"id\": \"1\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"id\": \"1\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -382,7 +382,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\t\n\t\"company_number\": \"00006400\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -416,7 +416,41 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"company_name\": \"Smith & Co\",\t\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n    \"links\": {\n    \t\"self\": \"/orderable/certificates/CHS00000000000000173\"\n    },\n\t\"quantity\": 3\n}",
+											"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n    \"links\": {\n    \t\"self\": \"/orderable/certificates/CHS00000000000000173\"\n    },\n\t\"quantity\": 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/orderable/certificates",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"orderable",
+												"certificates"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create certificate item read only company name",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"same-day\"\n    },\n\t\"quantity\": 3\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -460,7 +494,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"director_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": true,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"forename\": \"John\",\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": false,\n        \"include_good_standing_information\": true,\n        \"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current\",\n        \t\"include_dates\": true\n        },\n        \"secretary_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": true,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"surname\": \"Smith\"\n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"director_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": true,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"forename\": \"John\",\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": false,\n        \"include_good_standing_information\": true,\n        \"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current\",\n        \t\"include_dates\": true\n        },\n        \"secretary_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": true,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"surname\": \"Smith\"\n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -499,7 +533,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"director_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": false,\n        \"include_good_standing_information\": true,\n        \"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current\",\n        \t\"include_dates\": true\n        },\n        \"secretary_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": false\n        }        \n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"director_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": true\n        },\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": false,\n        \"include_good_standing_information\": true,\n        \"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current\",\n        \t\"include_dates\": true\n        },\n        \"secretary_details\":{\n        \t\"include_address\": true,\n        \t\"include_appointment_date\": false,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": false,\n        \t\"include_dob_type\": \"partial\",\n        \t\"include_nationality\": false,\n        \t\"include_occupation\": false\n        }        \n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -538,7 +572,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"standard\",\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": true\n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"incorporation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"standard\",\n        \"include_company_objects_information\": true,\n        \"include_email_copy\": true\n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -577,7 +611,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smith & Co\",\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"include_company_objects_information\": true,\n        \"include_good_standing_information\": true        \n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n\t\"customer_reference\": \"Certificate ordered by OJ.\",\n    \"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"belfast\",\n\t\t\"contact_number\": \"+44 1234 123456\",\n\t\t\"delivery_method\": \"postal\",\n        \"delivery_timescale\": \"same-day\",\n        \"include_company_objects_information\": true,\n        \"include_good_standing_information\": true        \n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -616,7 +650,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smith & Co\",\t\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"unknown\"\n    },\n\t\"quantity\": 3\n}",
+									"raw": "{\n\t\"company_number\": \"00006400\",\n    \"item_options\": {\n        \"delivery_timescale\": \"unknown\"\n    },\n\t\"quantity\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -702,7 +736,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"director_details\":{\n        \t\"include_address\": false,\n        \t\"include_appointment_date\": true,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": true,\n        \t\"include_dob_type\": \"full\",\n        \t\"include_nationality\": true,\n        \t\"include_occupation\": false\n        },\n    \t\"include_company_objects_information\": false,\n    \t\"include_email_copy\": false,\n    \t\"include_good_standing_information\": false,\n    \t\"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current-previous-and-prior\",\n        \t\"include_dates\": false\n        },\n    \t\"secretary_details\":{\n        \t\"include_address\": false,\n        \t\"include_appointment_date\": true,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": true,\n        \t\"include_dob_type\": \"full\",\n        \t\"include_nationality\": true,\n        \t\"include_occupation\": false\n        }    \t\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"director_details\":{\n        \t\"include_address\": false,\n        \t\"include_appointment_date\": true,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": true,\n        \t\"include_dob_type\": \"full\",\n        \t\"include_nationality\": true,\n        \t\"include_occupation\": false\n        },\n    \t\"include_company_objects_information\": false,\n    \t\"include_email_copy\": false,\n    \t\"include_good_standing_information\": false,\n    \t\"registered_office_address_details\": {\n        \t\"include_address_records_type\": \"current-previous-and-prior\",\n        \t\"include_dates\": false\n        },\n    \t\"secretary_details\":{\n        \t\"include_address\": false,\n        \t\"include_appointment_date\": true,\n        \t\"include_basic_information\": false,\n        \t\"include_country_of_residence\": true,\n        \t\"include_dob_type\": \"full\",\n        \t\"include_nationality\": true,\n        \t\"include_occupation\": false\n        }    \t\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -742,7 +776,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"include_company_objects_information\": true,\n    \t\"include_email_copy\": false,\n    \t\"include_good_standing_information\": true\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"include_company_objects_information\": true,\n    \t\"include_email_copy\": false,\n    \t\"include_good_standing_information\": true\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -782,7 +816,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"include_company_objects_information\": false,\n    \t\"include_email_copy\": true\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\",\n    \t\"include_company_objects_information\": false,\n    \t\"include_email_copy\": true\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -822,7 +856,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"dissolution-liquidation\",\n\t\t\"collection_location\": \"cardiff\",\n\t\t\"contact_number\": \"+44 1234 123457\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -862,7 +896,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n\t\t\"certificate_type\": \"incorporation-with-all-name-changes\",\n\t\t\"delivery_method\": \"collection\",\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -902,7 +936,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"etag\": \"9d39ea69b64c80ca42ed72328b48c303c4445e28\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -942,7 +976,47 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"links\": {},\n\t\"quantity\": 2\n}",
+									"raw": "{\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"links\": {},\n\t\"quantity\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/orderable/certificates/CHS00000000000000154",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"orderable",
+										"certificates",
+										"CHS00000000000000154"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update certificate item read only company name",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/merge-patch+json"
+									},
+									{
+										"key": "X-Request-ID",
+										"type": "text",
+										"value": "f058ebd6-02f7-4d3f-942e-904344e8cde5"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"company_name\": \"Smyth & Co\",\n\t\"company_number\": \"00006777\",\n\t\"customer_reference\": \"Certificate ordered by NJ.\",\n\t\"item_options\": {\n    \t\"delivery_timescale\": \"standard\"\n\t},\n\t\"quantity\": 2\n}",
 									"options": {
 										"raw": {
 											"language": "json"
