@@ -102,6 +102,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale`"
             + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
+    private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
     private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
@@ -347,6 +348,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO newItem = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        newItem.setCompanyName(COMPANY_NAME);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
@@ -356,7 +358,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
-                                                 "company_name: must not be null",
+                                                 "company_name: must be null",
                                                  "etag: must be null",
                                                  "links: must be null",
                                                  "postage_cost: must be null",

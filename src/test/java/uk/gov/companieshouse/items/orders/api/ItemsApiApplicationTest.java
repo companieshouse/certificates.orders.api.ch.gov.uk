@@ -235,7 +235,6 @@ class ItemsApiApplicationTest {
 	 */
 	private CertificateItemDTO createValidNewItem() {
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyName("Smith & Co");
 		newCertificateItemDTO.setCompanyNumber("1234");
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setDeliveryTimescale(STANDARD);

@@ -16,6 +16,7 @@ public class PatchValidationCertificateItemDTO extends AbstractItemDTO {
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
+    @Null
     @JsonProperty("company_name")
     private String companyName;
 
