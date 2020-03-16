@@ -90,6 +90,9 @@ class CertificateItemsControllerIntegrationTest {
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final String COMPANY_NUMBER = "00006400";
+    private static final String PREVIOUS_COMPANY_NUMBER = "00006400";
+    private static final String EXPECTED_COMPANY_NAME = "THE GIRLS' DAY SCHOOL TRUST";
+    private static final String PREVIOUS_COMPANY_NAME = "Phillips and Daughters";
     private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + UPDATED_COMPANY_NUMBER;
@@ -279,6 +282,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
+        expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setKind("item#certificate");
         expectedItem.setDescriptionIdentifier("certificate");
         final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
@@ -306,6 +310,7 @@ class CertificateItemsControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
+                .andExpect(jsonPath("$.company_name", is(EXPECTED_COMPANY_NAME)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
                 .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
@@ -753,6 +758,8 @@ class CertificateItemsControllerIntegrationTest {
         // Given
         // Create certificate item in database
         final CertificateItem newItem = new CertificateItem();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        newItem.setCompanyName(EXPECTED_COMPANY_NAME);
         newItem.setId(EXPECTED_ITEM_ID);
         newItem.setQuantity(QUANTITY);
         newItem.setUserId(ERIC_IDENTITY_VALUE);
@@ -762,6 +769,8 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(newItem);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setCompanyNumber(COMPANY_NUMBER);
+        expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setId(EXPECTED_ITEM_ID);
 
@@ -851,6 +860,8 @@ class CertificateItemsControllerIntegrationTest {
 
         // Given
         final CertificateItem savedItem = new CertificateItem();
+        savedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
+        savedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
@@ -878,6 +889,7 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        itemUpdate.setCompanyNumber(COMPANY_NUMBER);
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
         options.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
@@ -897,6 +909,8 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setCompanyNumber(COMPANY_NUMBER);
+        expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setQuantity(UPDATED_QUANTITY);
         expectedItem.setItemOptions(options);
         expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
@@ -930,6 +944,8 @@ class CertificateItemsControllerIntegrationTest {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
+        assertThat(retrievedCertificateItem.get().getCompanyNumber(), is(COMPANY_NUMBER));
+        assertThat(retrievedCertificateItem.get().getCompanyName(), is(EXPECTED_COMPANY_NAME));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
                 is(UPDATED_CERTIFICATE_TYPE));
