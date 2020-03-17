@@ -7,6 +7,7 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.service.CompanyService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
@@ -35,6 +36,7 @@ public class CertificateItemsController {
     private final CertificateItemMapper mapper;
     private final PatchMerger patcher;
     private final CertificateItemService service;
+    private final CompanyService companyService;
 
     /**
      * Constructor.
@@ -50,18 +52,21 @@ public class CertificateItemsController {
                                       final PatchItemRequestValidator patchItemRequestValidator,
                                       final CertificateItemMapper mapper,
                                       final PatchMerger patcher,
-                                      final CertificateItemService service) {
+                                      final CertificateItemService service,
+                                      final CompanyService companyService) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.mapper = mapper;
         this.patcher = patcher;
         this.service = service;
+        this.companyService = companyService;
     }
 
+    // TODO We don't really want to throw Exception from this
     @PostMapping("${uk.gov.companieshouse.items.orders.api.certificates}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
-                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws Exception {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
@@ -71,6 +76,8 @@ public class CertificateItemsController {
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         item.setUserId(EricHeaderHelper.getIdentity(request));
+        final String companyName = companyService.getCompanyName(item.getCompanyNumber());
+        item.setCompanyName(companyName);
 
         item = service.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);

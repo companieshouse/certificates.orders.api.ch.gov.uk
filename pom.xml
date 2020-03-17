@@ -28,6 +28,8 @@
 		<javax.json-api.version>1.1.4</javax.json-api.version>
 		<guava.version>28.1-jre</guava.version>
 		<snakeyaml.version>1.25</snakeyaml.version>
+		<api-sdk-manager-java-library.version>1.0.2</api-sdk-manager-java-library.version>
+		<api-sdk-java.version>4.2.1</api-sdk-java.version>
 		<start-class>uk.gov.companieshouse.items.orders.api.ItemsApiApplication</start-class>
 	</properties>
 
@@ -105,6 +107,16 @@
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>${snakeyaml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>api-sdk-manager-java-library</artifactId>
+			<version>${api-sdk-manager-java-library.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>api-sdk-java</artifactId>
+			<version>${api-sdk-java.version}</version>
 		</dependency>
 
 		<dependency>
