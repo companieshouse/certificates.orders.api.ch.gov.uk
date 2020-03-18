@@ -4,11 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.items.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.items.orders.api.service.CompanyService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,8 +23,12 @@ import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ItemsApiApplicationTest {
 
+	@MockBean
+	private CompanyService companyService;
+
 	@Autowired
 	private WebTestClient webTestClient;
+
 
 	@Test
 	@DisplayName("Application context loads successfully")

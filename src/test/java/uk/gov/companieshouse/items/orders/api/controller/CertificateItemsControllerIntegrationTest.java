@@ -20,6 +20,7 @@ import uk.gov.companieshouse.items.orders.api.dto.PatchValidationCertificateItem
 import uk.gov.companieshouse.items.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.items.orders.api.model.*;
 import uk.gov.companieshouse.items.orders.api.repository.CertificateItemRepository;
+import uk.gov.companieshouse.items.orders.api.service.CompanyService;
 import uk.gov.companieshouse.items.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMediaType;
 
@@ -32,6 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -74,6 +76,9 @@ class CertificateItemsControllerIntegrationTest {
 
     @MockBean
     private EtagGeneratorService etagGenerator;
+
+    @MockBean
+    private CompanyService companyService;
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
@@ -298,6 +303,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(totalItemCost);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
+        when(companyService.getCompanyName(COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -343,6 +349,9 @@ class CertificateItemsControllerIntegrationTest {
 
         // Then
         assertItemSavedCorrectly(EXPECTED_ITEM_ID);
+
+        verify(etagGenerator).generateEtag();
+        verify(companyService).getCompanyName(COMPANY_NUMBER);
     }
 
     @Test
@@ -926,6 +935,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
+        when(companyService.getCompanyName(UPDATED_COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -944,7 +954,7 @@ class CertificateItemsControllerIntegrationTest {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
-        assertThat(retrievedCertificateItem.get().getCompanyNumber(), is(COMPANY_NUMBER));
+        assertThat(retrievedCertificateItem.get().getCompanyNumber(), is(UPDATED_COMPANY_NUMBER));
         assertThat(retrievedCertificateItem.get().getCompanyName(), is(EXPECTED_COMPANY_NAME));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
@@ -981,6 +991,9 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
 
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
+
+        verify(etagGenerator).generateEtag();
+        verify(companyService).getCompanyName(UPDATED_COMPANY_NUMBER);
     }
 
     @Test
