@@ -101,12 +101,13 @@ public class CertificateItemsController {
         }
     }
 
+    // TODO We don't really want to throw Exception from this
     @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.certificates}/{id}",
                   consumes = "application/merge-patch+json")
     public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws Exception {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 
@@ -125,6 +126,8 @@ public class CertificateItemsController {
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
 
+        final String companyName = companyService.getCompanyName(patchedItem.getCompanyNumber());
+        patchedItem.setCompanyName(companyName);
         final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
 
