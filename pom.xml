@@ -30,6 +30,8 @@
 		<snakeyaml.version>1.25</snakeyaml.version>
 		<api-sdk-manager-java-library.version>1.0.2</api-sdk-manager-java-library.version>
 		<api-sdk-java.version>4.2.1</api-sdk-java.version>
+		<spring-cloud-starter-contract-stub-runner-version>2.2.2.RELEASE</spring-cloud-starter-contract-stub-runner-version>
+		<system-rules-version>1.19.0</system-rules-version>
 		<start-class>uk.gov.companieshouse.items.orders.api.ItemsApiApplication</start-class>
 	</properties>
 
@@ -156,6 +158,18 @@
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-rules</artifactId>
+			<version>${system-rules-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
+			<version>${spring-cloud-starter-contract-stub-runner-version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
