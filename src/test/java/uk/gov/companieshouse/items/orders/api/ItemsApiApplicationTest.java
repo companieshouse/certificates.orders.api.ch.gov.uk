@@ -31,14 +31,14 @@ class ItemsApiApplicationTest {
 	}
 
 	@Test
-	@DisplayName("Create rejects missing company name")
-	void createCertificateItemRejectsMissingCompanyName() {
+	@DisplayName("Create rejects read only company name")
+	void createCertificateItemRejectsReadOnlyCompanyName() {
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setCompanyName(null);
+		newCertificateItemDTO.setCompanyName("Phillips & Daughters");
 
 		// When and Then
-		postBadCreateRequestAndExpectError(newCertificateItemDTO, "company_name: must not be null");
+		postBadCreateRequestAndExpectError(newCertificateItemDTO, "company_name: must be null");
 	}
 
     @Test
@@ -235,7 +235,6 @@ class ItemsApiApplicationTest {
 	 */
 	private CertificateItemDTO createValidNewItem() {
 		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyName("Smith & Co");
 		newCertificateItemDTO.setCompanyNumber("1234");
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setDeliveryTimescale(STANDARD);

@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItemOptions;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
@@ -17,7 +18,7 @@ public class CertificateItemDTO extends ItemDTO {
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
-    @NotNull
+    @Null
     @JsonProperty("company_name")
     private String companyName;
 
