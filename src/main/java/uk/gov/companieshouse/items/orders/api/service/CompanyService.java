@@ -41,17 +41,34 @@ public class CompanyService {
         try {
             companyName = apiClient.company().get(uri).execute().getData().getCompanyName();
         } catch (ApiErrorResponseException ex) {
-            final String error = "Error getting company name for company number " + companyNumber;
-            LOGGER.error(error, ex);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, error, ex);
+            throw getResponseStatusException(ex, apiClient, companyNumber, uri);
         } catch (URIValidationException ex) {
             // Should this happen (unlikely), it is a broken contract, hence 500.
             final String error = "Invalid URI " + uri + " for company details";
             LOGGER.error(error, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error, ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error, ex); // TODO Does this help?
         }
 
         return companyName;
+    }
+
+    private ResponseStatusException getResponseStatusException(final ApiErrorResponseException apiException,
+                                                               final ApiClient client,
+                                                               final String companyNumber,
+                                                               final String uri) {
+
+        final ResponseStatusException propagatedException;
+        if (apiException.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+            final String error = "Error sending request to "
+                    + client.getBasePath() + uri + ": " + apiException.getStatusMessage();
+            LOGGER.error(error, apiException);
+            propagatedException = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
+        } else {
+            final String error = "Error getting company name for company number " + companyNumber;
+            LOGGER.error(error, apiException);
+            propagatedException =  new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
+        }
+        return propagatedException;
     }
 
 }
