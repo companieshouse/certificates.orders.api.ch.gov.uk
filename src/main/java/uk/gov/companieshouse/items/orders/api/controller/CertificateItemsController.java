@@ -62,11 +62,10 @@ public class CertificateItemsController {
         this.companyService = companyService;
     }
 
-    // TODO We don't really want to throw Exception from this
     @PostMapping("${uk.gov.companieshouse.items.orders.api.certificates}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
-                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws Exception {
+                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         trace("ENTERING createCertificateItem(" + certificateItemDTO + ")", requestId);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
@@ -101,13 +100,12 @@ public class CertificateItemsController {
         }
     }
 
-    // TODO We don't really want to throw Exception from this
     @PatchMapping(path = "${uk.gov.companieshouse.items.orders.api.certificates}/{id}",
                   consumes = "application/merge-patch+json")
     public ResponseEntity<Object> updateCertificateItem(
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
-            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) throws Exception {
+            final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
         trace("ENTERING updateCertificateItem(" + mergePatchDocument + ", " + id + ", " + requestId + ")", requestId);
 

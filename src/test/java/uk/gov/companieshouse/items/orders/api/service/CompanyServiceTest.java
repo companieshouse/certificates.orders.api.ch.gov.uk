@@ -20,7 +20,7 @@ class CompanyServiceTest {
     private CompanyService serviceUnderTest;
 
     @Test
-    void getCompanyName() throws Exception {
+    void getCompanyName() {
         assertThat(serviceUnderTest.getCompanyName(COMPANY_NUMBER), is(EXPECTED_COMPANY_NAME));
     }
 }
