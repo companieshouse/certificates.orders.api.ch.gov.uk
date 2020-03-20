@@ -2,7 +2,7 @@ package uk.gov.companieshouse.items.orders.api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
+import com.github.tomakehurst.wiremock.http.Fault;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -16,16 +16,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.hamcrest.CoreMatchers.either;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
@@ -132,15 +129,16 @@ public class CompanyServiceIntegrationTest {
         assertThat(exception.getReason(), is("Error getting company name for company number 00006400"));
     }
 
-    // TODO Is there any way to make this perform consistently quickly?
     @Test
-    public void getCompanyNameThrowsInternalServerErrorForForConnectionFailure() throws Exception {
+    public void getCompanyNameThrowsInternalServerErrorForForConnectionFailure() {
 
-        final int wrongPort = getWrongPort();
+        final String wireMockPort = environment.getProperty("wiremock.server.port");
 
         // Given
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");
-        ENVIRONMENT_VARIABLES.set("API_URL", "http://localhost:" + wrongPort);
+        ENVIRONMENT_VARIABLES.set("API_URL", "http://localhost:" + wireMockPort);
+        givenThat(com.github.tomakehurst.wiremock.client.WireMock.get(urlEqualTo("/company/" + COMPANY_NUMBER))
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
 
         // When and then
         final ResponseStatusException exception =
@@ -148,21 +146,8 @@ public class CompanyServiceIntegrationTest {
                         () -> serviceUnderTest.getCompanyName(COMPANY_NUMBER));
         assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
         final String expectedReason = "Error sending request to http://localhost:"
-                + wrongPort + "/company/" + COMPANY_NUMBER;
-        final String connectionRefused = expectedReason + ": Connection refused (Connection refused)";
-        final String readTimedOut =  expectedReason + ": Read timed out";
-        assertThat(exception.getReason(), either(is(connectionRefused)).or(is(readTimedOut)));
-    }
-
-    /**
-     * Gets a port that is available and therefore not served by anything, including WireMock. Useful for getting a
-     * connection refused error in a short length of time. TODO Is this consistent?
-     * @return a local port not currently used by anything
-     * @throws IOException should something unexpected happen
-     */
-    private int getWrongPort() throws IOException {
-        final ServerSocket socket = new ServerSocket(0);
-        return socket.getLocalPort();
+                + wireMockPort + "/company/" + COMPANY_NUMBER + ": Connection reset";
+        assertThat(exception.getReason(), is(expectedReason));
     }
 
 }
