@@ -46,12 +46,20 @@ public class CompanyService {
             // Should this happen (unlikely), it is a broken contract, hence 500.
             final String error = "Invalid URI " + uri + " for company details";
             LOGGER.error(error, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error, ex); // TODO Does this help?
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
         }
 
         return companyName;
     }
 
+    /**
+     * Creates an appropriate exception to report the underlying problem.
+     * @param apiException the API exception caught
+     * @param client the API client
+     * @param companyNumber the number of the company looked up
+     * @param uri the URI used to communicate with the company profiles API
+     * @return the {@link ResponseStatusException} exception to report the problem
+     */
     private ResponseStatusException getResponseStatusException(final ApiErrorResponseException apiException,
                                                                final ApiClient client,
                                                                final String companyNumber,
