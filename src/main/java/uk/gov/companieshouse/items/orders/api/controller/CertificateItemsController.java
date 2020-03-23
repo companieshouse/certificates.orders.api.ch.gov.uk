@@ -7,6 +7,7 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.service.CompanyService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.CreateItemRequestValidator;
@@ -34,7 +35,8 @@ public class CertificateItemsController {
     private final PatchItemRequestValidator patchItemRequestValidator;
     private final CertificateItemMapper mapper;
     private final PatchMerger patcher;
-    private final CertificateItemService service;
+    private final CertificateItemService certificateItemService;
+    private final CompanyService companyService;
 
     /**
      * Constructor.
@@ -44,18 +46,20 @@ public class CertificateItemsController {
      *               {@link CertificateItem} instances
      * @param patcher the component used by this to apply JSON merge patches to
      *                {@link CertificateItem} instances
-     * @param service the service used by this to manage and store certificate items
+     * @param certificateItemService the service used by this to manage and store certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
                                       final PatchItemRequestValidator patchItemRequestValidator,
                                       final CertificateItemMapper mapper,
                                       final PatchMerger patcher,
-                                      final CertificateItemService service) {
+                                      final CertificateItemService certificateItemService,
+                                      final CompanyService companyService) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.mapper = mapper;
         this.patcher = patcher;
-        this.service = service;
+        this.certificateItemService = certificateItemService;
+        this.companyService = companyService;
     }
 
     @PostMapping("${uk.gov.companieshouse.items.orders.api.certificates}")
@@ -71,8 +75,10 @@ public class CertificateItemsController {
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         item.setUserId(EricHeaderHelper.getIdentity(request));
+        final String companyName = companyService.getCompanyName(item.getCompanyNumber());
+        item.setCompanyName(companyName);
 
-        item = service.createCertificateItem(item);
+        item = certificateItemService.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
 
         trace("EXITING createCertificateItem() with " + createdCertificateItemDTO, requestId);
@@ -83,7 +89,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        Optional<CertificateItem> item = service.getCertificateItemWithCosts(id);
+        Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
             return ResponseEntity.status(OK).body(createdCertificateItemDTO);
@@ -108,7 +114,7 @@ public class CertificateItemsController {
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
-        final CertificateItem itemRetrieved = service.getCertificateItemById(id)
+        final CertificateItem itemRetrieved = certificateItemService.getCertificateItemById(id)
                 .orElseThrow(ResourceNotFoundException::new);
 
         // Apply the patch
@@ -118,7 +124,9 @@ public class CertificateItemsController {
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
 
-        final CertificateItem savedItem = service.saveCertificateItem(patchedItem);
+        final String companyName = companyService.getCompanyName(patchedItem.getCompanyNumber());
+        patchedItem.setCompanyName(companyName);
+        final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
 
         trace("EXITING updateCertificateItem() with " + savedItemDTO, requestId);

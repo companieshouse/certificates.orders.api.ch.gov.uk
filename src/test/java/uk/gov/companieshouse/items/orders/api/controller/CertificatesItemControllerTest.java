@@ -13,6 +13,7 @@ import uk.gov.companieshouse.items.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.items.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.items.orders.api.service.CompanyService;
 import uk.gov.companieshouse.items.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.items.orders.api.validator.PatchItemRequestValidator;
 
@@ -41,7 +42,7 @@ public class CertificatesItemControllerTest {
     private JsonMergePatch patch;
 
     @Mock
-    private CertificateItemService service;
+    private CertificateItemService certificateItemService;
 
     @Mock
     private CertificateItem item;
@@ -58,13 +59,16 @@ public class CertificatesItemControllerTest {
     @Mock
     private CertificateItemMapper mapper;
 
+    @Mock
+    private CompanyService companyService;
+
     @Test
     @DisplayName("Update request updates successfully")
-    void updateUpdatesSuccessfully() {
+    void updateUpdatesSuccessfully() throws Exception {
         // Given
-        when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
+        when(certificateItemService.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
-        when(service.saveCertificateItem(item)).thenReturn(item);
+        when(certificateItemService.saveCertificateItem(item)).thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
 
         // When
