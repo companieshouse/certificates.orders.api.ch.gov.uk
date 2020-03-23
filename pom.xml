@@ -32,6 +32,7 @@
 		<api-sdk-java.version>4.2.1</api-sdk-java.version>
 		<spring-cloud-contract-wiremock-version>2.2.2.RELEASE</spring-cloud-contract-wiremock-version>
 		<system-rules-version>1.19.0</system-rules-version>
+		<powermock.version>2.0.6</powermock.version>
 		<start-class>uk.gov.companieshouse.items.orders.api.ItemsApiApplication</start-class>
 	</properties>
 
@@ -170,6 +171,18 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-contract-wiremock</artifactId>
 			<version>${spring-cloud-contract-wiremock-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
