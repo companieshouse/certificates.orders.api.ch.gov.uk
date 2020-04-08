@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -17,11 +18,15 @@ import static org.hamcrest.core.Is.is;
 class DescriptionProviderServiceTest {
 
     private static final String COMPANY_NUMBER = "00006400";
+    private static final String ITEM_TYPE = "certificate";
     private static final String EXPECTED_DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String COMPANY_NUMBER_KEY = "company_number";
-    private static final Map<String, String> EXPECTED_DESCRIPTION_VALUES =
-            singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER);
+    private static final Map<String, String> EXPECTED_DESCRIPTION_VALUES = new HashMap<>();
 
+    static {
+        EXPECTED_DESCRIPTION_VALUES.put(COMPANY_NUMBER_KEY, COMPANY_NUMBER);
+        EXPECTED_DESCRIPTION_VALUES.put(ITEM_TYPE, EXPECTED_DESCRIPTION);
+    }
     @Test
     @DisplayName("Provides expected description")
     void getDescriptionProvidesExpectedDescription() {
@@ -33,7 +38,7 @@ class DescriptionProviderServiceTest {
     @DisplayName("Provides expected description values")
     void getDescriptionValuesProvidesExpectedValues() {
         final DescriptionProviderService provider = new DescriptionProviderService();
-        assertThat(provider.getDescriptionValues(COMPANY_NUMBER), is(EXPECTED_DESCRIPTION_VALUES));
+        assertThat(provider.getDescriptionValues(COMPANY_NUMBER, ITEM_TYPE), is(EXPECTED_DESCRIPTION_VALUES));
     }
 
     @Test
