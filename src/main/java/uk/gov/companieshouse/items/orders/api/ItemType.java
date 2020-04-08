@@ -6,6 +6,8 @@ import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculation
 import uk.gov.companieshouse.items.orders.api.service.CertificateCostCalculatorService;
 import uk.gov.companieshouse.items.orders.api.service.DescriptionProviderService;
 
+import java.util.Map;
+
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
@@ -47,8 +49,9 @@ public enum ItemType {
      * @param descriptions the description string resources provider
      */
     public void populateDerivedDescriptionFields(final Item item, final DescriptionProviderService descriptions) {
-        item.setDescription(descriptions.getDescription(item.getCompanyNumber()));
-        item.setDescriptionValues(descriptions.getDescriptionValues(item.getCompanyNumber()));
+        Map<String, String> descriptionValues = descriptions.getDescriptionValues(item.getCompanyNumber(), itemType);
+        item.setDescription(descriptionValues.get(itemType));
+        item.setDescriptionValues(descriptionValues);
     }
 
     /**

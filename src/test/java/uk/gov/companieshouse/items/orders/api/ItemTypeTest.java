@@ -67,7 +67,7 @@ class ItemTypeTest {
         // When
         CERTIFICATE.populateDerivedDescriptionFields(item, descriptions);
 
-        verifyDerivedDescriptionFields(item);
+        verifyDerivedDescriptionFields(item, "certificate");
     }
 
     @Test
@@ -127,12 +127,11 @@ class ItemTypeTest {
     private void verifyDescriptionFields(final Item item, final String value) {
         assertThat("Description identifier not expected value!", item.getDescriptionIdentifier(), is(value));
         assertThat("Kind not expected value!", item.getKind(), is("item#" + value));
-        verifyDerivedDescriptionFields(item);
+        verifyDerivedDescriptionFields(item, value);
     }
 
-    private void verifyDerivedDescriptionFields(final Item item) {
-        verify(descriptions).getDescription(item.getCompanyNumber());
-        verify(descriptions).getDescriptionValues(item.getCompanyNumber());
+    private void verifyDerivedDescriptionFields(final Item item, final String itemType) {
+        verify(descriptions).getDescriptionValues(item.getCompanyNumber(), itemType);
     }
 
     private void verifyPostalDelivery(final Item item, final ItemType type) {

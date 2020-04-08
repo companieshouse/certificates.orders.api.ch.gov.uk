@@ -6,7 +6,10 @@ import org.yaml.snakeyaml.Yaml;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,17 +56,21 @@ public class DescriptionProviderService {
                     COMPANY_CERTIFICATE_DESCRIPTION_KEY);
             return null;
         }
-        final Map<String, String> descriptionValues = getDescriptionValues(companyNumber);
+        final Map<String, String> descriptionValues = singletonMap(COMPANY_NUMBER_KEY, companyNumber);
         return StrSubstitutor.replace(companyCertificateDescription, descriptionValues, "{", "}");
     }
 
     /**
      * Gets the description values.
      * @param companyNumber the company number making up part of the description values
+     * @param itemType the item type, usually a value of certificate, certified-copy, scan-on-demand
      * @return the description values
      */
-    public Map<String, String> getDescriptionValues(final String companyNumber) {
-        return singletonMap(COMPANY_NUMBER_KEY, companyNumber);
+    public Map<String, String> getDescriptionValues(final String companyNumber, String itemType) {
+        Map<String, String> descriptionValues = new HashMap<String, String>();
+        descriptionValues.put(itemType, getDescription(companyNumber));
+        descriptionValues.put(COMPANY_NUMBER_KEY, companyNumber);
+        return descriptionValues;
     }
 
     /**
