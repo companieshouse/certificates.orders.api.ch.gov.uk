@@ -1,4 +1,5 @@
 artifact_name       := items.orders.api.ch.gov.uk
+version             := "unversioned"
 
 .PHONY: all
 all: build
@@ -17,7 +18,9 @@ clean:
 
 .PHONY: build
 build: submodules
-	mvn compile
+	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
+	mvn package -DskipTests=true
+	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: test
 test: test-unit test-integration
