@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.items.orders.api.mapper;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,9 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION;
+import static uk.gov.companieshouse.items.orders.api.model.CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
 import static uk.gov.companieshouse.items.orders.api.model.CollectionLocation.BELFAST;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryMethod.POSTAL;
 import static uk.gov.companieshouse.items.orders.api.model.DeliveryTimescale.STANDARD;
@@ -62,8 +65,14 @@ public class CertificateItemMapperTest {
     private static final boolean INCLUDE_DATES = true;
 
     private static final CertificateItemOptions ITEM_OPTIONS;
+    private static final CertificateItemOptions ITEM_OPTIONS_NO_DEFAULTS;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
+
+    private static final CertificateType NO_DEFAULT_CERTIFICATE_TYPE = INCORPORATION_WITH_ALL_NAME_CHANGES;
+    private static final DeliveryMethod NO_DEFAULT_DELIVERY_METHOD = POSTAL;
+    private static final DeliveryTimescale NO_DEFAULT_DELIVERY_TIMESCALE = STANDARD;
+    private static final int NO_DEFAULT_QUANTITY = 1;
 
     private static final String FORENAME = "John";
     private static final String SURNAME = "Smith";
@@ -98,6 +107,8 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setSurname(SURNAME);
+
+        ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptions();
 
         ITEM_COSTS = new ArrayList<>();
         ITEM_COSTS.add(new ItemCosts("1", "2", "3", CERTIFICATE));
@@ -144,6 +155,47 @@ public class CertificateItemMapperTest {
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
+        assertThat(item.getPostageCost(), is(dto.getPostageCost()));
+        assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
+    }
+
+    @Test
+    void testCertificateItemDtoToEntityMappingNoDefaults() {
+        final CertificateItemDTO dto = new CertificateItemDTO();
+        dto.setId(ID);
+        dto.setCompanyName(COMPANY_NAME);
+        dto.setCompanyNumber(COMPANY_NUMBER);
+        dto.setCustomerReference(CUSTOMER_REFERENCE);
+        dto.setDescription(DESCRIPTION);
+        dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
+        dto.setDescriptionValues(DESCRIPTION_VALUES);
+        dto.setItemCosts(ITEM_COSTS);
+        dto.setKind(KIND);
+        dto.setPostalDelivery(POSTAL_DELIVERY);
+        dto.setItemOptions(ITEM_OPTIONS_NO_DEFAULTS);
+        dto.setPostageCost(POSTAGE_COST);
+        dto.setTotalItemCost(TOTAL_ITEM_COST);
+
+        final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
+
+        assertThat(item.getId(), is(dto.getId()));
+        assertThat(item.getData(), is(notNullValue()));
+        assertThat(item.getData().getId(), is(dto.getId()));
+        assertThat(item.getCompanyName(), is(dto.getCompanyName()));
+        assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
+        assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
+        assertThat(item.getQuantity(), is(NO_DEFAULT_QUANTITY));
+        assertThat(item.getDescription(), is(dto.getDescription()));
+        assertThat(item.getDescriptionIdentifier(), is(dto.getDescriptionIdentifier()));
+        assertThat(item.getDescriptionValues(), is(dto.getDescriptionValues()));
+        assertThat(item.getItemCosts(), is(dto.getItemCosts()));
+        assertThat(item.getKind(), is(dto.getKind()));
+        assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
+        CertificateItemOptions itemOptionsDTO = dto.getItemOptions();
+        CertificateItemOptions itemOptions = item.getItemOptions();
+        assertEquals(itemOptionsDTO.getCertificateType(), itemOptions.getCertificateType());
+        assertEquals(itemOptionsDTO.getDeliveryMethod(), itemOptions.getDeliveryMethod());
+        assertEquals(itemOptionsDTO.getDeliveryTimescale(), itemOptions.getDeliveryTimescale());
         assertThat(item.getPostageCost(), is(dto.getPostageCost()));
         assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
