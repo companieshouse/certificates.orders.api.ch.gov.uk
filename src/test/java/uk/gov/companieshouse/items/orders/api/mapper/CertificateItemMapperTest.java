@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.items.orders.api.mapper;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,21 +122,9 @@ public class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMapping() {
-        final CertificateItemDTO dto = new CertificateItemDTO();
-        dto.setId(ID);
-        dto.setCompanyName(COMPANY_NAME);
-        dto.setCompanyNumber(COMPANY_NUMBER);
-        dto.setCustomerReference(CUSTOMER_REFERENCE);
-        dto.setQuantity(QUANTITY);
-        dto.setDescription(DESCRIPTION);
-        dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
-        dto.setDescriptionValues(DESCRIPTION_VALUES);
-        dto.setItemCosts(ITEM_COSTS);
-        dto.setKind(KIND);
-        dto.setPostalDelivery(POSTAL_DELIVERY);
+        final CertificateItemDTO dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS);
-        dto.setPostageCost(POSTAGE_COST);
-        dto.setTotalItemCost(TOTAL_ITEM_COST);
+        dto.setQuantity(QUANTITY);
 
         final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
 
@@ -161,20 +148,8 @@ public class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMappingNoDefaults() {
-        final CertificateItemDTO dto = new CertificateItemDTO();
-        dto.setId(ID);
-        dto.setCompanyName(COMPANY_NAME);
-        dto.setCompanyNumber(COMPANY_NUMBER);
-        dto.setCustomerReference(CUSTOMER_REFERENCE);
-        dto.setDescription(DESCRIPTION);
-        dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
-        dto.setDescriptionValues(DESCRIPTION_VALUES);
-        dto.setItemCosts(ITEM_COSTS);
-        dto.setKind(KIND);
-        dto.setPostalDelivery(POSTAL_DELIVERY);
+        final CertificateItemDTO dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS_NO_DEFAULTS);
-        dto.setPostageCost(POSTAGE_COST);
-        dto.setTotalItemCost(TOTAL_ITEM_COST);
 
         final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
 
@@ -191,11 +166,10 @@ public class CertificateItemMapperTest {
         assertThat(item.getItemCosts(), is(dto.getItemCosts()));
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
-        CertificateItemOptions itemOptionsDTO = dto.getItemOptions();
         CertificateItemOptions itemOptions = item.getItemOptions();
-        assertEquals(itemOptionsDTO.getCertificateType(), itemOptions.getCertificateType());
-        assertEquals(itemOptionsDTO.getDeliveryMethod(), itemOptions.getDeliveryMethod());
-        assertEquals(itemOptionsDTO.getDeliveryTimescale(), itemOptions.getDeliveryTimescale());
+        assertEquals(itemOptions.getCertificateType(), NO_DEFAULT_CERTIFICATE_TYPE);
+        assertEquals(itemOptions.getDeliveryMethod(), NO_DEFAULT_DELIVERY_METHOD);
+        assertEquals(itemOptions.getDeliveryTimescale(), NO_DEFAULT_DELIVERY_TIMESCALE);
         assertThat(item.getPostageCost(), is(dto.getPostageCost()));
         assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
@@ -291,4 +265,20 @@ public class CertificateItemMapperTest {
         assertThat(details1.getIncludeDates(), is(details2.getIncludeDates()));
     }
 
+    private CertificateItemDTO setupCertificateItemDTO() {
+        CertificateItemDTO dto = new CertificateItemDTO();
+        dto.setId(ID);
+        dto.setCompanyName(COMPANY_NAME);
+        dto.setCompanyNumber(COMPANY_NUMBER);
+        dto.setCustomerReference(CUSTOMER_REFERENCE);
+        dto.setDescription(DESCRIPTION);
+        dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
+        dto.setDescriptionValues(DESCRIPTION_VALUES);
+        dto.setItemCosts(ITEM_COSTS);
+        dto.setKind(KIND);
+        dto.setPostalDelivery(POSTAL_DELIVERY);
+        dto.setPostageCost(POSTAGE_COST);
+        dto.setTotalItemCost(TOTAL_ITEM_COST);
+        return dto;
+    }
 }
