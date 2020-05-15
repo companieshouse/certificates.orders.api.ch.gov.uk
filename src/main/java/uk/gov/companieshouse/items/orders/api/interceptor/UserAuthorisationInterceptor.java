@@ -1,22 +1,32 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.CERTIFICATE_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.IDENTITY_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.STATUS_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.USER_ID_LOG_KEY;
+
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.items.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
-import java.util.Optional;
-
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.GET;
 
 public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
@@ -40,18 +50,22 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
         else if(isOAuth2Request) {
             return validateOAuth2(request, response);
         }
-
-        LOGGER.error("Unrecognised identity type");
+        Map<String, Object> logMap = new HashMap<>();
+    	logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
+        LOGGER.error("Unrecognised identity type", logMap);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         return false;
     }
 
     private boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
+    	Map<String, Object> logMap = new HashMap<>();
+    	logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
         if(GET.matches(request.getMethod())) {
-            LOGGER.info("API is permitted to view the resource");
+            LOGGER.info("API is permitted to view the resource", logMap);
             return true;
         } else {
-            LOGGER.error("API is not permitted to perform a "+request.getMethod());
+        	logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
+            LOGGER.error("API is not permitted to perform a "+request.getMethod(), logMap);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
@@ -64,24 +78,34 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
             final String identity = EricHeaderHelper.getIdentity(request);
             Optional<CertificateItem> item = service.getCertificateItemById(certificateId);
+            
+            Map<String, Object> logMap = new HashMap<>();
+            logMap.put(CERTIFICATE_ID_LOG_KEY, certificateId);
+            logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
+            logMap.put(IDENTITY_LOG_KEY, identity);
 
             if (item.isPresent()) {
                 String userId = item.get().getUserId();
                 if (userId == null) {
+                	logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
+                	LOGGER.error("No user id found on certificate item, all certificates should have a user id", logMap);
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    LOGGER.error("No user id found on certificate item, all certificates should have a user id");
                     return false;
                 }
+                logMap.put(USER_ID_LOG_KEY, userId);
                 boolean authUserIsCreatedBy = userId.equals(identity);
                 if (authUserIsCreatedBy) {
-                    LOGGER.info("User is permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                    LOGGER.info("User is permitted to view/edit the resource certificate userId", logMap);
                     return true;
                 } else {
-                    LOGGER.error("User is not permitted to view/edit the resource certificate userId=" + userId + ", identity=" + identity);
+                	logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
+                    LOGGER.error("User is not permitted to view/edit the resource certificate userId", logMap);
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     return false;
                 }
             } else {
+            	logMap.put(STATUS_LOG_KEY,HttpStatus.NOT_FOUND);
+            	LOGGER.error("Resource certificate item not found", logMap);
                 response.setStatus(HttpStatus.NOT_FOUND.value());
                 return false;
             }
