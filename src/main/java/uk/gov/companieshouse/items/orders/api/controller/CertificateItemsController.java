@@ -4,14 +4,14 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.CERTIFICATE_ID_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.COMPANY_NUMBER_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.ERRORS_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.STATUS_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.USER_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.CERTIFICATE_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.COMPANY_NUMBER_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.ERRORS_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,14 +85,12 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(request, "create certficate item request", logMap);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
-            logMap.put(ERRORS_LOG_KEY, errors);
-            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
@@ -117,9 +115,8 @@ public class CertificateItemsController {
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put(CERTIFICATE_ID_LOG_KEY, id);
-        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        Map<String, Object> logMap = createLoggingDataMap(requestId);
+        logMap.put(CERTIFICATE_ID_LOG_KEY, id);        
         LOGGER.info("get certificate item request", logMap);
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
@@ -131,8 +128,7 @@ public class CertificateItemsController {
             String errorMsg = "certificate resource not found";
             final List<String> errors = new ArrayList<>();
             errors.add(errorMsg);
-            logMap.put(ERRORS_LOG_KEY, errors);
-            logMap.put(STATUS_LOG_KEY, NOT_FOUND);
+            logErrorsWithStatus(logMap, errors, NOT_FOUND);
             LOGGER.error(errorMsg, logMap);
             return ResponseEntity.status(NOT_FOUND).body(new ApiError(NOT_FOUND, errors));
         }
@@ -144,15 +140,13 @@ public class CertificateItemsController {
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put(CERTIFICATE_ID_LOG_KEY, id);
-        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        Map<String, Object> logMap = createLoggingDataMap(requestId);
+        logMap.put(CERTIFICATE_ID_LOG_KEY, id);       
         LOGGER.info("update certificate item request", logMap);
 
         final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
-            logMap.put(ERRORS_LOG_KEY, errors);
-            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.error("update certificate item request had validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
@@ -171,8 +165,7 @@ public class CertificateItemsController {
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(patchedItem);
         if (!patchedErrors.isEmpty()) {
-            logMap.put(ERRORS_LOG_KEY, patchedErrors);
-            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
@@ -186,5 +179,29 @@ public class CertificateItemsController {
         LOGGER.info("update certificate item request completed", logMap);
 
         return ResponseEntity.ok().body(savedItemDTO);
+    }
+    
+    /**
+     * method to set up a map for logging purposes and add a value for the 
+     * request id
+     * @param requestId
+     * @return
+     */
+    private Map<String, Object> createLoggingDataMap(final String requestId) {
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        return logMap;
+    }
+
+    /**
+     * method to add errors and a bad request status to a map for logging
+     * purposes
+     * @param logMap the map of logging data
+     * @param errors a list of errors
+     */
+    private void logErrorsWithStatus(Map<String, Object> logMap, 
+    		final List<String> errors, HttpStatus status) {
+        logMap.put(ERRORS_LOG_KEY, errors);
+        logMap.put(STATUS_LOG_KEY, status);
     }
 }

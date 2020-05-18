@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
 
 /**
  * Service that provides the description fields to facilitate UI text rendering.

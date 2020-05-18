@@ -2,14 +2,13 @@ package uk.gov.companieshouse.items.orders.api.interceptor;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.CERTIFICATE_ID_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.IDENTITY_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.STATUS_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.USER_ID_LOG_KEY;
-
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.CERTIFICATE_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.IDENTITY_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
 import java.util.HashMap;
 import java.util.Map;

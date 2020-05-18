@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.REQUEST_ID_LOG_KEY;
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.STATUS_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.REQUEST_ID_LOG_KEY;
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
 
 import java.util.HashMap;
 import java.util.Map;
