@@ -67,7 +67,7 @@ public class DescriptionProviderService {
      * @return the description values
      */
     public Map<String, String> getDescriptionValues(final String companyNumber, String itemType) {
-        Map<String, String> descriptionValues = new HashMap<String, String>();
+        Map<String, String> descriptionValues = new HashMap<>();
         descriptionValues.put(itemType, getDescription(companyNumber));
         descriptionValues.put(COMPANY_NUMBER_KEY, companyNumber);
         return descriptionValues;
