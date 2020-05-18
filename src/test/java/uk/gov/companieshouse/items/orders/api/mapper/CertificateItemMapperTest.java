@@ -167,9 +167,9 @@ public class CertificateItemMapperTest {
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         CertificateItemOptions itemOptions = item.getItemOptions();
-        assertEquals(itemOptions.getCertificateType(), NO_DEFAULT_CERTIFICATE_TYPE);
-        assertEquals(itemOptions.getDeliveryMethod(), NO_DEFAULT_DELIVERY_METHOD);
-        assertEquals(itemOptions.getDeliveryTimescale(), NO_DEFAULT_DELIVERY_TIMESCALE);
+        assertEquals(NO_DEFAULT_CERTIFICATE_TYPE, itemOptions.getCertificateType());
+        assertEquals(NO_DEFAULT_DELIVERY_METHOD, itemOptions.getDeliveryMethod());
+        assertEquals(NO_DEFAULT_DELIVERY_TIMESCALE, itemOptions.getDeliveryTimescale());
         assertThat(item.getPostageCost(), is(dto.getPostageCost()));
         assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
