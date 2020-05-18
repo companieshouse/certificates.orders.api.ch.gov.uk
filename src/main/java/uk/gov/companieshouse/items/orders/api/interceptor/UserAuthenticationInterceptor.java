@@ -24,11 +24,11 @@ public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-    	Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
         final String identityType = EricHeaderHelper.getIdentityType(request);
         if(identityType == null) {
-        	logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
+            logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
             LOGGER.infoRequest(request, "UserAuthenticationInterceptor error: no authorised identity type", logMap);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
@@ -36,7 +36,7 @@ public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
 
         final String identity = EricHeaderHelper.getIdentity(request);
         if(identity == null) {
-        	logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
+            logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
             LOGGER.infoRequest(request, "UserAuthenticationInterceptor error: no authorised identity", logMap);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;

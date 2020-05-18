@@ -85,15 +85,15 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
                                                         HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-    	Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(REQUEST_ID_LOG_KEY, requestId);
-    	LOGGER.infoRequest(request, "create certficate item request", logMap);
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        LOGGER.infoRequest(request, "create certficate item request", logMap);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
         if (!errors.isEmpty()) {
-        	logMap.put(ERRORS_LOG_KEY, errors);
-        	logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
-        	LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
+            logMap.put(ERRORS_LOG_KEY, errors);
+            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
@@ -117,10 +117,10 @@ public class CertificateItemsController {
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId)
     {
-    	Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(CERTIFICATE_ID_LOG_KEY, id);
-    	logMap.put(REQUEST_ID_LOG_KEY, requestId);
-    	LOGGER.info("get certificate item request", logMap);
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(CERTIFICATE_ID_LOG_KEY, id);
+        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        LOGGER.info("get certificate item request", logMap);
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
@@ -128,7 +128,7 @@ public class CertificateItemsController {
             LOGGER.info("certificate item found", logMap);
             return ResponseEntity.status(OK).body(createdCertificateItemDTO);
         } else {
-        	String errorMsg = "certificate resource not found";
+            String errorMsg = "certificate resource not found";
             final List<String> errors = new ArrayList<>();
             errors.add(errorMsg);
             logMap.put(ERRORS_LOG_KEY, errors);
@@ -144,24 +144,24 @@ public class CertificateItemsController {
             final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-    	Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(CERTIFICATE_ID_LOG_KEY, id);
-    	logMap.put(REQUEST_ID_LOG_KEY, requestId);
-    	LOGGER.info("update certificate item request", logMap);
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(CERTIFICATE_ID_LOG_KEY, id);
+        logMap.put(REQUEST_ID_LOG_KEY, requestId);
+        LOGGER.info("update certificate item request", logMap);
 
         final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
-        	logMap.put(ERRORS_LOG_KEY, errors);
-        	logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
-        	LOGGER.error("update certificate item request had validation errors", logMap);
+            logMap.put(ERRORS_LOG_KEY, errors);
+            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            LOGGER.error("update certificate item request had validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
         Optional<CertificateItem> certRetrieved = certificateItemService.getCertificateItemById(id);
         if(!certRetrieved.isPresent()) {
-        	logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
-        	LOGGER.error("certificate item not found", logMap);
-        	return ResponseEntity.notFound().build();
+            logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
+            LOGGER.error("certificate item not found", logMap);
+            return ResponseEntity.notFound().build();
         }
         final CertificateItem itemRetrieved = certRetrieved.get();
         logMap.put(COMPANY_NUMBER_LOG_KEY, itemRetrieved.getCompanyNumber());
@@ -171,9 +171,9 @@ public class CertificateItemsController {
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(patchedItem);
         if (!patchedErrors.isEmpty()) {
-        	logMap.put(ERRORS_LOG_KEY, patchedErrors);
-        	logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
-        	LOGGER.error("patched certificate item had validation errors", logMap);
+            logMap.put(ERRORS_LOG_KEY, patchedErrors);
+            logMap.put(STATUS_LOG_KEY, BAD_REQUEST);
+            LOGGER.error("patched certificate item had validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
 

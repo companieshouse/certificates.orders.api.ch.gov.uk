@@ -51,20 +51,20 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
             return validateOAuth2(request, response);
         }
         Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
+        logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
         LOGGER.error("Unrecognised identity type", logMap);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         return false;
     }
 
     private boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
-    	Map<String, Object> logMap = new HashMap<>();
-    	logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
         if(GET.matches(request.getMethod())) {
             LOGGER.info("API is permitted to view the resource", logMap);
             return true;
         } else {
-        	logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
+            logMap.put(STATUS_LOG_KEY, HttpStatus.UNAUTHORIZED);
             LOGGER.error("API is not permitted to perform a "+request.getMethod(), logMap);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
@@ -87,8 +87,8 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
             if (item.isPresent()) {
                 String userId = item.get().getUserId();
                 if (userId == null) {
-                	logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
-                	LOGGER.error("No user id found on certificate item, all certificates should have a user id", logMap);
+                    logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
+                    LOGGER.error("No user id found on certificate item, all certificates should have a user id", logMap);
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     return false;
                 }
@@ -98,14 +98,14 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
                     LOGGER.info("User is permitted to view/edit the resource certificate userId", logMap);
                     return true;
                 } else {
-                	logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
+                   logMap.put(STATUS_LOG_KEY,HttpStatus.UNAUTHORIZED);
                     LOGGER.error("User is not permitted to view/edit the resource certificate userId", logMap);
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     return false;
                 }
             } else {
-            	logMap.put(STATUS_LOG_KEY,HttpStatus.NOT_FOUND);
-            	LOGGER.error("Resource certificate item not found", logMap);
+                logMap.put(STATUS_LOG_KEY,HttpStatus.NOT_FOUND);
+                LOGGER.error("Resource certificate item not found", logMap);
                 response.setStatus(HttpStatus.NOT_FOUND.value());
                 return false;
             }
