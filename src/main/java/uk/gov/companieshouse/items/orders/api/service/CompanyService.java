@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.items.orders.api.service;
 
+import static uk.gov.companieshouse.items.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -9,8 +11,6 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-
-import static uk.gov.companieshouse.items.orders.api.ItemsApiApplication.APPLICATION_NAMESPACE;
 
 @Service
 public class CompanyService {

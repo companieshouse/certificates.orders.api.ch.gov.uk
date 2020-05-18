@@ -1,5 +1,22 @@
 package uk.gov.companieshouse.items.orders.api.interceptor;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_API_KEY_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.items.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,20 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
+
 import uk.gov.companieshouse.items.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.items.orders.api.service.CertificateItemService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.items.orders.api.util.TestConstants.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserAuthorisationInterceptorTest {
