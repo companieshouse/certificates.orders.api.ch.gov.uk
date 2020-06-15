@@ -1,0 +1,20 @@
+package uk.gov.companieshouse.certificates.orders.api.model;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter;
+
+/**
+ * Values of this represent the possible product types.
+ */
+public enum ProductType {
+    CERTIFICATE,
+    CERTIFICATE_SAME_DAY,
+    CERTIFICATE_ADDITIONAL_COPY,
+    SCAN_UPON_DEMAND,
+    CERTIFIED_COPY;
+
+    @JsonValue
+    public String getJsonName() {
+        return EnumValueNameConverter.convertEnumValueNameToJson(this);
+    }
+}

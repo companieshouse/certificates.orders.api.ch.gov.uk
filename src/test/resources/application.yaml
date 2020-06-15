@@ -1,7 +1,7 @@
 uk:
   gov:
     companieshouse:
-      items:
+      certificates:
         orders:
           api:
             certificates: /orderable/certificates
@@ -10,5 +10,5 @@ uk:
 spring:
   data:
     mongodb:
-      field-naming-strategy: uk.gov.companieshouse.items.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
+      field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
 

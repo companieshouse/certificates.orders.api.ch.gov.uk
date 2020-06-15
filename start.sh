@@ -1,15 +1,15 @@
 #!/bin/bash
 #
-# Start script for items.orders.api.ch.gov.uk
+# Start script for certificates.orders.api.ch.gov.uk
 
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ -z "${MESOS_SLAVE_PID}" ]]; then
     source ~/.chs_env/private_env
     source ~/.chs_env/global_env
-    source ~/.chs_env/items.orders.api.ch.gov.uk/env
+    source ~/.chs_env/certificates.orders.api.ch.gov.uk/env
 
-    PORT="${ITEMS_API_PORT:=10020}"
+    PORT="${CERTIFICATES_API_PORT:=10020}"
 else
     PORT="$1"
     CONFIG_URL="$2"
@@ -27,5 +27,5 @@ else
     source "${APP_DIR}/app_env"
 fi
 
-exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/items.orders.api.ch.gov.uk.jar"
+exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/certificates.orders.api.ch.gov.uk.jar"
 
