@@ -22,8 +22,8 @@ Variable                          | Default                                     
 --------------------------------- | -------------------------------------------------------------------- | -----------------------------------
 MONGODB_HOST                      | chs-mongo (in Vagrant) / localhost                                   | Mongo database host.
 MONGODB_PORT                      | Environment specific port / 27017                                    | Mongo database port.
-CERTIFICATES_DATABASE             | certificates                                                         | MongoDB Certificates database name.
-MONGODB_URL                       | $MONGODB_URL/$CERTIFICATES_DATABASE                                         | Mongo database URL.
+ITEMS_DATABASE                    | items                                                                | MongoDB Items database name.
+MONGODB_URL                       | $MONGODB_URL/$ITEMS_DATABASE                                         | Mongo database URL.
 CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT   | 10020 (in Vagrant)                                                   | API port.
 CERTIFICATES_ORDERS_API_CH_GOV_UK_URL    | http://${API_DOMAIN}:${CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT}              | API URL.
 
