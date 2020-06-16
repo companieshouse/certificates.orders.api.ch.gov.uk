@@ -8,9 +8,9 @@
 		<artifactId>companies-house-spring-boot-parent</artifactId>
 		<version>1.2.0</version>
 	</parent>
-	<artifactId>certificates.orders.api.ch.gov.uk</artifactId>
+	<artifactId>items.orders.api.ch.gov.uk</artifactId>
 	<version>unversioned</version>
-	<name>certificates.orders.api.ch.gov.uk</name>
+	<name>items.orders.api.ch.gov.uk</name>
 	<description>CH API handling CRUD operations on several item kinds for the CH Ordering Service</description>
 
 	<properties>
