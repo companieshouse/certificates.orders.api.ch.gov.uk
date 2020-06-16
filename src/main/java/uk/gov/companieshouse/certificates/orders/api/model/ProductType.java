@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter;
+
+import static uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
 
 /**
  * Values of this represent the possible product types.
@@ -15,6 +16,6 @@ public enum ProductType {
 
     @JsonValue
     public String getJsonName() {
-        return EnumValueNameConverter.convertEnumValueNameToJson(this);
+        return convertEnumValueNameToJson(this);
     }
 }

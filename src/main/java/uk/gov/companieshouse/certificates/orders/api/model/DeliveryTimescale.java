@@ -2,8 +2,8 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import uk.gov.companieshouse.certificates.orders.api.config.CostsConfig;
-import uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter;
 
+import static uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
 import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.*;
 
 /**
@@ -31,7 +31,7 @@ public enum DeliveryTimescale {
 
     @JsonValue
     public String getJsonName() {
-        return EnumValueNameConverter.convertEnumValueNameToJson(this);
+        return convertEnumValueNameToJson(this);
     }
 
     public int getIndividualCertificateCost(final CostsConfig costs) {

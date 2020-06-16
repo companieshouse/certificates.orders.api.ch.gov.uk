@@ -3,7 +3,6 @@ package uk.gov.companieshouse.certificates.orders.api.service;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
-import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -15,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
 
 /**
  * Service that provides the description fields to facilitate UI text rendering.
@@ -22,7 +22,7 @@ import static java.util.Collections.singletonMap;
 @Service
 public class DescriptionProviderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private static final String COMPANY_NUMBER_KEY = "company_number";
     private static final String CERTIFICATE_DESCRIPTION_KEY = "certificate-description";
