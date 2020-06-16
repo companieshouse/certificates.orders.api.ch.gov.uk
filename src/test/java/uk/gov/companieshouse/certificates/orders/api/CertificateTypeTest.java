@@ -21,12 +21,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.CertificateType.*;
+import static uk.gov.companieshouse.certificates.orders.api.ItemType.*;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 
 /**
- * Unit tests the {@link CertificateType} enum.
+ * Unit tests the {@link ItemType} enum.
  */
 @ExtendWith(MockitoExtension.class)
 class CertificateTypeTest {
@@ -106,12 +106,12 @@ class CertificateTypeTest {
 
     /**
      * Utility method that calls
-     * {@link CertificateType#populateReadOnlyFields(Item, DescriptionProviderService)} and
+     * {@link ItemType#populateReadOnlyFields(Item, DescriptionProviderService)} and
      * verifies the impact on the item is that expected.
-     * @param type the {@link CertificateType}
+     * @param type the {@link ItemType}
      * @param expectedDescriptionFieldsValue the expected description field values
      */
-    private void itemPopulatedCorrectly(final CertificateType type, final String expectedDescriptionFieldsValue) {
+    private void itemPopulatedCorrectly(final ItemType type, final String expectedDescriptionFieldsValue) {
         // Given
         final Item item = new Item();
         item.setQuantity(1);
@@ -134,7 +134,7 @@ class CertificateTypeTest {
         verify(descriptions).getDescriptionValues(item.getCompanyNumber(), itemType);
     }
 
-    private void verifyPostalDelivery(final Item item, final CertificateType type) {
+    private void verifyPostalDelivery(final Item item, final ItemType type) {
         assertThat(item.isPostalDelivery(), is(type != SCAN_ON_DEMAND));
     }
 }

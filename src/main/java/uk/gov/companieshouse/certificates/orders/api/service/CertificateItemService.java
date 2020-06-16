@@ -8,7 +8,7 @@ import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemR
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static uk.gov.companieshouse.certificates.orders.api.CertificateType.CERTIFICATE;
+import static uk.gov.companieshouse.certificates.orders.api.ItemType.CERTIFICATE;
 
 /**
  * Service for the management and storage of certificate items.

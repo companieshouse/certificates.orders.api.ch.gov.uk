@@ -13,7 +13,7 @@ import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimesc
 /**
  * Instances of this represent the type of the item handled by each API.
  */
-public enum CertificateType {
+public enum ItemType {
 
     CERTIFICATE("certificate", "item#certificate"),
     CERTIFIED_COPY("certified-copy", "item#certified-copy"),
@@ -27,7 +27,7 @@ public enum CertificateType {
     private String itemType;
     private String kind;
 
-    CertificateType(String itemType, String kind) {
+    ItemType(String itemType, String kind) {
         this.itemType = itemType;
         this.kind = kind;
     }
