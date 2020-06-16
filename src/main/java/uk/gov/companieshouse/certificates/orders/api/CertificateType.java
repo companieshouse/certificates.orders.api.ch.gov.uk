@@ -8,6 +8,8 @@ import uk.gov.companieshouse.certificates.orders.api.service.DescriptionProvider
 
 import java.util.Map;
 
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
+
 /**
  * Instances of this represent the type of the item handled by each API.
  */
@@ -93,6 +95,6 @@ public enum CertificateType {
         return item.getItemOptions() != null &&
                item.getItemOptions().getDeliveryTimescale() != null ?
                 item.getItemOptions().getDeliveryTimescale() :
-                DeliveryTimescale.STANDARD;
+                STANDARD;
     }
 }
