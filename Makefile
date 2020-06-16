@@ -1,4 +1,4 @@
-artifact_name       := items.orders.api.ch.gov.uk
+artifact_name       := certificates.orders.api.ch.gov.uk
 version             := "unversioned"
 
 .PHONY: all

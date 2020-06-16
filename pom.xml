@@ -8,9 +8,9 @@
 		<artifactId>companies-house-spring-boot-parent</artifactId>
 		<version>1.2.0</version>
 	</parent>
-	<artifactId>items.orders.api.ch.gov.uk</artifactId>
+	<artifactId>certificates.orders.api.ch.gov.uk</artifactId>
 	<version>unversioned</version>
-	<name>items.orders.api.ch.gov.uk</name>
+	<name>certificates.orders.api.ch.gov.uk</name>
 	<description>CH API handling CRUD operations on several item kinds for the CH Ordering Service</description>
 
 	<properties>
@@ -33,7 +33,7 @@
 		<spring-cloud-contract-wiremock-version>2.2.2.RELEASE</spring-cloud-contract-wiremock-version>
 		<system-rules-version>1.19.0</system-rules-version>
 		<powermock.version>2.0.6</powermock.version>
-		<start-class>uk.gov.companieshouse.items.orders.api.ItemsApiApplication</start-class>
+		<start-class>uk.gov.companieshouse.certificates.orders.api.CertificatesApiApplication</start-class>
 	</properties>
 
 	<dependencies>

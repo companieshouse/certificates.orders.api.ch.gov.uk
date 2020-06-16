@@ -1,7 +1,6 @@
-# items.orders.api.ch.gov.uk
+# certificates.orders.api.ch.gov.uk
 * CHS API handling CRUD operations on several item kinds for the CH Ordering Service. This 
-API will provide ordering services for Certificates, Certified Copies and scanned document images
- (aka SCUD).
+API will provide ordering services for Certificates.
 * For Certificates, the API is the back end service directly driven by the `certificates.orders.web.ch.gov.uk` 
 web application.
  
@@ -25,15 +24,15 @@ MONGODB_HOST                      | chs-mongo (in Vagrant) / localhost          
 MONGODB_PORT                      | Environment specific port / 27017                                    | Mongo database port.
 ITEMS_DATABASE                    | items                                                                | MongoDB Items database name.
 MONGODB_URL                       | $MONGODB_URL/$ITEMS_DATABASE                                         | Mongo database URL.
-ITEMS_ORDERS_API_CH_GOV_UK_PORT   | 10020 (in Vagrant)                                                   | API port.
-ITEMS_ORDERS_API_CH_GOV_UK_URL    | http://${API_DOMAIN}:${ITEMS_ORDERS_API_CH_GOV_UK_PORT}              | API URL.
+CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT   | 10020 (in Vagrant)                                                   | API port.
+CERTIFICATES_ORDERS_API_CH_GOV_UK_URL    | http://${API_DOMAIN}:${CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT}              | API URL.
 
 ## Running the API
 
 In Vagrant, use this command:
 
 ```
-ubic start chs.orders.items-orders-api
+ubic start chs.orders.certificates-orders-api
 ```
 
 ## Testing the API 
@@ -53,7 +52,7 @@ Alternatively, the tests can be executed from within an IDE such as Idea.
 A Postman collection has been created for this API. It may be imported into Postman from:
 
 ```
-src/test/postman/Items_API.postman_collection.json
+src/test/postman/Certificates_API.postman_collection.json
 ``` 
 
 
