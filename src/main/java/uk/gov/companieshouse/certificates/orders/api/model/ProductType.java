@@ -12,7 +12,8 @@ public enum ProductType {
     CERTIFICATE_SAME_DAY,
     CERTIFICATE_ADDITIONAL_COPY,
     SCAN_UPON_DEMAND,
-    CERTIFIED_COPY;
+    CERTIFIED_COPY,
+    CERTIFIED_COPY_SAME_DAY;
 
     @JsonValue
     public String getJsonName() {
