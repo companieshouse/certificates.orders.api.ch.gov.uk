@@ -101,7 +101,7 @@ class CertificateItemsControllerIntegrationTest {
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
-    private static final String UPDATED_ITEM_ID  = "ORD-123456-123457";
+    private static final String UPDATED_ITEM_ID  = "CRT-123456-123457";
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
@@ -304,6 +304,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setKind("item#certificate");
