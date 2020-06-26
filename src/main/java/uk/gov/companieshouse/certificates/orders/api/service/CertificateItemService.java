@@ -17,20 +17,21 @@ import static uk.gov.companieshouse.certificates.orders.api.ItemType.CERTIFICATE
 public class CertificateItemService {
 
     private final CertificateItemRepository repository;
-    private final SequenceGeneratorService generator;
+    private final IdGeneratorService idGenerator;
     private final DescriptionProviderService descriptions;
     private final CertificateCostCalculatorService calculator;
     private final EtagGeneratorService etagGenerator;
     private final LinksGeneratorService linksGenerator;
 
     public CertificateItemService(final CertificateItemRepository repository,
-                                  final SequenceGeneratorService generator,
+
                                   final DescriptionProviderService descriptions,
+                                  final IdGeneratorService idGenerator,
                                   final CertificateCostCalculatorService calculator,
                                   final EtagGeneratorService etagGenerator,
                                   final LinksGeneratorService linksGenerator) {
         this.repository = repository;
-        this.generator = generator;
+        this.idGenerator = idGenerator;
         this.descriptions = descriptions;
         this.calculator = calculator;
         this.etagGenerator = etagGenerator;
@@ -39,12 +40,13 @@ public class CertificateItemService {
 
     /**
      * Creates the certificate item in the database.
+     *
      * @param item the item to be created
      * @return the created item
      */
     public CertificateItem createCertificateItem(final CertificateItem item) {
         CERTIFICATE.populateReadOnlyFields(item, descriptions);
-        item.setId(getNextId());
+        item.setId(idGenerator.autoGenerateId());
         setCreationDateTimes(item);
         item.setEtag(etagGenerator.generateEtag());
         item.setLinks(linksGenerator.generateLinks(item.getId()));
@@ -55,6 +57,7 @@ public class CertificateItemService {
 
     /**
      * Saves the certificate item, assumed to have been updated, to the database.
+     *
      * @param updatedCertificateItem the certificate item to save
      * @return the latest certificate item state resulting from the save
      */
@@ -70,6 +73,7 @@ public class CertificateItemService {
 
     /**
      * Sets the created at and updated at date time 'timestamps' to now.
+     *
      * @param item the item to be 'timestamped'
      */
     void setCreationDateTimes(final Item item) {
@@ -81,6 +85,7 @@ public class CertificateItemService {
     /**
      * Gets the certificate item by its ID, and returns it as-is, without decorating it in any way.
      * (Compare with {@link #getCertificateItemWithCosts(String)}).
+     *
      * @param id the ID of the certificate item to be retrieved
      * @return the undecorated item retrieved from the DB
      */
@@ -91,6 +96,7 @@ public class CertificateItemService {
     /**
      * Gets the certificate item by its ID, calculating its costs on the fly.
      * (Compare with {@link #getCertificateItemById(String)}).
+     *
      * @param id the ID of the certificate item to be retrieved
      * @return the item, complete with its calculated costs
      */
@@ -99,14 +105,4 @@ public class CertificateItemService {
         retrievedItem.ifPresent(item -> CERTIFICATE.populateItemCosts(item, calculator));
         return retrievedItem;
     }
-
-    /**
-     * Gets the next ID value suitable for use as a 20 character PSNUMBER within CHD. All such values
-     * originated from within CHS are to be prefixed 'CHS...'.
-     * @return the next available ID value
-     */
-    String getNextId() {
-        return String.format("CHS%017d", generator.generateSequence(Item.SEQUENCE_NAME));
-    }
-
 }

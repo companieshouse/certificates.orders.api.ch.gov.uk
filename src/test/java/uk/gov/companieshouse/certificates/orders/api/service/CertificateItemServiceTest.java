@@ -31,13 +31,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CertificateItemServiceTest {
 
-    /** The value produced by the sequence that drives the item ID generation. */
-    private static final long NEXT_ID_SEQUENCE_VALUE = 1L;
+    private static final String ID = "CRT-123456-123456";
 
-    /** The next ID value expected to result given that the next sequence value is {@link #NEXT_ID_SEQUENCE_VALUE}. */
-    private static final String EXPECTED_ID_VALUE = "CHS00000000000000001";
-
-    private static final String ITEM_SOUGHT_ID_VALUE = "CHS00000000000000057";
+    private static final String ITEM_SOUGHT_ID_VALUE = "CRT-111111-222222";
 
     private static final String DISCOUNT_APPLIED = "1";
     private static final String ITEM_COST = "2";
@@ -52,9 +48,6 @@ class CertificateItemServiceTest {
     private CertificateItemRepository repository;
 
     @Mock
-    private SequenceGeneratorService generator;
-
-    @Mock
     private DescriptionProviderService descriptions;
 
     @Mock
@@ -64,26 +57,17 @@ class CertificateItemServiceTest {
     private EtagGeneratorService etagGenerator;
 
     @Mock
+    private IdGeneratorService idGeneratorService;
+
+    @Mock
     private LinksGeneratorService linksGenerator;
 
     @Test
-    @DisplayName("getNextId gets the expected next ID value")
-    void getNextIdGetsNextId() {
-
-        // Given
-        when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);
-
-        // When and Then
-        assertThat(serviceUnderTest.getNextId(), is(EXPECTED_ID_VALUE));
-        verify(etagGenerator, never()).generateEtag();
-    }
-
-    @Test
-    @DisplayName("createCertificateItem creates and saves item with timestamps, etag and links, returns item with costs")
+    @DisplayName("createCertificateItem creates and saves item with id, timestamps, etag and links, returns item with costs")
     void createCertificateItemPopulatesAndSavesItem() {
 
         // Given
-        when(generator.generateSequence(anyString())).thenReturn(NEXT_ID_SEQUENCE_VALUE);
+        when(idGeneratorService.autoGenerateId()).thenReturn(ID);
         final CertificateItem item = mockUpCostsCalculation();
         when(repository.save(item)).thenReturn(item);
 
@@ -94,12 +78,12 @@ class CertificateItemServiceTest {
 
         // Then
         final LocalDateTime intervalEnd = LocalDateTime.now();
-        assertThat(item.getId(), is(EXPECTED_ID_VALUE));
+        assertThat(item.getId(), is(ID));
         verifyCreationTimestampsWithinExecutionInterval(item, intervalStart, intervalEnd);
         verify(repository).save(item);
         verifyCostsFields(item);
         verify(etagGenerator).generateEtag();
-        verify(linksGenerator).generateLinks(EXPECTED_ID_VALUE);
+        verify(linksGenerator).generateLinks(ID);
     }
 
     @Test
