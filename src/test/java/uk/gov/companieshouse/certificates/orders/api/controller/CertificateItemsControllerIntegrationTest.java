@@ -18,13 +18,30 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
-import uk.gov.companieshouse.certificates.orders.api.model.*;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
+import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
+import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.certificates.orders.api.model.Links;
+import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
+import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorService;
+import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -36,9 +53,20 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -66,11 +94,14 @@ class CertificateItemsControllerIntegrationTest {
     private EtagGeneratorService etagGenerator;
 
     @MockBean
+    private IdGeneratorService idGeneratorService;
+
+    @MockBean
     private CompanyService companyService;
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
-    private static final String EXPECTED_ITEM_ID = "CHS00000000000000001";
-    private static final String UPDATED_ITEM_ID  = "CHS00000000000000002";
+    private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
+    private static final String UPDATED_ITEM_ID  = "CRT-123456-123457";
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
@@ -292,6 +323,7 @@ class CertificateItemsControllerIntegrationTest {
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
         when(companyService.getCompanyName(COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -357,6 +389,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setLinks(LINKS);
         newItem.setPostageCost(POSTAGE_COST);
         newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
@@ -394,6 +427,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
@@ -426,6 +460,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setCertificateType(CERTIFICATE_TYPE);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_CERTIFICATE_TYPE_MESSAGE));
@@ -458,6 +493,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setCollectionLocation(COLLECTION_LOCATION);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
@@ -490,6 +526,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
@@ -524,6 +561,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(DELIVERY_METHOD);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
@@ -558,6 +596,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeGoodStandingInformation(true);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -593,6 +632,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeEmailCopy(true);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -626,6 +666,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeEmailCopy(true);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -660,6 +701,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDirectorDetails(director);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
@@ -694,6 +736,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
@@ -727,6 +770,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -924,6 +968,7 @@ class CertificateItemsControllerIntegrationTest {
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
         when(companyService.getCompanyName(UPDATED_COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
+
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
