@@ -7,7 +7,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CertificatesApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CertificatesApiApplication.class, args);
+		if (checkEnvironmentVariables()) {
+			SpringApplication.run(CertificatesApiApplication.class, args);
+		}
+	}
+
+	/**
+	 * Checks whether all required environment variables have defined values.
+	 * @return whether all required environment variables have defined values (<code>true</code>), or not
+	 * (<code>false</code>)
+	 */
+	static boolean checkEnvironmentVariables() {
+		// TODO GCI-1316 Implement this!
+		return false;
 	}
 
 }
