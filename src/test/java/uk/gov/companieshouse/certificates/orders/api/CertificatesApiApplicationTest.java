@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api;
 
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
@@ -17,11 +20,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.util.Arrays.stream;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.API_URL;
+import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.CHS_API_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.ITEMS_DATABASE;
+import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.MONGODB_URL;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CertificatesApiApplicationTest {
@@ -35,6 +52,9 @@ class CertificatesApiApplicationTest {
 
 	@Autowired
 	private WebTestClient webTestClient;
+
+	@Rule
+	public EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
 	@Test
 	@DisplayName("Application context loads successfully")
@@ -230,6 +250,65 @@ class CertificatesApiApplicationTest {
 
 		// When and Then
 		postCreateRequestAndExpectBadRequestResponseStatusError(newCertificateItemDTO, COMPANY_NOT_FOUND_ERROR);
+	}
+
+	@Test
+	@DisplayName("Check returns true where all required environment variables are populated")
+	void checkEnvironmentVariablesAllPresentReturnsTrue() {
+
+		stream(RequiredEnvironmentVariables.values()).forEach(
+				variable -> environmentVariables.set(variable.getName(), variable.getName()));
+
+		assertTrue(CertificatesApiApplication.checkEnvironmentVariables());
+
+		stream(RequiredEnvironmentVariables.values()).forEach(
+				variable -> environmentVariables.clear(variable.getName()));
+	}
+
+	@Test
+	@DisplayName("Check returns false if ITEMS_DATABASE is not populated")
+	void checkEnvironmentVariablesItemsDatabaseMissingReturnsFalse() {
+		checkEnvironmentVariableMissing(ITEMS_DATABASE);
+	}
+
+	@Test
+	@DisplayName("Check returns false if MONGODB_URL is not populated")
+	void checkEnvironmentVariablesMongoDbUrlMissingReturnsFalse() {
+		checkEnvironmentVariableMissing(MONGODB_URL);
+	}
+
+	@Test
+	@DisplayName("Check returns false if CHS_API_KEY is not populated")
+	void checkEnvironmentVariablesChsApiKeyMissingReturnsFalse() {
+		checkEnvironmentVariableMissing(CHS_API_KEY);
+	}
+
+	@Test
+	@DisplayName("Check returns false if API_URL is not populated")
+	void checkEnvironmentVariablesApiUrlMissingReturnsFalse() {
+		checkEnvironmentVariableMissing(API_URL);
+	}
+
+	/**
+	 * Utility method that asserts that if the environment variable specified is not populated,
+	 * then {@link CertificatesApiApplication#checkEnvironmentVariables()} returns <code>false</code>.
+	 * @param missingVariable the {@link RequiredEnvironmentVariables} value indicating the variable that is to be
+	 *                        left unpopulated for the test
+	 */
+	private void checkEnvironmentVariableMissing(final RequiredEnvironmentVariables missingVariable) {
+		stream(RequiredEnvironmentVariables.values()).forEach(
+				variable -> {
+					if (variable != missingVariable) {
+						environmentVariables.set(variable.getName(), variable.getName());
+					}
+				});
+		assertFalse(CertificatesApiApplication.checkEnvironmentVariables());
+		stream(RequiredEnvironmentVariables.values()).forEach(
+				variable -> {
+					if (variable != missingVariable) {
+						environmentVariables.clear(variable.getName());
+					}
+				});
 	}
 
 	/**

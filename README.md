@@ -26,6 +26,8 @@ ITEMS_DATABASE                    | items                                       
 MONGODB_URL                       | $MONGODB_URL/$ITEMS_DATABASE                                         | Mongo database URL.
 CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT   | 10020 (in Vagrant)                                                   | API port.
 CERTIFICATES_ORDERS_API_CH_GOV_UK_URL    | http://${API_DOMAIN}:${CERTIFICATES_ORDERS_API_CH_GOV_UK_PORT}              | API URL.
+API_URL                           | -                                                                    | Base URL for requests to internal APIs.
+CHS_API_KEY                       | -                                                                    | Key identifying this client for requests to internal APIs.
 
 ## Running the API
 
