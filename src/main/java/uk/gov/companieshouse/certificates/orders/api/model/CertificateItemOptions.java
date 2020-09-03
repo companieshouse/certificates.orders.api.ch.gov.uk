@@ -2,12 +2,16 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
+import org.springframework.data.annotation.Transient;
 
 /**
  * An instance of this represents the item options for a certificate item.
  */
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemOptions {
+
+    @Transient
+    private final String type = "CertificateItemOptions";
 
     private CertificateType certificateType;
 
@@ -142,4 +146,5 @@ public class CertificateItemOptions {
     @Override
     public String toString() { return new Gson().toJson(this); }
 
+    public String getType() { return type; }
 }
