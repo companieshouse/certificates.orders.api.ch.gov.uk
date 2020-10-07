@@ -43,13 +43,13 @@ public class RequestValidator {
 
         if (options.getCertificateType() == DISSOLUTION) {
 
-            if (options.getIncludeCompanyObjectsInformation() != null && options.getIncludeCompanyObjectsInformation()) {
+            if (options.getIncludeCompanyObjectsInformation() != null) {
                 errors.add(
-                    "include_company_objects_information: must not be true when certificate type is dissolution");
+                    "include_company_objects_information: must not exist when certificate type is dissolution");
             }
-            if (options.getIncludeGoodStandingInformation() != null && options.getIncludeGoodStandingInformation()) {
+            if (options.getIncludeGoodStandingInformation() != null) {
                 errors.add(
-                    "include_good_standing_information: must not be true when certificate type is dissolution");
+                    "include_good_standing_information: must not exist when certificate type is dissolution");
             }
             if (options.getRegisteredOfficeAddressDetails() != null) {
                 errors.add(
