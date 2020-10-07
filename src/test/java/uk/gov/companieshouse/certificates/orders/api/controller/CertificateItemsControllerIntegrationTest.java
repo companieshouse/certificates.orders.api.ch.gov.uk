@@ -137,7 +137,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String INVALID_CERTIFICATE_TYPE_MESSAGE =
         "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.CertificateType`"
          + " from String \"unknown\": value not one of declared Enum instance names: "
-         + "[incorporation-with-all-name-changes, dissolution-liquidation, incorporation, "
+         + "[incorporation-with-all-name-changes, incorporation, dissolution, "
          + "incorporation-with-last-name-changes]";
     private static final DeliveryMethod DELIVERY_METHOD = DeliveryMethod.POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = DeliveryMethod.COLLECTION;
@@ -162,7 +162,13 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
     private static final String DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE =
-            "include_company_objects_information: must not be true when certificate type is dissolution_liquidation";
+            "include_company_objects_information: must not be true when certificate type is dissolution";
+    private static final String DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE =
+            "include_registered_office_address_details: must not exist when certificate type is dissolution";
+    private static final String DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE =
+            "include_secretary_details: must not exist when certificate type is dissolution";
+    private static final String DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE =
+            "include_director_details: must not exist when certificate type is dissolution";
     private static final boolean INCLUDE_EMAIL_COPY = false;
     private static final boolean UPDATED_INCLUDE_EMAIL_COPY = true;
     private static final String INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE =
@@ -170,7 +176,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
     private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
-    "include_good_standing_information: must not be true when certificate type is dissolution_liquidation";
+    "include_good_standing_information: must not be true when certificate type is dissolution";
 
     private static final boolean INCLUDE_ADDRESS = true;
     private static final boolean UPDATED_INCLUDE_ADDRESS = false;
@@ -584,23 +590,30 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Fails to create certificate item with include company objects, good standing true for dissolution liquidation")
-    void createCertificateItemFailsToCreateCertificateItemWithIncludeCompanyObjectsAndGoodStanding() throws Exception {
+    @DisplayName("Fails to create certificate item with include Company objects, good standing," +
+                " registered office details, secretary details or director details true for dissolution")
+    void createCertificateItemFailsToCreateCertificateItemWithIncludeCompanyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetails()
+        throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.DISSOLUTION_LIQUIDATION);
+        options.setCertificateType(CertificateType.DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
-                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
+                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE,
+                            DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE,
+                            DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1387,7 +1400,7 @@ class CertificateItemsControllerIntegrationTest {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.DISSOLUTION_LIQUIDATION);
+        options.setCertificateType(CertificateType.DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
         itemUpdate.setItemOptions(options);
@@ -1431,7 +1444,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCertificateType(CertificateType.DISSOLUTION_LIQUIDATION);
+        savedOptions.setCertificateType(CertificateType.DISSOLUTION);
         savedItem.setItemOptions(savedOptions);
 
         repository.save(savedItem);

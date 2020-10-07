@@ -7,7 +7,7 @@ public enum CertificateType {
     INCORPORATION,
     INCORPORATION_WITH_ALL_NAME_CHANGES,
     INCORPORATION_WITH_LAST_NAME_CHANGES,
-    DISSOLUTION_LIQUIDATION;
+    DISSOLUTION;
 
     @JsonValue
     public String getJsonName() {
