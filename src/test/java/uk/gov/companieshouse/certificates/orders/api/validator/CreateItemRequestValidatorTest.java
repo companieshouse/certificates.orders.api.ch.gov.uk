@@ -155,6 +155,24 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
+    @DisplayName("Company objects and good standing set as null when certificate type is dissolution")
+    void companyObjectsGoodStandingAsNullWhenRequestedForDissolution() {
+        // Given
+        final CertificateItemDTO item = new CertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION);
+        options.setIncludeCompanyObjectsInformation(null);
+        options.setIncludeGoodStandingInformation(null);
+        item.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+
+        // Then
+        assertThat(errors, empty());
+    }
+
+    @Test
     @DisplayName("(Only) include email copy for same day delivery timescale")
     void includeEmailCopyForSameDayDeliveryTimescale() {
         // Given
