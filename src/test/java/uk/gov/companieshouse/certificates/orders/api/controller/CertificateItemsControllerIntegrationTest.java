@@ -162,7 +162,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_COMPANY_OBJECTS_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION = false;
     private static final String DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE =
-            "include_company_objects_information: must not be true when certificate type is dissolution";
+            "include_company_objects_information: must not exist when certificate type is dissolution";
     private static final String DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE =
             "include_registered_office_address_details: must not exist when certificate type is dissolution";
     private static final String DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE =
@@ -176,7 +176,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
     private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
-    "include_good_standing_information: must not be true when certificate type is dissolution";
+    "include_good_standing_information: must not exist when certificate type is dissolution";
 
     private static final boolean INCLUDE_ADDRESS = true;
     private static final boolean UPDATED_INCLUDE_ADDRESS = false;

@@ -307,8 +307,8 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors, containsInAnyOrder(
-                "include_company_objects_information: must not be true when certificate type is dissolution",
-                "include_good_standing_information: must not be true when certificate type is dissolution",
+                "include_company_objects_information: must not exist when certificate type is dissolution",
+                "include_good_standing_information: must not exist when certificate type is dissolution",
                 "include_registered_office_address_details: must not exist when certificate type is dissolution",
                 "include_secretary_details: must not exist when certificate type is dissolution",
                 "include_director_details: must not exist when certificate type is dissolution"));
