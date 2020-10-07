@@ -6,13 +6,19 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
+import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
@@ -24,6 +30,32 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 class CreateItemRequestValidatorTest {
 
     private CreateItemRequestValidator validatorUnderTest;
+    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
+    private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean INCLUDE_OCCUPATION = true;
+    private static final boolean INCLUDE_DATES = true;
+
+    static {
+        DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+
+        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+    }
 
     @BeforeEach
     void setUp() {
@@ -94,14 +126,20 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Neither company objects nor good standing info should be requested for dissolution liquidation")
-    void companyObjectsGoodStandingInfoMustNotBeRequestedForDissolutionLiquidation() {
+    @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
+        "should not be requested for dissolution")
+    void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
         // Given
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         item.setItemOptions(options);
 
         // When
@@ -109,8 +147,29 @@ class CreateItemRequestValidatorTest {
 
         // Then
         assertThat(errors, containsInAnyOrder(
-                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation",
-                "include_good_standing_information: must not be true when certificate type is dissolution_liquidation"));
+            "include_company_objects_information: must not exist when certificate type is dissolution",
+            "include_good_standing_information: must not exist when certificate type is dissolution",
+            "include_registered_office_address_details: must not exist when certificate type is dissolution",
+            "include_secretary_details: must not exist when certificate type is dissolution",
+            "include_director_details: must not exist when certificate type is dissolution"));
+    }
+
+    @Test
+    @DisplayName("Company objects and good standing set as null when certificate type is dissolution")
+    void companyObjectsGoodStandingAsNullWhenRequestedForDissolution() {
+        // Given
+        final CertificateItemDTO item = new CertificateItemDTO();
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(DISSOLUTION);
+        options.setIncludeCompanyObjectsInformation(null);
+        options.setIncludeGoodStandingInformation(null);
+        item.setItemOptions(options);
+
+        // When
+        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+
+        // Then
+        assertThat(errors, empty());
     }
 
     @Test

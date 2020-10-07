@@ -27,7 +27,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
@@ -74,6 +74,32 @@ class PatchItemRequestValidatorTest {
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final boolean TOKEN_POSTAL_DELIVERY_VALUE = true;
+    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
+    private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
+    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
+    private static final boolean INCLUDE_ADDRESS = true;
+    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
+    private static final boolean INCLUDE_BASIC_INFORMATION = true;
+    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
+    private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
+    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean INCLUDE_OCCUPATION = true;
+    private static final boolean INCLUDE_DATES = true;
+
+    static {
+        DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
+        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
+
+        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+    }
 
     @Autowired
     private PatchItemRequestValidator validatorUnderTest;
@@ -260,14 +286,20 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Neither company objects nor good standing info should be requested for dissolution liquidation")
-    void companyObjectsGoodStandingInfoMustNotBeRequestedForDissolutionLiquidation() {
+    @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
+                "should not be requested for dissolution")
+    void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
         // Given
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(DISSOLUTION_LIQUIDATION);
+        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         patchedItem.setItemOptions(options);
 
         // When
@@ -275,8 +307,11 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors, containsInAnyOrder(
-                "include_company_objects_information: must not be true when certificate type is dissolution_liquidation",
-                "include_good_standing_information: must not be true when certificate type is dissolution_liquidation"));
+                "include_company_objects_information: must not exist when certificate type is dissolution",
+                "include_good_standing_information: must not exist when certificate type is dissolution",
+                "include_registered_office_address_details: must not exist when certificate type is dissolution",
+                "include_secretary_details: must not exist when certificate type is dissolution",
+                "include_director_details: must not exist when certificate type is dissolution"));
     }
 
     @Test

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.stream;
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION_LIQUIDATION;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 
@@ -29,7 +29,8 @@ public class RequestValidator {
 
     /**
      * Validates the options provided, returning any errors found.
-     * @param options the options to be validated
+     *
+     * @param options   the options to be validated
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the errors found, which will be empty if the item is found to be valid
      */
@@ -39,14 +40,28 @@ public class RequestValidator {
             return errors;
         }
         errors.addAll(getCollectionDeliveryValidationErrors(options));
-        if (options.getCertificateType() == DISSOLUTION_LIQUIDATION) {
-            if (options.getIncludeCompanyObjectsInformation()) {
+
+        if (options.getCertificateType() == DISSOLUTION) {
+
+            if (options.getIncludeCompanyObjectsInformation() != null) {
                 errors.add(
-                        "include_company_objects_information: must not be true when certificate type is dissolution_liquidation");
+                    "include_company_objects_information: must not exist when certificate type is dissolution");
             }
-            if (options.getIncludeGoodStandingInformation()) {
+            if (options.getIncludeGoodStandingInformation() != null) {
                 errors.add(
-                        "include_good_standing_information: must not be true when certificate type is dissolution_liquidation");
+                    "include_good_standing_information: must not exist when certificate type is dissolution");
+            }
+            if (options.getRegisteredOfficeAddressDetails() != null) {
+                errors.add(
+                    "include_registered_office_address_details: must not exist when certificate type is dissolution");
+            }
+            if (options.getSecretaryDetails() != null) {
+                errors.add(
+                    "include_secretary_details: must not exist when certificate type is dissolution");
+            }
+            if (options.getDirectorDetails() !=null) {
+                errors.add(
+                    "include_director_details: must not exist when certificate type is dissolution");
             }
         }
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
