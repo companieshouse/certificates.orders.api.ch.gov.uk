@@ -25,9 +25,6 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     @Autowired
     private CertificateItemService certificateItemService;
 
-    @Autowired
-    private CRUDAuthenticationInterceptor crudPermissionsInterceptor;
-
     @Bean
     public UserAuthorisationInterceptor userAuthorisationInterceptor() {
         return new UserAuthorisationInterceptor(certificateItemService);
@@ -43,7 +40,7 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new LoggingInterceptor());
         registry.addInterceptor(new UserAuthenticationInterceptor()).addPathPatterns("/orderable/**");
         registry.addInterceptor(userAuthorisationInterceptor()).addPathPatterns("/orderable/certificates/**");
-        registry.addInterceptor(crudPermissionsInterceptor).addPathPatterns("/orderable/**");
+        registry.addInterceptor(crudPermissionsInterceptor()).addPathPatterns("/orderable/**");
     }
 
     @Bean
