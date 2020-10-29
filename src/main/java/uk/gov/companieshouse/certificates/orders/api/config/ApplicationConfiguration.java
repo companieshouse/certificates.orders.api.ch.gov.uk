@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
+import uk.gov.companieshouse.api.util.security.Permission.Key;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthorisationInterceptor;
@@ -22,9 +25,17 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     @Autowired
     private CertificateItemService certificateItemService;
 
+    @Autowired
+    private CRUDAuthenticationInterceptor crudPermissionsInterceptor;
+
     @Bean
     public UserAuthorisationInterceptor userAuthorisationInterceptor() {
         return new UserAuthorisationInterceptor(certificateItemService);
+    }
+
+    @Bean
+    public CRUDAuthenticationInterceptor crudPermissionsInterceptor() {
+        return new CRUDAuthenticationInterceptor(Key.USER_ORDERS);
     }
 
     @Override
@@ -32,6 +43,7 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new LoggingInterceptor());
         registry.addInterceptor(new UserAuthenticationInterceptor()).addPathPatterns("/orderable/**");
         registry.addInterceptor(userAuthorisationInterceptor()).addPathPatterns("/orderable/certificates/**");
+        registry.addInterceptor(crudPermissionsInterceptor).addPathPatterns("/orderable/**");
     }
 
     @Bean
