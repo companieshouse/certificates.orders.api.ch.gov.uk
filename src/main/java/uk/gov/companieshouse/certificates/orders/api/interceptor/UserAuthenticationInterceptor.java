@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.logging.Logger;
@@ -13,6 +14,7 @@ import java.util.Map;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.*;
 
+@Component
 public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
