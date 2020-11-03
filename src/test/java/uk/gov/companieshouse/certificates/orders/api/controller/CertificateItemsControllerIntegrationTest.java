@@ -15,9 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthorisationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
@@ -87,8 +91,14 @@ class CertificateItemsControllerIntegrationTest {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @MockBean
-    private UserAuthenticationInterceptor userAuthenticationInterceptor;
+    @Autowired
+    UserAuthenticationInterceptor userAuthenticationInterceptor;
+    @Autowired
+    LoggingInterceptor loggingInterceptor;
+    @Autowired
+    UserAuthorisationInterceptor userAuthorisationInterceptor;
+    @Autowired
+    CRUDAuthenticationInterceptor crudPermissionsInterceptor;
 
     @MockBean
     private EtagGeneratorService etagGenerator;
