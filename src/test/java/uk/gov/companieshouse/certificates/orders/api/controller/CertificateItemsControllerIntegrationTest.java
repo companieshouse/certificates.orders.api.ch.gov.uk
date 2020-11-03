@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -63,6 +64,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
@@ -77,6 +79,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
  */
 @AutoConfigureMockMvc
 @SpringBootTest
+@TestPropertySource(properties = {"ENABLE_TOKEN_PERMISSION_AUTH=1"})
 class CertificateItemsControllerIntegrationTest {
 
     @Autowired
@@ -274,6 +277,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String SURNAME = "Smith";
     private static final String UPDATED_SURNAME = "Smyth";
     private static final String TOKEN_TOTAL_ITEM_COST = "100";
+    private static final String TOKEN_PERMISSION_VALUE = "user_orders=%s";
 
     /**
      * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
@@ -348,6 +352,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
@@ -391,6 +396,43 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Fails to create certificate item with incorrect token permission")
+    void createCertificateItemUnauthorizedTokenPermission() throws Exception {
+        // Given
+        final CertificateItemDTO newItem = new CertificateItemDTO();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CERTIFICATE_TYPE);
+        options.setCollectionLocation(COLLECTION_LOCATION);
+        options.setContactNumber(CONTACT_NUMBER);
+        options.setDeliveryMethod(DELIVERY_METHOD);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setForename(FORENAME);
+        options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setSurname(SURNAME);
+        newItem.setItemOptions(options);
+        newItem.setQuantity(QUANTITY);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Fails to create certificate item that fails validation")
     void createCertificateItemFailsToCreateCertificateItem() throws Exception {
 
@@ -422,6 +464,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
@@ -455,6 +498,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -488,6 +532,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeIncorporationCertificateTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -521,6 +566,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeBelfastCollectionLocationInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -556,6 +602,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
@@ -589,6 +636,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makePostalDeliveryMethodInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -632,6 +680,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
@@ -667,6 +716,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
@@ -701,6 +751,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
@@ -736,6 +787,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makePartialIncludeDobTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -771,6 +823,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -806,6 +859,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
@@ -853,6 +907,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
@@ -869,6 +924,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());
@@ -913,6 +969,32 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Return unauthorised if the user does not have the right token permission")
+    void getCertificateItemReturnsUnauthorisedIfMissingTokenPermission() throws Exception {
+        // Given
+        // Create certificate item in database
+        final CertificateItem newItem = new CertificateItem();
+        newItem.setId(EXPECTED_ITEM_ID);
+        newItem.setQuantity(QUANTITY);
+        newItem.setUserId(ERIC_IDENTITY_VALUE);
+        repository.save(newItem);
+
+
+        // When and then
+        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "other"))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andDo(MockMvcResultHandlers.print());
@@ -1000,6 +1082,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
@@ -1053,6 +1136,40 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Fails to create certificate item with incorrect token permission")
+    void updateCertificateItemUnauthorizedTokenPermission() throws Exception {
+
+        // Given
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
+        savedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setCompanyNumber(COMPANY_NUMBER);
+        savedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        savedItem.setDescription(DESCRIPTION);
+        savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
+
+        repository.save(savedItem);
+
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
     @DisplayName("Reports failure to find certificate item")
     void updateCertificateItemReportsFailureToFindItem() throws Exception {
 
@@ -1069,6 +1186,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isNotFound())
@@ -1091,6 +1209,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"))
                 .andExpect(status().isBadRequest());
@@ -1121,6 +1240,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1154,6 +1274,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
@@ -1206,6 +1327,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1237,6 +1359,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1268,6 +1391,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makeIncorporationCertificateTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1299,6 +1423,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1332,6 +1457,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1365,6 +1491,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1396,6 +1523,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makePostalDeliveryMethodInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1431,6 +1559,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1469,6 +1598,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1500,6 +1630,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1535,6 +1666,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1568,6 +1700,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1601,6 +1734,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
@@ -1634,6 +1768,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                 .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
                 .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                 .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
