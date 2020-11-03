@@ -2,6 +2,8 @@ package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import uk.gov.companieshouse.api.util.security.AuthorisationUtil;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
@@ -52,8 +54,8 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
     private boolean validateAPI(HttpServletRequest request, HttpServletResponse response){
         Map<String, Object> logMap = new HashMap<>();
         logMap.put(REQUEST_ID_LOG_KEY, request.getHeader(REQUEST_ID_HEADER_NAME));
-        if(GET.matches(request.getMethod())) {
-            LOGGER.info("API is permitted to view the resource", logMap);
+        if(AuthorisationUtil.hasInternalUserRole(request) && GET.matches(request.getMethod())) {
+            LOGGER.info("internal API is permitted to view the resource", logMap);
             return true;
         } else {
             logMap.put(STATUS_LOG_KEY, UNAUTHORIZED);

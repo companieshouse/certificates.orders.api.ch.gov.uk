@@ -27,6 +27,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.api.util.security.EricConstants;
+import uk.gov.companieshouse.api.util.security.SecurityConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,18 +122,29 @@ public class UserAuthorisationInterceptorTest {
     }
 
     @Test
-    @DisplayName("Authorise if GET and an API key is used")
-    public void willAuthoriseIfRequestIsGetAndAPIKey() {
-        when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
+    @DisplayName("Does not Authorise an external API key is used")
+    public void willNotAuthoriseIfRequestIsExternalAPIKey() {
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+    }
+
+    @Test
+    @DisplayName("Authorise if GET and an internal API key is used")
+    public void willAuthoriseIfRequestIsGetAndInternalAPIKey() {
+        when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
+        doReturn("request-id").when(request).getHeader("X-Request-ID");
+        doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
+        doReturn(SecurityConstants.INTERNAL_USER_ROLE).when(request).getHeader(EricConstants.ERIC_AUTHORISED_KEY_ROLES);
         assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    @DisplayName("Does not Authorise if POST and an API key is used")
-    public void willNotAuthoriseIfRequestIsPostAndAPIKey() {
+    @DisplayName("Does not Authorise if POST and an internal API key is used")
+    public void willNotAuthoriseIfRequestIsPostAndInternalAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
-        when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
+        doReturn("request-id").when(request).getHeader("X-Request-ID");
+        doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
+        doReturn(SecurityConstants.INTERNAL_USER_ROLE).when(request).getHeader(EricConstants.ERIC_AUTHORISED_KEY_ROLES);
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
