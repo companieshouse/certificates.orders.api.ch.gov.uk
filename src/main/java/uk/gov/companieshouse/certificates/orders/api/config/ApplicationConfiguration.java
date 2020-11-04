@@ -1,37 +1,45 @@
 package uk.gov.companieshouse.certificates.orders.api.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
+import uk.gov.companieshouse.api.util.security.Permission.Key;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthorisationInterceptor;
-import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
-
-import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
 @Configuration
 public class ApplicationConfiguration implements WebMvcConfigurer {
 
     @Autowired
-    private CertificateItemService certificateItemService;
+    private LoggingInterceptor loggingInterceptor;
 
-    @Bean
-    public UserAuthorisationInterceptor userAuthorisationInterceptor() {
-        return new UserAuthorisationInterceptor(certificateItemService);
-    }
+    @Autowired
+    private UserAuthenticationInterceptor userAuthenticationInterceptor;
+
+    @Autowired
+    private UserAuthorisationInterceptor userAuthorisationInterceptor;
+
+    @Autowired
+    private CRUDAuthenticationInterceptor crudPermissionsInterceptor;
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new LoggingInterceptor());
-        registry.addInterceptor(new UserAuthenticationInterceptor()).addPathPatterns("/orderable/**");
-        registry.addInterceptor(userAuthorisationInterceptor()).addPathPatterns("/orderable/certificates/**");
+        registry.addInterceptor(loggingInterceptor);
+        registry.addInterceptor(userAuthenticationInterceptor).addPathPatterns("/orderable/**");
+        registry.addInterceptor(userAuthorisationInterceptor).addPathPatterns("/orderable/certificates/**");
+        registry.addInterceptor(crudPermissionsInterceptor).addPathPatterns("/orderable/**");
     }
 
     @Bean
@@ -42,6 +50,11 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .setPropertyNamingStrategy(SNAKE_CASE)
                 .findAndRegisterModules();
+    }
+
+    @Bean
+    public CRUDAuthenticationInterceptor crudPermissionsInterceptor() {
+        return new CRUDAuthenticationInterceptor(Key.USER_ORDERS);
     }
 
 }

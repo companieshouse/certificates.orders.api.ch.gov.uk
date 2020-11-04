@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.*;
 
+@Component
 public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
 
     private final CertificateItemService service;
