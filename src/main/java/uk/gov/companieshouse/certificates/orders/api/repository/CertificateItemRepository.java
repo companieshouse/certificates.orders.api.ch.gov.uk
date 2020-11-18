@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.certificates.orders.api.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
+
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 
-@RepositoryRestResource
+@Repository
 public interface CertificateItemRepository extends MongoRepository<CertificateItem, String> { }
