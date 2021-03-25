@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
@@ -33,6 +34,7 @@ import static uk.gov.companieshouse.certificates.orders.api.environment.Required
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
@@ -41,11 +43,13 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.R
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {"ENABLE_TOKEN_PERMISSION_AUTH=1"})
 class CertificatesApiApplicationTest {
 
 	private static final String COMPANY_NUMBER = "00006400";
 	private static final String COMPANY_NOT_FOUND_ERROR =
 			"Error getting company name for company number " + COMPANY_NUMBER;
+	private static final String TOKEN_PERMISSION_VALUE = "user_orders=%s";
 
 	@MockBean
 	private CompanyService companyService;
@@ -97,12 +101,33 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isCreated();
 
 	}
+	
+    @Test
+    @DisplayName("Create rejects wrong permission")
+    void createCertificateUnauthorised() {
+
+        // Given
+        final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+
+        // When and Then
+        webTestClient.post().uri("/orderable/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromObject(newCertificateItemDTO))
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
 
 	@Test
 	@DisplayName("Create rejects missing item options")
@@ -234,6 +259,7 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
 				.body(fromObject(newCertificateItemDTO))
 				.exchange()
 				.expectStatus().isBadRequest();
@@ -324,6 +350,7 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(itemToCreate))
 				.exchange()
@@ -346,6 +373,7 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(fromObject(itemToCreate))
 				.exchange()
