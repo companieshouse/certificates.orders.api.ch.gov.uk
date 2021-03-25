@@ -28,7 +28,7 @@
 		<snakeyaml.version>1.25</snakeyaml.version>
 		<api-sdk-manager-java-library.version>1.0.2</api-sdk-manager-java-library.version>
 		<api-sdk-java.version>4.2.1</api-sdk-java.version>
-		<api-security-java.version>0.3.0</api-security-java.version>
+		<api-security-java.version>0.3.4</api-security-java.version>
 		<start-class>uk.gov.companieshouse.certificates.orders.api.CertificatesApiApplication</start-class>
 		<!-- Test -->
 		<junit-jupiter-engine-version>5.4.2</junit-jupiter-engine-version>
