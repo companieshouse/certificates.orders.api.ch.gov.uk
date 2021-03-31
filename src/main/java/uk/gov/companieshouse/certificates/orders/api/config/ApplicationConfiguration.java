@@ -37,9 +37,9 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(loggingInterceptor);
+        registry.addInterceptor(crudPermissionsInterceptor).addPathPatterns("/orderable/**");
         registry.addInterceptor(userAuthenticationInterceptor).addPathPatterns("/orderable/**");
         registry.addInterceptor(userAuthorisationInterceptor).addPathPatterns("/orderable/certificates/**");
-        registry.addInterceptor(crudPermissionsInterceptor).addPathPatterns("/orderable/**");
     }
 
     @Bean

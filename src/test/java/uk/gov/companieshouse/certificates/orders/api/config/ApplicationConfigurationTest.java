@@ -44,15 +44,15 @@ class ApplicationConfigurationTest {
         InterceptorRegistration loggingInterceptorRegistration = Mockito.mock(InterceptorRegistration.class);
         doReturn(loggingInterceptorRegistration).when(registry).addInterceptor(loggingInterceptor);
 
+        InterceptorRegistration crudPermissionInterceptorRegistration = Mockito.mock(InterceptorRegistration.class);
+        doReturn(crudPermissionInterceptorRegistration).when(registry).addInterceptor(crudPermissionInterceptor);
+
         InterceptorRegistration userAuthenticationInterceptorRegistration = Mockito.mock(InterceptorRegistration.class);
         doReturn(userAuthenticationInterceptorRegistration).when(registry)
                 .addInterceptor(userAuthenticationInterceptor);
 
         InterceptorRegistration userAuthorisationInterceptorRegistration = Mockito.mock(InterceptorRegistration.class);
         doReturn(userAuthorisationInterceptorRegistration).when(registry).addInterceptor(userAuthorisationInterceptor);
-
-        InterceptorRegistration crudPermissionInterceptorRegistration = Mockito.mock(InterceptorRegistration.class);
-        doReturn(crudPermissionInterceptorRegistration).when(registry).addInterceptor(crudPermissionInterceptor);
 
         config.addInterceptors(registry);
 
@@ -68,9 +68,9 @@ class ApplicationConfigurationTest {
 
         InOrder inOrder = Mockito.inOrder(registry);
         inOrder.verify(registry).addInterceptor(loggingInterceptor);
+        inOrder.verify(registry).addInterceptor(crudPermissionInterceptor);
         inOrder.verify(registry).addInterceptor(userAuthenticationInterceptor);
         inOrder.verify(registry).addInterceptor(userAuthorisationInterceptor);
-        inOrder.verify(registry).addInterceptor(crudPermissionInterceptor);
     }
 
 }
