@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
@@ -43,7 +42,6 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.R
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"ENABLE_TOKEN_PERMISSION_AUTH=1"})
 class CertificatesApiApplicationTest {
 
 	private static final String COMPANY_NUMBER = "00006400";
