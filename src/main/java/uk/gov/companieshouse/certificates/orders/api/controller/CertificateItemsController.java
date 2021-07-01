@@ -12,6 +12,7 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.REQUEST_ID_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.PATCHED_COMPANY_NUMBER;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,6 +108,7 @@ public class CertificateItemsController {
         logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
         logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
         logMap.put(STATUS_LOG_KEY, CREATED);
+        logMap.remove("message");
         LOGGER.infoRequest(request, "certificate item created", logMap);
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
     }
@@ -118,9 +120,11 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);        
         LOGGER.info("get certificate item request", logMap);
+        logMap.remove("message");
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItemDTO.getCompanyNumber());
             logMap.put(STATUS_LOG_KEY, OK);
             LOGGER.info("certificate item found", logMap);
             return ResponseEntity.status(OK).body(createdCertificateItemDTO);
@@ -143,6 +147,7 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);       
         LOGGER.info("update certificate item request", logMap);
+        logMap.remove("message");
 
         final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
@@ -171,6 +176,7 @@ public class CertificateItemsController {
         }
 
         final String companyName = companyService.getCompanyName(patchedItem.getCompanyNumber());
+        logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
         patchedItem.setCompanyName(companyName);
         final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
