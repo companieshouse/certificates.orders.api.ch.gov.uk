@@ -16,5 +16,6 @@ public final class LoggingConstants {
     public static final String IDENTITY_LOG_KEY = "identity";
     public static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
     public static final String PATCHED_COMPANY_NUMBER = "patched_company_number";
+    public static final String MESSAGE = "message";
 
 }

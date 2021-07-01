@@ -13,6 +13,7 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.PATCHED_COMPANY_NUMBER;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.MESSAGE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +109,7 @@ public class CertificateItemsController {
         logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
         logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
         logMap.put(STATUS_LOG_KEY, CREATED);
-        logMap.remove("message");
+        logMap.remove(MESSAGE);
         LOGGER.infoRequest(request, "certificate item created", logMap);
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
     }
@@ -120,7 +121,7 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);        
         LOGGER.info("get certificate item request", logMap);
-        logMap.remove("message");
+        logMap.remove(MESSAGE);
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
             final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
@@ -147,7 +148,7 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);       
         LOGGER.info("update certificate item request", logMap);
-        logMap.remove("message");
+        logMap.remove(MESSAGE);
 
         final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
