@@ -42,6 +42,9 @@
 		<system-rules-version>1.17.2</system-rules-version>
 		<powermock.version>2.0.6</powermock.version>
 
+		<!-- Docker -->
+		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
+
 		<!-- Spring -->
 		<spring-boot-dependencies.version>2.1.15.RELEASE</spring-boot-dependencies.version>
 		<spring-boot-maven-plugin.version>2.1.15.RELEASE</spring-boot-maven-plugin.version>
@@ -238,7 +241,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>2.7.0</version>
+				<version>${jib-maven-plugin.version}</version>
 				<configuration>
 					<extraDirectories>
 						<paths>
