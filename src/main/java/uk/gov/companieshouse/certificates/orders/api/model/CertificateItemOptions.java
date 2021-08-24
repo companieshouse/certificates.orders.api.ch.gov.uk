@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
 
@@ -34,6 +35,18 @@ public class CertificateItemOptions {
     private DirectorOrSecretaryDetails secretaryDetails;
 
     private String surname;
+
+    private DesignatedMemberDetails designatedMemberDetails;
+
+    private MemberDetails memberDetails;
+
+    private GeneralPartnerDetails generalPartnerDetails;
+
+    private LimitedPartnerDetails limitedPartnerDetails;
+
+    private PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails;
+
+    private String companyType;
 
     public CertificateType getCertificateType() {
         return certificateType;
@@ -137,6 +150,54 @@ public class CertificateItemOptions {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public DesignatedMemberDetails getDesignatedMemberDetails() {
+        return designatedMemberDetails;
+    }
+
+    public void setDesignatedMemberDetails(DesignatedMemberDetails designatedMemberDetails) {
+        this.designatedMemberDetails = designatedMemberDetails;
+    }
+
+    public MemberDetails getMemberDetails() {
+        return memberDetails;
+    }
+
+    public void setMemberDetails(MemberDetails memberDetails) {
+        this.memberDetails = memberDetails;
+    }
+
+    public GeneralPartnerDetails getGeneralPartnerDetails() {
+        return generalPartnerDetails;
+    }
+
+    public void setGeneralPartnerDetails(GeneralPartnerDetails generalPartnerDetails) {
+        this.generalPartnerDetails = generalPartnerDetails;
+    }
+
+    public LimitedPartnerDetails getLimitedPartnerDetails() {
+        return limitedPartnerDetails;
+    }
+
+    public void setLimitedPartnerDetails(LimitedPartnerDetails limitedPartnerDetails) {
+        this.limitedPartnerDetails = limitedPartnerDetails;
+    }
+
+    public PrinciplePlaceOfBusinessDetails getPrinciplePlaceOfBusinessDetails() {
+        return principlePlaceOfBusinessDetails;
+    }
+
+    public void setPrinciplePlaceOfBusinessDetails(PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails) {
+        this.principlePlaceOfBusinessDetails = principlePlaceOfBusinessDetails;
+    }
+
+    public String getCompanyType() {
+        return companyType;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
     }
 
     @Override
