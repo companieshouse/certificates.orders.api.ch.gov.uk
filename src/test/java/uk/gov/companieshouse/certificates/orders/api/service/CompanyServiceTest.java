@@ -105,6 +105,45 @@ public class CompanyServiceTest {
         assertThat(exception.getReason(), is(IOEXCEPTION_EXPECTED_REASON));
     }
 
+    @Test
+    @DisplayName("getType() Invalid URL reported as Internal Server Error (500)")
+    public void getTypeThrowsInternalServerErrorForInvalidUri() throws Exception {
+
+        // Given
+        when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
+        when(apiClient.company()).thenReturn(handler);
+        when(handler.get(anyString())).thenReturn(get);
+        when(get.execute()).thenThrow(new URIValidationException(INVALID_URI));
+
+        // When and then
+        final ResponseStatusException exception =
+                Assertions.assertThrows(ResponseStatusException.class,
+                        () -> serviceUnderTest.getType(COMPANY_NUMBER));
+        assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
+        assertThat(exception.getReason(), is(INVALID_URI_EXPECTED_REASON));
+    }
+
+    @Test
+    @DisplayName("getType() ApiErrorResponseException Internal Server Error is reported as such (500)")
+    public void getTypeInternalServerErrorApiExceptionIsPropagated() throws Exception {
+
+        final IOException ioException = new IOException(IOEXCEPTION_MESSAGE);
+
+        // Given
+        when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
+        when(apiClient.company()).thenReturn(handler);
+        when(handler.get(anyString())).thenReturn(get);
+        when(get.execute()).thenThrow(fromIOException(ioException));
+        when(apiClient.getBasePath()).thenReturn("http://host");
+
+        // When and then
+        final ResponseStatusException exception =
+                Assertions.assertThrows(ResponseStatusException.class,
+                        () -> serviceUnderTest.getType(COMPANY_NUMBER));
+        assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
+        assertThat(exception.getReason(), is(IOEXCEPTION_EXPECTED_REASON));
+    }
+
     /**
      * This is a JUnit 4 test to take advantage of PowerMock.
      * @throws Exception should something unexpected happen
