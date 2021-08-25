@@ -105,7 +105,7 @@ public class CompanyServiceIntegrationTest {
                         .withBody(objectMapper.writeValueAsString(COMPANY_PROFILE))));
 
         // When and then
-        assertThat(serviceUnderTest.getCompanyName(COMPANY_NUMBER), is(EXPECTED_COMPANY_NAME));
+        assertThat(serviceUnderTest.getCompanyProfile(COMPANY_NUMBER), is(EXPECTED_COMPANY_NAME));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class CompanyServiceIntegrationTest {
         // When and then
         final ResponseStatusException exception =
                 Assertions.assertThrows(ResponseStatusException.class,
-                        () -> serviceUnderTest.getCompanyName(COMPANY_NUMBER));
+                        () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
         assertThat(exception.getStatus(), is(BAD_REQUEST));
         assertThat(exception.getReason(), is("Error getting company name for company number 00006400"));
     }
@@ -143,7 +143,7 @@ public class CompanyServiceIntegrationTest {
         // When and then
         final ResponseStatusException exception =
                 Assertions.assertThrows(ResponseStatusException.class,
-                        () -> serviceUnderTest.getCompanyName(COMPANY_NUMBER));
+                        () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
         assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
         final String expectedReason = "Error sending request to http://localhost:"
                 + wireMockPort + "/company/" + COMPANY_NUMBER + ": Connection reset";

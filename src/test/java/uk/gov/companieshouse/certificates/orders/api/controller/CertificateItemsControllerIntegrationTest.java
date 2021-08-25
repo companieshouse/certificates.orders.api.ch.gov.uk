@@ -22,19 +22,7 @@ import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertific
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthorisationInterceptor;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
-import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
-import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
-import uk.gov.companieshouse.certificates.orders.api.model.Links;
-import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
-import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.*;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorService;
@@ -75,6 +63,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
+ * TODO: update test to capture company type
  */
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -127,6 +116,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String COMPANY_NUMBER = "00006400";
     private static final String PREVIOUS_COMPANY_NUMBER = "00006400";
     private static final String EXPECTED_COMPANY_NAME = "THE GIRLS' DAY SCHOOL TRUST";
+    private static final String EXPECTED_COMPANY_TYPE = "limited";
     private static final String PREVIOUS_COMPANY_NAME = "Phillips and Daughters";
     private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
@@ -340,7 +330,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(totalItemCost);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyName(COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
+        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         // When and Then
@@ -390,7 +380,7 @@ class CertificateItemsControllerIntegrationTest {
         assertItemSavedCorrectly(EXPECTED_ITEM_ID);
 
         verify(etagGenerator).generateEtag();
-        verify(companyService).getCompanyName(COMPANY_NUMBER);
+        verify(companyService).getCompanyProfile(COMPANY_NUMBER);
     }
 
     @Test
@@ -1070,7 +1060,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyName(UPDATED_COMPANY_NUMBER)).thenReturn(EXPECTED_COMPANY_NAME);
+        when(companyService.getCompanyProfile(UPDATED_COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
 
 
         // When and then
@@ -1130,7 +1120,7 @@ class CertificateItemsControllerIntegrationTest {
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
 
         verify(etagGenerator).generateEtag();
-        verify(companyService).getCompanyName(UPDATED_COMPANY_NUMBER);
+        verify(companyService).getCompanyProfile(UPDATED_COMPANY_NUMBER);
     }
 
     @Test

@@ -2,8 +2,8 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 import java.util.ArrayList;
@@ -24,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
@@ -33,6 +35,7 @@ import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestV
 
 /**
  * Unit tests the {@link CertificateItemsController} class.
+ * TODO: update test to capture company type
  */
 @ExtendWith(MockitoExtension.class)
 public class CertificatesItemControllerTest {
@@ -72,12 +75,23 @@ public class CertificatesItemControllerTest {
     @Mock
     private HttpServletRequest request;
 
+    @Mock
+    private CompanyProfileResource companyProfileResource;
+
+    @Mock
+    private CertificateItemOptions certificateItemOptions;
+
     @Test
     @DisplayName("Update request updates successfully")
     void updateUpdatesSuccessfully() throws Exception {
         // Given
         when(certificateItemService.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
+        when(item.getCompanyNumber()).thenReturn("12345678");
+        when(item.getItemOptions()).thenReturn(certificateItemOptions);
+        when(companyService.getCompanyProfile(anyString())).thenReturn(companyProfileResource);
+        when(companyProfileResource.getCompanyName()).thenReturn("TEST LIMITED");
+        when(companyProfileResource.getCompanyType()).thenReturn("limited");
         when(certificateItemService.saveCertificateItem(item)).thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
 
@@ -88,6 +102,7 @@ public class CertificatesItemControllerTest {
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertThat(response.getBody(), is(dto));
+        verify(companyService).getCompanyProfile("12345678");
     }
 
     @Test
@@ -150,7 +165,7 @@ public class CertificatesItemControllerTest {
     void createCertificateItemSuccessful() {
         when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(item);
         when(item.getCompanyNumber()).thenReturn("number");
-        when(companyService.getCompanyName("number")).thenReturn("name");
+        when(companyService.getCompanyProfile("number")).thenReturn(new CompanyProfileResource("name", "type"));
         when(certificateItemService.createCertificateItem(item)).thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
         

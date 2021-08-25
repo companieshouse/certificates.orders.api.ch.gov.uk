@@ -269,7 +269,7 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemReportsCompanyNotFoundAsBadRequest() {
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		when(companyService.getCompanyName(COMPANY_NUMBER)).
+		when(companyService.getCompanyProfile(COMPANY_NUMBER)).
 				thenThrow(new ResponseStatusException(BAD_REQUEST, COMPANY_NOT_FOUND_ERROR));
 
 		// When and Then

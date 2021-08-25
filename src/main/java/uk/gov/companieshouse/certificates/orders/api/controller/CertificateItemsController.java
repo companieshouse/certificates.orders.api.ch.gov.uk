@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
@@ -99,8 +100,9 @@ public class CertificateItemsController {
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         item.setUserId(EricHeaderHelper.getIdentity(request));
-        final String companyName = companyService.getCompanyName(item.getCompanyNumber());
-        item.setCompanyName(companyName);
+        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(item.getCompanyNumber());
+        item.setCompanyName(companyProfile.getCompanyName());
+        //TODO: item.getItemOptions().setCompanyType();
 
         item = certificateItemService.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
@@ -176,9 +178,10 @@ public class CertificateItemsController {
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
 
-        final String companyName = companyService.getCompanyName(patchedItem.getCompanyNumber());
+        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(patchedItem.getCompanyNumber());
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
-        patchedItem.setCompanyName(companyName);
+        patchedItem.setCompanyName(companyProfile.getCompanyName());
+        patchedItem.getItemOptions().setCompanyType(companyProfile.getCompanyType());
         final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
 
