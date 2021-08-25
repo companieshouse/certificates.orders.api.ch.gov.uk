@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * An instance of this represents the director or secretary details item options selected.
  */
-public class DirectorOrSecretaryDetails {
+public class DirectorOrSecretaryDetails implements BasicInformationIncludable, DateOfBirthIncludable {
 
     private Boolean includeAddress;
     private Boolean includeAppointmentDate;

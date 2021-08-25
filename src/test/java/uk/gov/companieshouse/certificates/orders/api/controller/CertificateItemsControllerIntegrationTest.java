@@ -1244,6 +1244,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
+        savedItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         savedItem.setItemOptions(options);
@@ -1255,6 +1256,8 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setItemOptions(options);
+
+        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)

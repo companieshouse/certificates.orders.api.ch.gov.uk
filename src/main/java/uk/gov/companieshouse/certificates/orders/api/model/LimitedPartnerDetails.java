@@ -7,11 +7,11 @@ import java.util.Objects;
 /**
  * An instance of this represents the limited partner details item options selected.
  */
-public class LimitedPartnerDetails {
+public class LimitedPartnerDetails implements BasicInformationIncludable {
 
     private Boolean includeBasicInformation;
 
-    public Boolean isIncludeBasicInformation() {
+    public Boolean getIncludeBasicInformation() {
         return includeBasicInformation;
     }
 

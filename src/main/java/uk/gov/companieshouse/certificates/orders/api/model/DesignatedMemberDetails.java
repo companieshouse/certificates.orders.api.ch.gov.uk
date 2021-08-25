@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * An instance of this represents the designated member details item options selected.
  */
-public class DesignatedMemberDetails {
+public class DesignatedMemberDetails implements BasicInformationIncludable, DateOfBirthIncludable {
 
     private Boolean includeAddress;
     private Boolean includeAppointmentDate;

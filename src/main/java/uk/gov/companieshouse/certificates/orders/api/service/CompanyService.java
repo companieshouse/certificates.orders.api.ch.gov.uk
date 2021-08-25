@@ -32,7 +32,7 @@ public class CompanyService {
     /**
      * Interrogates the company profiles API to get the company name for the company number provided.
      * @param companyNumber the number of the company
-     * @return the name for the company
+     * @return A {@link CompanyProfileResource} object containing required company profile details.
      */
     public CompanyProfileResource getCompanyProfile(final String companyNumber) {
 
@@ -50,30 +50,6 @@ public class CompanyService {
             LOGGER.error(error, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
         }
-    }
-
-    /**
-     * Interrogates the company profiles API to get the company type for the company number provided.
-     * @param companyNumber the number of the company
-     * @return the type for the company
-     */
-    public String getType(final String companyNumber) {
-        final ApiClient apiClient = apiClientService.getInternalApiClient();
-        final String uri = GET_COMPANY_URI.expand(companyNumber).toString();
-        final String type;
-
-        try {
-            type = apiClient.company().get(uri).execute().getData().getType();
-        } catch (ApiErrorResponseException ex) {
-            throw getResponseStatusException(ex, apiClient, companyNumber, uri);
-        } catch (URIValidationException ex) {
-            // Should this happen (unlikely), it is a broken contract, hence 500.
-            final String error = "Invalid URI " + uri + " for company details";
-            LOGGER.error(error, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
-        }
-
-        return type;
     }
 
     /**

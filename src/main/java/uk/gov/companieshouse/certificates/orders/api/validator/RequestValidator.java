@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
+import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.logging.Logger;
@@ -70,6 +72,11 @@ public class RequestValidator {
         }
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
         errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));
+        errors.addAll(getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details", converter));
+        errors.addAll(getValidationErrors(options.getMemberDetails(), "member_details", converter));
+        errors.addAll(getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details", converter));
+        errors.addAll(getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details", converter));
+
         return errors;
     }
 
@@ -80,7 +87,7 @@ public class RequestValidator {
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the resulting errors, which will be empty if the details are found to be valid
      */
-    List<String> getValidationErrors(final DirectorOrSecretaryDetails details,
+    List<String> getValidationErrors(final BasicInformationIncludable details,
                                      final String detailsFieldName,
                                      final FieldNameConverter converter) {
         final List<String> errors = new ArrayList<>();
@@ -99,6 +106,16 @@ public class RequestValidator {
             final String fieldList = incorrectlySetFields.toString().replace("[", "").replace("]", "");
             errors.add(detailsFieldName + ": " + fieldList + " must not be true when include_basic_information is false");
         }
+        return errors;
+    }
+
+    List<String> getValidationErrors(final DateOfBirthIncludable details, final String detailsFieldName,
+                                     final FieldNameConverter converter) {
+        List<String> errors = new ArrayList<>();
+        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
+            return errors;
+        }
+        errors = getValidationErrors((BasicInformationIncludable) details, detailsFieldName, converter);
         if (details.getIncludeDobType() != null) {
             errors.add(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false");
         }
@@ -133,7 +150,7 @@ public class RequestValidator {
      * @return whether the field value is equivalent to <code>true</code> (<code>true</code>), or not
      * (<code>false</code>)
      */
-    boolean isTrue(final Field field, final DirectorOrSecretaryDetails details) {
+    boolean isTrue(final Field field, final BasicInformationIncludable details) {
         Boolean include;
         try {
             include = (Boolean) new PropertyDescriptor(field.getName(), details.getClass())

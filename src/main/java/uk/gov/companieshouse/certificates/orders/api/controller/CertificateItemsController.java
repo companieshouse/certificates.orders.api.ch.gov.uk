@@ -102,7 +102,7 @@ public class CertificateItemsController {
         item.setUserId(EricHeaderHelper.getIdentity(request));
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(item.getCompanyNumber());
         item.setCompanyName(companyProfile.getCompanyName());
-        //TODO: item.getItemOptions().setCompanyType();
+        item.getItemOptions().setCompanyType(companyProfile.getCompanyType());
 
         item = certificateItemService.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);

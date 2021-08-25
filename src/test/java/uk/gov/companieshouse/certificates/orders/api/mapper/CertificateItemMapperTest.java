@@ -345,11 +345,11 @@ public class CertificateItemMapperTest {
     }
 
     private void assertGeneralPartnerDetailsSame(GeneralPartnerDetails details1, GeneralPartnerDetails details2) {
-        assertEquals(details1.isIncludeBasicInformation(), details2.isIncludeBasicInformation());
+        assertEquals(details1.getIncludeBasicInformation(), details2.getIncludeBasicInformation());
     }
 
     private void assertLimitedPartnerDetailsSame(LimitedPartnerDetails details1, LimitedPartnerDetails details2) {
-        assertEquals(details1.isIncludeBasicInformation(), details2.isIncludeBasicInformation());
+        assertEquals(details1.getIncludeBasicInformation(), details2.getIncludeBasicInformation());
     }
 
     private void assertPrinciplePlaceOfBusinessDetailsSame(PrinciplePlaceOfBusinessDetails details1, PrinciplePlaceOfBusinessDetails details2) {

@@ -55,6 +55,9 @@ public class CertificatesItemControllerTest {
     private CertificateItem item;
 
     @Mock
+    private CertificateItem unenrichedCertificateItem;
+
+    @Mock
     private CertificateItemDTO dto;
 
     @Mock
@@ -163,16 +166,19 @@ public class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() {
-        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(item);
-        when(item.getCompanyNumber()).thenReturn("number");
+        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(unenrichedCertificateItem);
+        when(unenrichedCertificateItem.getCompanyNumber()).thenReturn("number");
+        when(unenrichedCertificateItem.getItemOptions()).thenReturn(certificateItemOptions);
         when(companyService.getCompanyProfile("number")).thenReturn(new CompanyProfileResource("name", "type"));
-        when(certificateItemService.createCertificateItem(item)).thenReturn(item);
+        when(certificateItemService.createCertificateItem(unenrichedCertificateItem)).thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
         
         ResponseEntity<Object> response = controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
         
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
         assertThat(response.getBody(), is(dto));
+        verify(unenrichedCertificateItem).setCompanyName("name");
+        verify(certificateItemOptions).setCompanyType("type");
     }
     
     @Test

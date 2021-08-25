@@ -7,11 +7,11 @@ import java.util.Objects;
 /**
  * An instance of this represents the general partner details item options selected.
  */
-public class GeneralPartnerDetails {
+public class GeneralPartnerDetails implements BasicInformationIncludable {
 
     private Boolean includeBasicInformation;
 
-    public Boolean isIncludeBasicInformation() {
+    public Boolean getIncludeBasicInformation() {
         return includeBasicInformation;
     }
 
