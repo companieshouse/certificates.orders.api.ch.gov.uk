@@ -9,14 +9,14 @@ import java.util.Objects;
  */
 public class PrinciplePlaceOfBusinessDetails {
 
-    private String includeAddressRecordsType;
+    private IncludeAddressRecordsType includeAddressRecordsType;
     private Boolean includeDates;
 
-    public String getIncludeAddressRecordsType() {
+    public IncludeAddressRecordsType getIncludeAddressRecordsType() {
         return includeAddressRecordsType;
     }
 
-    public void setIncludeAddressRecordsType(String includeAddressRecordsType) {
+    public void setIncludeAddressRecordsType(IncludeAddressRecordsType includeAddressRecordsType) {
         this.includeAddressRecordsType = includeAddressRecordsType;
     }
 
@@ -38,7 +38,7 @@ public class PrinciplePlaceOfBusinessDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrinciplePlaceOfBusinessDetails that = (PrinciplePlaceOfBusinessDetails) o;
-        return Objects.equals(includeAddressRecordsType, that.includeAddressRecordsType) && Objects.equals(includeDates, that.includeDates);
+        return includeAddressRecordsType == that.includeAddressRecordsType && Objects.equals(includeDates, that.includeDates);
     }
 
     @Override

@@ -68,6 +68,13 @@ public class CertificateItemMapperTest {
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
 
+    private static final DesignatedMemberDetails DESIGNATED_MEMBER_DETAILS;
+    private static final MemberDetails MEMBER_DETAILS;
+    private static final GeneralPartnerDetails GENERAL_PARTNER_DETAILS;
+    private static final LimitedPartnerDetails LIMITED_PARTNER_DETAILS;
+    private static final PrinciplePlaceOfBusinessDetails PRINCIPLE_PLACE_OF_BUSINESS_DETAILS;
+    private static final String COMPANY_TYPE = "LTD";
+
     private static final CertificateType NO_DEFAULT_CERTIFICATE_TYPE = INCORPORATION_WITH_ALL_NAME_CHANGES;
     private static final DeliveryMethod NO_DEFAULT_DELIVERY_METHOD = POSTAL;
     private static final DeliveryTimescale NO_DEFAULT_DELIVERY_TIMESCALE = STANDARD;
@@ -92,6 +99,30 @@ public class CertificateItemMapperTest {
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
 
+        DESIGNATED_MEMBER_DETAILS = new DesignatedMemberDetails();
+        DESIGNATED_MEMBER_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        DESIGNATED_MEMBER_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        DESIGNATED_MEMBER_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        DESIGNATED_MEMBER_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        DESIGNATED_MEMBER_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+
+        MEMBER_DETAILS = new MemberDetails();
+        MEMBER_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
+        MEMBER_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
+        MEMBER_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+        MEMBER_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
+        MEMBER_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
+
+        GENERAL_PARTNER_DETAILS = new GeneralPartnerDetails();
+        GENERAL_PARTNER_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+
+        LIMITED_PARTNER_DETAILS = new LimitedPartnerDetails();
+        LIMITED_PARTNER_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
+
+        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS = new PrinciplePlaceOfBusinessDetails();
+        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
         ITEM_OPTIONS.setCollectionLocation(BELFAST);
@@ -106,8 +137,12 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setSurname(SURNAME);
-
-        // TODO
+        ITEM_OPTIONS.setDesignatedMemberDetails(DESIGNATED_MEMBER_DETAILS);
+        ITEM_OPTIONS.setMemberDetails(MEMBER_DETAILS);
+        ITEM_OPTIONS.setGeneralPartnerDetails(GENERAL_PARTNER_DETAILS);
+        ITEM_OPTIONS.setLimitedPartnerDetails(LIMITED_PARTNER_DETAILS);
+        ITEM_OPTIONS.setPrinciplePlaceOfBusinessDetails(PRINCIPLE_PLACE_OF_BUSINESS_DETAILS);
+        ITEM_OPTIONS.setCompanyType(COMPANY_TYPE);
 
         ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptions();
 
