@@ -107,6 +107,8 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         ITEM_OPTIONS.setSurname(SURNAME);
 
+        // TODO
+
         ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptions();
 
         ITEM_COSTS = new ArrayList<>();
@@ -234,6 +236,14 @@ public class CertificateItemMapperTest {
         assertAddressDetailsSame(options1.getRegisteredOfficeAddressDetails(), options2.getRegisteredOfficeAddressDetails());
         assertDetailsSame(options1.getSecretaryDetails(), options2.getSecretaryDetails());
         assertThat(options1.getSurname(), is(options2.getSurname()));
+
+        // New LLP and LP options
+        assertDesignatedMembersDetailsSame(options1.getDesignatedMemberDetails(), options2.getDesignatedMemberDetails());
+        assertMembersDetailsSame(options1.getMemberDetails(), options2.getMemberDetails());
+        assertGeneralPartnerDetailsSame(options1.getGeneralPartnerDetails(), options2.getGeneralPartnerDetails());
+        assertLimitedPartnerDetailsSame(options1.getLimitedPartnerDetails(), options2.getLimitedPartnerDetails());
+        assertPrinciplePlaceOfBusinessDetailsSame(options1.getPrinciplePlaceOfBusinessDetails(), options2.getPrinciplePlaceOfBusinessDetails());
+        assertThat(options1.getCompanyType(), is(options2.getCompanyType()));
     }
 
     /**
@@ -280,5 +290,35 @@ public class CertificateItemMapperTest {
         dto.setPostageCost(POSTAGE_COST);
         dto.setTotalItemCost(TOTAL_ITEM_COST);
         return dto;
+    }
+
+    // Helper methods for assertions on LP and LLP details
+    private void assertDesignatedMembersDetailsSame(DesignatedMemberDetails details1, DesignatedMemberDetails details2) {
+        assertThat(details1.getIncludeAddress(), is(details2.getIncludeAddress()));
+        assertThat(details1.getIncludeAppointmentDate(), is(details2.getIncludeAppointmentDate()));
+        assertThat(details1.getIncludeBasicInformation(), is(details2.getIncludeBasicInformation()));
+        assertThat(details1.getIncludeCountryOfResidence(), is(details2.getIncludeCountryOfResidence()));
+        assertThat(details1.getIncludeDobType(), is(details2.getIncludeDobType()));
+    }
+
+    private void assertMembersDetailsSame(MemberDetails details1, MemberDetails details2) {
+        assertThat(details1.getIncludeAddress(), is(details2.getIncludeAddress()));
+        assertThat(details1.getIncludeAppointmentDate(), is(details2.getIncludeAppointmentDate()));
+        assertThat(details1.getIncludeBasicInformation(), is(details2.getIncludeBasicInformation()));
+        assertThat(details1.getIncludeCountryOfResidence(), is(details2.getIncludeCountryOfResidence()));
+        assertThat(details1.getIncludeDobType(), is(details2.getIncludeDobType()));
+    }
+
+    private void assertGeneralPartnerDetailsSame(GeneralPartnerDetails details1, GeneralPartnerDetails details2) {
+        assertEquals(details1.isIncludeBasicInformation(), details2.isIncludeBasicInformation());
+    }
+
+    private void assertLimitedPartnerDetailsSame(LimitedPartnerDetails details1, LimitedPartnerDetails details2) {
+        assertEquals(details1.isIncludeBasicInformation(), details2.isIncludeBasicInformation());
+    }
+
+    private void assertPrinciplePlaceOfBusinessDetailsSame(PrinciplePlaceOfBusinessDetails details1, PrinciplePlaceOfBusinessDetails details2) {
+        assertThat(details1.getIncludeAddressRecordsType(), is(details2.getIncludeAddressRecordsType()));
+        assertEquals(details1.isIncludeDates(), details2.isIncludeDates());
     }
 }
