@@ -28,6 +28,8 @@ import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimesc
 public class RequestValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
+    private static final String LIMITED_PARTNERSHIP_TYPE = "limited-partnership";
+    private static final String LLP_TYPE = "llp";
 
     /**
      * Validates the options provided, returning any errors found.
@@ -65,11 +67,30 @@ public class RequestValidator {
                 errors.add(
                     "include_director_details: must not exist when certificate type is dissolution");
             }
+            if(options.getDesignatedMemberDetails() != null) {
+                errors.add("include_designated_member_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getMemberDetails() != null) {
+                errors.add("include_member_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getGeneralPartnerDetails() != null) {
+                errors.add("include_general_partner_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getLimitedPartnerDetails() != null) {
+                errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getPrinciplePlaceOfBusinessDetails() != null) {
+                errors.add("include_principle_place_of_business_details: must not exist when certificate type is dissolution");
+            }
         }
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
+
+        validateLlpOptions(options, errors);
+        validateLimitedPartnershipOptions(options, errors);
+
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
         errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));
         errors.addAll(getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details", converter));
@@ -161,6 +182,39 @@ public class RequestValidator {
             include = null;
         }
         return TRUE.equals(include);
+    }
+
+    private void validateLimitedPartnershipOptions(CertificateItemOptions options, List<String> errors) {
+        if(options.getGeneralPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_general_partner_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getLimitedPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_limited_partner_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getPrinciplePlaceOfBusinessDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_principle_place_of_business_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getDirectorDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_director_details: must not exist when company type is limited-partnership");
+        }
+        if(options.getSecretaryDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_secretary_details: must not exist when company type is limited-partnership");
+        }
+    }
+
+    private void validateLlpOptions(CertificateItemOptions options, List<String> errors) {
+        if(options.getDesignatedMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_designated_member_details: must not exist when company type is not llp");
+        }
+        if(options.getMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_member_details: must not exist when company type is not llp");
+        }
+        if(options.getDirectorDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_director_details: must not exist when company type is llp");
+        }
+        if(options.getSecretaryDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_secretary_details: must not exist when company type is llp");
+        }
     }
 
 }

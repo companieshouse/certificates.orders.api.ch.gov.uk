@@ -4,11 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
-import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.*;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.List;
@@ -140,6 +136,11 @@ class CreateItemRequestValidatorTest {
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setMemberDetails(new MemberDetails());
+        options.setDesignatedMemberDetails(new DesignatedMemberDetails());
+        options.setGeneralPartnerDetails(new GeneralPartnerDetails());
+        options.setLimitedPartnerDetails(new LimitedPartnerDetails());
+        options.setPrinciplePlaceOfBusinessDetails(new PrinciplePlaceOfBusinessDetails());
         item.setItemOptions(options);
 
         // When
@@ -151,7 +152,17 @@ class CreateItemRequestValidatorTest {
             "include_good_standing_information: must not exist when certificate type is dissolution",
             "include_registered_office_address_details: must not exist when certificate type is dissolution",
             "include_secretary_details: must not exist when certificate type is dissolution",
-            "include_director_details: must not exist when certificate type is dissolution"));
+            "include_director_details: must not exist when certificate type is dissolution",
+            "include_member_details: must not exist when certificate type is dissolution",
+            "include_designated_member_details: must not exist when certificate type is dissolution",
+            "include_general_partner_details: must not exist when certificate type is dissolution",
+            "include_limited_partner_details: must not exist when certificate type is dissolution",
+            "include_principle_place_of_business_details: must not exist when certificate type is dissolution",
+            "include_member_details: must not exist when company type is not llp",
+            "include_designated_member_details: must not exist when company type is not llp",
+            "include_general_partner_details: must not exist when company type is not limited-partnership",
+            "include_limited_partner_details: must not exist when company type is not limited-partnership",
+            "include_principle_place_of_business_details: must not exist when company type is not limited-partnership"));
     }
 
     @Test
@@ -214,14 +225,27 @@ class CreateItemRequestValidatorTest {
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
+        final DesignatedMemberDetails designatedMemberDetails = new DesignatedMemberDetails();
+        final MemberDetails memberDetails = new MemberDetails();
         details.setIncludeAddress(true);
         details.setIncludeAppointmentDate(true);
         details.setIncludeCountryOfResidence(true);
         details.setIncludeDobType(PARTIAL);
         details.setIncludeNationality(true);
         details.setIncludeOccupation(true);
+        designatedMemberDetails.setIncludeAddress(true);
+        designatedMemberDetails.setIncludeAppointmentDate(true);
+        designatedMemberDetails.setIncludeCountryOfResidence(true);
+        designatedMemberDetails.setIncludeDobType(PARTIAL);
+        memberDetails.setIncludeAddress(true);
+        memberDetails.setIncludeAppointmentDate(true);
+        memberDetails.setIncludeCountryOfResidence(true);
+        memberDetails.setIncludeDobType(PARTIAL);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setDesignatedMemberDetails(designatedMemberDetails);
+        options.setMemberDetails(memberDetails);
+        options.setCompanyType("limited");
         item.setItemOptions(options);
 
         // When
@@ -229,6 +253,8 @@ class CreateItemRequestValidatorTest {
 
         // Then
         assertThat(errors, contains(
+                "include_designated_member_details: must not exist when company type is not llp",
+                "include_member_details: must not exist when company type is not llp",
                 "director_details: include_address, include_appointment_date, include_country_of_residence,"
                         + " include_nationality, include_occupation must not be true when include_basic_information"
                         + " is false",
@@ -236,7 +262,15 @@ class CreateItemRequestValidatorTest {
                 "secretary_details: include_address, include_appointment_date, include_country_of_residence,"
                         + " include_nationality, include_occupation must not be true when include_basic_information"
                         + " is false",
-                "secretary_details: include_dob_type must not be non-null when include_basic_information is false"));
+                "secretary_details: include_dob_type must not be non-null when include_basic_information is false",
+                "designated_member_details: include_address, include_appointment_date, include_country_of_residence"
+                        + " must not be true when include_basic_information"
+                        + " is false",
+                "designated_member_details: include_dob_type must not be non-null when include_basic_information is false",
+                "member_details: include_address, include_appointment_date, include_country_of_residence"
+                        + " must not be true when include_basic_information"
+                        + " is false",
+                "member_details: include_dob_type must not be non-null when include_basic_information is false"));
     }
 
     @Test
@@ -261,6 +295,62 @@ class CreateItemRequestValidatorTest {
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
 
         // Then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Request is valid if company type is llp and appropriate fields set")
+    void allowMembersAndDesignatedMembersFieldValuesForLlps() {
+        //given
+        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final CertificateItemOptions itemOptions = new CertificateItemOptions();
+        final MemberDetails memberDetails = new MemberDetails();
+        final DesignatedMemberDetails designatedMemberDetails = new DesignatedMemberDetails();
+        memberDetails.setIncludeAddress(true);
+        memberDetails.setIncludeDobType(INCLUDE_DOB_TYPE);
+        memberDetails.setIncludeAppointmentDate(true);
+        memberDetails.setIncludeCountryOfResidence(true);
+        memberDetails.setIncludeBasicInformation(true);
+        designatedMemberDetails.setIncludeAddress(true);
+        designatedMemberDetails.setIncludeDobType(INCLUDE_DOB_TYPE);
+        designatedMemberDetails.setIncludeAppointmentDate(true);
+        designatedMemberDetails.setIncludeCountryOfResidence(true);
+        designatedMemberDetails.setIncludeBasicInformation(true);
+        itemOptions.setMemberDetails(memberDetails);
+        itemOptions.setDesignatedMemberDetails(designatedMemberDetails);
+        itemOptions.setCompanyType("llp");
+        certificateItemDTO.setItemOptions(itemOptions);
+
+        //when
+        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+
+        //then
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Request is valid if company type is limited-partnership and appropriate fields set")
+    void allowGeneralPartnersLimitedPartnersPrinciplePlaceOfBusinessFieldValuesForLimitedPartnerships() {
+        //given
+        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final CertificateItemOptions itemOptions = new CertificateItemOptions();
+        final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
+        final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
+        final PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails = new PrinciplePlaceOfBusinessDetails();
+        generalPartnerDetails.setIncludeBasicInformation(true);
+        limitedPartnerDetails.setIncludeBasicInformation(true);
+        principlePlaceOfBusinessDetails.setIncludeDates(true);
+        principlePlaceOfBusinessDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        itemOptions.setGeneralPartnerDetails(generalPartnerDetails);
+        itemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
+        itemOptions.setPrinciplePlaceOfBusinessDetails(principlePlaceOfBusinessDetails);
+        itemOptions.setCompanyType("limited-partnership");
+        certificateItemDTO.setItemOptions(itemOptions);
+
+        //when
+        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+
+        //then
         assertThat(errors, is(empty()));
     }
 
@@ -316,5 +406,49 @@ class CreateItemRequestValidatorTest {
 
         // Then
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Request is invalid if directors' or secretaries' details specified for an llp")
+    void rejectDirectorsOrSecretariesDetailsIfSpecifiedForLlp() {
+        //given
+        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        certificateItemOptions.setCompanyType("llp");
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemDTO.setItemOptions(certificateItemOptions);
+
+        //when
+        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+
+        //then
+        assertThat(errors, contains(
+                "include_director_details: must not exist when company type is llp",
+                "include_secretary_details: must not exist when company type is llp"
+        ));
+    }
+
+    @Test
+    @DisplayName("Request is invalid if directors' or secretaries' details specified for an limited-partnership")
+    void rejectDirectorsOrSecretariesDetailsIfSpecifiedForLimitedPartnership() {
+        //given
+        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        certificateItemOptions.setCompanyType("limited-partnership");
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemDTO.setItemOptions(certificateItemOptions);
+
+        //when
+        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+
+        //then
+        assertThat(errors, contains(
+                "include_director_details: must not exist when company type is limited-partnership",
+                "include_secretary_details: must not exist when company type is limited-partnership"
+        ));
     }
 }
