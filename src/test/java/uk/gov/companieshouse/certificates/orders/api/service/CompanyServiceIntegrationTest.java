@@ -15,6 +15,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 
 import java.util.List;
 
@@ -40,6 +41,8 @@ public class CompanyServiceIntegrationTest {
 
     private static final String COMPANY_NUMBER = "00006400";
     private static final String EXPECTED_COMPANY_NAME = "THE GIRLS' DAY SCHOOL TRUST";
+    public static final String EXPECTED_COMPANY_TYPE = "limited";
+
 
     private static final CompanyProfileApi COMPANY_PROFILE;
 
@@ -77,9 +80,11 @@ public class CompanyServiceIntegrationTest {
     private static final CompanyProfileApiErrorResponsePayload COMPANY_NOT_FOUND =
             new CompanyProfileApiErrorResponsePayload(singletonList(new Error("ch:service", "company-profile-not-found")));
 
+
     static {
         COMPANY_PROFILE = new CompanyProfileApi();
         COMPANY_PROFILE.setCompanyName(EXPECTED_COMPANY_NAME);
+        COMPANY_PROFILE.setType(EXPECTED_COMPANY_TYPE);
     }
 
     @Autowired
@@ -92,9 +97,10 @@ public class CompanyServiceIntegrationTest {
     private Environment environment;
 
     @Test
-    public void getCompanyNameGetsNameSuccessfully () throws JsonProcessingException {
+    public void getCompanyProfileReturnsSuccessfully () throws JsonProcessingException {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
+        final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource("THE GIRLS' DAY SCHOOL TRUST", "limited");
 
         // Given
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");
@@ -104,8 +110,9 @@ public class CompanyServiceIntegrationTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(COMPANY_PROFILE))));
 
+        CompanyProfileResource profileResource = serviceUnderTest.getCompanyProfile(COMPANY_NUMBER);
         // When and then
-        assertThat(serviceUnderTest.getCompanyProfile(COMPANY_NUMBER), is(EXPECTED_COMPANY_NAME));
+        assertThat(profileResource, is(expectedCompanyProfile));
     }
 
     @Test

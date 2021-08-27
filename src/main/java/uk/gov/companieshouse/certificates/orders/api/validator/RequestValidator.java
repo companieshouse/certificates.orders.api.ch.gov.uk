@@ -4,7 +4,6 @@ import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;

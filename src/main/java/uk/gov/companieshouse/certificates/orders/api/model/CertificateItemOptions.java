@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
 

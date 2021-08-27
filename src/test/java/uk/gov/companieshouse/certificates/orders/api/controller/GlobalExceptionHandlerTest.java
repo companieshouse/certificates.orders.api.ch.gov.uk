@@ -20,7 +20,6 @@ import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.HttpStatus.MULTI_STATUS;
