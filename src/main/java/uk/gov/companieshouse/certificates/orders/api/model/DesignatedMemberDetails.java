@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
- * An instance of this represents the designated member details item options selected.
+ * The designated details item options that have been selected.
  */
 public class DesignatedMemberDetails implements BasicInformationIncludable, DateOfBirthIncludable {
 
@@ -62,8 +62,12 @@ public class DesignatedMemberDetails implements BasicInformationIncludable, Date
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         DesignatedMemberDetails that = (DesignatedMemberDetails) o;
         return Objects.equals(includeAddress, that.includeAddress) && Objects.equals(includeAppointmentDate, that.includeAppointmentDate) && Objects.equals(includeBasicInformation, that.includeBasicInformation) && Objects.equals(includeCountryOfResidence, that.includeCountryOfResidence) && includeDobType == that.includeDobType;
     }

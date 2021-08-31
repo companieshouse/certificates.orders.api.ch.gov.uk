@@ -26,8 +26,12 @@ public class LimitedPartnerDetails implements BasicInformationIncludable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         LimitedPartnerDetails that = (LimitedPartnerDetails) o;
         return Objects.equals(includeBasicInformation, that.includeBasicInformation);
     }

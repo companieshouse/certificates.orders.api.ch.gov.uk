@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
- * An instance of this represents the member details item options selected.
+ * The member detail item options that have been selected.
  */
 public class MemberDetails implements BasicInformationIncludable, DateOfBirthIncludable {
 
@@ -63,8 +63,12 @@ public class MemberDetails implements BasicInformationIncludable, DateOfBirthInc
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MemberDetails that = (MemberDetails) o;
         return Objects.equals(includeAddress, that.includeAddress) && Objects.equals(includeAppointmentDate, that.includeAppointmentDate) && Objects.equals(includeBasicInformation, that.includeBasicInformation) && Objects.equals(includeCountryOfResidence, that.includeCountryOfResidence) && includeDobType == that.includeDobType;
     }
