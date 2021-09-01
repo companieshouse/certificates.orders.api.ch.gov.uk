@@ -128,6 +128,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final String COMPANY_NUMBER = "00006400";
     private static final String PREVIOUS_COMPANY_NUMBER = "00006400";
+    private static final String PREVIOUS_COMPANY_TYPE = "llp";
     private static final String EXPECTED_COMPANY_NAME = "THE GIRLS' DAY SCHOOL TRUST";
     private static final String EXPECTED_COMPANY_TYPE = "limited";
     private static final String PREVIOUS_COMPANY_NAME = "Phillips and Daughters";
@@ -308,6 +309,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setCompanyType(EXPECTED_COMPANY_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
@@ -360,6 +362,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.company_name", is(EXPECTED_COMPANY_NAME)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.company_type", is(EXPECTED_COMPANY_TYPE)))
                 .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
@@ -1019,6 +1022,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
+        options.setCompanyType(PREVIOUS_COMPANY_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
@@ -1039,6 +1043,7 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setCompanyNumber(COMPANY_NUMBER);
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
+        options.setCompanyType(EXPECTED_COMPANY_TYPE);
         options.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
         options.setContactNumber(UPDATED_CONTACT_NUMBER);
         options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
@@ -1099,6 +1104,7 @@ class CertificateItemsControllerIntegrationTest {
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
                 is(UPDATED_CERTIFICATE_TYPE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyType(), is(EXPECTED_COMPANY_TYPE));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCollectionLocation(),
                 is(UPDATED_COLLECTION_LOCATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getContactNumber(),

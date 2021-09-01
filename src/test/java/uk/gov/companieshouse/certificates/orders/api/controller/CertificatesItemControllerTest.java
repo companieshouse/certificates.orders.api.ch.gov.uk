@@ -37,7 +37,6 @@ import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestV
 
 /**
  * Unit tests the {@link CertificateItemsController} class.
- * TODO: update test to capture company type
  */
 @ExtendWith(MockitoExtension.class)
 public class CertificatesItemControllerTest {
