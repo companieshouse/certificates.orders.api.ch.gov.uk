@@ -76,7 +76,6 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
- * TODO: update test to capture company type
  */
 @AutoConfigureMockMvc
 @SpringBootTest
