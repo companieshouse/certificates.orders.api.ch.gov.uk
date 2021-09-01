@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
- * An instance of this represents the general partner details item options selected.
+ * The general partner details item options that have been selected.
  */
 public class GeneralPartnerDetails implements BasicInformationIncludable {
 
