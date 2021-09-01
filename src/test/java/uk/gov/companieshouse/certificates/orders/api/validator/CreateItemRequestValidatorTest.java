@@ -131,9 +131,9 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
+    @DisplayName("Company objects, general nature of business information, good standing, registered office details, secretary details or director details" +
         "should not be requested for dissolution")
-    void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
+    void certainCompanyObjectsMustNotBeRequestedForDissolution() {
         // Given
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
@@ -142,6 +142,7 @@ class CreateItemRequestValidatorTest {
         options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setGeneralNatureOfBusinessInformation(true);
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
@@ -159,6 +160,7 @@ class CreateItemRequestValidatorTest {
         assertThat(errors, containsInAnyOrder(
             "include_company_objects_information: must not exist when certificate type is dissolution",
             "include_good_standing_information: must not exist when certificate type is dissolution",
+            "include_general_nature_of_business_information: must not exist when certificate type is dissolution",
             "include_registered_office_address_details: must not exist when certificate type is dissolution",
             "include_secretary_details: must not exist when certificate type is dissolution",
             "include_director_details: must not exist when certificate type is dissolution",
@@ -171,7 +173,8 @@ class CreateItemRequestValidatorTest {
             "include_designated_member_details: must not exist when company type is not llp",
             "include_general_partner_details: must not exist when company type is not limited-partnership",
             "include_limited_partner_details: must not exist when company type is not limited-partnership",
-            "include_principle_place_of_business_details: must not exist when company type is not limited-partnership"));
+            "include_principle_place_of_business_details: must not exist when company type is not limited-partnership",
+            "include_general_nature_of_business_information: must not exist when company type is not limited-partnership"));
     }
 
     @Test
@@ -339,7 +342,7 @@ class CreateItemRequestValidatorTest {
 
     @Test
     @DisplayName("Request is valid if company type is limited-partnership and appropriate fields set")
-    void allowGeneralPartnersLimitedPartnersPrinciplePlaceOfBusinessFieldValuesForLimitedPartnerships() {
+    void allowGeneralPartnersLimitedPartnersPrinciplePlaceOfBusinessGeneralNatureOfBusinessInformationFieldValuesForLimitedPartnerships() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
@@ -353,6 +356,7 @@ class CreateItemRequestValidatorTest {
         itemOptions.setGeneralPartnerDetails(generalPartnerDetails);
         itemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
         itemOptions.setPrinciplePlaceOfBusinessDetails(principlePlaceOfBusinessDetails);
+        itemOptions.setGeneralNatureOfBusinessInformation(true);
         itemOptions.setCompanyType("limited-partnership");
         certificateItemDTO.setItemOptions(itemOptions);
 
