@@ -35,8 +35,12 @@ public class PrinciplePlaceOfBusinessDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         PrinciplePlaceOfBusinessDetails that = (PrinciplePlaceOfBusinessDetails) o;
         return includeAddressRecordsType == that.includeAddressRecordsType && Objects.equals(includeDates, that.includeDates);
     }
