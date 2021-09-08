@@ -45,6 +45,8 @@ public class CertificateItemOptions {
 
     private PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails;
 
+    private Boolean includeGeneralNatureOfBusinessInformation;
+
     private String companyType;
 
     public CertificateType getCertificateType() {
@@ -189,6 +191,14 @@ public class CertificateItemOptions {
 
     public void setPrinciplePlaceOfBusinessDetails(PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails) {
         this.principlePlaceOfBusinessDetails = principlePlaceOfBusinessDetails;
+    }
+
+    public Boolean getIncludeGeneralNatureOfBusinessInformation() {
+        return includeGeneralNatureOfBusinessInformation;
+    }
+
+    public void setIncludeGeneralNatureOfBusinessInformation(Boolean includeGeneralNatureOfBusinessInformation) {
+        this.includeGeneralNatureOfBusinessInformation = includeGeneralNatureOfBusinessInformation;
     }
 
     public String getCompanyType() {
