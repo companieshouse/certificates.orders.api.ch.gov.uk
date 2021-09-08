@@ -12,7 +12,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
-import uk.gov.companieshouse.certificates.orders.api.model.*;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
+import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
+import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.TestMergePatchFactory;
 

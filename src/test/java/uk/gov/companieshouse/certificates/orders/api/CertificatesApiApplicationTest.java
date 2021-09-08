@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 
@@ -92,6 +93,7 @@ class CertificatesApiApplicationTest {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		when(companyService.getCompanyProfile("00006400")).thenReturn(new CompanyProfileResource("name", "type"));
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -269,7 +271,7 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemReportsCompanyNotFoundAsBadRequest() {
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		when(companyService.getCompanyName(COMPANY_NUMBER)).
+		when(companyService.getCompanyProfile(COMPANY_NUMBER)).
 				thenThrow(new ResponseStatusException(BAD_REQUEST, COMPANY_NOT_FOUND_ERROR));
 
 		// When and Then

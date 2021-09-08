@@ -10,13 +10,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
-import uk.gov.companieshouse.certificates.orders.api.model.*;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
+import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
+import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
+import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.INCORPORATION;
 import static uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation.BELFAST;
 import static uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation.CARDIFF;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
@@ -53,6 +61,7 @@ class PatchMergerTest {
         }
     }
 
+    private static final CertificateType CERTIFICATE_TYPE = CertificateType.INCORPORATION;
     private static final String ORIGINAL_COMPANY_NUMBER = "1234";
     private static final String CORRECTED_COMPANY_NUMBER = "1235";
     private static final boolean ORIGINAL_POSTAL_DELIVERY = true;
@@ -60,7 +69,6 @@ class PatchMergerTest {
     private static final int ORIGINAL_QUANTITY = 20;
     private static final int CORRECTED_QUANTITY = 2;
 
-    private static final CertificateType CERTIFICATE_TYPE = INCORPORATION;
     private static final CollectionLocation COLLECTION_LOCATION = BELFAST;
     private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CARDIFF;
     private static final String CONTACT_NUMBER = "+44 1234 123456";

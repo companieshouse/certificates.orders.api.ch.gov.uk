@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
 
 @ExtendWith(MockitoExtension.class)

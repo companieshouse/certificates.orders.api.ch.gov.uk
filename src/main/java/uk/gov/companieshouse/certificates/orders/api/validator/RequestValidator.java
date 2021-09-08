@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
+import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -26,6 +27,8 @@ import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimesc
 public class RequestValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
+    private static final String LIMITED_PARTNERSHIP_TYPE = "limited-partnership";
+    private static final String LLP_TYPE = "llp";
 
     /**
      * Validates the options provided, returning any errors found.
@@ -63,13 +66,37 @@ public class RequestValidator {
                 errors.add(
                     "include_director_details: must not exist when certificate type is dissolution");
             }
+            if(options.getDesignatedMemberDetails() != null) {
+                errors.add("include_designated_member_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getMemberDetails() != null) {
+                errors.add("include_member_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getGeneralPartnerDetails() != null) {
+                errors.add("include_general_partner_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getLimitedPartnerDetails() != null) {
+                errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
+            }
+            if(options.getPrinciplePlaceOfBusinessDetails() != null) {
+                errors.add("include_principle_place_of_business_details: must not exist when certificate type is dissolution");
+            }
         }
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
+
+        validateLlpOptions(options, errors);
+        validateLimitedPartnershipOptions(options, errors);
+
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
         errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));
+        errors.addAll(getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details", converter));
+        errors.addAll(getValidationErrors(options.getMemberDetails(), "member_details", converter));
+        errors.addAll(getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details", converter));
+        errors.addAll(getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details", converter));
+
         return errors;
     }
 
@@ -80,7 +107,7 @@ public class RequestValidator {
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the resulting errors, which will be empty if the details are found to be valid
      */
-    List<String> getValidationErrors(final DirectorOrSecretaryDetails details,
+    List<String> getValidationErrors(final BasicInformationIncludable details,
                                      final String detailsFieldName,
                                      final FieldNameConverter converter) {
         final List<String> errors = new ArrayList<>();
@@ -99,6 +126,16 @@ public class RequestValidator {
             final String fieldList = incorrectlySetFields.toString().replace("[", "").replace("]", "");
             errors.add(detailsFieldName + ": " + fieldList + " must not be true when include_basic_information is false");
         }
+        return errors;
+    }
+
+    List<String> getValidationErrors(final DateOfBirthIncludable details, final String detailsFieldName,
+                                     final FieldNameConverter converter) {
+        List<String> errors = new ArrayList<>();
+        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
+            return errors;
+        }
+        errors = getValidationErrors((BasicInformationIncludable) details, detailsFieldName, converter);
         if (details.getIncludeDobType() != null) {
             errors.add(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false");
         }
@@ -133,7 +170,7 @@ public class RequestValidator {
      * @return whether the field value is equivalent to <code>true</code> (<code>true</code>), or not
      * (<code>false</code>)
      */
-    boolean isTrue(final Field field, final DirectorOrSecretaryDetails details) {
+    boolean isTrue(final Field field, final BasicInformationIncludable details) {
         Boolean include;
         try {
             include = (Boolean) new PropertyDescriptor(field.getName(), details.getClass())
@@ -144,6 +181,39 @@ public class RequestValidator {
             include = null;
         }
         return TRUE.equals(include);
+    }
+
+    private void validateLimitedPartnershipOptions(CertificateItemOptions options, List<String> errors) {
+        if(options.getGeneralPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_general_partner_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getLimitedPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_limited_partner_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getPrinciplePlaceOfBusinessDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_principle_place_of_business_details: must not exist when company type is not limited-partnership");
+        }
+        if(options.getDirectorDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_director_details: must not exist when company type is limited-partnership");
+        }
+        if(options.getSecretaryDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_secretary_details: must not exist when company type is limited-partnership");
+        }
+    }
+
+    private void validateLlpOptions(CertificateItemOptions options, List<String> errors) {
+        if(options.getDesignatedMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_designated_member_details: must not exist when company type is not llp");
+        }
+        if(options.getMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_member_details: must not exist when company type is not llp");
+        }
+        if(options.getDirectorDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_director_details: must not exist when company type is llp");
+        }
+        if(options.getSecretaryDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
+            errors.add("include_secretary_details: must not exist when company type is llp");
+        }
     }
 
 }

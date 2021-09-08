@@ -7,6 +7,8 @@ import org.springframework.web.util.UriTemplate;
 import uk.gov.companieshouse.api.ApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -30,16 +32,16 @@ public class CompanyService {
     /**
      * Interrogates the company profiles API to get the company name for the company number provided.
      * @param companyNumber the number of the company
-     * @return the name for the company
+     * @return A {@link CompanyProfileResource} object containing required company profile details.
      */
-    public String getCompanyName(final String companyNumber) {
+    public CompanyProfileResource getCompanyProfile(final String companyNumber) {
 
         final ApiClient apiClient = apiClientService.getInternalApiClient();
         final String uri = GET_COMPANY_URI.expand(companyNumber).toString();
-        final String companyName;
 
         try {
-            companyName = apiClient.company().get(uri).execute().getData().getCompanyName();
+            CompanyProfileApi companyProfile = apiClient.company().get(uri).execute().getData();
+            return new CompanyProfileResource(companyProfile.getCompanyName(), companyProfile.getType());
         } catch (ApiErrorResponseException ex) {
             throw getResponseStatusException(ex, apiClient, companyNumber, uri);
         } catch (URIValidationException ex) {
@@ -48,8 +50,6 @@ public class CompanyService {
             LOGGER.error(error, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
         }
-
-        return companyName;
     }
 
     /**
