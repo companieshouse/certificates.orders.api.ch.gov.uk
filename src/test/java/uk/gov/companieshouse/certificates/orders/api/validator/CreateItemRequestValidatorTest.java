@@ -142,7 +142,7 @@ class CreateItemRequestValidatorTest {
         options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
-        options.setGeneralNatureOfBusinessInformation(true);
+        options.setIncludeGeneralNatureOfBusinessInformation(true);
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
@@ -356,7 +356,7 @@ class CreateItemRequestValidatorTest {
         itemOptions.setGeneralPartnerDetails(generalPartnerDetails);
         itemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
         itemOptions.setPrinciplePlaceOfBusinessDetails(principlePlaceOfBusinessDetails);
-        itemOptions.setGeneralNatureOfBusinessInformation(true);
+        itemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         itemOptions.setCompanyType("limited-partnership");
         certificateItemDTO.setItemOptions(itemOptions);
 

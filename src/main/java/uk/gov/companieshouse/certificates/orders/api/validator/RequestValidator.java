@@ -50,7 +50,7 @@ public class RequestValidator {
                 errors.add(
                     "include_company_objects_information: must not exist when certificate type is dissolution");
             }
-            if (options.getGeneralNatureOfBusinessInformation() != null) {
+            if (options.getIncludeGeneralNatureOfBusinessInformation() != null) {
                 errors.add(
                     "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
             }
@@ -203,7 +203,7 @@ public class RequestValidator {
         if(options.getSecretaryDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
             errors.add("include_secretary_details: must not exist when company type is limited-partnership");
         }
-        if(options.getGeneralNatureOfBusinessInformation() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+        if(options.getIncludeGeneralNatureOfBusinessInformation() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
             errors.add("include_general_nature_of_business_information: must not exist when company type is not limited-partnership");
         }
     }

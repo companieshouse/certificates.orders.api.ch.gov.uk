@@ -157,7 +157,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setGeneralPartnerDetails(GENERAL_PARTNER_DETAILS);
         ITEM_OPTIONS.setLimitedPartnerDetails(LIMITED_PARTNER_DETAILS);
         ITEM_OPTIONS.setPrinciplePlaceOfBusinessDetails(PRINCIPLE_PLACE_OF_BUSINESS_DETAILS);
-        ITEM_OPTIONS.setGeneralNatureOfBusinessInformation(INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS);
+        ITEM_OPTIONS.setIncludeGeneralNatureOfBusinessInformation(INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS);
         ITEM_OPTIONS.setCompanyType(COMPANY_TYPE);
 
         ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptions();
@@ -294,7 +294,7 @@ public class CertificateItemMapperTest {
         assertGeneralPartnerDetailsSame(options1.getGeneralPartnerDetails(), options2.getGeneralPartnerDetails());
         assertLimitedPartnerDetailsSame(options1.getLimitedPartnerDetails(), options2.getLimitedPartnerDetails());
         assertPrinciplePlaceOfBusinessDetailsSame(options1.getPrinciplePlaceOfBusinessDetails(), options2.getPrinciplePlaceOfBusinessDetails());
-        assertThat(options1.getGeneralNatureOfBusinessInformation(), is(options2.getGeneralNatureOfBusinessInformation()));
+        assertThat(options1.getIncludeGeneralNatureOfBusinessInformation(), is(options2.getIncludeGeneralNatureOfBusinessInformation()));
         assertThat(options1.getCompanyType(), is(options2.getCompanyType()));
     }
 
