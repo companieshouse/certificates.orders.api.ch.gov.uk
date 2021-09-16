@@ -5,9 +5,9 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
- * An instance of this represents the principle place of business details item options selected.
+ * An instance of this represents the principal place of business details item options selected.
  */
-public class PrinciplePlaceOfBusinessDetails {
+public class PrincipalPlaceOfBusinessDetails {
 
     private IncludeAddressRecordsType includeAddressRecordsType;
     private Boolean includeDates;
@@ -41,7 +41,7 @@ public class PrinciplePlaceOfBusinessDetails {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PrinciplePlaceOfBusinessDetails that = (PrinciplePlaceOfBusinessDetails) o;
+        PrincipalPlaceOfBusinessDetails that = (PrincipalPlaceOfBusinessDetails) o;
         return includeAddressRecordsType == that.includeAddressRecordsType && Objects.equals(includeDates, that.includeDates);
     }
 

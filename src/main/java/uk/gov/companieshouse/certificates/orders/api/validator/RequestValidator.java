@@ -82,8 +82,8 @@ public class RequestValidator {
             if(options.getLimitedPartnerDetails() != null) {
                 errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
             }
-            if(options.getPrinciplePlaceOfBusinessDetails() != null) {
-                errors.add("include_principle_place_of_business_details: must not exist when certificate type is dissolution");
+            if(options.getPrincipalPlaceOfBusinessDetails() != null) {
+                errors.add("include_principal_place_of_business_details: must not exist when certificate type is dissolution");
             }
         }
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
@@ -194,8 +194,8 @@ public class RequestValidator {
         if(options.getLimitedPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
             errors.add("include_limited_partner_details: must not exist when company type is not limited-partnership");
         }
-        if(options.getPrinciplePlaceOfBusinessDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_principle_place_of_business_details: must not exist when company type is not limited-partnership");
+        if(options.getPrincipalPlaceOfBusinessDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
+            errors.add("include_principal_place_of_business_details: must not exist when company type is not limited-partnership");
         }
         if(options.getDirectorDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
             errors.add("include_director_details: must not exist when company type is limited-partnership");

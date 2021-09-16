@@ -12,7 +12,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecords
 import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
 import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.PrinciplePlaceOfBusinessDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
@@ -150,7 +150,7 @@ class CreateItemRequestValidatorTest {
         options.setDesignatedMemberDetails(new DesignatedMemberDetails());
         options.setGeneralPartnerDetails(new GeneralPartnerDetails());
         options.setLimitedPartnerDetails(new LimitedPartnerDetails());
-        options.setPrinciplePlaceOfBusinessDetails(new PrinciplePlaceOfBusinessDetails());
+        options.setPrincipalPlaceOfBusinessDetails(new PrincipalPlaceOfBusinessDetails());
         item.setItemOptions(options);
 
         // When
@@ -168,12 +168,12 @@ class CreateItemRequestValidatorTest {
             "include_designated_member_details: must not exist when certificate type is dissolution",
             "include_general_partner_details: must not exist when certificate type is dissolution",
             "include_limited_partner_details: must not exist when certificate type is dissolution",
-            "include_principle_place_of_business_details: must not exist when certificate type is dissolution",
+            "include_principal_place_of_business_details: must not exist when certificate type is dissolution",
             "include_member_details: must not exist when company type is not llp",
             "include_designated_member_details: must not exist when company type is not llp",
             "include_general_partner_details: must not exist when company type is not limited-partnership",
             "include_limited_partner_details: must not exist when company type is not limited-partnership",
-            "include_principle_place_of_business_details: must not exist when company type is not limited-partnership",
+            "include_principal_place_of_business_details: must not exist when company type is not limited-partnership",
             "include_general_nature_of_business_information: must not exist when company type is not limited-partnership"));
     }
 
@@ -342,20 +342,20 @@ class CreateItemRequestValidatorTest {
 
     @Test
     @DisplayName("Request is valid if company type is limited-partnership and appropriate fields set")
-    void allowGeneralPartnersLimitedPartnersPrinciplePlaceOfBusinessGeneralNatureOfBusinessInformationFieldValuesForLimitedPartnerships() {
+    void allowGeneralPartnersLimitedPartnersPrincipalPlaceOfBusinessGeneralNatureOfBusinessInformationFieldValuesForLimitedPartnerships() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
         final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
         final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
-        final PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails = new PrinciplePlaceOfBusinessDetails();
+        final PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
         generalPartnerDetails.setIncludeBasicInformation(true);
         limitedPartnerDetails.setIncludeBasicInformation(true);
-        principlePlaceOfBusinessDetails.setIncludeDates(true);
-        principlePlaceOfBusinessDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        principalPlaceOfBusinessDetails.setIncludeDates(true);
+        principalPlaceOfBusinessDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
         itemOptions.setGeneralPartnerDetails(generalPartnerDetails);
         itemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
-        itemOptions.setPrinciplePlaceOfBusinessDetails(principlePlaceOfBusinessDetails);
+        itemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         itemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         itemOptions.setCompanyType("limited-partnership");
         certificateItemDTO.setItemOptions(itemOptions);

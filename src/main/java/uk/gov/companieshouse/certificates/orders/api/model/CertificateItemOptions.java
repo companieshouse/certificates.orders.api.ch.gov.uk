@@ -43,7 +43,7 @@ public class CertificateItemOptions {
 
     private LimitedPartnerDetails limitedPartnerDetails;
 
-    private PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails;
+    private PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails;
 
     private Boolean includeGeneralNatureOfBusinessInformation;
 
@@ -185,12 +185,12 @@ public class CertificateItemOptions {
         this.limitedPartnerDetails = limitedPartnerDetails;
     }
 
-    public PrinciplePlaceOfBusinessDetails getPrinciplePlaceOfBusinessDetails() {
-        return principlePlaceOfBusinessDetails;
+    public PrincipalPlaceOfBusinessDetails getPrincipalPlaceOfBusinessDetails() {
+        return principalPlaceOfBusinessDetails;
     }
 
-    public void setPrinciplePlaceOfBusinessDetails(PrinciplePlaceOfBusinessDetails principlePlaceOfBusinessDetails) {
-        this.principlePlaceOfBusinessDetails = principlePlaceOfBusinessDetails;
+    public void setPrincipalPlaceOfBusinessDetails(PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails) {
+        this.principalPlaceOfBusinessDetails = principalPlaceOfBusinessDetails;
     }
 
     public Boolean getIncludeGeneralNatureOfBusinessInformation() {
