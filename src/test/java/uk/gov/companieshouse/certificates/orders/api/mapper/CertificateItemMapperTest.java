@@ -21,7 +21,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.PrinciplePlaceOfBusinessDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class CertificateItemMapperTest {
     private static final MemberDetails MEMBER_DETAILS;
     private static final GeneralPartnerDetails GENERAL_PARTNER_DETAILS;
     private static final LimitedPartnerDetails LIMITED_PARTNER_DETAILS;
-    private static final PrinciplePlaceOfBusinessDetails PRINCIPLE_PLACE_OF_BUSINESS_DETAILS;
+    private static final PrincipalPlaceOfBusinessDetails PRINCIPAL_PLACE_OF_BUSINESS_DETAILS;
     private static final boolean INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS = false;
     private static final String COMPANY_TYPE = "LTD";
 
@@ -134,9 +134,9 @@ public class CertificateItemMapperTest {
         LIMITED_PARTNER_DETAILS = new LimitedPartnerDetails();
         LIMITED_PARTNER_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
 
-        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS = new PrinciplePlaceOfBusinessDetails();
-        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-        PRINCIPLE_PLACE_OF_BUSINESS_DETAILS.setIncludeDates(INCLUDE_DATES);
+        PRINCIPAL_PLACE_OF_BUSINESS_DETAILS = new PrincipalPlaceOfBusinessDetails();
+        PRINCIPAL_PLACE_OF_BUSINESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        PRINCIPAL_PLACE_OF_BUSINESS_DETAILS.setIncludeDates(INCLUDE_DATES);
 
         ITEM_OPTIONS = new CertificateItemOptions();
         ITEM_OPTIONS.setCertificateType(INCORPORATION);
@@ -156,7 +156,7 @@ public class CertificateItemMapperTest {
         ITEM_OPTIONS.setMemberDetails(MEMBER_DETAILS);
         ITEM_OPTIONS.setGeneralPartnerDetails(GENERAL_PARTNER_DETAILS);
         ITEM_OPTIONS.setLimitedPartnerDetails(LIMITED_PARTNER_DETAILS);
-        ITEM_OPTIONS.setPrinciplePlaceOfBusinessDetails(PRINCIPLE_PLACE_OF_BUSINESS_DETAILS);
+        ITEM_OPTIONS.setPrincipalPlaceOfBusinessDetails(PRINCIPAL_PLACE_OF_BUSINESS_DETAILS);
         ITEM_OPTIONS.setIncludeGeneralNatureOfBusinessInformation(INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS);
         ITEM_OPTIONS.setCompanyType(COMPANY_TYPE);
 
@@ -293,7 +293,7 @@ public class CertificateItemMapperTest {
         assertMembersDetailsSame(options1.getMemberDetails(), options2.getMemberDetails());
         assertGeneralPartnerDetailsSame(options1.getGeneralPartnerDetails(), options2.getGeneralPartnerDetails());
         assertLimitedPartnerDetailsSame(options1.getLimitedPartnerDetails(), options2.getLimitedPartnerDetails());
-        assertPrinciplePlaceOfBusinessDetailsSame(options1.getPrinciplePlaceOfBusinessDetails(), options2.getPrinciplePlaceOfBusinessDetails());
+        assertPrincipalPlaceOfBusinessDetailsSame(options1.getPrincipalPlaceOfBusinessDetails(), options2.getPrincipalPlaceOfBusinessDetails());
         assertThat(options1.getIncludeGeneralNatureOfBusinessInformation(), is(options2.getIncludeGeneralNatureOfBusinessInformation()));
         assertThat(options1.getCompanyType(), is(options2.getCompanyType()));
     }
@@ -369,7 +369,7 @@ public class CertificateItemMapperTest {
         assertEquals(details1.getIncludeBasicInformation(), details2.getIncludeBasicInformation());
     }
 
-    private void assertPrinciplePlaceOfBusinessDetailsSame(PrinciplePlaceOfBusinessDetails details1, PrinciplePlaceOfBusinessDetails details2) {
+    private void assertPrincipalPlaceOfBusinessDetailsSame(PrincipalPlaceOfBusinessDetails details1, PrincipalPlaceOfBusinessDetails details2) {
         assertThat(details1.getIncludeAddressRecordsType(), is(details2.getIncludeAddressRecordsType()));
         assertEquals(details1.isIncludeDates(), details2.isIncludeDates());
     }
