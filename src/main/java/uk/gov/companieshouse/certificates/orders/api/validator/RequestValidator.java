@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import org.springframework.beans.factory.annotation.Value;
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -29,6 +30,11 @@ public class RequestValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
     private static final String LIMITED_PARTNERSHIP_TYPE = "limited-partnership";
     private static final String LLP_TYPE = "llp";
+
+    @Value("${llp.certificate.orders.enabled:false}")
+    private boolean LLP_CERTIFICATE_ORDERS_ENABLED;
+    @Value("${lp.certificate.orders.enabled:false}")
+    private boolean LP_CERTIFICATE_ORDERS_ENABLED;
 
     /**
      * Validates the options provided, returning any errors found.
@@ -91,8 +97,13 @@ public class RequestValidator {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
 
-        validateLlpOptions(options, errors);
-        validateLimitedPartnershipOptions(options, errors);
+        if (LLP_CERTIFICATE_ORDERS_ENABLED) {
+            validateLlpOptions(options, errors);
+        }
+
+        if (LP_CERTIFICATE_ORDERS_ENABLED) {
+            validateLimitedPartnershipOptions(options, errors);
+        }
 
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
         errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));

@@ -13,3 +13,12 @@ spring:
       uri: ${MONGODB_URL}
       field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
 
+lp:
+  certificate:
+    orders:
+      enabled: {$DYNAMIC_LP_CERTIFICATE_ORDERS_ENABLED}
+
+llp:
+  certificate:
+    orders:
+      enabled: {$DYNAMIC_LLP_CERTIFICATE_ORDERS_ENABLED}
