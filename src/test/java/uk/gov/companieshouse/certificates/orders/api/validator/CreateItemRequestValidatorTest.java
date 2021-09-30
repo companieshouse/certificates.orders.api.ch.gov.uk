@@ -3,6 +3,8 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DesignatedMemberDetails;
@@ -32,6 +34,9 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
+@ContextConfiguration(locations = {
+        "classpath:resources/application.yaml" })
+@ActiveProfiles(profiles = "enabled")
 class CreateItemRequestValidatorTest {
 
     private CreateItemRequestValidator validatorUnderTest;

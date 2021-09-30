@@ -1,3 +1,10 @@
+spring:
+  profiles:
+    active: "enabled,disabled"
+
+  data:
+    mongodb:
+      field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
 uk:
   gov:
     companieshouse:
@@ -7,8 +14,28 @@ uk:
             certificates: /orderable/certificates
             health: /healthcheck
 
-spring:
-  data:
-    mongodb:
-      field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
+---
 
+spring:
+  profiles: enabled
+lp:
+  certificate:
+    orders:
+      enabled: true
+llp:
+  certificate:
+    orders:
+      enabled: true
+
+---
+
+spring:
+  profiles: disabled
+lp:
+  certificate:
+    orders:
+      enabled: false
+llp:
+  certificate:
+    orders:
+      enabled: false
