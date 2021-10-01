@@ -17,7 +17,7 @@ uk:
 ---
 
 spring:
-  profiles: enabled
+  profiles: feature-flags-enabled
 lp:
   certificate:
     orders:
@@ -30,7 +30,7 @@ llp:
 ---
 
 spring:
-  profiles: disabled
+  profiles: feature-flags-disabled
 lp:
   certificate:
     orders:

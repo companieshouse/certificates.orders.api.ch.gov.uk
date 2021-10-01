@@ -12,6 +12,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,58 +52,45 @@ public class RequestValidator {
         errors.addAll(getCollectionDeliveryValidationErrors(options));
 
         if (options.getCertificateType() == DISSOLUTION) {
-
-            if (options.getIncludeCompanyObjectsInformation() != null) {
-                errors.add(
-                    "include_company_objects_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getIncludeGeneralNatureOfBusinessInformation() != null) {
-                errors.add(
-                    "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getIncludeGoodStandingInformation() != null) {
-                errors.add(
-                    "include_good_standing_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getRegisteredOfficeAddressDetails() != null) {
-                errors.add(
-                    "include_registered_office_address_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getSecretaryDetails() != null) {
-                errors.add(
-                    "include_secretary_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getDirectorDetails() !=null) {
-                errors.add(
-                    "include_director_details: must not exist when certificate type is dissolution");
-            }
-            if(options.getDesignatedMemberDetails() != null) {
-                errors.add("include_designated_member_details: must not exist when certificate type is dissolution");
-            }
-            if(options.getMemberDetails() != null) {
-                errors.add("include_member_details: must not exist when certificate type is dissolution");
-            }
-            if(options.getGeneralPartnerDetails() != null) {
-                errors.add("include_general_partner_details: must not exist when certificate type is dissolution");
-            }
-            if(options.getLimitedPartnerDetails() != null) {
-                errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
-            }
-            if(options.getPrincipalPlaceOfBusinessDetails() != null) {
-                errors.add("include_principal_place_of_business_details: must not exist when certificate type is dissolution");
-            }
+            validateDissolutionCertificateOptions(options, errors);
         }
+
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
 
-        if (LLP_CERTIFICATE_ORDERS_ENABLED) {
-            validateLlpOptions(options, errors);
-        }
+        String companyType = options.getCompanyType();
 
-        if (LP_CERTIFICATE_ORDERS_ENABLED) {
-            validateLimitedPartnershipOptions(options, errors);
+        if (LP_CERTIFICATE_ORDERS_ENABLED && LLP_CERTIFICATE_ORDERS_ENABLED) {
+            switch (companyType) {
+                case CompanyType.LIMITED_PARTNERSHIP:
+                    validateLPOptions(options, errors);
+                    break;
+                case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
+                    validateLLPOptions(options, errors);
+                    break;
+                default:
+                    validateLimitedCompanyOptions(options, errors);
+            }
+        } else if (LP_CERTIFICATE_ORDERS_ENABLED) {
+            switch (companyType) {
+                case CompanyType.LIMITED_PARTNERSHIP:
+                    validateLPOptions(options, errors);
+                    break;
+                default:
+                    validateLimitedCompanyOptions(options, errors);
+            }
+        } else if (LLP_CERTIFICATE_ORDERS_ENABLED) {
+            switch (companyType) {
+                case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
+                    validateLLPOptions(options, errors);
+                    break;
+                default:
+                    validateLimitedCompanyOptions(options, errors);
+            }
+        } else {
+            validateLimitedCompanyOptions(options, errors);
         }
 
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
@@ -111,15 +99,127 @@ public class RequestValidator {
         errors.addAll(getValidationErrors(options.getMemberDetails(), "member_details", converter));
         errors.addAll(getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details", converter));
         errors.addAll(getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details", converter));
-
         return errors;
+    }
+
+    private void validateLimitedCompanyOptions(CertificateItemOptions options, List<String> errors) {
+        notLPDetails(options, errors);
+        notLLPDetails(options, errors);
+    }
+
+    private void validateLLPOptions(CertificateItemOptions options, List<String> errors) {
+        notLimitedCompanyDetails(options, errors);
+        notLPDetails(options, errors);
+    }
+
+    private void validateLPOptions(CertificateItemOptions options, List<String> errors) {
+        notLimitedCompanyDetails(options, errors);
+        notLLPDetails(options, errors);
+    }
+
+    private void notLPDetails(CertificateItemOptions options, List<String> errors) {
+        notPrincipalPlaceOfBusinessDetails(options, errors);
+        notGeneralPartnerDetails(options, errors);
+        notLimitedPartnerDetails(options, errors);
+        notIncludeGeneralNatureOfBusinessInformation(options, errors);
+    }
+
+    private void notLLPDetails(CertificateItemOptions options, List<String> errors) {
+        notDesignatedMemberDetails(options, errors);
+        notMemberDetails(options, errors);
+    }
+
+    private void notLimitedCompanyDetails(CertificateItemOptions options, List<String> errors) {
+        notDirectorsDetails(options, errors);
+        notSecretaryDetails(options, errors);
+    }
+
+    private void notDirectorsDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getDirectorDetails(), errors, "include_director_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notSecretaryDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getSecretaryDetails(), errors, "include_secretary_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notDesignatedMemberDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getDesignatedMemberDetails(), errors, "include_designated_member_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notMemberDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getMemberDetails(), errors, "include_member_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notGeneralPartnerDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getGeneralPartnerDetails(), errors, "include_general_partner_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notLimitedPartnerDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getLimitedPartnerDetails(), errors, "include_limited_partner_details: must not exist when company type is not %s", options.getCompanyType());
+    }
+
+    private void notPrincipalPlaceOfBusinessDetails(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getPrincipalPlaceOfBusinessDetails(), errors, "include_principal_place_of_business_details: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notIncludeGeneralNatureOfBusinessInformation(CertificateItemOptions options, List<String> errors) {
+        notNull(options.getIncludeGeneralNatureOfBusinessInformation(), errors, "include_general_nature_of_business_information: must not exist when company type is %s", options.getCompanyType());
+    }
+
+    private void notNull(Object object, Collection<String> errors, String message, String companyType) {
+        if (object != null) {
+            errors.add(String.format(message, companyType));
+        }
+    }
+
+    private void validateDissolutionCertificateOptions(CertificateItemOptions options, List<String> errors) {
+        if (options.getIncludeCompanyObjectsInformation() != null) {
+            errors.add(
+                    "include_company_objects_information: must not exist when certificate type is dissolution");
+        }
+        if (options.getIncludeGeneralNatureOfBusinessInformation() != null) {
+            errors.add(
+                    "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
+        }
+        if (options.getIncludeGoodStandingInformation() != null) {
+            errors.add(
+                    "include_good_standing_information: must not exist when certificate type is dissolution");
+        }
+        if (options.getRegisteredOfficeAddressDetails() != null) {
+            errors.add(
+                    "include_registered_office_address_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getSecretaryDetails() != null) {
+            errors.add(
+                    "include_secretary_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getDirectorDetails() != null) {
+            errors.add(
+                    "include_director_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getDesignatedMemberDetails() != null) {
+            errors.add("include_designated_member_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getMemberDetails() != null) {
+            errors.add("include_member_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getGeneralPartnerDetails() != null) {
+            errors.add("include_general_partner_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getLimitedPartnerDetails() != null) {
+            errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
+        }
+        if (options.getPrincipalPlaceOfBusinessDetails() != null) {
+            errors.add("include_principal_place_of_business_details: must not exist when certificate type is dissolution");
+        }
     }
 
     /**
      * Validates the details provided, returning any errors found, prefixed with the supplied details field name.
-     * @param details the details to be validated
+     *
+     * @param details          the details to be validated
      * @param detailsFieldName the field name of the details to be validated
-     * @param converter the converter this uses to present field names as they appear in the request JSON payload
+     * @param converter        the converter this uses to present field names as they appear in the request JSON payload
      * @return the resulting errors, which will be empty if the details are found to be valid
      */
     List<String> getValidationErrors(final BasicInformationIncludable details,
@@ -159,6 +259,7 @@ public class RequestValidator {
 
     /**
      * Validates the collection delivery related fields on the options provided.
+     *
      * @param options the options to be validated
      * @return the resulting errors, which will be empty if the fields are found to be valid
      */
@@ -180,7 +281,8 @@ public class RequestValidator {
 
     /**
      * Determines whether the value of the field on the details object is equivalent to <code>true</code> or not.
-     * @param field the reflective representation of the details field
+     *
+     * @param field   the reflective representation of the details field
      * @param details the details object
      * @return whether the field value is equivalent to <code>true</code> (<code>true</code>), or not
      * (<code>false</code>)
@@ -197,41 +299,4 @@ public class RequestValidator {
         }
         return TRUE.equals(include);
     }
-
-    private void validateLimitedPartnershipOptions(CertificateItemOptions options, List<String> errors) {
-        if(options.getGeneralPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_general_partner_details: must not exist when company type is not limited-partnership");
-        }
-        if(options.getLimitedPartnerDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_limited_partner_details: must not exist when company type is not limited-partnership");
-        }
-        if(options.getPrincipalPlaceOfBusinessDetails() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_principal_place_of_business_details: must not exist when company type is not limited-partnership");
-        }
-        if(options.getDirectorDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
-            errors.add("include_director_details: must not exist when company type is limited-partnership");
-        }
-        if(options.getSecretaryDetails() != null && LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())){
-            errors.add("include_secretary_details: must not exist when company type is limited-partnership");
-        }
-        if(options.getIncludeGeneralNatureOfBusinessInformation() != null && !LIMITED_PARTNERSHIP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_general_nature_of_business_information: must not exist when company type is not limited-partnership");
-        }
-    }
-
-    private void validateLlpOptions(CertificateItemOptions options, List<String> errors) {
-        if(options.getDesignatedMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_designated_member_details: must not exist when company type is not llp");
-        }
-        if(options.getMemberDetails() != null && !LLP_TYPE.equals(options.getCompanyType())) {
-            errors.add("include_member_details: must not exist when company type is not llp");
-        }
-        if(options.getDirectorDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
-            errors.add("include_director_details: must not exist when company type is llp");
-        }
-        if(options.getSecretaryDetails() != null && LLP_TYPE.equals(options.getCompanyType())){
-            errors.add("include_secretary_details: must not exist when company type is llp");
-        }
-    }
-
 }

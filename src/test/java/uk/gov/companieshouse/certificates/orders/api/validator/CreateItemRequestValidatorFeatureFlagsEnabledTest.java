@@ -3,8 +3,9 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DesignatedMemberDetails;
@@ -17,6 +18,8 @@ import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.List;
 
@@ -34,10 +37,14 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
-@ContextConfiguration(locations = {
-        "classpath:resources/application.yaml" })
-@ActiveProfiles(profiles = "enabled")
-class CreateItemRequestValidatorTest {
+@SpringBootTest
+@ActiveProfiles("feature-flags-enabled")
+class CreateItemRequestValidatorFeatureFlagsEnabledTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorFeatureFlagsEnabledTest.class.getName());
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     private CreateItemRequestValidator validatorUnderTest;
     private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
@@ -67,8 +74,10 @@ class CreateItemRequestValidatorTest {
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
     }
 
+
     @BeforeEach
     void setUp() {
+        LOGGER.debug("Active profile " + activeProfile);
         validatorUnderTest = new CreateItemRequestValidator(new FieldNameConverter());
     }
 
