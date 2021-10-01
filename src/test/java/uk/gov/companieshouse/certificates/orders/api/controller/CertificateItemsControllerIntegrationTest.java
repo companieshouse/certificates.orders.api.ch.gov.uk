@@ -589,6 +589,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        options.setCompanyType("limited");
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -666,6 +667,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setCompanyType("limited");
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -705,6 +707,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DeliveryTimescale.STANDARD);
         options.setIncludeEmailCopy(true);
+        options.setCompanyType("limited");
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -740,6 +743,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeEmailCopy(true);
+        options.setCompanyType("limited");
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -848,6 +852,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         newItem.setItemOptions(options);
+        options.setCompanyType("limited");
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
@@ -1265,6 +1270,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setCompanyType("limited");
         savedItem.setItemOptions(options);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
@@ -1447,6 +1453,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1486,6 +1493,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
         savedOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        savedOptions.setCompanyType("limited");
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
@@ -1550,6 +1558,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setCertificateType(CertificateType.DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1585,6 +1594,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
+        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1622,6 +1632,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeEmailCopy(true);
+        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1655,6 +1666,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeEmailCopy(true);
+        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1760,6 +1772,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         itemUpdate.setItemOptions(options);
+        options.setCompanyType("limited");
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);

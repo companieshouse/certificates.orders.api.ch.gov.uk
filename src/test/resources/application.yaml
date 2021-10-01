@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: "enabled,disabled"
+    active: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
 
   data:
     mongodb:
@@ -39,3 +39,30 @@ llp:
   certificate:
     orders:
       enabled: false
+
+---
+
+spring:
+  profiles: lp-feature-flag-enabled
+lp:
+  certificate:
+    orders:
+      enabled: true
+llp:
+  certificate:
+    orders:
+      enabled: false
+
+---
+
+spring:
+  profiles: llp-feature-flag-enabled
+lp:
+  certificate:
+    orders:
+      enabled: false
+llp:
+  certificate:
+    orders:
+      enabled: true
+

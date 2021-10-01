@@ -392,6 +392,7 @@ class CertificatesApiApplicationTest {
 		newCertificateItemDTO.setCompanyNumber(COMPANY_NUMBER);
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setDeliveryTimescale(STANDARD);
+		options.setCompanyType("limited");
 		newCertificateItemDTO.setItemOptions(options);
 		newCertificateItemDTO.setQuantity(5);
 		return newCertificateItemDTO;

@@ -119,7 +119,7 @@ public class CreateItemRequestValidatorFeatureFlagsDisabledTest {
 
         //then
         assertThat(errors, containsInAnyOrder("include_general_partner_details: must not exist when company type is limited-partnership",
-                "include_limited_partner_details: must not exist when company type is not limited-partnership",
+                "include_limited_partner_details: must not exist when company type is limited-partnership",
                 "include_principal_place_of_business_details: must not exist when company type is limited-partnership",
                 "include_general_nature_of_business_information: must not exist when company type is limited-partnership"));
     }

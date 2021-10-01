@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -32,9 +33,9 @@ public class RequestValidator {
     private static final String LIMITED_PARTNERSHIP_TYPE = "limited-partnership";
     private static final String LLP_TYPE = "llp";
 
-    @Value("${llp.certificate.orders.enabled:false}")
+    @Value("${llp.certificate.orders.enabled}")
     private boolean LLP_CERTIFICATE_ORDERS_ENABLED;
-    @Value("${lp.certificate.orders.enabled:false}")
+    @Value("${lp.certificate.orders.enabled}")
     private boolean LP_CERTIFICATE_ORDERS_ENABLED;
 
     /**
@@ -60,37 +61,39 @@ public class RequestValidator {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
 
-        String companyType = options.getCompanyType();
+        if (notCompanyTypeIsNull(options, errors)) {
+            String companyType = options.getCompanyType();
 
-        if (LP_CERTIFICATE_ORDERS_ENABLED && LLP_CERTIFICATE_ORDERS_ENABLED) {
-            switch (companyType) {
-                case CompanyType.LIMITED_PARTNERSHIP:
-                    validateLPOptions(options, errors);
-                    break;
-                case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
-                    validateLLPOptions(options, errors);
-                    break;
-                default:
-                    validateLimitedCompanyOptions(options, errors);
+            if (LP_CERTIFICATE_ORDERS_ENABLED && LLP_CERTIFICATE_ORDERS_ENABLED) {
+                switch (companyType) {
+                    case CompanyType.LIMITED_PARTNERSHIP:
+                        validateLPOptions(options, errors);
+                        break;
+                    case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
+                        validateLLPOptions(options, errors);
+                        break;
+                    default:
+                        validateLimitedCompanyOptions(options, errors);
+                }
+            } else if (LP_CERTIFICATE_ORDERS_ENABLED) {
+                switch (companyType) {
+                    case CompanyType.LIMITED_PARTNERSHIP:
+                        validateLPOptions(options, errors);
+                        break;
+                    default:
+                        validateLimitedCompanyOptions(options, errors);
+                }
+            } else if (LLP_CERTIFICATE_ORDERS_ENABLED) {
+                switch (companyType) {
+                    case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
+                        validateLLPOptions(options, errors);
+                        break;
+                    default:
+                        validateLimitedCompanyOptions(options, errors);
+                }
+            } else {
+                validateLimitedCompanyOptions(options, errors);
             }
-        } else if (LP_CERTIFICATE_ORDERS_ENABLED) {
-            switch (companyType) {
-                case CompanyType.LIMITED_PARTNERSHIP:
-                    validateLPOptions(options, errors);
-                    break;
-                default:
-                    validateLimitedCompanyOptions(options, errors);
-            }
-        } else if (LLP_CERTIFICATE_ORDERS_ENABLED) {
-            switch (companyType) {
-                case CompanyType.LIMITED_LIABILITY_PARTNERSHIP:
-                    validateLLPOptions(options, errors);
-                    break;
-                default:
-                    validateLimitedCompanyOptions(options, errors);
-            }
-        } else {
-            validateLimitedCompanyOptions(options, errors);
         }
 
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
@@ -134,42 +137,56 @@ public class RequestValidator {
         notSecretaryDetails(options, errors);
     }
 
+    private boolean notCompanyTypeIsNull(CertificateItemOptions options, List<String> errors) {
+        return checkIsNotNull(options.getCompanyType(), errors, "company type: is a mandatory field");
+    }
+
     private void notDirectorsDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getDirectorDetails(), errors, "include_director_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getDirectorDetails(), errors, "include_director_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notSecretaryDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getSecretaryDetails(), errors, "include_secretary_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getSecretaryDetails(), errors, "include_secretary_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notDesignatedMemberDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getDesignatedMemberDetails(), errors, "include_designated_member_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getDesignatedMemberDetails(), errors, "include_designated_member_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notMemberDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getMemberDetails(), errors, "include_member_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getMemberDetails(), errors, "include_member_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notGeneralPartnerDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getGeneralPartnerDetails(), errors, "include_general_partner_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getGeneralPartnerDetails(), errors, "include_general_partner_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notLimitedPartnerDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getLimitedPartnerDetails(), errors, "include_limited_partner_details: must not exist when company type is not %s", options.getCompanyType());
+        checkIsNull(options.getLimitedPartnerDetails(), errors, "include_limited_partner_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notPrincipalPlaceOfBusinessDetails(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getPrincipalPlaceOfBusinessDetails(), errors, "include_principal_place_of_business_details: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getPrincipalPlaceOfBusinessDetails(), errors, "include_principal_place_of_business_details: must not exist when company type is %s", options.getCompanyType());
     }
 
     private void notIncludeGeneralNatureOfBusinessInformation(CertificateItemOptions options, List<String> errors) {
-        notNull(options.getIncludeGeneralNatureOfBusinessInformation(), errors, "include_general_nature_of_business_information: must not exist when company type is %s", options.getCompanyType());
+        checkIsNull(options.getIncludeGeneralNatureOfBusinessInformation(), errors, "include_general_nature_of_business_information: must not exist when company type is %s", options.getCompanyType());
     }
 
-    private void notNull(Object object, Collection<String> errors, String message, String companyType) {
+    private boolean checkIsNull(Object object, Collection<String> errors, String message, String... messageArgs) {
         if (object != null) {
-            errors.add(String.format(message, companyType));
+            errors.add(String.format(message, messageArgs));
+            return false;
         }
+        return true;
+    }
+
+    private boolean checkIsNotNull(Object object, Collection<String> errors, String message, String... messageArgs) {
+        if (object == null) {
+            errors.add(String.format(message, messageArgs));
+            return false;
+        }
+        return true;
     }
 
     private void validateDissolutionCertificateOptions(CertificateItemOptions options, List<String> errors) {

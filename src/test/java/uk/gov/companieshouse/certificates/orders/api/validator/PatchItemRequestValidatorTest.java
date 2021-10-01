@@ -6,8 +6,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
@@ -43,7 +45,8 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
  * Unit tests the {@link PatchItemRequestValidator} class.
  */
 @ExtendWith(SpringExtension.class)
-@SpringJUnitConfig(PatchItemRequestValidatorTest.Config.class)
+@SpringBootTest
+@ActiveProfiles("feature-flags-disabled")
 class PatchItemRequestValidatorTest {
 
     @Configuration
@@ -264,6 +267,7 @@ class PatchItemRequestValidatorTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -284,6 +288,7 @@ class PatchItemRequestValidatorTest {
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -308,6 +313,7 @@ class PatchItemRequestValidatorTest {
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -330,6 +336,7 @@ class PatchItemRequestValidatorTest {
         options.setDeliveryTimescale(SAME_DAY);
         options.setIncludeEmailCopy(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -347,6 +354,7 @@ class PatchItemRequestValidatorTest {
         options.setDeliveryTimescale(STANDARD);
         options.setIncludeEmailCopy(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -372,6 +380,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -405,6 +414,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -427,6 +437,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -460,6 +471,7 @@ class PatchItemRequestValidatorTest {
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
