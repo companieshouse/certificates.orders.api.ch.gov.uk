@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
 @SpringBootTest
 @ActiveProfiles("feature-flags-disabled")
-public class CreateItemRequestValidatorFeatureFlagsDisabledTest {
+class CreateItemRequestValidatorFeatureFlagsDisabledTest {
 
     @Autowired
     private CreateItemRequestValidator validatorUnderTest;

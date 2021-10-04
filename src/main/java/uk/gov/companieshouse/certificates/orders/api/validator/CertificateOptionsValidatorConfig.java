@@ -13,37 +13,45 @@ class CertificateOptionsValidatorConfig {
     CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions) {
         Consumer<OptionsValidationHelper> strategy;
         if (featureOptions.isLlpCertificateOrdersEnabled() && featureOptions.isLpCertificateOrdersEnabled()) {
-            strategy = (OptionsValidationHelper optionsValidationHelper) -> {
-                String companyType = optionsValidationHelper.getCompanyType();
-                if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
-                    optionsValidationHelper.validateLimitedPartnershipOptions();
-                } else if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(companyType)) {
-                    optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
-                } else {
-                    optionsValidationHelper.validateLimitedCompanyOptions();
-                }
-            };
+            strategy = this::AllFeatureOptionsEnabledStrategy;
         } else if (featureOptions.isLpCertificateOrdersEnabled()) {
-            strategy = (OptionsValidationHelper optionsValidationHelper) -> {
-                if (CompanyType.LIMITED_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
-                    optionsValidationHelper.validateLimitedPartnershipOptions();
-                } else {
-                    optionsValidationHelper.validateLimitedCompanyOptions();
-                }
-            };
+            strategy = this::lpFeatureOptionEnabledStrategy;
         } else if (featureOptions.isLlpCertificateOrdersEnabled()) {
-            strategy = (OptionsValidationHelper optionsValidationHelper) -> {
-                if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
-                    optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
-                } else {
-                    optionsValidationHelper.validateLimitedCompanyOptions();
-                }
-            };
+            strategy = this::llpFeatureOptionEnabledStrategy;
         } else {
-            strategy = (OptionsValidationHelper optionsValidationHelper) -> {
-                optionsValidationHelper.validateLimitedCompanyOptions();
-            };
+            strategy = this::noFeatureOptionsEnabledStrategy;
         }
         return new CertificateOptionsValidator(strategy);
+    }
+
+    private void noFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
+        optionsValidationHelper.validateLimitedCompanyOptions();
+    }
+
+    private void llpFeatureOptionEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
+        if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
+            optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
+        } else {
+            optionsValidationHelper.validateLimitedCompanyOptions();
+        }
+    }
+
+    private void lpFeatureOptionEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
+            optionsValidationHelper.validateLimitedPartnershipOptions();
+        } else {
+            optionsValidationHelper.validateLimitedCompanyOptions();
+        }
+    }
+
+    private void AllFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
+        String companyType = optionsValidationHelper.getCompanyType();
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+            optionsValidationHelper.validateLimitedPartnershipOptions();
+        } else if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(companyType)) {
+            optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
+        } else {
+            optionsValidationHelper.validateLimitedCompanyOptions();
+        }
     }
 }
