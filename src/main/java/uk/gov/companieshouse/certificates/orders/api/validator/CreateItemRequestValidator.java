@@ -20,7 +20,8 @@ public class CreateItemRequestValidator extends RequestValidator {
      * Constructor.
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      */
-    public CreateItemRequestValidator(FieldNameConverter converter) {
+    public CreateItemRequestValidator(FieldNameConverter converter, CertificateOptionsValidator certificateOptionsValidator) {
+        super(certificateOptionsValidator);
         this.converter = converter;
     }
 
