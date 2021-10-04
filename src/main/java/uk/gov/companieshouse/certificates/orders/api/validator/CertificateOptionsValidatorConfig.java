@@ -29,7 +29,7 @@ class CertificateOptionsValidatorConfig {
     }
 
     private void llpFeatureOptionEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
-        if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
+        if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.toString().equals(optionsValidationHelper.getCompanyType())) {
             optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
         } else {
             optionsValidationHelper.validateLimitedCompanyOptions();
@@ -37,7 +37,7 @@ class CertificateOptionsValidatorConfig {
     }
 
     private void lpFeatureOptionEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
-        if (CompanyType.LIMITED_PARTNERSHIP.equals(optionsValidationHelper.getCompanyType())) {
+        if (CompanyType.LIMITED_PARTNERSHIP.toString().equals(optionsValidationHelper.getCompanyType())) {
             optionsValidationHelper.validateLimitedPartnershipOptions();
         } else {
             optionsValidationHelper.validateLimitedCompanyOptions();
@@ -46,9 +46,9 @@ class CertificateOptionsValidatorConfig {
 
     private void allFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
         String companyType = optionsValidationHelper.getCompanyType();
-        if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+        if (CompanyType.LIMITED_PARTNERSHIP.toString().equals(companyType)) {
             optionsValidationHelper.validateLimitedPartnershipOptions();
-        } else if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.equals(companyType)) {
+        } else if (CompanyType.LIMITED_LIABILITY_PARTNERSHIP.toString().equals(companyType)) {
             optionsValidationHelper.validateLimitedLiabilityPartnershipOptions();
         } else {
             optionsValidationHelper.validateLimitedCompanyOptions();
