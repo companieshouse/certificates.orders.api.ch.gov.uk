@@ -13,7 +13,7 @@ class CertificateOptionsValidatorConfig {
     CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions) {
         Consumer<OptionsValidationHelper> strategy;
         if (featureOptions.isLlpCertificateOrdersEnabled() && featureOptions.isLpCertificateOrdersEnabled()) {
-            strategy = this::AllFeatureOptionsEnabledStrategy;
+            strategy = this::allFeatureOptionsEnabledStrategy;
         } else if (featureOptions.isLpCertificateOrdersEnabled()) {
             strategy = this::lpFeatureOptionEnabledStrategy;
         } else if (featureOptions.isLlpCertificateOrdersEnabled()) {
@@ -44,7 +44,7 @@ class CertificateOptionsValidatorConfig {
         }
     }
 
-    private void AllFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
+    private void allFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {
         String companyType = optionsValidationHelper.getCompanyType();
         if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
             optionsValidationHelper.validateLimitedPartnershipOptions();

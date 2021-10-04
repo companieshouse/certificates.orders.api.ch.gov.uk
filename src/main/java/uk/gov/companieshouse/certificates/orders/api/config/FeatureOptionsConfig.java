@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class FeatureOptionsConfig {
-    @Value("${llp.certificate.orders.enabled}")
+    @Value("${llp.certificate.orders.enabled:false}")
     private boolean llpCertificateOrdersEnabled;
-    @Value("${lp.certificate.orders.enabled}")
+    @Value("${lp.certificate.orders.enabled:false}")
     private boolean lpCertificateOrdersEnabled;
 
     @Bean
