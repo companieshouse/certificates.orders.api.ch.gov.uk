@@ -11,14 +11,14 @@ public enum CompanyType {
 
     static {
         for (CompanyType companyType : values()) {
-            enumValues.put(companyType.companyType, companyType);
+            enumValues.put(companyType.name, companyType);
         }
     }
 
-    private final String companyType;
+    private final String name;
 
     CompanyType(String companyType) {
-        this.companyType = companyType;
+        this.name = companyType;
     }
 
     public static CompanyType getEnumValue(String companyType) {
@@ -27,6 +27,6 @@ public enum CompanyType {
 
     @Override
     public String toString() {
-        return companyType;
+        return name;
     }
 }
