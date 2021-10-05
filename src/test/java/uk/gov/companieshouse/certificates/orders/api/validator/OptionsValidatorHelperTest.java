@@ -18,11 +18,11 @@ class OptionsValidatorHelperTest {
         CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
         certificateItemOptions.setCompanyType("limited");
         OptionsValidationHelper helper = new OptionsValidationHelper(certificateItemOptions);
-        // Then
+        // When
         boolean result = helper.notCompanyTypeIsNull();
         List<String> errors = helper.getErrors();
 
-        // When
+        // Then
         assertThat(result, is(true));
         assertThat(errors, is(empty()));
     }
@@ -32,11 +32,11 @@ class OptionsValidatorHelperTest {
         // Given
         CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
         OptionsValidationHelper helper = new OptionsValidationHelper(certificateItemOptions);
-        // Then
+        // When
         boolean result = helper.notCompanyTypeIsNull();
         List<String> errors = helper.getErrors();
 
-        // When
+        // Then
         assertThat(result, is(false));
         assertThat(errors, containsInAnyOrder("company type: is a mandatory field"));
     }
