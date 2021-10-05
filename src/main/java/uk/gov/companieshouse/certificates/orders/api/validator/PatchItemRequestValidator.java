@@ -37,7 +37,9 @@ public class PatchItemRequestValidator extends RequestValidator {
      */
     public PatchItemRequestValidator(final ObjectMapper objectMapper,
                                      final Validator validator,
-                                     final FieldNameConverter converter) {
+                                     final FieldNameConverter converter,
+                                     final CertificateOptionsValidator certificateOptionsValidator) {
+        super(certificateOptionsValidator);
         this.objectMapper = objectMapper;
         this.validator = validator;
         this.converter = converter;

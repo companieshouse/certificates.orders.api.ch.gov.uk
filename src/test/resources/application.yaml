@@ -1,3 +1,10 @@
+spring:
+  profiles:
+    active: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
+
+  data:
+    mongodb:
+      field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
 uk:
   gov:
     companieshouse:
@@ -7,8 +14,55 @@ uk:
             certificates: /orderable/certificates
             health: /healthcheck
 
+---
+
 spring:
-  data:
-    mongodb:
-      field-naming-strategy: uk.gov.companieshouse.certificates.orders.api.model.NoIsSnakeCaseFieldNamingStrategy
+  profiles: feature-flags-enabled
+lp:
+  certificate:
+    orders:
+      enabled: true
+llp:
+  certificate:
+    orders:
+      enabled: true
+
+---
+
+spring:
+  profiles: feature-flags-disabled
+lp:
+  certificate:
+    orders:
+      enabled: false
+llp:
+  certificate:
+    orders:
+      enabled: false
+
+---
+
+spring:
+  profiles: lp-feature-flag-enabled
+lp:
+  certificate:
+    orders:
+      enabled: true
+llp:
+  certificate:
+    orders:
+      enabled: false
+
+---
+
+spring:
+  profiles: llp-feature-flag-enabled
+lp:
+  certificate:
+    orders:
+      enabled: false
+llp:
+  certificate:
+    orders:
+      enabled: true
 

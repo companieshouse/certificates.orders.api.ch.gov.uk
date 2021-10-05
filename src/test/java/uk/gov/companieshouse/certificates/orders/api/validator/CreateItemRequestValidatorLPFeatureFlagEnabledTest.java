@@ -3,6 +3,10 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DesignatedMemberDetails;
@@ -14,7 +18,8 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.List;
 
@@ -32,8 +37,16 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
-class CreateItemRequestValidatorTest {
+@SpringBootTest
+@ActiveProfiles("lp-feature-flag-enabled")
+class CreateItemRequestValidatorLPFeatureFlagEnabledTest {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorLPFeatureFlagEnabledTest.class.getName());
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
+    @Autowired
     private CreateItemRequestValidator validatorUnderTest;
     private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
@@ -62,9 +75,10 @@ class CreateItemRequestValidatorTest {
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
     }
 
+
     @BeforeEach
     void setUp() {
-        validatorUnderTest = new CreateItemRequestValidator(new FieldNameConverter());
+        LOGGER.debug("Active profile " + activeProfile);
     }
 
     @Test
@@ -102,6 +116,7 @@ class CreateItemRequestValidatorTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(COLLECTION);
         item.setItemOptions(options);
+        options.setCompanyType("any");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
@@ -122,6 +137,7 @@ class CreateItemRequestValidatorTest {
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
         item.setItemOptions(options);
+        options.setCompanyType("any");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
@@ -151,6 +167,7 @@ class CreateItemRequestValidatorTest {
         options.setGeneralPartnerDetails(new GeneralPartnerDetails());
         options.setLimitedPartnerDetails(new LimitedPartnerDetails());
         options.setPrincipalPlaceOfBusinessDetails(new PrincipalPlaceOfBusinessDetails());
+        options.setCompanyType("limited");
         item.setItemOptions(options);
 
         // When
@@ -169,12 +186,12 @@ class CreateItemRequestValidatorTest {
             "include_general_partner_details: must not exist when certificate type is dissolution",
             "include_limited_partner_details: must not exist when certificate type is dissolution",
             "include_principal_place_of_business_details: must not exist when certificate type is dissolution",
-            "include_member_details: must not exist when company type is not llp",
-            "include_designated_member_details: must not exist when company type is not llp",
-            "include_general_partner_details: must not exist when company type is not limited-partnership",
-            "include_limited_partner_details: must not exist when company type is not limited-partnership",
-            "include_principal_place_of_business_details: must not exist when company type is not limited-partnership",
-            "include_general_nature_of_business_information: must not exist when company type is not limited-partnership"));
+            "include_member_details: must not exist when company type is limited",
+            "include_designated_member_details: must not exist when company type is limited",
+            "include_general_partner_details: must not exist when company type is limited",
+            "include_limited_partner_details: must not exist when company type is limited",
+            "include_principal_place_of_business_details: must not exist when company type is limited",
+            "include_general_nature_of_business_information: must not exist when company type is limited"));
     }
 
     @Test
@@ -186,13 +203,14 @@ class CreateItemRequestValidatorTest {
         options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(null);
         options.setIncludeGoodStandingInformation(null);
+        options.setCompanyType("any");
         item.setItemOptions(options);
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
 
         // Then
-        assertThat(errors, empty());
+        assertThat(errors, is(empty()));
     }
 
     @Test
@@ -204,6 +222,7 @@ class CreateItemRequestValidatorTest {
         options.setDeliveryTimescale(SAME_DAY);
         options.setIncludeEmailCopy(true);
         item.setItemOptions(options);
+        options.setCompanyType("any");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
@@ -221,6 +240,7 @@ class CreateItemRequestValidatorTest {
         options.setDeliveryTimescale(STANDARD);
         options.setIncludeEmailCopy(true);
         item.setItemOptions(options);
+        options.setCompanyType("any");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
@@ -265,8 +285,8 @@ class CreateItemRequestValidatorTest {
 
         // Then
         assertThat(errors, contains(
-                "include_designated_member_details: must not exist when company type is not llp",
-                "include_member_details: must not exist when company type is not llp",
+                "include_designated_member_details: must not exist when company type is limited",
+                "include_member_details: must not exist when company type is limited",
                 "director_details: include_address, include_appointment_date, include_country_of_residence,"
                         + " include_nationality, include_occupation must not be true when include_basic_information"
                         + " is false",
@@ -301,6 +321,7 @@ class CreateItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         item.setItemOptions(options);
 
         // When
@@ -311,13 +332,15 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Request is valid if company type is llp and appropriate fields set")
-    void allowMembersAndDesignatedMembersFieldValuesForLlps() {
+    @DisplayName("Request is invalid if company type is llp and appropriate fields set")
+    void rejectMembersAndDesignatedMembersFieldValuesForLlps() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
         final MemberDetails memberDetails = new MemberDetails();
         final DesignatedMemberDetails designatedMemberDetails = new DesignatedMemberDetails();
+        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeBasicInformation(true);
         memberDetails.setIncludeAddress(true);
         memberDetails.setIncludeDobType(INCLUDE_DOB_TYPE);
         memberDetails.setIncludeAppointmentDate(true);
@@ -328,6 +351,8 @@ class CreateItemRequestValidatorTest {
         designatedMemberDetails.setIncludeAppointmentDate(true);
         designatedMemberDetails.setIncludeCountryOfResidence(true);
         designatedMemberDetails.setIncludeBasicInformation(true);
+        itemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        itemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         itemOptions.setMemberDetails(memberDetails);
         itemOptions.setDesignatedMemberDetails(designatedMemberDetails);
         itemOptions.setCompanyType("llp");
@@ -337,7 +362,8 @@ class CreateItemRequestValidatorTest {
         final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
 
         //then
-        assertThat(errors, is(empty()));
+        assertThat(errors, containsInAnyOrder("include_designated_member_details: must not exist when company type is llp",
+                "include_member_details: must not exist when company type is llp"));
     }
 
     @Test
@@ -380,6 +406,7 @@ class CreateItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         item.setItemOptions(options);
 
         // When
@@ -413,6 +440,7 @@ class CreateItemRequestValidatorTest {
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         item.setItemOptions(options);
+        options.setCompanyType("any");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(item);
@@ -422,8 +450,8 @@ class CreateItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Request is invalid if directors' or secretaries' details specified for an llp")
-    void rejectDirectorsOrSecretariesDetailsIfSpecifiedForLlp() {
+    @DisplayName("Request is valid if directors' or secretaries' details specified for an llp")
+    void allowDirectorsOrSecretariesDetailsWhenSpecifiedForLlp() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
@@ -437,10 +465,7 @@ class CreateItemRequestValidatorTest {
         final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
 
         //then
-        assertThat(errors, contains(
-                "include_director_details: must not exist when company type is llp",
-                "include_secretary_details: must not exist when company type is llp"
-        ));
+        assertThat(errors, empty());
     }
 
     @Test
@@ -462,6 +487,56 @@ class CreateItemRequestValidatorTest {
         assertThat(errors, contains(
                 "include_director_details: must not exist when company type is limited-partnership",
                 "include_secretary_details: must not exist when company type is limited-partnership"
+        ));
+    }
+
+    @Test
+    @DisplayName("Request is invalid if LP and LLP details specified for an limited company")
+    void rejectLPAndLLPDetailsIfSpecifiedForLimitedCompany() {
+        //given
+        final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
+        final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
+        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
+        final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
+        final PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
+        final MemberDetails memberDetails = new MemberDetails();
+        final DesignatedMemberDetails designatedMemberDetails = new DesignatedMemberDetails();
+        memberDetails.setIncludeAddress(true);
+        memberDetails.setIncludeDobType(INCLUDE_DOB_TYPE);
+        memberDetails.setIncludeAppointmentDate(true);
+        memberDetails.setIncludeCountryOfResidence(true);
+        memberDetails.setIncludeBasicInformation(true);
+        designatedMemberDetails.setIncludeAddress(true);
+        designatedMemberDetails.setIncludeDobType(INCLUDE_DOB_TYPE);
+        designatedMemberDetails.setIncludeAppointmentDate(true);
+        designatedMemberDetails.setIncludeCountryOfResidence(true);
+        designatedMemberDetails.setIncludeBasicInformation(true);
+        generalPartnerDetails.setIncludeBasicInformation(true);
+        limitedPartnerDetails.setIncludeBasicInformation(true);
+        principalPlaceOfBusinessDetails.setIncludeDates(true);
+        principalPlaceOfBusinessDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        certificateItemOptions.setGeneralPartnerDetails(generalPartnerDetails);
+        certificateItemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
+        certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
+        certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
+        certificateItemOptions.setMemberDetails(memberDetails);
+        certificateItemOptions.setDesignatedMemberDetails(designatedMemberDetails);
+        certificateItemOptions.setCompanyType("limited");
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemDTO.setItemOptions(certificateItemOptions);
+
+        //when
+        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+
+        //then
+        assertThat(errors, containsInAnyOrder("include_principal_place_of_business_details: must not exist when company type is limited",
+                "include_general_partner_details: must not exist when company type is limited",
+                "include_limited_partner_details: must not exist when company type is limited",
+                "include_general_nature_of_business_information: must not exist when company type is limited",
+                "include_designated_member_details: must not exist when company type is limited",
+                "include_member_details: must not exist when company type is limited"
         ));
     }
 }

@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;

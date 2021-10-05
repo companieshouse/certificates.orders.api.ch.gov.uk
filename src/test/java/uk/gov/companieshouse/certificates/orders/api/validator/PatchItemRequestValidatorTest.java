@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
+import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -33,7 +34,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
@@ -42,12 +46,12 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
  */
-@ExtendWith(SpringExtension.class)
-@SpringJUnitConfig(PatchItemRequestValidatorTest.Config.class)
+@SpringBootTest
+@ActiveProfiles("feature-flags-disabled")
 class PatchItemRequestValidatorTest {
-
+    @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
     @Configuration
-    static class Config {
+    public class Config {
         @Bean
         public ObjectMapper objectMapper() {
             return new ApplicationConfiguration().objectMapper();
@@ -65,8 +69,8 @@ class PatchItemRequestValidatorTest {
         }
 
         @Bean
-        public PatchItemRequestValidator patchItemRequestValidator() {
-            return new PatchItemRequestValidator(objectMapper(), validator(), converter());
+        public PatchItemRequestValidator patchItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
+            return new PatchItemRequestValidator(objectMapper(), validator(), converter(), certificateOptionsValidator);
         }
 
         @Bean
@@ -89,7 +93,7 @@ class PatchItemRequestValidatorTest {
     private static final boolean INCLUDE_BASIC_INFORMATION = true;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
-    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean INCLUDE_NATIONALITY = false;
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean INCLUDE_DATES = true;
 
@@ -210,9 +214,9 @@ class PatchItemRequestValidatorTest {
         // Then
         assertThat(errors,
                 containsInAnyOrder("description_values: must be null",
-                                   "item_costs: must be null",
-                                   "kind: must be null",
-                                   "etag: must be null"));
+                        "item_costs: must be null",
+                        "kind: must be null",
+                        "etag: must be null"));
     }
 
     @Test
@@ -264,6 +268,7 @@ class PatchItemRequestValidatorTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -284,6 +289,7 @@ class PatchItemRequestValidatorTest {
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -294,7 +300,7 @@ class PatchItemRequestValidatorTest {
 
     @Test
     @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
-                "should not be requested for dissolution")
+            "should not be requested for dissolution")
     void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
         // Given
         final CertificateItem patchedItem = new CertificateItem();
@@ -308,6 +314,7 @@ class PatchItemRequestValidatorTest {
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -330,6 +337,7 @@ class PatchItemRequestValidatorTest {
         options.setDeliveryTimescale(SAME_DAY);
         options.setIncludeEmailCopy(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -347,6 +355,7 @@ class PatchItemRequestValidatorTest {
         options.setDeliveryTimescale(STANDARD);
         options.setIncludeEmailCopy(true);
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -372,6 +381,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -405,6 +415,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -427,6 +438,7 @@ class PatchItemRequestValidatorTest {
         details.setIncludeOccupation(true);
         options.setDirectorDetails(details);
         options.setSecretaryDetails(details);
+        options.setCompanyType("limited");
         patchedItem.setItemOptions(options);
 
         // When
@@ -460,6 +472,7 @@ class PatchItemRequestValidatorTest {
         final CertificateItem patchedItem = new CertificateItem();
         final CertificateItemOptions options = new CertificateItemOptions();
         patchedItem.setItemOptions(options);
+        options.setCompanyType("limited");
 
         // When
         final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
@@ -471,6 +484,7 @@ class PatchItemRequestValidatorTest {
     /**
      * Utility method that asserts that the validator produces a "<field name>: must be null"
      * error message.
+     *
      * @param fieldName the name of the field for which the error is expected
      * @throws IOException should something unexpected happen
      */
