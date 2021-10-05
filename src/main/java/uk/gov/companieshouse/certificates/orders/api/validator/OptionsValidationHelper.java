@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 class OptionsValidationHelper {
-    private final  CertificateItemOptions options;
+    private final CertificateItemOptions options;
     private final List<String> errors = new ArrayList<>();
 
     OptionsValidationHelper(CertificateItemOptions options) {
