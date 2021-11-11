@@ -69,12 +69,11 @@ public class PatchItemRequestValidator extends RequestValidator {
 
     /**
      * Validates the patched item provided, returning any errors found.
-     * @param patchedItem the item to be validated
+     * @param TODO the item to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    public List<String> getValidationErrors(final CertificateItem patchedItem) {
-        final CertificateItemOptions options = patchedItem.getItemOptions();
-        return getValidationErrors(options, converter);
+    public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
+        return getValidationErrors(requestValidatable, converter);
     }
 
 }

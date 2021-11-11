@@ -5,13 +5,16 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOption
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 
 class OptionsValidationHelper {
-    private final CertificateItemOptions options;
+    private final RequestValidatable requestValidatable;
     private final List<String> errors = new ArrayList<>();
+    private CertificateItemOptions options;
 
-    OptionsValidationHelper(CertificateItemOptions options) {
-        this.options = options;
+    OptionsValidationHelper(RequestValidatable requestValidatable) {
+        this.requestValidatable = requestValidatable;
+        this.options = requestValidatable.getItemOptions();
     }
 
     String getCompanyType() {
@@ -21,11 +24,13 @@ class OptionsValidationHelper {
     void validateLimitedCompanyOptions() {
         notLPDetails();
         notLLPDetails();
+        verifyCompanyStatus();
     }
 
     void validateLimitedLiabilityPartnershipOptions() {
         notLimitedCompanyDetails();
         notLPDetails();
+        verifyCompanyStatus();
     }
 
     void validateLimitedPartnershipOptions() {
@@ -34,7 +39,8 @@ class OptionsValidationHelper {
     }
 
     boolean notCompanyTypeIsNull() {
-        return isNotNull(options.getCompanyType(), "company type: is a mandatory field");
+        return isNotNull(options.getCompanyType(), "company type: is a "
+                + "mandatory field");
     }
 
     List<String> getErrors() {
@@ -56,6 +62,21 @@ class OptionsValidationHelper {
     private void notLimitedCompanyDetails() {
         notDirectorsDetails();
         notSecretaryDetails();
+    }
+
+    private void verifyCompanyStatus() {
+        if ("active".equals(requestValidatable.getCompanyStatus()) &&
+                options.getLiquidatorDetails() != null &&
+                Boolean.TRUE.equals(options.getLiquidatorDetails().getIncludeBasicInformation())) {
+            errors.add(String.format("include_liquidator_details: must not exist when "
+                    + "company status is %s", requestValidatable.getCompanyStatus()));
+        }
+
+        if ("liquidation".equals(requestValidatable.getCompanyStatus()) &&
+                Boolean.TRUE.equals(options.getIncludeGoodStandingInformation())) {
+            errors.add(String.format("include_good_standing_information: must not exist when "
+                    + "company status is %s", requestValidatable.getCompanyStatus()));
+        }
     }
 
     private void notDirectorsDetails() {

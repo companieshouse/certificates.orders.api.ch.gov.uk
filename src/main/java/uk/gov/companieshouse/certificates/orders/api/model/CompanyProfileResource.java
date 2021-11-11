@@ -6,10 +6,12 @@ public class CompanyProfileResource {
 
     private String companyName;
     private String companyType;
+    private String companyStatus;
 
-    public CompanyProfileResource(String companyName, String companyType) {
+    public CompanyProfileResource(String companyName, String companyType, String companyStatus) {
         this.companyName = companyName;
         this.companyType = companyType;
+        this.companyStatus = companyStatus;
     }
 
     public String getCompanyName() {
@@ -18,6 +20,10 @@ public class CompanyProfileResource {
 
     public String getCompanyType() {
         return companyType;
+    }
+
+    public String getCompanyStatus() {
+        return companyStatus;
     }
 
     @Override
@@ -29,11 +35,12 @@ public class CompanyProfileResource {
             return false;
         }
         CompanyProfileResource that = (CompanyProfileResource) o;
-        return Objects.equals(companyName, that.companyName) && Objects.equals(companyType, that.companyType);
+        return Objects.equals(companyName, that.companyName) && Objects.equals(companyType,
+                that.companyType) && Objects.equals(companyStatus, that.companyStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(companyName, companyType);
+        return Objects.hash(companyName, companyType, companyStatus);
     }
 }

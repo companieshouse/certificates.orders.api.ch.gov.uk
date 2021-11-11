@@ -30,7 +30,9 @@ public class CompanyService {
     }
 
     /**
-     * Interrogates the company profiles API to get the company name for the company number provided.
+     * Interrogates the company profiles API to get the company name, type and status for the
+     * companynumber provided.
+     *
      * @param companyNumber the number of the company
      * @return A {@link CompanyProfileResource} object containing required company profile details.
      */
@@ -41,7 +43,8 @@ public class CompanyService {
 
         try {
             CompanyProfileApi companyProfile = apiClient.company().get(uri).execute().getData();
-            return new CompanyProfileResource(companyProfile.getCompanyName(), companyProfile.getType());
+            return new CompanyProfileResource(companyProfile.getCompanyName(),
+                    companyProfile.getType(), companyProfile.getCompanyStatus());
         } catch (ApiErrorResponseException ex) {
             throw getResponseStatusException(ex, apiClient, companyNumber, uri);
         } catch (URIValidationException ex) {
