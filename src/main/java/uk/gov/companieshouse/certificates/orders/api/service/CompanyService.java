@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -44,7 +45,8 @@ public class CompanyService {
         try {
             CompanyProfileApi companyProfile = apiClient.company().get(uri).execute().getData();
             return new CompanyProfileResource(companyProfile.getCompanyName(),
-                    companyProfile.getType(), companyProfile.getCompanyStatus());
+                    companyProfile.getType(),
+                    CompanyStatus.getEnumValue(companyProfile.getCompanyStatus()));
         } catch (ApiErrorResponseException ex) {
             throw getResponseStatusException(ex, apiClient, companyNumber, uri);
         } catch (URIValidationException ex) {

@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -55,6 +56,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -110,6 +112,9 @@ class CertificateItemsControllerIntegrationTest {
 
     @MockBean
     private CompanyService companyService;
+
+    @MockBean
+    private CompanyProfileResource companyProfileResource;
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -235,6 +240,8 @@ class CertificateItemsControllerIntegrationTest {
     private static final String SELF_PATH = "/orderable/certificates";
     private static final Links LINKS;
 
+    public static final CompanyStatus EXPECTED_COMPANY_STATUS = CompanyStatus.ACTIVE;
+
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
@@ -344,7 +351,8 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(totalItemCost);
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
+        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
+                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         // When and Then
@@ -593,6 +601,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
@@ -671,6 +680,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -711,6 +721,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -747,6 +758,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -855,6 +867,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setCompanyType("limited");
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -1082,8 +1095,8 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyProfile(UPDATED_COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
-
+        when(companyService.getCompanyProfile(UPDATED_COMPANY_NUMBER)).thenReturn(
+                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1281,7 +1294,8 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setItemOptions(options);
 
-        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE));
+        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
+                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
 
         // When and then
         final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1455,6 +1469,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
         options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1496,6 +1511,8 @@ class CertificateItemsControllerIntegrationTest {
         savedOptions.setCompanyType("limited");
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
+
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
@@ -1553,6 +1570,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsGoodStandingInfoAndDissolutionLiquidation()
             throws Exception {
         // Given
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.DISSOLUTION);
@@ -1607,9 +1625,12 @@ class CertificateItemsControllerIntegrationTest {
 
         repository.save(savedItem);
 
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
                         asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
+
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1634,6 +1655,8 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeEmailCopy(true);
         options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
+
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1668,6 +1691,7 @@ class CertificateItemsControllerIntegrationTest {
         options.setIncludeEmailCopy(true);
         options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
@@ -1779,6 +1803,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,

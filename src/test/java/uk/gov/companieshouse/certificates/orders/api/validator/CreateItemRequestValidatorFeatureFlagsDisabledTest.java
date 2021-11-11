@@ -1,5 +1,9 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +23,14 @@ import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-
 @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
 @SpringBootTest
 @ActiveProfiles("feature-flags-disabled")
 class CreateItemRequestValidatorFeatureFlagsDisabledTest {
 
-    @Autowired
-    private CreateItemRequestValidator validatorUnderTest;
-    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
+    private static final IncludeAddressRecordsType
+            INCLUDE_ADDRESS_RECORDS_TYPE =
+            IncludeAddressRecordsType.CURRENT;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final boolean INCLUDE_ADDRESS = true;
@@ -54,9 +53,13 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
 
         REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
-        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(
+                INCLUDE_ADDRESS_RECORDS_TYPE);
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
     }
+
+    @Autowired
+    private CreateItemRequestValidator validatorUnderTest;
 
     @Test
     @DisplayName("Request is valid if company type is llp and appropriate fields set")
@@ -82,22 +85,28 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemDTO.setItemOptions(itemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(certificateItemDTO));
 
         //then
-        assertThat(errors, containsInAnyOrder("include_designated_member_details: must not exist when company type is llp",
+        assertThat(errors, containsInAnyOrder(
+                "include_designated_member_details: must not exist when company type is llp",
                 "include_member_details: must not exist when company type is llp"));
     }
 
     @Test
-    @DisplayName("Request is valid if company type is limited-partnership and appropriate fields set")
+    @DisplayName(
+            "Request is valid if company type is limited-partnership and appropriate fields set")
     void correctlyErrorWhenCompanyTypeIsLPAndLPSpecificFieldsAreSet() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
         final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
         final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
-        final PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
+        final PrincipalPlaceOfBusinessDetails
+                principalPlaceOfBusinessDetails =
+                new PrincipalPlaceOfBusinessDetails();
         generalPartnerDetails.setIncludeBasicInformation(true);
         limitedPartnerDetails.setIncludeBasicInformation(true);
         principalPlaceOfBusinessDetails.setIncludeDates(true);
@@ -110,11 +119,16 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemDTO.setItemOptions(itemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(certificateItemDTO));
 
         //then
-        assertThat(errors, containsInAnyOrder("include_general_partner_details: must not exist when company type is limited-partnership",
-                "include_limited_partner_details: must not exist when company type is limited-partnership",
+        assertThat(errors, containsInAnyOrder(
+                "include_general_partner_details: must not exist when company type is "
+                        + "limited-partnership",
+                "include_limited_partner_details: must not exist when company type is "
+                        + "limited-partnership",
                 "include_principal_place_of_business_details: must not exist when company type is limited-partnership",
                 "include_general_nature_of_business_information: must not exist when company type is limited-partnership"));
     }

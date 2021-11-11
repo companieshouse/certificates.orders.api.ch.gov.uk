@@ -97,7 +97,7 @@ public class CertificateItemsController {
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(
-                new RequestValidatableImpl(CompanyStatus.getEnumValue(companyProfile.getCompanyStatus()),
+                new RequestValidatableImpl(companyProfile.getCompanyStatus(),
                         certificateItemDTO.getId(), certificateItemDTO.getItemOptions()));
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
@@ -181,7 +181,7 @@ public class CertificateItemsController {
 
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
                 new RequestValidatableImpl(
-                        CompanyStatus.getEnumValue(companyProfile.getCompanyStatus()),
+                        companyProfile.getCompanyStatus(),
                         patchedItem.getId(),
                         patchedItem.getItemOptions()));
         if (!patchedErrors.isEmpty()) {

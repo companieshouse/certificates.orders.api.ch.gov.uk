@@ -26,7 +26,8 @@ class CertificateOptionsValidatorTest {
         CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer);
 
         // When
-        List<String> result = validator.validate(certificateItemOptions);
+        List<String> result =
+                validator.validate(new RequestValidatableImpl(certificateItemOptions));
 
         // Then
         assertThat(result, containsInAnyOrder("company type: is a mandatory field"));
@@ -40,7 +41,8 @@ class CertificateOptionsValidatorTest {
         CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer);
 
         // When
-        List<String> result = validator.validate(certificateItemOptions);
+        List<String> result =
+                validator.validate(new RequestValidatableImpl(certificateItemOptions));
 
         // Then
         assertThat(result, is(empty()));

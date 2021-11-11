@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -11,18 +10,12 @@ public enum CompanyStatus {
     LIQUIDATION("liquidation"),
     OTHER("other");
 
-    private static final Map<String, CompanyStatus> enumValues = new HashMap<>();
+    private static final Map<String, CompanyStatus> enumValues;
 
     static {
-        Arrays.stream(values()).filter(
-                value -> value != OTHER
-        ).collect(Collectors.toMap(
-                CompanyStatus::toString, Function.identity()
-        ));
-
-        /*for (CompanyStatus companyStatus : values()) {
-            enumValues.put(companyStatus.name, companyStatus);
-        }*/
+        enumValues = Arrays.stream(values()).filter(value -> value != OTHER).collect(
+                Collectors.toMap(CompanyStatus::toString, Function.identity())
+        );
     }
 
     private final String name;
@@ -32,6 +25,11 @@ public enum CompanyStatus {
     }
 
     public static CompanyStatus getEnumValue(String companyStatus) {
-        return enumValues.getOrDefault(companyStatus, OTHER);
+        return companyStatus != null ? enumValues.getOrDefault(companyStatus, OTHER) : null;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

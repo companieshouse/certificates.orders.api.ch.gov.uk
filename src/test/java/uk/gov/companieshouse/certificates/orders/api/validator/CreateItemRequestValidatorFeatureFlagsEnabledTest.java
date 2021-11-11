@@ -1,5 +1,17 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
+
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,19 +35,6 @@ import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddre
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
-import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
-
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
@@ -44,14 +43,13 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 @ActiveProfiles("feature-flags-enabled")
 class CreateItemRequestValidatorFeatureFlagsEnabledTest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorFeatureFlagsEnabledTest.class.getName());
-
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
-
-    @Autowired
-    private CreateItemRequestValidator validatorUnderTest;
-    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
+    private static final Logger
+            LOGGER =
+            LoggerFactory.getLogger(
+                    CreateItemRequestValidatorFeatureFlagsEnabledTest.class.getName());
+    private static final IncludeAddressRecordsType
+            INCLUDE_ADDRESS_RECORDS_TYPE =
+            IncludeAddressRecordsType.CURRENT;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final boolean INCLUDE_ADDRESS = true;
@@ -59,7 +57,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
     private static final boolean INCLUDE_BASIC_INFORMATION = true;
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
-    private static final boolean INCLUDE_NATIONALITY= false;
+    private static final boolean INCLUDE_NATIONALITY = false;
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean INCLUDE_DATES = true;
 
@@ -74,10 +72,15 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
 
         REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
-        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(
+                INCLUDE_ADDRESS_RECORDS_TYPE);
         REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
     }
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+    @Autowired
+    private CreateItemRequestValidator validatorUnderTest;
 
     @BeforeEach
     void setUp() {
@@ -92,7 +95,10 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setId("1");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, contains("id: must be null in a create item request"));
@@ -105,7 +111,10 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         final CertificateItemDTO item = new CertificateItemDTO();
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
@@ -122,7 +131,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         options.setCompanyType("any");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -143,21 +156,26 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         options.setCompanyType("any");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
     }
 
     @Test
-    @DisplayName("Company objects, general nature of business information, good standing, registered office details, secretary details or director details" +
-        "should not be requested for dissolution")
+    @DisplayName(
+            "Company objects, general nature of business information, good standing, registered "
+                    + "office details, secretary details or director details"
+                    +
+                    "should not be requested for dissolution")
     void certainCompanyObjectsMustNotBeRequestedForDissolution() {
         // Given
         final CertificateItemDTO item = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
-        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
         options.setCertificateType(DISSOLUTION);
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
@@ -174,31 +192,46 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, containsInAnyOrder(
-            "include_company_objects_information: must not exist when certificate type is dissolution",
-            "include_good_standing_information: must not exist when certificate type is dissolution",
-            "include_general_nature_of_business_information: must not exist when certificate type is dissolution",
-            "include_registered_office_address_details: must not exist when certificate type is dissolution",
-            "include_secretary_details: must not exist when certificate type is dissolution",
-            "include_director_details: must not exist when certificate type is dissolution",
-            "include_member_details: must not exist when certificate type is dissolution",
-            "include_designated_member_details: must not exist when certificate type is dissolution",
-            "include_general_partner_details: must not exist when certificate type is dissolution",
-            "include_limited_partner_details: must not exist when certificate type is dissolution",
-            "include_principal_place_of_business_details: must not exist when certificate type is dissolution",
-            "include_member_details: must not exist when company type is limited",
-            "include_designated_member_details: must not exist when company type is limited",
-            "include_general_partner_details: must not exist when company type is limited",
-            "include_limited_partner_details: must not exist when company type is limited",
-            "include_principal_place_of_business_details: must not exist when company type is limited",
-            "include_general_nature_of_business_information: must not exist when company type is limited"));
+                "include_company_objects_information: must not exist when certificate type is "
+                        + "dissolution",
+                "include_good_standing_information: must not exist when certificate type is "
+                        + "dissolution",
+                "include_general_nature_of_business_information: must not exist when certificate "
+                        + "type is dissolution",
+                "include_registered_office_address_details: must not exist when certificate type "
+                        + "is dissolution",
+                "include_secretary_details: must not exist when certificate type is dissolution",
+                "include_director_details: must not exist when certificate type is dissolution",
+                "include_member_details: must not exist when certificate type is dissolution",
+                "include_designated_member_details: must not exist when certificate type is "
+                        + "dissolution",
+                "include_general_partner_details: must not exist when certificate type is "
+                        + "dissolution",
+                "include_limited_partner_details: must not exist when certificate type is "
+                        + "dissolution",
+                "include_principal_place_of_business_details: must not exist when certificate "
+                        + "type is dissolution",
+                "include_member_details: must not exist when company type is limited",
+                "include_designated_member_details: must not exist when company type is limited",
+                "include_general_partner_details: must not exist when company type is limited",
+                "include_limited_partner_details: must not exist when company type is limited",
+                "include_principal_place_of_business_details: must not exist when company type is"
+                        + " limited",
+                "include_general_nature_of_business_information: must not exist when company type"
+                        + " is limited"));
     }
 
     @Test
-    @DisplayName("Company objects and good standing set as null when certificate type is dissolution")
+    @DisplayName(
+            "Company objects and good standing set as null when certificate type is dissolution")
     void companyObjectsGoodStandingAsNullWhenRequestedForDissolution() {
         // Given
         final CertificateItemDTO item = new CertificateItemDTO();
@@ -210,7 +243,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, empty());
@@ -228,7 +265,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         options.setCompanyType("any");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
@@ -246,7 +287,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         options.setCompanyType("any");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, contains(
@@ -284,28 +329,42 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, contains(
                 "include_designated_member_details: must not exist when company type is limited",
                 "include_member_details: must not exist when company type is limited",
-                "director_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
+                "director_details: include_address, include_appointment_date, "
+                        + "include_country_of_residence,"
+                        + " include_nationality, include_occupation must not be true when "
+                        + "include_basic_information"
                         + " is false",
-                "director_details: include_dob_type must not be non-null when include_basic_information is false",
-                "secretary_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
+                "director_details: include_dob_type must not be non-null when "
+                        + "include_basic_information is false",
+                "secretary_details: include_address, include_appointment_date, "
+                        + "include_country_of_residence,"
+                        + " include_nationality, include_occupation must not be true when "
+                        + "include_basic_information"
                         + " is false",
-                "secretary_details: include_dob_type must not be non-null when include_basic_information is false",
-                "designated_member_details: include_address, include_appointment_date, include_country_of_residence"
+                "secretary_details: include_dob_type must not be non-null when "
+                        + "include_basic_information is false",
+                "designated_member_details: include_address, include_appointment_date, "
+                        + "include_country_of_residence"
                         + " must not be true when include_basic_information"
                         + " is false",
-                "designated_member_details: include_dob_type must not be non-null when include_basic_information is false",
-                "member_details: include_address, include_appointment_date, include_country_of_residence"
+                "designated_member_details: include_dob_type must not be non-null when "
+                        + "include_basic_information is false",
+                "member_details: include_address, include_appointment_date, "
+                        + "include_country_of_residence"
                         + " must not be true when include_basic_information"
                         + " is false",
-                "member_details: include_dob_type must not be non-null when include_basic_information is false"));
+                "member_details: include_dob_type must not be non-null when "
+                        + "include_basic_information is false"));
     }
 
     @Test
@@ -328,7 +387,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
@@ -358,21 +421,27 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         certificateItemDTO.setItemOptions(itemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                certificateItemDTO));
 
         //then
         assertThat(errors, is(empty()));
     }
 
     @Test
-    @DisplayName("Request is valid if company type is limited-partnership and appropriate fields set")
+    @DisplayName(
+            "Request is valid if company type is limited-partnership and appropriate fields set")
     void allowGeneralPartnersLimitedPartnersPrincipalPlaceOfBusinessGeneralNatureOfBusinessInformationFieldValuesForLimitedPartnerships() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
         final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
         final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
-        final PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
+        final PrincipalPlaceOfBusinessDetails
+                principalPlaceOfBusinessDetails =
+                new PrincipalPlaceOfBusinessDetails();
         generalPartnerDetails.setIncludeBasicInformation(true);
         limitedPartnerDetails.setIncludeBasicInformation(true);
         principalPlaceOfBusinessDetails.setIncludeDates(true);
@@ -385,7 +454,10 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         certificateItemDTO.setItemOptions(itemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                certificateItemDTO));
 
         //then
         assertThat(errors, is(empty()));
@@ -408,13 +480,19 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         item.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, contains(
-                "director_details: include_address, include_nationality, include_occupation must not be true when "
+                "director_details: include_address, include_nationality, include_occupation must "
+                        + "not be true when "
                         + "include_basic_information is false",
-                "secretary_details: include_address, include_nationality, include_occupation must not be true when "
+                "secretary_details: include_address, include_nationality, include_occupation must"
+                        + " not be true when "
                         + "include_basic_information is false"));
     }
 
@@ -425,7 +503,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         final CertificateItemDTO item = new CertificateItemDTO();
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
@@ -441,7 +523,11 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         options.setCompanyType("any");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(item);
+        final List<String>
+                errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                item));
 
         // Then
         assertThat(errors, is(empty()));
@@ -453,14 +539,19 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
-        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        final DirectorOrSecretaryDetails
+                directorOrSecretaryDetails =
+                new DirectorOrSecretaryDetails();
         certificateItemOptions.setCompanyType("llp");
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemDTO.setItemOptions(certificateItemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(
+                                certificateItemDTO));
 
         //then
         assertThat(errors, contains(
@@ -470,19 +561,25 @@ class CreateItemRequestValidatorFeatureFlagsEnabledTest {
     }
 
     @Test
-    @DisplayName("Request is invalid if directors' or secretaries' details specified for an limited-partnership")
+    @DisplayName(
+            "Request is invalid if directors' or secretaries' details specified for an "
+                    + "limited-partnership")
     void rejectDirectorsOrSecretariesDetailsIfSpecifiedForLimitedPartnership() {
         //given
         final CertificateItemDTO certificateItemDTO = new CertificateItemDTO();
         final CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
-        final DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        final DirectorOrSecretaryDetails
+                directorOrSecretaryDetails =
+                new DirectorOrSecretaryDetails();
         certificateItemOptions.setCompanyType("limited-partnership");
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemDTO.setItemOptions(certificateItemOptions);
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(certificateItemDTO);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(
+                        new RequestValidatableImpl(certificateItemDTO));
 
         //then
         assertThat(errors, contains(

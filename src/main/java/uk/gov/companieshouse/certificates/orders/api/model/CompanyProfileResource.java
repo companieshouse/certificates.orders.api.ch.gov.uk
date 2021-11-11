@@ -1,14 +1,17 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
 import java.util.Objects;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 public class CompanyProfileResource {
 
-    private String companyName;
-    private String companyType;
-    private String companyStatus;
+    private final String companyName;
+    private final String companyType;
+    private final CompanyStatus companyStatus;
 
-    public CompanyProfileResource(String companyName, String companyType, String companyStatus) {
+    public CompanyProfileResource(String companyName,
+            String companyType,
+            CompanyStatus companyStatus) {
         this.companyName = companyName;
         this.companyType = companyType;
         this.companyStatus = companyStatus;
@@ -22,7 +25,7 @@ public class CompanyProfileResource {
         return companyType;
     }
 
-    public String getCompanyStatus() {
+    public CompanyStatus getCompanyStatus() {
         return companyStatus;
     }
 
@@ -42,5 +45,14 @@ public class CompanyProfileResource {
     @Override
     public int hashCode() {
         return Objects.hash(companyName, companyType, companyStatus);
+    }
+
+    @Override
+    public String toString() {
+        return "CompanyProfileResource{" +
+                "companyName='" + companyName + '\'' +
+                ", companyType='" + companyType + '\'' +
+                ", companyStatus=" + companyStatus +
+                '}';
     }
 }

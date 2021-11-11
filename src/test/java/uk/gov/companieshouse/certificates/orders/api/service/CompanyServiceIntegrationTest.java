@@ -18,6 +18,7 @@ import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 
 import java.util.List;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.util.Collections.singletonList;
@@ -100,7 +101,10 @@ public class CompanyServiceIntegrationTest {
     public void getCompanyProfileReturnsSuccessfully () throws JsonProcessingException {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
-        final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource("THE GIRLS' DAY SCHOOL TRUST", "limited");
+        final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource(
+                "THE "
+                + "GIRLS' DAY SCHOOL TRUST", "limited",
+                null);
 
         // Given
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");

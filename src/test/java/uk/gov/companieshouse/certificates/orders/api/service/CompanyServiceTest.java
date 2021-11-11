@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 
 import java.io.IOException;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -87,12 +88,17 @@ public class CompanyServiceTest {
         when(response.getData()).thenReturn(data);
         when(data.getCompanyName()).thenReturn("TEST LIMITED");
         when(data.getType()).thenReturn("limited-partnership");
+        when(data.getCompanyStatus()).thenReturn("active");
 
         //when
         CompanyProfileResource resource = serviceUnderTest.getCompanyProfile("12345678");
 
         //then
-        assertThat(resource, is(new CompanyProfileResource("TEST LIMITED", "limited-partnership")));
+        assertThat(resource, is(new CompanyProfileResource(
+                "TEST LIMITED",
+                "limited-partnership",
+                        CompanyStatus.ACTIVE
+                )));
         assertThat(resource.getCompanyName(), is("TEST LIMITED"));
         assertThat(resource.getCompanyType(), is("limited-partnership"));
         verify(handler).get("/company/12345678");

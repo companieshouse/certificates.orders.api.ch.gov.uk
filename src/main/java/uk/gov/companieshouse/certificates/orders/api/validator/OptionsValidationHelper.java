@@ -65,14 +65,14 @@ class OptionsValidationHelper {
     }
 
     private void verifyCompanyStatus() {
-        if ("active".equals(requestValidatable.getCompanyStatus()) &&
+        if (CompanyStatus.ACTIVE == requestValidatable.getCompanyStatus() &&
                 options.getLiquidatorDetails() != null &&
                 Boolean.TRUE.equals(options.getLiquidatorDetails().getIncludeBasicInformation())) {
             errors.add(String.format("include_liquidator_details: must not exist when "
                     + "company status is %s", requestValidatable.getCompanyStatus()));
         }
 
-        if ("liquidation".equals(requestValidatable.getCompanyStatus()) &&
+        if (CompanyStatus.LIQUIDATION == requestValidatable.getCompanyStatus() &&
                 Boolean.TRUE.equals(options.getIncludeGoodStandingInformation())) {
             errors.add(String.format("include_good_standing_information: must not exist when "
                     + "company status is %s", requestValidatable.getCompanyStatus()));

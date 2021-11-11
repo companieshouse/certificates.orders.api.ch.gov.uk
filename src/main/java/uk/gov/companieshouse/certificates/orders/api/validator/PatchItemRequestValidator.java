@@ -75,5 +75,4 @@ public class PatchItemRequestValidator extends RequestValidator {
     public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
         return getValidationErrors(requestValidatable, converter);
     }
-
 }

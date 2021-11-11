@@ -254,7 +254,8 @@ class PatchItemRequestValidatorTest {
         final CertificateItem patchedItem = new CertificateItem();
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
@@ -271,7 +272,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -292,7 +294,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
@@ -317,7 +320,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl( patchedItem));
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -340,7 +344,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
@@ -358,7 +363,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, contains(
@@ -385,7 +391,8 @@ class PatchItemRequestValidatorTest {
         patchedItem.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, contains(
@@ -419,7 +426,8 @@ class PatchItemRequestValidatorTest {
         patchedItem.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
@@ -442,7 +450,8 @@ class PatchItemRequestValidatorTest {
         patchedItem.setItemOptions(options);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, contains(
@@ -459,7 +468,8 @@ class PatchItemRequestValidatorTest {
         final CertificateItem patchedItem = new CertificateItem();
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
@@ -475,7 +485,8 @@ class PatchItemRequestValidatorTest {
         options.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patchedItem);
+        final List<String> errors =
+                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
 
         // Then
         assertThat(errors, is(empty()));
