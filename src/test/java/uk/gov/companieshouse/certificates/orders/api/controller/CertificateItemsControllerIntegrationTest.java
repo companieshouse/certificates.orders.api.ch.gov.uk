@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -34,6 +35,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecords
 import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.model.Links;
+import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
@@ -81,6 +83,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
  */
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("feature-flags-enabled")
 class CertificateItemsControllerIntegrationTest {
 
     @Autowired
@@ -1821,6 +1824,242 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorDetailsSupplied()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
+        options.setLiquidatorDetails(liquidatorDetails);
+        options.setCompanyType("limited");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("include_liquidator_details: must not exist when "
+                                + "company status is active"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void correctlyErrorsWhenLiquidatedLimitedCompanyAndGoodStandingInformationSupplied()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        options.setIncludeGoodStandingInformation(true);
+        options.setCompanyType("limited");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("include_good_standing_information: must not exist when "
+                                + "company status is liquidation"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorDetailsSupplied()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
+        options.setLiquidatorDetails(liquidatorDetails);
+        options.setCompanyType("llp");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("include_liquidator_details: must not exist when "
+                                + "company status is active"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void correctlyErrorsWhenLiquidatedLLPCompanyAndGoodStandingInformationSupplied()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        options.setIncludeGoodStandingInformation(true);
+        options.setCompanyType("llp");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("include_good_standing_information: must not exist when "
+                                + "company status is liquidation"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void correctlyErrorsWhenLPCompanyAndLiquidatorDetailsSupplied()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
+        options.setLiquidatorDetails(liquidatorDetails);
+        options.setCompanyType("limited-partnership");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("include_liquidator_details: must not exist when "
+                                + "company type is limited-partnership"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void correctlyErrorsWhenLPCompanyAndCompanyStatusLiquidation()
+            throws Exception {
+
+        // Given
+        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
+        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION);
+        options.setCompanyType("limited-partnership");
+        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setQuantity(QUANTITY);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        final ApiError expectedValidationError =
+                new ApiError(BAD_REQUEST,
+                        asList("company_status: liquidation not valid for company "
+                                + "type limited-partnership"));
+
+        // When and Then
+        mockMvc.perform(post(CERTIFICATES_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
     /**

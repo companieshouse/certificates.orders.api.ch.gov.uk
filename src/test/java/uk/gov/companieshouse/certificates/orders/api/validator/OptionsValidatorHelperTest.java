@@ -125,7 +125,7 @@ class OptionsValidatorHelperTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
         options.setLiquidatorDetails(liquidatorDetails);
-        options.setCompanyType("limited partnership");
+        options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
                         new RequestValidatableImpl(CompanyStatus.ACTIVE, options));
@@ -136,7 +136,7 @@ class OptionsValidatorHelperTest {
 
         // Then
         assertThat(errors, hasItem("include_liquidator_details: must not exist when "
-                + "company type is limited partnership"));
+                + "company type is limited-partnership"));
     }
 
     @Test
@@ -145,7 +145,7 @@ class OptionsValidatorHelperTest {
         final CertificateItemOptions options = new CertificateItemOptions();
             LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
             options.setLiquidatorDetails(liquidatorDetails);
-            options.setCompanyType("limited partnership");
+            options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
                         new RequestValidatableImpl(CompanyStatus.LIQUIDATION, options));
@@ -156,6 +156,6 @@ class OptionsValidatorHelperTest {
 
         // Then
         assertThat(errors, hasItem("company_status: liquidation not valid for company "
-                + "type limited partnership"));
+                + "type limited-partnership"));
     }
 }
