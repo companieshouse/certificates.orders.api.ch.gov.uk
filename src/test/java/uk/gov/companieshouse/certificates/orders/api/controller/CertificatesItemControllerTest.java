@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
@@ -103,9 +102,7 @@ class CertificatesItemControllerTest {
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
 
         // When
-        final ResponseEntity<Object>
-                response =
-                controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
+        final ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
                         TOKEN_REQUEST_ID_VALUE);
 
         // Then
@@ -118,9 +115,7 @@ class CertificatesItemControllerTest {
     @DisplayName("Update request reports resource not found")
     void updateReportsResourceNotFound() {
         when(certificateItemService.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
-        final ResponseEntity<Object>
-                response =
-                controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
+        final ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
                         TOKEN_REQUEST_ID_VALUE);
         assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
 
@@ -155,9 +150,7 @@ class CertificatesItemControllerTest {
         when(certificateItemService.getCertificateItemWithCosts(ITEM_ID)).thenReturn(
                 Optional.of(item));
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
-        ResponseEntity<Object>
-                response =
-                controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
+        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertThat(response.getBody(), is(dto));
@@ -168,9 +161,7 @@ class CertificatesItemControllerTest {
     void getCertificateItemNotFound() {
         when(certificateItemService.getCertificateItemWithCosts(ITEM_ID)).thenReturn(
                 Optional.empty());
-        ResponseEntity<Object>
-                response =
-                controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
+        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
     }

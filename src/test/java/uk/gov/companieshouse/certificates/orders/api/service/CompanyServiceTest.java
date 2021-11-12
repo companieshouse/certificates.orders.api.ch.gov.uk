@@ -97,8 +97,8 @@ public class CompanyServiceTest {
         assertThat(resource, is(new CompanyProfileResource(
                 "TEST LIMITED",
                 "limited-partnership",
-                        CompanyStatus.ACTIVE
-                )));
+                CompanyStatus.ACTIVE
+        )));
         assertThat(resource.getCompanyName(), is("TEST LIMITED"));
         assertThat(resource.getCompanyType(), is("limited-partnership"));
         verify(handler).get("/company/12345678");

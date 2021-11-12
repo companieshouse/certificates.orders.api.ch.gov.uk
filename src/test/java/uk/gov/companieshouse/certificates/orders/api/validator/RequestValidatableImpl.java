@@ -9,6 +9,13 @@ class RequestValidatableImpl implements RequestValidatable {
     private final CompanyStatus companyStatus;
     private final CertificateItemOptions certificateItemOptions;
 
+    public RequestValidatableImpl(CompanyStatus companyStatus,
+            CertificateItemOptions certificateItemOptions) {
+        this.certificateId = null;
+        this.companyStatus = companyStatus;
+        this.certificateItemOptions = certificateItemOptions;
+    }
+
     public RequestValidatableImpl(CertificateItem certificateItem) {
         this.certificateId = certificateItem.getId();
         this.companyStatus = CompanyStatus.ACTIVE;

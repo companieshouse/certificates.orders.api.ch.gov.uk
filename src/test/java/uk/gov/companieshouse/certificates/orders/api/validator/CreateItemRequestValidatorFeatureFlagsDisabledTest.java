@@ -104,9 +104,7 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         final CertificateItemOptions itemOptions = new CertificateItemOptions();
         final GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
         final LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
-        final PrincipalPlaceOfBusinessDetails
-                principalPlaceOfBusinessDetails =
-                new PrincipalPlaceOfBusinessDetails();
+        final PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
         generalPartnerDetails.setIncludeBasicInformation(true);
         limitedPartnerDetails.setIncludeBasicInformation(true);
         principalPlaceOfBusinessDetails.setIncludeDates(true);
