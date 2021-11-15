@@ -7,15 +7,13 @@ import java.util.stream.Collectors;
 
 public enum CompanyStatus {
     ACTIVE("active"),
-    LIQUIDATION("liquidation"),
-    OTHER("other");
+    LIQUIDATION("liquidation");
 
     private static final Map<String, CompanyStatus> enumValues;
 
     static {
-        enumValues = Arrays.stream(values()).filter(value -> value != OTHER).collect(
-                Collectors.toMap(CompanyStatus::toString, Function.identity())
-        );
+        enumValues = Arrays.stream(values())
+                .collect(Collectors.toMap(CompanyStatus::toString, Function.identity()));
     }
 
     private final String name;
@@ -25,7 +23,7 @@ public enum CompanyStatus {
     }
 
     public static CompanyStatus getEnumValue(String companyStatus) {
-        return companyStatus != null ? enumValues.getOrDefault(companyStatus, OTHER) : null;
+        return companyStatus != null ? enumValues.get(companyStatus) : null;
     }
 
     @Override
