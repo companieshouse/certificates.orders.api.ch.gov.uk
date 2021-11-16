@@ -34,7 +34,7 @@ class OptionsValidationHelper {
     void validateLimitedPartnershipOptions() {
         notLimitedCompanyDetails();
         notLLPDetails();
-        if (options.getLiquidatorDetails() != null) {
+        if (options.getLiquidatorsDetails() != null) {
             errors.add(String.format("include_liquidator_details: must not exist when "
                     + "company type is %s", options.getCompanyType()));
         }
@@ -72,7 +72,7 @@ class OptionsValidationHelper {
 
     private void verifyCompanyStatus() {
         if (CompanyStatus.ACTIVE == requestValidatable.getCompanyStatus() &&
-                options.getLiquidatorDetails() != null) {
+                options.getLiquidatorsDetails() != null) {
             errors.add(String.format("include_liquidator_details: must not exist when "
                     + "company status is %s", requestValidatable.getCompanyStatus()));
         }

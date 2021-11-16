@@ -3,9 +3,10 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 import com.google.gson.Gson;
 import java.util.Objects;
 
-public class LiquidatorDetails implements BasicInformationIncludable {
+public class LiquidatorsDetails implements BasicInformationIncludable {
     private Boolean includeBasicInformation;
 
+    @Override
     public Boolean getIncludeBasicInformation() {
         return includeBasicInformation;
     }
@@ -27,7 +28,7 @@ public class LiquidatorDetails implements BasicInformationIncludable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LiquidatorDetails that = (LiquidatorDetails) o;
+        LiquidatorsDetails that = (LiquidatorsDetails) o;
         return Objects.equals(includeBasicInformation, that.includeBasicInformation);
     }
 

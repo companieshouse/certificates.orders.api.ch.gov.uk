@@ -91,7 +91,7 @@ public class CertificateItemsController {
                                                         HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
-        LOGGER.infoRequest(request, "create certficate item request", logMap);
+        LOGGER.infoRequest(request, "create certificate item request", logMap);
 
         String companyNumber = certificateItemDTO.getCompanyNumber();
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);

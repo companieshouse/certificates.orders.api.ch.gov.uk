@@ -35,7 +35,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecords
 import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.model.Links;
-import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
@@ -1835,8 +1835,8 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         options.setCompanyType("limited");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);
@@ -1914,8 +1914,8 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         options.setCompanyType("llp");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);
@@ -1993,8 +1993,8 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         options.setCompanyType("limited-partnership");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);

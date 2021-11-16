@@ -49,7 +49,7 @@ public class CertificateItemOptions {
 
     private String companyType;
 
-    private LiquidatorDetails liquidatorDetails;
+    private LiquidatorsDetails liquidatorsDetails;
 
     public CertificateType getCertificateType() {
         return certificateType;
@@ -211,12 +211,12 @@ public class CertificateItemOptions {
         this.companyType = companyType;
     }
 
-    public LiquidatorDetails getLiquidatorDetails() {
-        return liquidatorDetails;
+    public LiquidatorsDetails getLiquidatorsDetails() {
+        return liquidatorsDetails;
     }
 
-    public void setLiquidatorDetails(LiquidatorDetails liquidatorDetails) {
-        this.liquidatorDetails = liquidatorDetails;
+    public void setLiquidatorsDetails(LiquidatorsDetails liquidatorsDetails) {
+        this.liquidatorsDetails = liquidatorsDetails;
     }
 
     @Override

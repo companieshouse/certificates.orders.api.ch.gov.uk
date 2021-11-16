@@ -9,7 +9,7 @@ import static org.hamcrest.Matchers.is;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 
 class OptionsValidatorHelperTest {
 
@@ -48,8 +48,8 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
                         new RequestValidatableImpl(CompanyStatus.ACTIVE, options));
@@ -85,8 +85,8 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         options.setCompanyType("llp");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
@@ -123,8 +123,8 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenLPCompanyAndLiquidatorDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
-        LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-        options.setLiquidatorDetails(liquidatorDetails);
+        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+        options.setLiquidatorDetails(liquidatorsDetails);
         options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
@@ -143,8 +143,8 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenLPCompanyAndCompanyStatusLiquidation() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
-            LiquidatorDetails liquidatorDetails = new LiquidatorDetails();
-            options.setLiquidatorDetails(liquidatorDetails);
+            LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
+            options.setLiquidatorDetails(liquidatorsDetails);
             options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
