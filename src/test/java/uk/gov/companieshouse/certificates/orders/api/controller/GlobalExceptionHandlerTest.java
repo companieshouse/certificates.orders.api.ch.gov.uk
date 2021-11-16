@@ -28,7 +28,7 @@ import static org.springframework.http.HttpStatus.MULTI_STATUS;
  * Unit tests the {@link GlobalExceptionHandler} class.
  */
 @ExtendWith(MockitoExtension.class)
-public class GlobalExceptionHandlerTest {
+class GlobalExceptionHandlerTest {
 
     private static final String OBJECT1 =  "object1";
     private static final String OBJECT2 =  "object2";

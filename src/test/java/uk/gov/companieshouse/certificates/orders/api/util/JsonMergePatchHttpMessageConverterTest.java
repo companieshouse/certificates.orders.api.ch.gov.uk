@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
  * Unit tests the {@link JsonMergePatchHttpMessageConverter} class.
  */
 @ExtendWith(MockitoExtension.class)
-public class JsonMergePatchHttpMessageConverterTest {
+class JsonMergePatchHttpMessageConverterTest {
 
     private static final MediaType SUPPORTED_MEDIA_TYPE = PatchMediaType.APPLICATION_MERGE_PATCH;
 

@@ -47,7 +47,7 @@ import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.CE
  */
 @ExtendWith(SpringExtension.class)
 @SpringJUnitConfig(CertificateItemMapperTest.Config.class)
-public class CertificateItemMapperTest {
+class CertificateItemMapperTest {
 
     private static final String ID = "CHS00000000000000001";
     private static final String COMPANY_NUMBER = "00006444";

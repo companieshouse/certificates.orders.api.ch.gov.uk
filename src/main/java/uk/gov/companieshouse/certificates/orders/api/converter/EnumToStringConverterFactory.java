@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.converter;
 
+import javax.annotation.Nonnull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.data.convert.WritingConverter;
@@ -7,16 +8,19 @@ import org.springframework.data.convert.WritingConverter;
 import static uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
 
 @WritingConverter
-public final class EnumToStringConverterFactory implements ConverterFactory<Enum, String> {
+public final class EnumToStringConverterFactory implements ConverterFactory<Enum<?>, String> {
 
     @Override
-    public <T extends String> Converter<Enum, T> getConverter(Class<T> targetType) {
-        return new EnumToStringConverter();
+    @Nonnull
+    public <T extends String> Converter<Enum<?>, T> getConverter(@Nonnull Class<T> targetType) {
+        return new EnumToStringConverter<>();
     }
 
-    private final class EnumToStringConverter<T extends Enum> implements Converter<T, String> {
-        public String convert(T source) {
-            return convertEnumValueNameToJson(source);
+    private static class EnumToStringConverter<T extends String> implements Converter<Enum<?>, T> {
+
+        @SuppressWarnings("unchecked")
+        public T convert(@Nonnull Enum source) {
+            return (T) convertEnumValueNameToJson(source);
         }
     }
 }

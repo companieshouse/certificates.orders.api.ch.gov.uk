@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.util.security.SecurityConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAuthorisationInterceptorTest {
+class UserAuthorisationInterceptorTest {
 
     @InjectMocks
     private UserAuthorisationInterceptor userAuthorisationInterceptor;
@@ -52,7 +52,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Authorise if authenticated user created the certificate when request method is GET")
-    public void willAuthoriseIfAuthorisedUserCreatedTheCertificateWhenRequestMethodIsGet() {
+    void willAuthoriseIfAuthorisedUserCreatedTheCertificateWhenRequestMethodIsGet() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
@@ -71,7 +71,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Authorise if request method is POST for a user")
-    public void willAuthoriseIfPostAndOAuth2() {
+    void willAuthoriseIfPostAndOAuth2() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
@@ -80,7 +80,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not authorise if authenticated user did not create the certificate when request method is GET")
-    public void doesNotAuthoriseIfAuthenticatedUserDidNotCreateTheCertificateWhenRequestMethodGet() {
+    void doesNotAuthoriseIfAuthenticatedUserDidNotCreateTheCertificateWhenRequestMethodGet() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
@@ -99,7 +99,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not Authorise if request method is GET and there is no user")
-    public void willNotAuthoriseIfMethodIsGetAndNoIdentity() {
+    void willNotAuthoriseIfMethodIsGetAndNoIdentity() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
@@ -108,7 +108,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not authorise if Certificate is not found when request method is GET for a user")
-    public void willNotAuthoriseIfCertificateIsNotFoundAndOAuth2() {
+    void willNotAuthoriseIfCertificateIsNotFoundAndOAuth2() {
         Map<String, String> map = new HashMap<>();
         map.put("id", ITEM_ID);
 
@@ -123,14 +123,14 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not Authorise an external API key is used")
-    public void willNotAuthoriseIfRequestIsExternalAPIKey() {
+    void willNotAuthoriseIfRequestIsExternalAPIKey() {
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
     @DisplayName("Authorise if GET and an internal API key is used")
-    public void willAuthoriseIfRequestIsGetAndInternalAPIKey() {
+    void willAuthoriseIfRequestIsGetAndInternalAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.GET.toString());
         doReturn("request-id").when(request).getHeader("X-Request-ID");
         doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
@@ -140,7 +140,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not Authorise if POST and an internal API key is used")
-    public void willNotAuthoriseIfRequestIsPostAndInternalAPIKey() {
+    void willNotAuthoriseIfRequestIsPostAndInternalAPIKey() {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         doReturn("request-id").when(request).getHeader("X-Request-ID");
         doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
@@ -150,7 +150,7 @@ public class UserAuthorisationInterceptorTest {
 
     @Test
     @DisplayName("Does not Authorise if POST and unrecognised identity type")
-    public void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
+    void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(INVALID_IDENTITY_TYPE_VALUE);
         assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }

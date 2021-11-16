@@ -42,7 +42,7 @@ class CertificateOptionsValidator {
     /**
      * Performs field validation on the supplied certificate item options
      *
-     * @param TODO certificate order item options
+     * @param requestValidatable to be validated
      * @return list containing any errors; an empty list if no validation errors occur
      */
     List<String> validate(RequestValidatable requestValidatable) {

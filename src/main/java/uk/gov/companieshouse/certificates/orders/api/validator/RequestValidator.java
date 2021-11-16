@@ -37,7 +37,7 @@ public class RequestValidator {
     /**
      * Validates the options provided, returning any errors found.
      *
-     * @param TODO   the options to be validated
+     * @param requestValidatable to be validated
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the errors found, which will be empty if the item is found to be valid
      */

@@ -45,11 +45,11 @@ class OptionsValidatorHelperTest {
     }
 
     @Test
-    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorDetailsSupplied() {
+    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorsDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
                         new RequestValidatableImpl(CompanyStatus.ACTIVE, options));
@@ -82,11 +82,11 @@ class OptionsValidatorHelperTest {
     }
 
     @Test
-    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorDetailsSupplied() {
+    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorsDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         options.setCompanyType("llp");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
@@ -120,11 +120,11 @@ class OptionsValidatorHelperTest {
     }
 
     @Test
-    void correctlyErrorsWhenLPCompanyAndLiquidatorDetailsSupplied() {
+    void correctlyErrorsWhenLPCompanyAndLiquidatorsDetailsSupplied() {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(
@@ -144,7 +144,7 @@ class OptionsValidatorHelperTest {
         // Given
         final CertificateItemOptions options = new CertificateItemOptions();
             LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-            options.setLiquidatorDetails(liquidatorsDetails);
+            options.setLiquidatorsDetails(liquidatorsDetails);
             options.setCompanyType("limited-partnership");
         OptionsValidationHelper helper =
                 new OptionsValidationHelper(

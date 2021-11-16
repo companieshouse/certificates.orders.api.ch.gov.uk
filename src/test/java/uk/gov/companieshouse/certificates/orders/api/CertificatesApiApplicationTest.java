@@ -68,6 +68,7 @@ class CertificatesApiApplicationTest {
 	@DisplayName("Application context loads successfully")
 	void contextLoads() {
 		// No implementation required here to test that context loads.
+		assertTrue(true);
 	}
 
 	@Test

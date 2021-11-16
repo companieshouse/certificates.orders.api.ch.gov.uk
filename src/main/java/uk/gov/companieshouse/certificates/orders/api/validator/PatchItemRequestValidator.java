@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
@@ -69,7 +67,7 @@ public class PatchItemRequestValidator extends RequestValidator {
 
     /**
      * Validates the patched item provided, returning any errors found.
-     * @param TODO the item to be validated
+     * @param requestValidatable to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
     public List<String> getValidationErrors(final RequestValidatable requestValidatable) {

@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAuthenticationInterceptorTest {
+class UserAuthenticationInterceptorTest {
 
     @InjectMocks
     private UserAuthenticationInterceptor userAuthenticationInterceptor;
@@ -27,21 +27,21 @@ public class UserAuthenticationInterceptorTest {
     private HttpServletResponse response;
 
     @Test
-    public void willAuthoriseIfEricHeadersArePresent() {
+    void willAuthoriseIfEricHeadersArePresent() {
         lenient().doReturn(ERIC_IDENTITY_VALUE).when(request).getHeader(ERIC_IDENTITY_HEADER_NAME);
         lenient().doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         assertTrue(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    public void willNotAuthoriseIfIdentityTypeHeaderIsNotPresent() {
+    void willNotAuthoriseIfIdentityTypeHeaderIsNotPresent() {
         lenient().doReturn(null).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         lenient().doReturn(null).when(request).getHeader(REQUEST_ID_HEADER_NAME);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }
 
     @Test
-    public void willNotAuthoriseIfIdentityHeaderIsNotPresent() {
+    void willNotAuthoriseIfIdentityHeaderIsNotPresent() {
         lenient().when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
         assertFalse(userAuthenticationInterceptor.preHandle(request, response, null));
     }

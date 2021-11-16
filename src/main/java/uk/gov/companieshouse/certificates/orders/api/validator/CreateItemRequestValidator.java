@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ public class CreateItemRequestValidator extends RequestValidator {
 
     /**
      * Validates the item provided, returning any errors found.
-     * @param TODO the item to be validated
+     * @param requestValidatable to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
     public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
@@ -35,7 +33,6 @@ public class CreateItemRequestValidator extends RequestValidator {
         if (requestValidatable.getCertificateId() != null) {
             errors.add("id: must be null in a create item request");
         }
-        final CertificateItemOptions options = requestValidatable.getItemOptions();
         errors.addAll(getValidationErrors(requestValidatable, converter));
         return errors;
     }

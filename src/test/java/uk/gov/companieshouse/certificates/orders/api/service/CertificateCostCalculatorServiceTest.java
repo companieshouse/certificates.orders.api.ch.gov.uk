@@ -20,7 +20,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*
  * Unit/integration tests the {@link CertificateCostCalculatorService} class.
  */
 @SpringBootTest
-public class CertificateCostCalculatorServiceTest {
+class CertificateCostCalculatorServiceTest {
 
     private static final String POSTAGE_COST = "0";
     private static final String NO_DISCOUNT = "0";

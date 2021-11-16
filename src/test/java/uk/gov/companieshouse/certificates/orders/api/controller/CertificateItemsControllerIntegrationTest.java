@@ -1827,7 +1827,7 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorDetailsSupplied()
+    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorsDetailsSupplied()
             throws Exception {
 
         // Given
@@ -1836,7 +1836,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         options.setCompanyType("limited");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);
@@ -1906,7 +1906,7 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorDetailsSupplied()
+    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorsDetailsSupplied()
             throws Exception {
 
         // Given
@@ -1915,7 +1915,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         options.setCompanyType("llp");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);
@@ -1985,7 +1985,7 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    void correctlyErrorsWhenLPCompanyAndLiquidatorDetailsSupplied()
+    void correctlyErrorsWhenLPCompanyAndLiquidatorsDetailsSupplied()
             throws Exception {
 
         // Given
@@ -1994,7 +1994,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.INCORPORATION);
         LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorDetails(liquidatorsDetails);
+        options.setLiquidatorsDetails(liquidatorsDetails);
         options.setCompanyType("limited-partnership");
         certificateItemDto.setItemOptions(options);
         certificateItemDto.setQuantity(QUANTITY);
