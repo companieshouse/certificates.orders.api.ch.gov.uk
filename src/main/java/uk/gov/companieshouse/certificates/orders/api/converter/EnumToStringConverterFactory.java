@@ -10,17 +10,21 @@ import static uk.gov.companieshouse.certificates.orders.api.converter.EnumValueN
 @WritingConverter
 public final class EnumToStringConverterFactory implements ConverterFactory<Enum<?>, String> {
 
-    @Override
     @Nonnull
+    @Override
     public <T extends String> Converter<Enum<?>, T> getConverter(@Nonnull Class<T> targetType) {
-        return new EnumToStringConverter<>();
+        return new EnumToStringConverter<>(targetType);
     }
 
     private static class EnumToStringConverter<T extends String> implements Converter<Enum<?>, T> {
+        private final Class<T> targetType;
 
-        @SuppressWarnings("unchecked")
+        public EnumToStringConverter(Class<T> targetType) {
+            this.targetType = targetType;
+        }
+
         public T convert(@Nonnull Enum source) {
-            return (T) convertEnumValueNameToJson(source);
+            return targetType.cast(convertEnumValueNameToJson(source));
         }
     }
 }
