@@ -18,7 +18,6 @@ import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 
 import java.util.List;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.util.Collections.singletonList;
@@ -48,8 +47,8 @@ public class CompanyServiceIntegrationTest {
     private static final CompanyProfileApi COMPANY_PROFILE;
 
     private static class Error {
-        private String type;
-        private String error;
+        private final String type;
+        private final String error;
 
         private Error(String type, String error) {
             this.type = type;
@@ -67,7 +66,7 @@ public class CompanyServiceIntegrationTest {
 
     private static class CompanyProfileApiErrorResponsePayload {
 
-        private List<Error> errors;
+        private final List<Error> errors;
 
         private CompanyProfileApiErrorResponsePayload(List<Error> errors) {
             this.errors = errors;
@@ -102,9 +101,7 @@ public class CompanyServiceIntegrationTest {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
         final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource(
-                "THE "
-                + "GIRLS' DAY SCHOOL TRUST", "limited",
-                null);
+                "THE GIRLS' DAY SCHOOL TRUST", "limited", null);
 
         // Given
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");

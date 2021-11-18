@@ -55,7 +55,7 @@ class CertificatesItemControllerTest {
     private CertificateItem item;
 
     @Mock
-    private CertificateItem unEnrichedCertificateItem;
+    private CertificateItem nonEnrichedCertificateItem;
 
     @Mock
     private CertificateItemDTO dto;
@@ -83,9 +83,6 @@ class CertificatesItemControllerTest {
 
     @Mock
     private CertificateItemOptions certificateItemOptions;
-
-    @Mock
-    private RequestValidatable requestValidatable;
 
     @Test
     @DisplayName("Update request updates successfully")
@@ -170,13 +167,13 @@ class CertificatesItemControllerTest {
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() {
         when(dto.getCompanyNumber()).thenReturn("number");
-        when(unEnrichedCertificateItem.getItemOptions()).thenReturn(certificateItemOptions);
+        when(nonEnrichedCertificateItem.getItemOptions()).thenReturn(certificateItemOptions);
         when(companyService.getCompanyProfile("number")).thenReturn(
                 new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
-        when(certificateItemService.createCertificateItem(unEnrichedCertificateItem))
+        when(certificateItemService.createCertificateItem(nonEnrichedCertificateItem))
                 .thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
-        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(unEnrichedCertificateItem);
+        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(nonEnrichedCertificateItem);
 
         ResponseEntity<Object>
                 response =
@@ -184,7 +181,7 @@ class CertificatesItemControllerTest {
 
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
         assertThat(response.getBody(), is(dto));
-        verify(unEnrichedCertificateItem).setCompanyName("name");
+        verify(nonEnrichedCertificateItem).setCompanyName("name");
         verify(certificateItemOptions).setCompanyType("type");
     }
 

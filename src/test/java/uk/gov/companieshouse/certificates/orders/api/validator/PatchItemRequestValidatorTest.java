@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,12 +14,10 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
@@ -38,6 +37,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
@@ -51,7 +51,7 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 class PatchItemRequestValidatorTest {
     @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
     @Configuration
-    public class Config {
+    public static class Config {
         @Bean
         public ObjectMapper objectMapper() {
             return new ApplicationConfiguration().objectMapper();
@@ -85,47 +85,25 @@ class PatchItemRequestValidatorTest {
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final boolean TOKEN_POSTAL_DELIVERY_VALUE = true;
-    private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
-    private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
-    private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
-    private static final boolean INCLUDE_ADDRESS = true;
-    private static final boolean INCLUDE_APPOINTMENT_DATE = false;
-    private static final boolean INCLUDE_BASIC_INFORMATION = true;
-    private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
-    private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
-    private static final boolean INCLUDE_NATIONALITY = false;
-    private static final boolean INCLUDE_OCCUPATION = true;
-    private static final boolean INCLUDE_DATES = true;
-
-    static {
-        DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAddress(INCLUDE_ADDRESS);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeAppointmentDate(INCLUDE_APPOINTMENT_DATE);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeBasicInformation(INCLUDE_BASIC_INFORMATION);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeCountryOfResidence(INCLUDE_COUNTRY_OF_RESIDENCE);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeDobType(INCLUDE_DOB_TYPE);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeNationality(INCLUDE_NATIONALITY);
-        DIRECTOR_OR_SECRETARY_DETAILS.setIncludeOccupation(INCLUDE_OCCUPATION);
-
-        REGISTERED_OFFICE_ADDRESS_DETAILS = new RegisteredOfficeAddressDetails();
-        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-        REGISTERED_OFFICE_ADDRESS_DETAILS.setIncludeDates(INCLUDE_DATES);
-    }
 
     @Autowired
     private PatchItemRequestValidator validatorUnderTest;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     @Autowired
     private TestMergePatchFactory patchFactory;
 
     private PatchValidationCertificateItemDTO itemUpdate;
 
+    private CertificateItemOptions certificateItemOptions;
+
+    @MockBean
+    private RequestValidatable requestValidatable;
+
     @BeforeEach
     void setUp() {
         itemUpdate = new PatchValidationCertificateItemDTO();
+        certificateItemOptions = new CertificateItemOptions();
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test
@@ -251,11 +229,11 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Collection location is optional by default")
     void collectionLocationIsOptionalByDefault() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
+        certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -265,15 +243,11 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Collection details are mandatory for collection delivery method")
     void collectionDetailsAreMandatoryForCollectionDeliveryMethod() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryMethod(DeliveryMethod.COLLECTION);
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        certificateItemOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -286,16 +260,12 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Company objects and good standing info may be requested by default")
     void companyObjectsAndGoodStandingInfoMayBeRequestedByDefault() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setIncludeCompanyObjectsInformation(true);
-        options.setIncludeGoodStandingInformation(true);
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        certificateItemOptions.setIncludeCompanyObjectsInformation(true);
+        certificateItemOptions.setIncludeGoodStandingInformation(true);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -306,22 +276,29 @@ class PatchItemRequestValidatorTest {
             "should not be requested for dissolution")
     void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-        options.setCertificateType(DISSOLUTION);
-        options.setIncludeCompanyObjectsInformation(true);
-        options.setIncludeGoodStandingInformation(true);
-        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
-        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeAddress(true);
+        directorOrSecretaryDetails.setIncludeAppointmentDate(false);
+        directorOrSecretaryDetails.setIncludeBasicInformation(true);
+        directorOrSecretaryDetails.setIncludeCountryOfResidence(false);
+        directorOrSecretaryDetails.setIncludeDobType(PARTIAL);
+        directorOrSecretaryDetails.setIncludeNationality(false);
+        directorOrSecretaryDetails.setIncludeOccupation(true);
+
+        RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(IncludeAddressRecordsType.CURRENT);
+        registeredOfficeAddressDetails.setIncludeDates(true);
+
+        certificateItemOptions.setCertificateType(DISSOLUTION);
+        certificateItemOptions.setIncludeCompanyObjectsInformation(true);
+        certificateItemOptions.setIncludeGoodStandingInformation(true);
+        certificateItemOptions.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl( patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -336,16 +313,12 @@ class PatchItemRequestValidatorTest {
     @DisplayName("(Only) include email copy for same day delivery timescale")
     void includeEmailCopyForSameDayDeliveryTimescale() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryTimescale(SAME_DAY);
-        options.setIncludeEmailCopy(true);
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        certificateItemOptions.setDeliveryTimescale(SAME_DAY);
+        certificateItemOptions.setIncludeEmailCopy(true);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -355,20 +328,15 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Do not include email copy for standard delivery timescale")
     void doNotIncludeEmailCopyForStandardDeliveryTimescale() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryTimescale(STANDARD);
-        options.setIncludeEmailCopy(true);
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        certificateItemOptions.setDeliveryTimescale(STANDARD);
+        certificateItemOptions.setIncludeEmailCopy(true);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
-        assertThat(errors, contains(
-                "include_email_copy: can only be true when delivery timescale is same_day"));
+        assertThat(errors, contains("include_email_copy: can only be true when delivery timescale is same_day"));
     }
 
 
@@ -376,23 +344,20 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Do not include other details without basic information")
     void doNotIncludeOtherDetailsWithoutBasicInformation() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
-        details.setIncludeAddress(true);
-        details.setIncludeAppointmentDate(true);
-        details.setIncludeCountryOfResidence(true);
-        details.setIncludeDobType(PARTIAL);
-        details.setIncludeNationality(true);
-        details.setIncludeOccupation(true);
-        options.setDirectorDetails(details);
-        options.setSecretaryDetails(details);
-        options.setCompanyType("limited");
-        patchedItem.setItemOptions(options);
+        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeAddress(true);
+        directorOrSecretaryDetails.setIncludeAppointmentDate(true);
+        directorOrSecretaryDetails.setIncludeCountryOfResidence(true);
+        directorOrSecretaryDetails.setIncludeDobType(PARTIAL);
+        directorOrSecretaryDetails.setIncludeNationality(true);
+        directorOrSecretaryDetails.setIncludeOccupation(true);
+
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
@@ -410,24 +375,21 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Can include other details with basic information")
     void canIncludeOtherDetailsWithBasicInformation() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
-        details.setIncludeAddress(true);
-        details.setIncludeAppointmentDate(true);
-        details.setIncludeBasicInformation(true);
-        details.setIncludeCountryOfResidence(true);
-        details.setIncludeDobType(PARTIAL);
-        details.setIncludeNationality(true);
-        details.setIncludeOccupation(true);
-        options.setDirectorDetails(details);
-        options.setSecretaryDetails(details);
-        options.setCompanyType("limited");
-        patchedItem.setItemOptions(options);
+        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeAddress(true);
+        directorOrSecretaryDetails.setIncludeAppointmentDate(true);
+        directorOrSecretaryDetails.setIncludeBasicInformation(true);
+        directorOrSecretaryDetails.setIncludeCountryOfResidence(true);
+        directorOrSecretaryDetails.setIncludeDobType(PARTIAL);
+        directorOrSecretaryDetails.setIncludeNationality(true);
+        directorOrSecretaryDetails.setIncludeOccupation(true);
+
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -437,21 +399,18 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Reports only the incorrectly set fields")
     void reportsOnlyIncorrectlySetFields() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        final DirectorOrSecretaryDetails details = new DirectorOrSecretaryDetails();
-        details.setIncludeAddress(true);
-        details.setIncludeAppointmentDate(false);
-        details.setIncludeNationality(true);
-        details.setIncludeOccupation(true);
-        options.setDirectorDetails(details);
-        options.setSecretaryDetails(details);
-        options.setCompanyType("limited");
-        patchedItem.setItemOptions(options);
+        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeAddress(true);
+        directorOrSecretaryDetails.setIncludeAppointmentDate(false);
+        directorOrSecretaryDetails.setIncludeNationality(true);
+        directorOrSecretaryDetails.setIncludeOccupation(true);
+
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
@@ -465,11 +424,10 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Handles absence of item options smoothly")
     void handlesAbsenceOfItemOptionsSmoothly() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
+        when(requestValidatable.getItemOptions()).thenReturn(null);
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -479,14 +437,10 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Handles absence of details smoothly")
     void handlesAbsenceOfDetailsSmoothly() {
         // Given
-        final CertificateItem patchedItem = new CertificateItem();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        patchedItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors =
-                validatorUnderTest.getValidationErrors(new RequestValidatableImpl(patchedItem));
+        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -507,5 +461,4 @@ class PatchItemRequestValidatorTest {
         // Then
         assertThat(errors, contains(fieldName + ": must be null"));
     }
-
 }

@@ -20,7 +20,7 @@ public class PrincipalPlaceOfBusinessDetails {
         this.includeAddressRecordsType = includeAddressRecordsType;
     }
 
-    public Boolean isIncludeDates() {
+    public Boolean getIncludeDates() {
         return includeDates;
     }
 

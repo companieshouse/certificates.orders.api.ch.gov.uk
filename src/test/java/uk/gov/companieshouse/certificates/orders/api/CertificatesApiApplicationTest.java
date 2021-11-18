@@ -65,13 +65,6 @@ class CertificatesApiApplicationTest {
 	public EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
 	@Test
-	@DisplayName("Application context loads successfully")
-	void contextLoads() {
-		// No implementation required here to test that context loads.
-		assertTrue(true);
-	}
-
-	@Test
 	@DisplayName("Create rejects read only company name")
 	void createCertificateItemRejectsReadOnlyCompanyName() {
 		// Given

@@ -4,8 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,9 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
@@ -43,13 +46,14 @@ import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -57,26 +61,15 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -86,42 +79,11 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
 @ActiveProfiles("feature-flags-enabled")
 class CertificateItemsControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private CertificateItemRepository repository;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    UserAuthenticationInterceptor userAuthenticationInterceptor;
-    @Autowired
-    LoggingInterceptor loggingInterceptor;
-    @Autowired
-    UserAuthorisationInterceptor userAuthorisationInterceptor;
-    @Autowired
-    CRUDAuthenticationInterceptor crudPermissionsInterceptor;
-
-    @MockBean
-    private EtagGeneratorService etagGenerator;
-
-    @MockBean
-    private IdGeneratorService idGeneratorService;
-
-    @MockBean
-    private CompanyService companyService;
-
-    @MockBean
-    private CompanyProfileResource companyProfileResource;
-
+    public static final CompanyStatus EXPECTED_COMPANY_STATUS = CompanyStatus.ACTIVE;
+    static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
-    private static final String UPDATED_ITEM_ID  = "CRT-123456-123457";
+    private static final String UPDATED_ITEM_ID = "CRT-123456-123457";
     private static final int QUANTITY = 5;
     private static final int UPDATED_QUANTITY = 10;
     private static final int INVALID_QUANTITY = 0;
@@ -131,7 +93,6 @@ class CertificateItemsControllerIntegrationTest {
     private static final int SAME_DAY_INDIVIDUAL_CERTIFICATE_COST = 50;
     private static final String ALTERNATIVE_CREATED_BY = "abc123";
     private static final String TOKEN_STRING = "TOKEN VALUE";
-    static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final String COMPANY_NUMBER = "00006400";
     private static final String PREVIOUS_COMPANY_NUMBER = "00006400";
@@ -150,17 +111,17 @@ class CertificateItemsControllerIntegrationTest {
     private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale`"
-            + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
+                    + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
     private static final CertificateType CERTIFICATE_TYPE = CertificateType.INCORPORATION;
     private static final CertificateType UPDATED_CERTIFICATE_TYPE = CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
     private static final String INVALID_CERTIFICATE_TYPE_MESSAGE =
-        "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.CertificateType`"
-         + " from String \"unknown\": value not one of declared Enum instance names: "
-         + "[incorporation-with-all-name-changes, incorporation, dissolution, "
-         + "incorporation-with-last-name-changes]";
+            "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.CertificateType`"
+                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + "[incorporation-with-all-name-changes, incorporation, dissolution, "
+                    + "incorporation-with-last-name-changes]";
     private static final DeliveryMethod DELIVERY_METHOD = DeliveryMethod.POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = DeliveryMethod.COLLECTION;
     private static final String INVALID_DELIVERY_METHOD_MESSAGE =
@@ -198,8 +159,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_GOOD_STANDING_INFORMATION = true;
     private static final boolean UPDATED_INCLUDE_GOOD_STANDING_INFORMATION = false;
     private static final String DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE =
-    "include_good_standing_information: must not exist when certificate type is dissolution";
-
+            "include_good_standing_information: must not exist when certificate type is dissolution";
     private static final boolean INCLUDE_ADDRESS = true;
     private static final boolean UPDATED_INCLUDE_ADDRESS = false;
     private static final boolean INCLUDE_APPOINTMENT_DATE = false;
@@ -209,15 +169,14 @@ class CertificateItemsControllerIntegrationTest {
     private static final boolean INCLUDE_COUNTRY_OF_RESIDENCE = false;
     private static final boolean UPDATED_INCLUDE_COUNTRY_OF_RESIDENCE = true;
     private static final IncludeDobType INCLUDE_DOB_TYPE = IncludeDobType.PARTIAL;
-    private static final IncludeDobType  UPDATED_INCLUDE_DOB_TYPE = IncludeDobType.FULL;
+    private static final IncludeDobType UPDATED_INCLUDE_DOB_TYPE = IncludeDobType.FULL;
     private static final String INVALID_INCLUDE_DOB_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType`"
                     + " from String \"unknown\": value not one of declared Enum instance names: [partial, full]";
-    private static final boolean INCLUDE_NATIONALITY= false;
-    private static final boolean UPDATED_INCLUDE_NATIONALITY= true;
+    private static final boolean INCLUDE_NATIONALITY = false;
+    private static final boolean UPDATED_INCLUDE_NATIONALITY = true;
     private static final boolean INCLUDE_OCCUPATION = true;
     private static final boolean UPDATED_INCLUDE_OCCUPATION = false;
-
     private static final IncludeAddressRecordsType INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT;
     private static final IncludeAddressRecordsType UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
     private static final String INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE =
@@ -226,7 +185,6 @@ class CertificateItemsControllerIntegrationTest {
                     + "[all, current-previous-and-prior, current, current-and-previous]";
     private static final boolean INCLUDE_DATES = true;
     private static final boolean UPDATED_INCLUDE_DATES = false;
-
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final DirectorOrSecretaryDetails UPDATED_DIRECTOR_OR_SECRETARY_DETAILS;
     private static final DirectorOrSecretaryDetails CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS;
@@ -236,14 +194,17 @@ class CertificateItemsControllerIntegrationTest {
     private static final String CONFLICTING_SECRETARY_DETAILS_MESSAGE =
             "secretary_details: include_address, include_nationality, include_occupation must not be true when "
                     + "include_basic_information is false";
-
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
     private static final RegisteredOfficeAddressDetails UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS;
-
     private static final String SELF_PATH = "/orderable/certificates";
     private static final Links LINKS;
-
-    public static final CompanyStatus EXPECTED_COMPANY_STATUS = CompanyStatus.ACTIVE;
+    private static final List<String> ITEM_OPTIONS_ENUM_FIELDS =
+            asList("certificate_type", "collection_location", "delivery_method", "delivery_timescale");
+    private static final String FORENAME = "John";
+    private static final String SURNAME = "Smith";
+    private static final String UPDATED_SURNAME = "Smyth";
+    private static final String TOKEN_TOTAL_ITEM_COST = "100";
+    private static final String TOKEN_PERMISSION_VALUE = "user_orders=%s";
 
     static {
         DIRECTOR_OR_SECRETARY_DETAILS = new DirectorOrSecretaryDetails();
@@ -282,32 +243,85 @@ class CertificateItemsControllerIntegrationTest {
         LINKS.setSelf(SELF_PATH + "/" + EXPECTED_ITEM_ID);
     }
 
-    private static final List<String> ITEM_OPTIONS_ENUM_FIELDS =
-            asList("certificate_type", "collection_location", "delivery_method", "delivery_timescale");
-    private static final String FORENAME = "John";
-    private static final String SURNAME = "Smith";
-    private static final String UPDATED_SURNAME = "Smyth";
-    private static final String TOKEN_TOTAL_ITEM_COST = "100";
-    private static final String TOKEN_PERMISSION_VALUE = "user_orders=%s";
+    @Autowired
+    UserAuthenticationInterceptor userAuthenticationInterceptor;
+    @Autowired
+    LoggingInterceptor loggingInterceptor;
+    @Autowired
+    UserAuthorisationInterceptor userAuthorisationInterceptor;
+    @Autowired
+    CRUDAuthenticationInterceptor crudPermissionsInterceptor;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private CertificateItemRepository repository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
+    @MockBean
+    private EtagGeneratorService etagGenerator;
+    @MockBean
+    private IdGeneratorService idGeneratorService;
+    @MockBean
+    private CompanyService companyService;
+    @MockBean
+    private CompanyProfileResource companyProfileResource;
+    private CertificateItemDTO certificateItemDto;
 
-    /**
-     * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
-     */
-    private static class TestDTO extends PatchValidationCertificateItemDTO {
-        private String unknownField;
+    private CertificateItemOptions certificateItemOptions;
 
-        private TestDTO(String unknownField) {
-            this.unknownField = unknownField;
-        }
+    private static Stream<Arguments> provideLiquidatorsDetailsErrorFixtures() {
+        return Stream.of(
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("limited")
+                        .withCompanyStatus(CompanyStatus.ACTIVE)
+                        .withLiquidatorsDetails(new LiquidatorsDetails())
+                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company status is active"))
+                        .build()),
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("limited")
+                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
+                        .withIncludeGoodStandingInformation(true)
+                        .withExpectedErrors(singletonList("include_good_standing_information: must not exist when company status is liquidation"))
+                        .build()),
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("llp")
+                        .withCompanyStatus(CompanyStatus.ACTIVE)
+                        .withLiquidatorsDetails(new LiquidatorsDetails())
+                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company status is active"))
+                        .build()),
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("llp")
+                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
+                        .withIncludeGoodStandingInformation(true)
+                        .withExpectedErrors(singletonList("include_good_standing_information: must not exist when company status is liquidation"))
+                        .build()),
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("limited-partnership")
+                        .withCompanyStatus(CompanyStatus.ACTIVE)
+                        .withLiquidatorsDetails(new LiquidatorsDetails())
+                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company type is limited-partnership"))
+                        .build()),
+                Arguments.of(CertificateItemsFixture.newBuilder()
+                        .withCompanyType("limited-partnership")
+                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
+                        .withExpectedErrors(singletonList("company_status: liquidation not valid for company type limited-partnership"))
+                        .build())
 
-        public String getUnknownField() {
-            return unknownField;
-        }
+        );
     }
 
     @AfterEach
     void tearDown() {
         repository.findById(EXPECTED_ITEM_ID).ifPresent(repository::delete);
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        certificateItemDto = new CertificateItemDTO();
+        certificateItemOptions = new CertificateItemOptions();
+        certificateItemDto.setItemOptions(certificateItemOptions);
     }
 
     @Test
@@ -360,14 +374,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.company_name", is(EXPECTED_COMPANY_NAME)))
@@ -435,14 +449,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -465,22 +479,22 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
-                                                 "company_name: must be null",
-                                                 "etag: must be null",
-                                                 "links: must be null",
-                                                 "postage_cost: must be null",
-                                                 "total_item_cost: must be null"));
+                        "company_name: must be null",
+                        "etag: must be null",
+                        "links: must be null",
+                        "postage_cost: must be null",
+                        "total_item_cost: must be null"));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -507,14 +521,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -541,14 +555,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makeIncorporationCertificateTypeInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makeIncorporationCertificateTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -575,14 +589,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makeBelfastCollectionLocationInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makeBelfastCollectionLocationInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -608,19 +622,19 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
-                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
-                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
+                        MISSING_COLLECTION_FORENAME_MESSAGE,
+                        MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
@@ -647,14 +661,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makePostalDeliveryMethodInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makePostalDeliveryMethodInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -665,9 +679,9 @@ class CertificateItemsControllerIntegrationTest {
 
     @Test
     @DisplayName("Fails to create certificate item with include Company objects, good standing," +
-                " registered office details, secretary details or director details true for dissolution")
+            " registered office details, secretary details or director details true for dissolution")
     void createCertificateItemFailsToCreateCertificateItemWithIncludeCompanyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetails()
-        throws Exception {
+            throws Exception {
 
         // Given
         final CertificateItemDTO newItem = new CertificateItemDTO();
@@ -688,19 +702,19 @@ class CertificateItemsControllerIntegrationTest {
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
                         asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE,
-                            DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE,
-                            DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE));
+                                DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE,
+                                DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -731,14 +745,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -768,14 +782,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -804,14 +818,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makePartialIncludeDobTypeInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makePartialIncludeDobTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -840,14 +854,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -878,14 +892,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -925,14 +939,14 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         // When and then
-        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
-            .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
-            .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andDo(MockMvcResultHandlers.print());
@@ -942,14 +956,14 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Return not found when a certificate item does not exist")
     void getCertificateItemReturnsNotFound() throws Exception {
         // When and then
-        mockMvc.perform(get( CERTIFICATES_URL+"CHS0")
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CERTIFICATES_URL + "CHS0")
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -966,10 +980,10 @@ class CertificateItemsControllerIntegrationTest {
 
 
         // When and then
-        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -987,14 +1001,14 @@ class CertificateItemsControllerIntegrationTest {
 
 
         // When and then
-        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -1012,14 +1026,14 @@ class CertificateItemsControllerIntegrationTest {
 
 
         // When and then
-        mockMvc.perform(get(CERTIFICATES_URL+EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "other"))
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "other"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -1102,15 +1116,15 @@ class CertificateItemsControllerIntegrationTest {
                 new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
 
         // When and then
-        final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1184,14 +1198,14 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isUnauthorized());
 
     }
@@ -1209,13 +1223,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -1232,17 +1246,18 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content("{\"company_number\":\"00006444\", \"user_id\":\"invalid\"}"))
                 .andExpect(status().isBadRequest());
 
         final Optional<CertificateItem> foundItem = repository.findById(EXPECTED_ITEM_ID);
-        assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
+        assertTrue(foundItem.isPresent());
+        Assertions.assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
     }
 
     @Test
@@ -1263,13 +1278,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1301,14 +1316,14 @@ class CertificateItemsControllerIntegrationTest {
                 new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
 
         // When and then
-        final ResultActions response = mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1344,24 +1359,24 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList("company_name: must be null",
-                                                 "description_values: must be null",
-                                                 "item_costs: must be null",
-                                                 "kind: must be null",
-                                                 "etag: must be null",
-                                                 "links: must be null",
-                                                 "id: must be null",
-                                                 "postage_cost: must be null",
-                                                 "total_item_cost: must be null"));
+                        "description_values: must be null",
+                        "item_costs: must be null",
+                        "kind: must be null",
+                        "etag: must be null",
+                        "links: must be null",
+                        "id: must be null",
+                        "postage_cost: must be null",
+                        "total_item_cost: must be null"));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1387,13 +1402,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1419,13 +1434,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makeIncorporationCertificateTypeInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makeIncorporationCertificateTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1451,13 +1466,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1482,18 +1497,18 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
-                                                 MISSING_COLLECTION_FORENAME_MESSAGE,
-                                                 MISSING_COLLECTION_SURNAME_MESSAGE));
+                        MISSING_COLLECTION_FORENAME_MESSAGE,
+                        MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1524,13 +1539,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1556,13 +1571,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makePostalDeliveryMethodInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makePostalDeliveryMethodInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1594,13 +1609,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1637,13 +1652,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1672,13 +1687,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1710,13 +1725,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(objectMapper.writeValueAsString(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1744,13 +1759,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1778,13 +1793,13 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1814,235 +1829,36 @@ class CertificateItemsControllerIntegrationTest {
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    void correctlyErrorsWhenActiveLimitedCompanyAndLiquidatorsDetailsSupplied()
-            throws Exception {
-
-        // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
-        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorsDetails(liquidatorsDetails);
-        options.setCompanyType("limited");
-        certificateItemDto.setItemOptions(options);
-        certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("include_liquidator_details: must not exist when "
-                                + "company status is active"));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                         .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
                         .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
                         .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemDto)))
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    @Test
-    void correctlyErrorsWhenLiquidatedLimitedCompanyAndGoodStandingInformationSupplied()
+    @ParameterizedTest
+    @MethodSource("provideLiquidatorsDetailsErrorFixtures")
+    void correctErrorsWhenCertificateLiquidatorsDetailsAreSupplied(CertificateItemsFixture fixture)
             throws Exception {
-
         // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
         certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        options.setIncludeGoodStandingInformation(true);
-        options.setCompanyType("limited");
-        certificateItemDto.setItemOptions(options);
+        certificateItemDto.setItemOptions(certificateItemOptions);
         certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+
+        certificateItemOptions.setCertificateType(CertificateType.INCORPORATION);
+        certificateItemOptions.setCompanyType(fixture.getCompanyType());
+        certificateItemOptions.setLiquidatorsDetails(fixture.getLiquidatorsDetails());
+        certificateItemOptions.setIncludeGoodStandingInformation(fixture.getIncludeGoodStandingInformation());
+
+        when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("include_good_standing_information: must not exist when "
-                                + "company status is liquidation"));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-    @Test
-    void correctlyErrorsWhenActiveLLPCompanyAndLiquidatorsDetailsSupplied()
-            throws Exception {
-
-        // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
-        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorsDetails(liquidatorsDetails);
-        options.setCompanyType("llp");
-        certificateItemDto.setItemOptions(options);
-        certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("include_liquidator_details: must not exist when "
-                                + "company status is active"));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-    @Test
-    void correctlyErrorsWhenLiquidatedLLPCompanyAndGoodStandingInformationSupplied()
-            throws Exception {
-
-        // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
-        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        options.setIncludeGoodStandingInformation(true);
-        options.setCompanyType("llp");
-        certificateItemDto.setItemOptions(options);
-        certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("include_good_standing_information: must not exist when "
-                                + "company status is liquidation"));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-    @Test
-    void correctlyErrorsWhenLPCompanyAndLiquidatorsDetailsSupplied()
-            throws Exception {
-
-        // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
-        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        LiquidatorsDetails liquidatorsDetails = new LiquidatorsDetails();
-        options.setLiquidatorsDetails(liquidatorsDetails);
-        options.setCompanyType("limited-partnership");
-        certificateItemDto.setItemOptions(options);
-        certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("include_liquidator_details: must not exist when "
-                                + "company type is limited-partnership"));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-    @Test
-    void correctlyErrorsWhenLPCompanyAndCompanyStatusLiquidation()
-            throws Exception {
-
-        // Given
-        final CertificateItemDTO certificateItemDto = new CertificateItemDTO();
-        certificateItemDto.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.INCORPORATION);
-        options.setCompanyType("limited-partnership");
-        certificateItemDto.setItemOptions(options);
-        certificateItemDto.setQuantity(QUANTITY);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList("company_status: liquidation not valid for company "
-                                + "type limited-partnership"));
+        final ApiError expectedValidationError = new ApiError(BAD_REQUEST, fixture.getExpectedErrors());
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -2064,12 +1880,12 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Generates the costs we expect to be calculated given the quantity of certificates and the delivery timescale.
-     * @param quantity the quantity of certificates
+     *
+     * @param quantity  the quantity of certificates
      * @param timescale the delivery timescale, standard or same day
      * @return the expected costs
      */
-    private List<ItemCosts> generateExpectedCosts(final int quantity,
-                                                             final DeliveryTimescale timescale) {
+    private List<ItemCosts> generateExpectedCosts(final int quantity, final DeliveryTimescale timescale) {
         final List<ItemCosts> costs = new ArrayList<>();
         final int certificateCost =
                 timescale == DeliveryTimescale.SAME_DAY ? SAME_DAY_INDIVIDUAL_CERTIFICATE_COST : STANDARD_INDIVIDUAL_CERTIFICATE_COST;
@@ -2089,8 +1905,9 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Derives the product type from the certificate number and the delivery timescale.
+     *
      * @param certificateNumber the number of the certificate (1 is the first, > 1 => additional)
-     * @param timescale the delivery timescale, standard or same day
+     * @param timescale         the delivery timescale, standard or same day
      * @return the derived product type
      */
     private ProductType getProductType(final int certificateNumber, final DeliveryTimescale timescale) {
@@ -2103,6 +1920,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "incorporation" certificate type value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect certificate type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2115,6 +1933,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "incorporation" certificate type value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect certificate type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2127,6 +1946,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "belfast" collection location value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect delivery method value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2139,6 +1959,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "belfast" collection location value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect certificate type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2151,6 +1972,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "postal" delivery method value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect delivery method value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2163,6 +1985,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "postal" certificate type value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect certificate type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2175,6 +1998,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2187,6 +2011,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "same-day" delivery timescale value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect delivery timescale value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2199,6 +2024,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect include DOB type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2211,6 +2037,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "partial" include DOB type value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect include DOB type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2223,6 +2050,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "current" include address records type value with "unknown" for validation testing purposes.
+     *
      * @param newItem the item to be serialised to JSON with an incorrect include DOB type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2235,6 +2063,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Utility that gets the item passed it as its equivalent JSON representation, BUT replaces
      * the "current" include address records type value with "unknown" for validation testing purposes.
+     *
      * @param itemUpdate the item to be serialised to JSON with an incorrect include DOB type value
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
@@ -2247,6 +2076,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Verifies that the item assumed to have been created by the create item POST request can be retrieved
      * from the database using its expected ID value. Also verifies that item costs have NOT been saved to the DB.
+     *
      * @param expectedItemId the expected ID of the newly created item
      */
     private void assertItemSavedCorrectly(final String expectedItemId) {
@@ -2265,6 +2095,7 @@ class CertificateItemsControllerIntegrationTest {
     /**
      * Verifies that the item that could have been created by the create item POST request cannot in fact be retrieved
      * from the database.
+     *
      * @param expectedItemId the expected ID of the newly created item
      */
     private void assertItemWasNotSaved(final String expectedItemId) {
@@ -2274,13 +2105,15 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Checks that the enum values have been saved in the expected format.
+     *
      * @param enumFieldNames the item options enum fields to be checked
      */
     private void assertItemOptionsEnumValueNamesSavedCorrectly(final List<String> enumFieldNames) {
         final Document certificate = mongoTemplate.findById(EXPECTED_ITEM_ID, Document.class, "certificates");
+        assertNotNull(certificate);
         final Document data = (Document) certificate.get("data");
         final Document itemOptions = (Document) data.get("item_options");
-        for (final String field: enumFieldNames) {
+        for (final String field : enumFieldNames) {
             final String fieldValue = itemOptions.getString(field);
             assertThat("Enum " + field + " value not of expected format!", fieldValue, is(fieldValue.toLowerCase()));
         }
@@ -2288,15 +2121,30 @@ class CertificateItemsControllerIntegrationTest {
 
     /**
      * Utility that calculates the expected total item cost for the item costs and postage cost provided.
-     * @param costs the item costs
+     *
+     * @param costs       the item costs
      * @param postageCost the postage cost
      * @return the expected total item cost (as a String)
      */
     private String calculateExpectedTotalItemCost(final List<ItemCosts> costs, final String postageCost) {
-        final Integer total = costs.stream()
+        final int total = costs.stream()
                 .map(itemCosts -> Integer.parseInt(itemCosts.getCalculatedCost()))
                 .reduce(0, Integer::sum) + Integer.parseInt(postageCost);
-        return total.toString();
+        return "" + total;
     }
 
+    /**
+     * Extends {@link PatchValidationCertificateItemDTO} to introduce a field that is unknown to the implementation.
+     */
+    private static class TestDTO extends PatchValidationCertificateItemDTO {
+        private final String unknownField;
+
+        private TestDTO(String unknownField) {
+            this.unknownField = unknownField;
+        }
+
+        public String getUnknownField() {
+            return unknownField;
+        }
+    }
 }

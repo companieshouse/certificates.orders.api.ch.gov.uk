@@ -97,7 +97,7 @@ public class CertificateItemsController {
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(
-                new RequestValidatableImpl(companyProfile.getCompanyStatus(),
+                new CompanyCertificateInformation(companyProfile.getCompanyStatus(),
                         certificateItemDTO.getId(), certificateItemDTO.getItemOptions()));
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
@@ -180,7 +180,7 @@ public class CertificateItemsController {
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(patchedItem.getCompanyNumber());
 
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
-                new RequestValidatableImpl(
+                new CompanyCertificateInformation(
                         companyProfile.getCompanyStatus(),
                         patchedItem.getId(),
                         patchedItem.getItemOptions()));
@@ -205,8 +205,8 @@ public class CertificateItemsController {
     /**
      * method to set up a map for logging purposes and add a value for the 
      * request id
-     * @param requestId
-     * @return
+     * @param requestId of the request
+     * @return map of logging data
      */
     private Map<String, Object> createLoggingDataMap(final String requestId) {
         Map<String, Object> logMap = new HashMap<>();
@@ -226,13 +226,13 @@ public class CertificateItemsController {
         logMap.put(STATUS_LOG_KEY, status);
     }
 
-    private static class RequestValidatableImpl implements RequestValidatable {
+    private static class CompanyCertificateInformation implements RequestValidatable {
 
-        private CompanyStatus companyStatus;
-        private String certificateId;
-        private CertificateItemOptions itemOptions;
+        private final CompanyStatus companyStatus;
+        private final String certificateId;
+        private final CertificateItemOptions itemOptions;
 
-        public RequestValidatableImpl(CompanyStatus companyStatus,
+        public CompanyCertificateInformation(CompanyStatus companyStatus,
                 String certificateId,
                 CertificateItemOptions itemOptions) {
             this.companyStatus = companyStatus;
