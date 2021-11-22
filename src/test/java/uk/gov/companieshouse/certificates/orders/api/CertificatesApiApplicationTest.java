@@ -92,8 +92,10 @@ class CertificatesApiApplicationTest {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		when(companyService.getCompanyProfile("00006400")).thenReturn(
-				new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
+		when(companyProfileResource.getCompanyName()).thenReturn("name");
+		when(companyProfileResource.getCompanyType()).thenReturn("type");
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyService.getCompanyProfile("00006400")).thenReturn(companyProfileResource);
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
