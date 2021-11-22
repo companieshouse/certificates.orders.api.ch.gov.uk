@@ -20,10 +20,12 @@ import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static java.util.Arrays.stream;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
@@ -53,17 +55,14 @@ class CertificatesApiApplicationTest {
 	@MockBean
 	private CompanyService companyService;
 
+	@MockBean
+	private CompanyProfileResource companyProfileResource;
+
 	@Autowired
 	private WebTestClient webTestClient;
 
 	@Rule
 	public EnvironmentVariables environmentVariables = new EnvironmentVariables();
-
-	@Test
-	@DisplayName("Application context loads successfully")
-	void contextLoads() {
-		// No implementation required here to test that context loads.
-	}
 
 	@Test
 	@DisplayName("Create rejects read only company name")
@@ -93,7 +92,10 @@ class CertificatesApiApplicationTest {
 
 		// Given
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		when(companyService.getCompanyProfile("00006400")).thenReturn(new CompanyProfileResource("name", "type"));
+		when(companyProfileResource.getCompanyName()).thenReturn("name");
+		when(companyProfileResource.getCompanyType()).thenReturn("type");
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyService.getCompanyProfile("00006400")).thenReturn(companyProfileResource);
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -214,6 +216,9 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyId() {
 
 		// Given
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setId("TEST_ID");
 
@@ -226,6 +231,9 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyPostageCost() {
 
 		// Given
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+
 		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
 		newCertificateItemDTO.setPostageCost("0");
 

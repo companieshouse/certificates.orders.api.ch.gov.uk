@@ -7,11 +7,13 @@ import java.util.Collections;
 import java.util.List;
 
 class OptionsValidationHelper {
-    private final CertificateItemOptions options;
+    private final RequestValidatable requestValidatable;
     private final List<String> errors = new ArrayList<>();
+    private final CertificateItemOptions options;
 
-    OptionsValidationHelper(CertificateItemOptions options) {
-        this.options = options;
+    OptionsValidationHelper(RequestValidatable requestValidatable) {
+        this.requestValidatable = requestValidatable;
+        this.options = requestValidatable.getItemOptions();
     }
 
     String getCompanyType() {
@@ -21,20 +23,30 @@ class OptionsValidationHelper {
     void validateLimitedCompanyOptions() {
         notLPDetails();
         notLLPDetails();
+        verifyCompanyStatus();
     }
 
     void validateLimitedLiabilityPartnershipOptions() {
         notLimitedCompanyDetails();
         notLPDetails();
+        verifyCompanyStatus();
     }
 
     void validateLimitedPartnershipOptions() {
         notLimitedCompanyDetails();
         notLLPDetails();
+        if (options.getLiquidatorsDetails() != null) {
+            errors.add(String.format("include_liquidators_details: must not exist when company type is %s",
+                    options.getCompanyType()));
+        }
+        if (CompanyStatus.LIQUIDATION == requestValidatable.getCompanyStatus()) {
+            errors.add(String.format("company_status: %s not valid for company type %s",
+                    requestValidatable.getCompanyStatus().toString(), options.getCompanyType()));
+        }
     }
 
     boolean notCompanyTypeIsNull() {
-        return isNotNull(options.getCompanyType(), "company type: is a mandatory field");
+        return isNotNull(options.getCompanyType());
     }
 
     List<String> getErrors() {
@@ -56,6 +68,18 @@ class OptionsValidationHelper {
     private void notLimitedCompanyDetails() {
         notDirectorsDetails();
         notSecretaryDetails();
+    }
+
+    private void verifyCompanyStatus() {
+        if (CompanyStatus.ACTIVE == requestValidatable.getCompanyStatus() && options.getLiquidatorsDetails() != null) {
+            errors.add(String.format("include_liquidators_details: must not exist when company status is %s",
+                    requestValidatable.getCompanyStatus()));
+        }
+
+        if (CompanyStatus.LIQUIDATION == requestValidatable.getCompanyStatus() && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
+            errors.add(String.format("include_good_standing_information: must not exist when company status is %s",
+                    requestValidatable.getCompanyStatus()));
+        }
     }
 
     private void notDirectorsDetails() {
@@ -90,17 +114,15 @@ class OptionsValidationHelper {
         isNull(options.getIncludeGeneralNatureOfBusinessInformation(), "include_general_nature_of_business_information: must not exist when company type is %s", options.getCompanyType());
     }
 
-    private boolean isNull(Object object, String message, String... messageArgs) {
+    private void isNull(Object object, String message, Object... messageArgs) {
         if (object != null) {
             errors.add(String.format(message, messageArgs));
-            return false;
         }
-        return true;
     }
 
-    private boolean isNotNull(Object object, String message, String... messageArgs) {
+    private boolean isNotNull(Object object, Object... messageArgs) {
         if (object == null) {
-            errors.add(String.format(message, messageArgs));
+            errors.add(String.format("company type: is a mandatory field", messageArgs));
             return false;
         }
         return true;

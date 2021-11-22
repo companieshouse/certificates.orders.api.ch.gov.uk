@@ -37,13 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
+import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -88,9 +91,14 @@ public class CertificateItemsController {
                                                         HttpServletRequest request,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
-        LOGGER.infoRequest(request, "create certficate item request", logMap);
+        LOGGER.infoRequest(request, "create certificate item request", logMap);
 
-        final List<String> errors = createItemRequestValidator.getValidationErrors(certificateItemDTO);
+        String companyNumber = certificateItemDTO.getCompanyNumber();
+        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+
+        final List<String> errors = createItemRequestValidator.getValidationErrors(
+                new CompanyCertificateInformation(companyProfile.getCompanyStatus(),
+                        certificateItemDTO.getId(), certificateItemDTO.getItemOptions()));
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
@@ -99,7 +107,6 @@ public class CertificateItemsController {
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         item.setUserId(EricHeaderHelper.getIdentity(request));
-        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(item.getCompanyNumber());
         item.setCompanyName(companyProfile.getCompanyName());
         item.getItemOptions().setCompanyType(companyProfile.getCompanyType());
 
@@ -170,14 +177,19 @@ public class CertificateItemsController {
 
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
-        final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(patchedItem);
+        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(patchedItem.getCompanyNumber());
+
+        final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
+                new CompanyCertificateInformation(
+                        companyProfile.getCompanyStatus(),
+                        patchedItem.getId(),
+                        patchedItem.getItemOptions()));
         if (!patchedErrors.isEmpty()) {
             logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
         }
 
-        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(patchedItem.getCompanyNumber());
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
         patchedItem.setCompanyName(companyProfile.getCompanyName());
         patchedItem.getItemOptions().setCompanyType(companyProfile.getCompanyType());
@@ -193,8 +205,8 @@ public class CertificateItemsController {
     /**
      * method to set up a map for logging purposes and add a value for the 
      * request id
-     * @param requestId
-     * @return
+     * @param requestId of the request
+     * @return map of logging data
      */
     private Map<String, Object> createLoggingDataMap(final String requestId) {
         Map<String, Object> logMap = new HashMap<>();
@@ -212,5 +224,35 @@ public class CertificateItemsController {
     		final List<String> errors, HttpStatus status) {
         logMap.put(ERRORS_LOG_KEY, errors);
         logMap.put(STATUS_LOG_KEY, status);
+    }
+
+    private static class CompanyCertificateInformation implements RequestValidatable {
+
+        private final CompanyStatus companyStatus;
+        private final String certificateId;
+        private final CertificateItemOptions itemOptions;
+
+        public CompanyCertificateInformation(CompanyStatus companyStatus,
+                String certificateId,
+                CertificateItemOptions itemOptions) {
+            this.companyStatus = companyStatus;
+            this.certificateId = certificateId;
+            this.itemOptions = itemOptions;
+        }
+
+        @Override
+        public CompanyStatus getCompanyStatus() {
+            return companyStatus;
+        }
+
+        @Override
+        public String getCertificateId() {
+            return certificateId;
+        }
+
+        @Override
+        public CertificateItemOptions getItemOptions() {
+            return itemOptions;
+        }
     }
 }

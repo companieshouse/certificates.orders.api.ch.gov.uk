@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 
 import java.io.IOException;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -41,7 +42,7 @@ import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromIOEx
 @ExtendWith(MockitoExtension.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(HttpResponseException.class)
-public class CompanyServiceTest {
+class CompanyServiceTest {
 
     private static final String COMPANY_NUMBER = "00006400";
 
@@ -78,7 +79,7 @@ public class CompanyServiceTest {
 
     @Test
     @DisplayName("getCompanyProfile() returns model if request handled successfully")
-    public void getCompanyProfileReturnsCompanyProfileModel() throws ApiErrorResponseException, URIValidationException {
+    void getCompanyProfileReturnsCompanyProfileModel() throws ApiErrorResponseException, URIValidationException {
         //given
         when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
         when(apiClient.company()).thenReturn(handler);
@@ -87,12 +88,17 @@ public class CompanyServiceTest {
         when(response.getData()).thenReturn(data);
         when(data.getCompanyName()).thenReturn("TEST LIMITED");
         when(data.getType()).thenReturn("limited-partnership");
+        when(data.getCompanyStatus()).thenReturn("active");
 
         //when
         CompanyProfileResource resource = serviceUnderTest.getCompanyProfile("12345678");
 
         //then
-        assertThat(resource, is(new CompanyProfileResource("TEST LIMITED", "limited-partnership")));
+        assertThat(resource, is(new CompanyProfileResource(
+                "TEST LIMITED",
+                "limited-partnership",
+                CompanyStatus.ACTIVE
+        )));
         assertThat(resource.getCompanyName(), is("TEST LIMITED"));
         assertThat(resource.getCompanyType(), is("limited-partnership"));
         verify(handler).get("/company/12345678");
@@ -100,7 +106,7 @@ public class CompanyServiceTest {
 
     @Test
     @DisplayName("getCompanyProfile() Invalid URL reported as Internal Server Error (500)")
-    public void getCompanyProfileThrowsInternalServerErrorForInvalidUri() throws Exception {
+    void getCompanyProfileThrowsInternalServerErrorForInvalidUri() throws Exception {
 
         // Given
         when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
@@ -118,7 +124,7 @@ public class CompanyServiceTest {
 
     @Test
     @DisplayName("getCompanyProfile() ApiErrorResponseException Internal Server Error is reported as such (500)")
-    public void getCompanyProfileInternalServerErrorApiExceptionIsPropagated() throws Exception {
+    void getCompanyProfileInternalServerErrorApiExceptionIsPropagated() throws Exception {
 
         final IOException ioException = new IOException(IOEXCEPTION_MESSAGE);
 

@@ -37,12 +37,14 @@ public class RequestValidator {
     /**
      * Validates the options provided, returning any errors found.
      *
-     * @param options   the options to be validated
+     * @param requestValidatable to be validated
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    List<String> getValidationErrors(final CertificateItemOptions options, final FieldNameConverter converter) {
+    List<String> getValidationErrors(final RequestValidatable requestValidatable,
+            final FieldNameConverter converter) {
         final List<String> errors = new ArrayList<>();
+        CertificateItemOptions options = requestValidatable.getItemOptions();
         if (options == null) {
             return errors;
         }
@@ -95,7 +97,7 @@ public class RequestValidator {
             errors.add("include_email_copy: can only be true when delivery timescale is same_day");
         }
 
-        errors.addAll(certificateOptionsValidator.validate(options));
+        errors.addAll(certificateOptionsValidator.validate(requestValidatable));
 
         errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
         errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));

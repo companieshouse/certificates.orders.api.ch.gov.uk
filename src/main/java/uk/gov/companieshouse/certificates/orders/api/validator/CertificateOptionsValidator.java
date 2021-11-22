@@ -42,11 +42,11 @@ class CertificateOptionsValidator {
     /**
      * Performs field validation on the supplied certificate item options
      *
-     * @param certificateItemOptions certificate order item options
+     * @param requestValidatable to be validated
      * @return list containing any errors; an empty list if no validation errors occur
      */
-    List<String> validate(CertificateItemOptions certificateItemOptions) {
-        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(certificateItemOptions);
+    List<String> validate(RequestValidatable requestValidatable) {
+        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(requestValidatable);
         if (optionsValidationHelper.notCompanyTypeIsNull()) {
 
             // Delegate additional validation to supplied validation strategy

@@ -47,8 +47,8 @@ public class CompanyServiceIntegrationTest {
     private static final CompanyProfileApi COMPANY_PROFILE;
 
     private static class Error {
-        private String type;
-        private String error;
+        private final String type;
+        private final String error;
 
         private Error(String type, String error) {
             this.type = type;
@@ -66,7 +66,7 @@ public class CompanyServiceIntegrationTest {
 
     private static class CompanyProfileApiErrorResponsePayload {
 
-        private List<Error> errors;
+        private final List<Error> errors;
 
         private CompanyProfileApiErrorResponsePayload(List<Error> errors) {
             this.errors = errors;
@@ -100,7 +100,8 @@ public class CompanyServiceIntegrationTest {
     public void getCompanyProfileReturnsSuccessfully () throws JsonProcessingException {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
-        final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource("THE GIRLS' DAY SCHOOL TRUST", "limited");
+        final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource(
+                "THE GIRLS' DAY SCHOOL TRUST", "limited", null);
 
         // Given
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");
