@@ -51,6 +51,8 @@ public class CertificateItemOptions {
 
     private LiquidatorsDetails liquidatorsDetails;
 
+    private String companyStatus;
+
     public CertificateType getCertificateType() {
         return certificateType;
     }
@@ -217,6 +219,14 @@ public class CertificateItemOptions {
 
     public void setLiquidatorsDetails(LiquidatorsDetails liquidatorsDetails) {
         this.liquidatorsDetails = liquidatorsDetails;
+    }
+
+    public String getCompanyStatus() {
+        return companyStatus;
+    }
+
+    public void setCompanyStatus(String companyStatus) {
+        this.companyStatus = companyStatus;
     }
 
     @Override

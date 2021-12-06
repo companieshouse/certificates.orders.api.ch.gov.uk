@@ -11,6 +11,7 @@ import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.certificates.orders.api.model.DesignatedMemberDetails;
@@ -23,6 +24,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,6 +265,22 @@ class CertificateItemMapperTest {
         assertThat(dto.getEtag(), is(item.getEtag()));
         assertThat(dto.getPostageCost(), is(item.getPostageCost()));
         assertThat(dto.getTotalItemCost(), is(item.getTotalItemCost()));
+    }
+
+    @Test
+    void testEnrichCertificateItem() {
+        //given
+        CertificateItem certificateItem = new CertificateItem();
+        CompanyProfileResource companyProfileResource = new CompanyProfileResource("TEST LTD", "ltd", CompanyStatus.ACTIVE);
+
+        //when
+        CertificateItem actual = mapperUnderTest.enrichCertificateItem("user", companyProfileResource, certificateItem);
+
+        //then
+        assertThat(actual.getUserId(), is("user"));
+        assertThat(actual.getCompanyName(), is("TEST LTD"));
+        assertThat(actual.getItemOptions().getCompanyType(), is("ltd"));
+        assertThat(actual.getItemOptions().getCompanyStatus(), is("active"));
     }
 
     /**

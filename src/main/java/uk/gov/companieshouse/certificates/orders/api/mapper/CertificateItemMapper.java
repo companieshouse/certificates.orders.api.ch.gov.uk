@@ -2,10 +2,12 @@ package uk.gov.companieshouse.certificates.orders.api.mapper;
 
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 
@@ -13,6 +15,12 @@ import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 public interface CertificateItemMapper {
     CertificateItem certificateItemDTOtoCertificateItem(CertificateItemDTO certificateItemDTO);
     CertificateItemDTO certificateItemToCertificateItemDTO(CertificateItem certificateItem);
+    @Mapping(source = "identity", target = "certificateItem.userId")
+    @Mapping(source = "companyProfile.companyName", target = "certificateItem.companyName")
+    @Mapping(source = "companyProfile.companyStatus.statusName", target = "certificateItem.itemOptions.companyStatus")
+    @Mapping(source = "companyProfile.companyType", target = "certificateItem.itemOptions.companyType")
+    CertificateItem enrichCertificateItem(String identity, CompanyProfileResource companyProfile,
+                                          @MappingTarget CertificateItem certificateItem);
 
     @AfterMapping
     default void setDefaults(CertificateItemDTO certificateItemDTO, @MappingTarget CertificateItem certificateItem){

@@ -154,6 +154,11 @@
 			<artifactId>api-sdk-java</artifactId>
 			<version>${api-sdk-java.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>private-api-sdk-java</artifactId>
+            <version>unversioned</version>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

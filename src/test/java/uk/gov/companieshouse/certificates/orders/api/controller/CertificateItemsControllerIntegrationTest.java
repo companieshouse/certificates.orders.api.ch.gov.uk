@@ -79,7 +79,6 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*
 @ActiveProfiles("feature-flags-enabled")
 class CertificateItemsControllerIntegrationTest {
 
-    public static final CompanyStatus EXPECTED_COMPANY_STATUS = CompanyStatus.ACTIVE;
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -96,9 +95,12 @@ class CertificateItemsControllerIntegrationTest {
     private static final ItemCosts TOKEN_ITEM_COSTS = new ItemCosts();
     private static final String COMPANY_NUMBER = "00006400";
     private static final String PREVIOUS_COMPANY_NUMBER = "00006400";
-    private static final String PREVIOUS_COMPANY_TYPE = "llp";
+    private static final CompanyStatus PREVIOUS_COMPANY_STATUS = CompanyStatus.ACTIVE;
+    private static final CompanyStatus EXPECTED_COMPANY_STATUS = CompanyStatus.ACTIVE;
+    private static final CompanyStatus UPDATED_COMPANY_STATUS = CompanyStatus.LIQUIDATION;
     private static final String EXPECTED_COMPANY_NAME = "THE GIRLS' DAY SCHOOL TRUST";
-    private static final String EXPECTED_COMPANY_TYPE = "limited";
+    private static final String PREVIOUS_COMPANY_TYPE = "limited";
+    private static final String UPDATED_COMPANY_TYPE = "llp";
     private static final String PREVIOUS_COMPANY_NAME = "Phillips and Daughters";
     private static final String DESCRIPTION = "certificate for company " + COMPANY_NUMBER;
     private static final String UPDATED_COMPANY_NUMBER = "00006444";
@@ -332,7 +334,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
-        options.setCompanyType(EXPECTED_COMPANY_TYPE);
+        options.setCompanyType(PREVIOUS_COMPANY_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
@@ -369,7 +371,7 @@ class CertificateItemsControllerIntegrationTest {
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
         when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
-                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
+                new CompanyProfileResource(EXPECTED_COMPANY_NAME, PREVIOUS_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         // When and Then
@@ -386,7 +388,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
                 .andExpect(jsonPath("$.company_name", is(EXPECTED_COMPANY_NAME)))
                 .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
-                .andExpect(jsonPath("$.item_options.company_type", is(EXPECTED_COMPANY_TYPE)))
+                .andExpect(jsonPath("$.item_options.company_type", is(PREVIOUS_COMPANY_TYPE)))
                 .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
                 .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
                 .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
@@ -414,6 +416,8 @@ class CertificateItemsControllerIntegrationTest {
                         is(POSTAGE_COST)))
                 .andExpect(jsonPath("$.total_item_cost",
                         is(totalItemCost)))
+                .andExpect(jsonPath("$.item_options.company_status",
+                        is(EXPECTED_COMPANY_STATUS.getStatusName())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -1049,7 +1053,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setCompanyNumber(COMPANY_NUMBER);
         savedItem.setCustomerReference(CUSTOMER_REFERENCE);
         savedItem.setDescription(DESCRIPTION);
         savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
@@ -1057,6 +1060,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
         options.setCompanyType(PREVIOUS_COMPANY_TYPE);
+        options.setCompanyStatus(PREVIOUS_COMPANY_STATUS.getStatusName());
         options.setCollectionLocation(COLLECTION_LOCATION);
         options.setContactNumber(CONTACT_NUMBER);
         options.setDeliveryMethod(DELIVERY_METHOD);
@@ -1074,35 +1078,49 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        itemUpdate.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptions itemUpdateOptions = new CertificateItemOptions();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
-        options.setCertificateType(UPDATED_CERTIFICATE_TYPE);
-        options.setCompanyType(EXPECTED_COMPANY_TYPE);
-        options.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
-        options.setContactNumber(UPDATED_CONTACT_NUMBER);
-        options.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
-        options.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
-        options.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setForename(FORENAME);
-        options.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
-        options.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
-        options.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
-        options.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
-        options.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setSurname(UPDATED_SURNAME);
-        itemUpdate.setItemOptions(options);
-        itemUpdate.setCompanyNumber(UPDATED_COMPANY_NUMBER);
         itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
+        itemUpdate.setItemOptions(itemUpdateOptions);
+        itemUpdateOptions.setCertificateType(UPDATED_CERTIFICATE_TYPE);
+        itemUpdateOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        itemUpdateOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
+        itemUpdateOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
+        itemUpdateOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        itemUpdateOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemUpdateOptions.setForename(FORENAME);
+        itemUpdateOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        itemUpdateOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        itemUpdateOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
+        itemUpdateOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
+        itemUpdateOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemUpdateOptions.setSurname(UPDATED_SURNAME);
+
+        final CertificateItemOptions expectedCertificateItemOptions = new CertificateItemOptions();
+        expectedCertificateItemOptions.setCertificateType(UPDATED_CERTIFICATE_TYPE);
+        expectedCertificateItemOptions.setCompanyType(PREVIOUS_COMPANY_TYPE);
+        expectedCertificateItemOptions.setCompanyStatus(PREVIOUS_COMPANY_STATUS.getStatusName());
+        expectedCertificateItemOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        expectedCertificateItemOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
+        expectedCertificateItemOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
+        expectedCertificateItemOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        expectedCertificateItemOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        expectedCertificateItemOptions.setForename(FORENAME);
+        expectedCertificateItemOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        expectedCertificateItemOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        expectedCertificateItemOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
+        expectedCertificateItemOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
+        expectedCertificateItemOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        expectedCertificateItemOptions.setSurname(UPDATED_SURNAME);
 
         final CertificateItemDTO expectedItem = new CertificateItemDTO();
-        expectedItem.setCompanyNumber(COMPANY_NUMBER);
-        expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
+        expectedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
+        expectedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
         expectedItem.setQuantity(UPDATED_QUANTITY);
-        expectedItem.setItemOptions(options);
-        expectedItem.setCompanyNumber(UPDATED_COMPANY_NUMBER);
+        expectedItem.setItemOptions(expectedCertificateItemOptions);
         expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
-        expectedItem.setDescription(EXPECTED_DESCRIPTION);
-        expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, UPDATED_COMPANY_NUMBER));
+        expectedItem.setDescription(DESCRIPTION);
+        expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, PREVIOUS_COMPANY_NUMBER));
 
         final List<ItemCosts> costs = generateExpectedCosts(UPDATED_QUANTITY, UPDATED_DELIVERY_TIMESCALE);
         expectedItem.setItemCosts(costs);
@@ -1112,8 +1130,6 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
 
         when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyProfile(UPDATED_COMPANY_NUMBER)).thenReturn(
-                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1133,12 +1149,17 @@ class CertificateItemsControllerIntegrationTest {
         final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
         assertThat(retrievedCertificateItem.isPresent(), is(true));
         assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
-        assertThat(retrievedCertificateItem.get().getCompanyNumber(), is(UPDATED_COMPANY_NUMBER));
-        assertThat(retrievedCertificateItem.get().getCompanyName(), is(EXPECTED_COMPANY_NAME));
+        assertThat(retrievedCertificateItem.get().getCompanyNumber(),
+                is(PREVIOUS_COMPANY_NUMBER));
+        assertThat(retrievedCertificateItem.get().getCompanyName(),
+                is(PREVIOUS_COMPANY_NAME));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyType(),
+                is(PREVIOUS_COMPANY_TYPE));
+        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyStatus(),
+                is(PREVIOUS_COMPANY_STATUS.getStatusName()));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
                 is(UPDATED_CERTIFICATE_TYPE));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyType(), is(EXPECTED_COMPANY_TYPE));
         assertThat(retrievedCertificateItem.get().getItemOptions().getCollectionLocation(),
                 is(UPDATED_COLLECTION_LOCATION));
         assertThat(retrievedCertificateItem.get().getItemOptions().getContactNumber(),
@@ -1173,8 +1194,10 @@ class CertificateItemsControllerIntegrationTest {
         assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
 
         verify(etagGenerator).generateEtag();
-        verify(companyService).getCompanyProfile(UPDATED_COMPANY_NUMBER);
     }
+
+    //TODO: fetch company status from company profile on update if absent
+    //TODO: raise error if company info provided in update request
 
     @Test
     @DisplayName("Fails to create certificate item with incorrect token permission")
@@ -1301,7 +1324,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        options.setCompanyType("limited");
+        options.setCompanyType("ltd");
         savedItem.setItemOptions(options);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
@@ -1313,7 +1336,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedItem.setItemOptions(options);
 
         when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
-                new CompanyProfileResource(EXPECTED_COMPANY_NAME, EXPECTED_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
+                new CompanyProfileResource(EXPECTED_COMPANY_NAME, "ltd", EXPECTED_COMPANY_STATUS));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1493,6 +1516,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setItemOptions(new CertificateItemOptions());
         repository.save(savedItem);
 
         final ApiError expectedValidationErrors =
@@ -1601,6 +1625,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setItemOptions(new CertificateItemOptions());
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -1680,6 +1705,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setItemOptions(new CertificateItemOptions());
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -1820,6 +1846,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setItemOptions(new CertificateItemOptions());
         repository.save(savedItem);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 

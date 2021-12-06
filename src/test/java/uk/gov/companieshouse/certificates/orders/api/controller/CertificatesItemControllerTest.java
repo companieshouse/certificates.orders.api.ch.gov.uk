@@ -2,9 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
@@ -32,7 +30,6 @@ import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
-import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
 
 /**
  * Unit tests the {@link CertificateItemsController} class.
@@ -56,6 +53,9 @@ class CertificatesItemControllerTest {
 
     @Mock
     private CertificateItem nonEnrichedCertificateItem;
+
+    @Mock
+    private CertificateItem enrichedCertificateItem;
 
     @Mock
     private CertificateItemDTO dto;
@@ -92,9 +92,6 @@ class CertificatesItemControllerTest {
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
         when(item.getCompanyNumber()).thenReturn("12345678");
         when(item.getItemOptions()).thenReturn(certificateItemOptions);
-        when(companyService.getCompanyProfile(anyString())).thenReturn(companyProfileResource);
-        when(companyProfileResource.getCompanyName()).thenReturn("TEST LIMITED");
-        when(companyProfileResource.getCompanyType()).thenReturn("limited");
         when(certificateItemService.saveCertificateItem(item)).thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
 
@@ -105,7 +102,6 @@ class CertificatesItemControllerTest {
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertThat(response.getBody(), is(dto));
-        verify(companyService).getCompanyProfile("12345678");
     }
 
     @Test
@@ -167,22 +163,20 @@ class CertificatesItemControllerTest {
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() {
         when(dto.getCompanyNumber()).thenReturn("number");
-        when(nonEnrichedCertificateItem.getItemOptions()).thenReturn(certificateItemOptions);
         when(companyService.getCompanyProfile("number")).thenReturn(
                 new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
-        when(certificateItemService.createCertificateItem(nonEnrichedCertificateItem))
+        when(certificateItemService.createCertificateItem(enrichedCertificateItem))
                 .thenReturn(item);
         when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
         when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(nonEnrichedCertificateItem);
+        when(mapper.enrichCertificateItem(any(), any(), eq(nonEnrichedCertificateItem)))
+                .thenReturn(enrichedCertificateItem);
 
-        ResponseEntity<Object>
-                response =
+        ResponseEntity<Object> response =
                 controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
         assertThat(response.getBody(), is(dto));
-        verify(nonEnrichedCertificateItem).setCompanyName("name");
-        verify(certificateItemOptions).setCompanyType("type");
     }
 
     @Test

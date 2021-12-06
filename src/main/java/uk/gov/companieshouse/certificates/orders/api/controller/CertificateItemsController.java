@@ -106,10 +106,7 @@ public class CertificateItemsController {
         }
 
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
-        item.setUserId(EricHeaderHelper.getIdentity(request));
-        item.setCompanyName(companyProfile.getCompanyName());
-        item.getItemOptions().setCompanyType(companyProfile.getCompanyType());
-
+        item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
         item = certificateItemService.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
         
@@ -150,11 +147,11 @@ public class CertificateItemsController {
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
                   consumes = "application/merge-patch+json")
     public ResponseEntity<Object> updateCertificateItem(
-            final @RequestBody JsonMergePatch mergePatchDocument,
+            final @RequestBody JsonMergePatch mergePatchDocument, //TODO: replace this with a request model
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
-        logMap.put(CERTIFICATE_ID_LOG_KEY, id);       
+        logMap.put(CERTIFICATE_ID_LOG_KEY, id);
         LOGGER.info("update certificate item request", logMap);
         logMap.remove(MESSAGE);
 
@@ -177,11 +174,11 @@ public class CertificateItemsController {
 
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
-        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(patchedItem.getCompanyNumber());
+        //TODO: Fetch company profile if company status == null
 
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
                 new CompanyCertificateInformation(
-                        companyProfile.getCompanyStatus(),
+                        CompanyStatus.getEnumValue(itemRetrieved.getItemOptions().getCompanyStatus()),
                         patchedItem.getId(),
                         patchedItem.getItemOptions()));
         if (!patchedErrors.isEmpty()) {
@@ -191,8 +188,6 @@ public class CertificateItemsController {
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
-        patchedItem.setCompanyName(companyProfile.getCompanyName());
-        patchedItem.getItemOptions().setCompanyType(companyProfile.getCompanyType());
         final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
         final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
 
