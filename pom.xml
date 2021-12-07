@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<structured-logging.version>1.9.0</structured-logging.version>
+		<structured-logging.version>1.9.8</structured-logging.version>
 		<api-helper-java.version>1.1.0-rc1</api-helper-java.version>
 		<commons.lang.version>2.6</commons.lang.version>
 		<commons.beanutils.version>1.9.4</commons.beanutils.version>
@@ -47,8 +47,8 @@
 		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
 
 		<!-- Spring -->
-		<spring-boot-dependencies.version>2.4.13</spring-boot-dependencies.version>
-		<spring-boot-maven-plugin.version>2.4.13</spring-boot-maven-plugin.version>
+		<spring-boot-dependencies.version>2.5.5</spring-boot-dependencies.version>
+		<spring-boot-maven-plugin.version>2.5.5</spring-boot-maven-plugin.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
