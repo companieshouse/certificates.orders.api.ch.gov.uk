@@ -22,3 +22,8 @@ llp:
   certificate:
     orders:
       enabled: ${DYNAMIC_LLP_CERTIFICATE_ORDERS_ENABLED}
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always

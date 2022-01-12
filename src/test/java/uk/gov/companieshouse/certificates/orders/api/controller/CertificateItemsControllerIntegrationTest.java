@@ -1,7 +1,41 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -48,29 +82,6 @@ import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
-
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
  */
@@ -113,7 +124,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final String UPDATED_CUSTOMER_REFERENCE = "Certificate ordered by PJ.";
     private static final String INVALID_DELIVERY_TIMESCALE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: [standard, same-day]";
+                    + " from String \"unknown\": not one of the values accepted for Enum class: [standard, same-day]";
     private static final String COMPANY_NAME = "Phillips & Daughters";
     private static final String UPDATED_COMPANY_NAME = "Philips & Daughters";
     private static final String TOKEN_ETAG = "9d39ea69b64c80ca42ed72328b48c303c4445e28";
@@ -121,20 +132,20 @@ class CertificateItemsControllerIntegrationTest {
     private static final CertificateType UPDATED_CERTIFICATE_TYPE = CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
     private static final String INVALID_CERTIFICATE_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.CertificateType`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + " from String \"unknown\": not one of the values accepted for Enum class: "
                     + "[incorporation-with-all-name-changes, incorporation, dissolution, "
                     + "incorporation-with-last-name-changes]";
     private static final DeliveryMethod DELIVERY_METHOD = DeliveryMethod.POSTAL;
     private static final DeliveryMethod UPDATED_DELIVERY_METHOD = DeliveryMethod.COLLECTION;
     private static final String INVALID_DELIVERY_METHOD_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + " from String \"unknown\": not one of the values accepted for Enum class: "
                     + "[postal, collection]";
     private static final CollectionLocation COLLECTION_LOCATION = CollectionLocation.BELFAST;
     private static final CollectionLocation UPDATED_COLLECTION_LOCATION = CollectionLocation.CARDIFF;
     private static final String INVALID_COLLECTION_LOCATION_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + " from String \"unknown\": not one of the values accepted for Enum class: "
                     + "[london, cardiff, edinburgh, belfast]";
     private static final String MISSING_COLLECTION_LOCATION_MESSAGE =
             "collection_location: must not be null when delivery method is collection";
@@ -174,7 +185,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final IncludeDobType UPDATED_INCLUDE_DOB_TYPE = IncludeDobType.FULL;
     private static final String INVALID_INCLUDE_DOB_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: [partial, full]";
+                    + " from String \"unknown\": not one of the values accepted for Enum class: [partial, full]";
     private static final boolean INCLUDE_NATIONALITY = false;
     private static final boolean UPDATED_INCLUDE_NATIONALITY = true;
     private static final boolean INCLUDE_OCCUPATION = true;
@@ -183,7 +194,7 @@ class CertificateItemsControllerIntegrationTest {
     private static final IncludeAddressRecordsType UPDATED_INCLUDE_ADDRESS_RECORDS_TYPE = IncludeAddressRecordsType.CURRENT_PREVIOUS_AND_PRIOR;
     private static final String INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE =
             "Cannot deserialize value of type `uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType`"
-                    + " from String \"unknown\": value not one of declared Enum instance names: "
+                    + " from String \"unknown\": not one of the values accepted for Enum class: "
                     + "[all, current-previous-and-prior, current, current-and-previous]";
     private static final boolean INCLUDE_DATES = true;
     private static final boolean UPDATED_INCLUDE_DATES = false;
