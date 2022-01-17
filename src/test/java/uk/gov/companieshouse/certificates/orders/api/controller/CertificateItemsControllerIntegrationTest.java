@@ -53,9 +53,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
@@ -92,6 +97,7 @@ class CertificateItemsControllerIntegrationTest {
 
     static final Map<String, String> TOKEN_VALUES = new HashMap<>();
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
+    private static final String INITIAL_CERTIFICATE_URL = "/orderable/certificates/initial";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
     private static final String UPDATED_ITEM_ID = "CRT-123456-123457";
     private static final int QUANTITY = 5;
@@ -1914,6 +1920,37 @@ class CertificateItemsControllerIntegrationTest {
 
         // Then
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
+    }
+
+    @Test
+    void whenInitialCertificateItemRequestShouldRespondWithCreatedCertificateItem() throws Exception {
+        //given
+        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
+        certificateItemInitialDTO.setCompanyNumber("123456");
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+
+        //then
+        MvcResult result = resultActions
+                .andExpect(status().isCreated())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(EXPECTED_ITEM_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.company_name").value("company-name"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.company_number").value("123456"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.company_type").value("ltd"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_status").value("active"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value("ltd"))
+                .andReturn();
     }
 
     /**

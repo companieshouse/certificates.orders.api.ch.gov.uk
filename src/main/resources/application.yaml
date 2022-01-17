@@ -5,6 +5,7 @@ uk:
         orders:
           api:
             certificates: /orderable/certificates
+            initial: /orderable/certificates/initial
             health: /healthcheck
 
 spring:

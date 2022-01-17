@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -142,11 +144,15 @@ public class CertificateItemsController {
         }
     }
 
-    @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
-    public ResponseEntity<Object> initialCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+    @PostMapping("${uk.gov.companieshouse.certificates.orders.api.initial}")
+    public ResponseEntity<Object> initialCertificateItem(final @Valid @RequestBody CertificateItemInitialDTO certificateItemInitialDTO,
                                                          HttpServletRequest request,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        final CertificateItemDTO createdCertificateItemDTO = new CertificateItemDTO();
+        final CertificateItemResponseDTO createdCertificateItemDTO = new CertificateItemResponseDTO();
+
+        // TODO
+        createdCertificateItemDTO.setId("ORD-111111-222222");
+
         return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
     }
 
