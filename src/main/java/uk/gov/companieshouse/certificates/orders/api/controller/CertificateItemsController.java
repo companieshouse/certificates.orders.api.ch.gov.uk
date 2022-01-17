@@ -86,8 +86,8 @@ public class CertificateItemsController {
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
     public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
-                                                        HttpServletRequest request,
-                                                        final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+                                                         HttpServletRequest request,
+                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(request, "create certificate item request", logMap);
 
@@ -107,7 +107,7 @@ public class CertificateItemsController {
         item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
         item = certificateItemService.createCertificateItem(item);
         final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
-        
+
         logMap.put(USER_ID_LOG_KEY, item.getUserId());
         logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
         logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
@@ -142,10 +142,18 @@ public class CertificateItemsController {
         }
     }
 
+    @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
+    public ResponseEntity<Object> initialCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+                                                         HttpServletRequest request,
+                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+        final CertificateItemDTO createdCertificateItemDTO = new CertificateItemDTO();
+        return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
+    }
+
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
                   consumes = "application/merge-patch+json")
     public ResponseEntity<Object> updateCertificateItem(
-            final @RequestBody JsonMergePatch mergePatchDocument, //TODO: replace this with a request model
+            final @RequestBody JsonMergePatch mergePatchDocument,
             final @PathVariable("id") String id,
             final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
