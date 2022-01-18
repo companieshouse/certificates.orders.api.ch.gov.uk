@@ -58,6 +58,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
@@ -1928,6 +1929,12 @@ class CertificateItemsControllerIntegrationTest {
         CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
         certificateItemInitialDTO.setCompanyNumber("123456");
 
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.getEnumValue("active"));
+        when(companyProfileResource.getCompanyType()).thenReturn("ltd");
+        when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+
         //when
         ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1940,17 +1947,69 @@ class CertificateItemsControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
 
         //then
-        MvcResult result = resultActions
+        resultActions
                 .andExpect(status().isCreated())
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(EXPECTED_ITEM_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.company_name").value("company-name"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.company_name").value("ACME Limited"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.company_number").value("123456"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.company_type").value("ltd"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_status").value("active"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value("ltd"))
-                .andReturn();
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value(
+                        "ltd"));
+    }
+
+    @Test
+    void whenInitialItemRequestWithNullCompanyNumberShouldRespondWithBadRequest()
+            throws Exception {
+        //given
+        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+
+        //then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors").value("company_number: must not be null"))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void whenInitialItemRequestWithCompanyProfileApiNotFoundShouldReturnValidationError()
+            throws Exception {
+        //given
+        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
+        certificateItemInitialDTO.setCompanyNumber("12345678");
+
+        when(companyService.getCompanyProfile(any())).thenThrow(new ResponseStatusException(BAD_REQUEST, "Error getting "
+                + "company name for company number 12345678"));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+
+        //then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors").value("400 BAD_REQUEST "
+                        + "\"Error getting company name for company number 12345678\""))
+                .andDo(MockMvcResultHandlers.print());
     }
 
     /**

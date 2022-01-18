@@ -16,6 +16,7 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
@@ -148,12 +150,34 @@ public class CertificateItemsController {
     public ResponseEntity<Object> initialCertificateItem(final @Valid @RequestBody CertificateItemInitialDTO certificateItemInitialDTO,
                                                          HttpServletRequest request,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        final CertificateItemResponseDTO createdCertificateItemDTO = new CertificateItemResponseDTO();
 
-        // TODO
-        createdCertificateItemDTO.setId("ORD-111111-222222");
+        Map<String, Object> logMap = createLoggingDataMap(requestId);
+        LOGGER.infoRequest(request, "create certificate item request", logMap);
 
-        return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
+        String companyNumber = certificateItemInitialDTO.getCompanyNumber();
+        try {
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+
+            CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemInitialDTO);
+            item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
+            item.setQuantity(1);
+            item = certificateItemService.createCertificateItem(item);
+            final CertificateItemResponseDTO createdCertificateItemDTO =
+                    mapper.certificateItemToCertificateItemResponseDTO(item);
+
+            logMap.put(USER_ID_LOG_KEY, item.getUserId());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
+            logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
+            logMap.put(STATUS_LOG_KEY, CREATED);
+            logMap.remove(MESSAGE);
+            LOGGER.infoRequest(request, "certificate item created", logMap);
+
+            return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
+
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(ex.getStatus(),
+                    Collections.singletonList(ex.getMessage())));
+        }
     }
 
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
