@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
@@ -68,7 +68,7 @@ public class CertificateItemsController {
      * Constructor.
      * @param createItemRequestValidator the validator this relies on for some create request 'input' validations
      * @param patchItemRequestValidator the validator this relies on for patch/update request 'input' validations
-     * @param mapper mapper used by this to map between {@link CertificateItemDTO} and
+     * @param mapper mapper used by this to map between {@link CertificateItemRequestDTO} and
      *               {@link CertificateItem} instances
      * @param patcher the component used by this to apply JSON merge patches to
      *                {@link CertificateItem} instances
@@ -89,25 +89,25 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
-    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemDTO certificateItemDTO,
+    public ResponseEntity<Object> createCertificateItem(final @Valid @RequestBody CertificateItemRequestDTO certificateItemRequestDTO,
                                                          HttpServletRequest request,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(request, "create certificate item request", logMap);
 
-        String companyNumber = certificateItemDTO.getCompanyNumber();
+        String companyNumber = certificateItemRequestDTO.getCompanyNumber();
         final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
 
         final List<String> errors = createItemRequestValidator.getValidationErrors(
                 new CompanyCertificateInformation(companyProfile.getCompanyStatus(),
-                        certificateItemDTO.getId(), certificateItemDTO.getItemOptions()));
+                        certificateItemRequestDTO.getId(), certificateItemRequestDTO.getItemOptions()));
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
         }
 
-        CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
+        CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemRequestDTO);
         item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
         item = certificateItemService.createCertificateItem(item);
         final CertificateItemResponseDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponseDTO(item);

@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
  */
 @JsonPropertyOrder(alphabetic = true)
-public class CertificateItemDTO extends ItemDTO {
+public class CertificateItemRequestDTO extends ItemDTO {
 
     @NotNull
     @JsonProperty("item_options")

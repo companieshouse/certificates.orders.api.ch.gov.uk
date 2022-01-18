@@ -35,7 +35,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
@@ -67,11 +67,11 @@ class CertificatesApiApplicationTest {
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {
         // Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setCompanyNumber(null);
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setCompanyNumber(null);
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "company_number: must not be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "company_number: must not be null");
     }
 
 	@Test
@@ -79,7 +79,7 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemDoesNotRejectMissingItemCosts() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 		when(companyProfileResource.getCompanyName()).thenReturn("name");
 		when(companyProfileResource.getCompanyType()).thenReturn("type");
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
@@ -93,7 +93,7 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemDTO))
+				.body(fromValue(newCertificateItemRequestDTO))
 				.exchange()
 				.expectStatus().isCreated();
 
@@ -104,7 +104,7 @@ class CertificatesApiApplicationTest {
     void createCertificateUnauthorised() {
 
         // Given
-        final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+        final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 
         // When and Then
         webTestClient.post().uri("/orderable/certificates")
@@ -114,7 +114,7 @@ class CertificatesApiApplicationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(fromValue(newCertificateItemDTO))
+                .body(fromValue(newCertificateItemRequestDTO))
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
@@ -124,11 +124,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsMissingItemOptions() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setItemOptions(null);
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setItemOptions(null);
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "item_options: must not be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "item_options: must not be null");
 	}
 
 	@Test
@@ -136,11 +136,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsMissingQuantity() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setQuantity(0); // 0 is default value when value not specified
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setQuantity(0); // 0 is default value when value not specified
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "quantity: must be greater than or equal to 1");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "quantity: must be greater than or equal to 1");
 	}
 
 	@Test
@@ -148,18 +148,18 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyItemCosts() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 		final List<ItemCosts> costs = new ArrayList<>();
 		final ItemCosts cost = new ItemCosts();
 		cost.setDiscountApplied("1");
 		cost.setItemCost("2");
 		cost.setCalculatedCost("4");
 		costs.add(cost);
-		newCertificateItemDTO.setItemCosts(costs);
+		newCertificateItemRequestDTO.setItemCosts(costs);
 
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "item_costs: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "item_costs: must be null");
 	}
 
 	@Test
@@ -167,11 +167,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescription() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setDescription("description text");
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setDescription("description text");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "description: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "description: must be null");
 	}
 
 
@@ -180,11 +180,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescriptionIdentifier() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setDescriptionIdentifier("description identifier text");
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setDescriptionIdentifier("description identifier text");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "description_identifier: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "description_identifier: must be null");
 	}
 
 	@Test
@@ -192,11 +192,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyDescriptionValues() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setDescriptionValues(new HashMap<>());
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setDescriptionValues(new HashMap<>());
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "description_values: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "description_values: must be null");
 	}
 
 	@Test
@@ -207,11 +207,11 @@ class CertificatesApiApplicationTest {
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setId("TEST_ID");
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setId("TEST_ID");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "id: must be null in a create item request");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "id: must be null in a create item request");
 	}
 
 	@Test
@@ -222,11 +222,11 @@ class CertificatesApiApplicationTest {
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setPostageCost("0");
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setPostageCost("0");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "postage_cost: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "postage_cost: must be null");
 	}
 
 
@@ -235,11 +235,11 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsReadOnlyTotalItemCost() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setTotalItemCost("100");
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
+		newCertificateItemRequestDTO.setTotalItemCost("100");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "total_item_cost: must be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemRequestDTO, "total_item_cost: must be null");
 	}
 
 	@Test
@@ -247,7 +247,7 @@ class CertificatesApiApplicationTest {
 	void createCertificateItemRejectsMissingRequestId() {
 
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -256,7 +256,7 @@ class CertificatesApiApplicationTest {
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
 				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
 				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-				.body(fromValue(newCertificateItemDTO))
+				.body(fromValue(newCertificateItemRequestDTO))
 				.exchange()
 				.expectStatus().isBadRequest();
 
@@ -266,12 +266,12 @@ class CertificatesApiApplicationTest {
 	@DisplayName("Create reports company not found as bad request")
 	void createCertificateItemReportsCompanyNotFoundAsBadRequest() {
 		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 		when(companyService.getCompanyProfile(COMPANY_NUMBER)).
 				thenThrow(new ResponseStatusException(BAD_REQUEST, COMPANY_NOT_FOUND_ERROR));
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponseStatusError(newCertificateItemDTO, COMPANY_NOT_FOUND_ERROR);
+		postCreateRequestAndExpectBadRequestResponseStatusError(newCertificateItemRequestDTO, COMPANY_NOT_FOUND_ERROR);
 	}
 
 	@Test
@@ -339,7 +339,7 @@ class CertificatesApiApplicationTest {
 	 * @param itemToCreate the DTO representing the certificate item to be requested
 	 * @param expectedError expected validation error message
 	 */
-	private void postCreateRequestAndExpectBadRequestResponse(final CertificateItemDTO itemToCreate,
+	private void postCreateRequestAndExpectBadRequestResponse(final CertificateItemRequestDTO itemToCreate,
 															  final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -362,7 +362,7 @@ class CertificatesApiApplicationTest {
 	 * @param itemToCreate the DTO representing the certificate item to be requested
 	 * @param expectedError expected error message
 	 */
-	private void postCreateRequestAndExpectBadRequestResponseStatusError(final CertificateItemDTO itemToCreate,
+	private void postCreateRequestAndExpectBadRequestResponseStatusError(final CertificateItemRequestDTO itemToCreate,
 																		 final String expectedError) {
 		webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -383,15 +383,15 @@ class CertificatesApiApplicationTest {
 	 * Factory method that produces a DTO for a valid create item request payload.
 	 * @return a valid item DTO
 	 */
-	private CertificateItemDTO createValidNewItem() {
-		final CertificateItemDTO newCertificateItemDTO = new CertificateItemDTO();
-		newCertificateItemDTO.setCompanyNumber(COMPANY_NUMBER);
+	private CertificateItemRequestDTO createValidNewItem() {
+		final CertificateItemRequestDTO newCertificateItemRequestDTO = new CertificateItemRequestDTO();
+		newCertificateItemRequestDTO.setCompanyNumber(COMPANY_NUMBER);
 		final CertificateItemOptions options = new CertificateItemOptions();
 		options.setDeliveryTimescale(STANDARD);
 		options.setCompanyType("limited");
-		newCertificateItemDTO.setItemOptions(options);
-		newCertificateItemDTO.setQuantity(5);
-		return newCertificateItemDTO;
+		newCertificateItemRequestDTO.setItemOptions(options);
+		newCertificateItemRequestDTO.setQuantity(5);
+		return newCertificateItemRequestDTO;
 	}
 
 }

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
@@ -177,7 +177,7 @@ class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMapping() {
-        final CertificateItemDTO dto = setupCertificateItemDTO();
+        final CertificateItemRequestDTO dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS);
         dto.setQuantity(QUANTITY);
 
@@ -202,7 +202,7 @@ class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMappingNoDefaults() {
-        final CertificateItemDTO dto = setupCertificateItemDTO();
+        final CertificateItemRequestDTO dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS_NO_DEFAULTS);
 
         final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
@@ -246,7 +246,7 @@ class CertificateItemMapperTest {
         item.setPostageCost(POSTAGE_COST);
         item.setTotalItemCost(TOTAL_ITEM_COST);
 
-        final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
+        final CertificateItemRequestDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
@@ -342,8 +342,8 @@ class CertificateItemMapperTest {
         assertThat(details1.getIncludeDates(), is(details2.getIncludeDates()));
     }
 
-    private CertificateItemDTO setupCertificateItemDTO() {
-        CertificateItemDTO dto = new CertificateItemDTO();
+    private CertificateItemRequestDTO setupCertificateItemDTO() {
+        CertificateItemRequestDTO dto = new CertificateItemRequestDTO();
         dto.setId(ID);
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);

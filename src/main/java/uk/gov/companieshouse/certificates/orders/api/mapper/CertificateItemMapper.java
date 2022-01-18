@@ -4,7 +4,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
@@ -15,9 +15,9 @@ import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 
 @Mapper(componentModel = "spring")
 public interface CertificateItemMapper {
-    CertificateItem certificateItemDTOtoCertificateItem(CertificateItemDTO certificateItemDTO);
+    CertificateItem certificateItemDTOtoCertificateItem(CertificateItemRequestDTO certificateItemRequestDTO);
     CertificateItem certificateItemDTOtoCertificateItem(CertificateItemInitialDTO certificateItemInitialDTO);
-    CertificateItemDTO certificateItemToCertificateItemDTO(CertificateItem certificateItem);
+    CertificateItemRequestDTO certificateItemToCertificateItemDTO(CertificateItem certificateItem);
     CertificateItemResponseDTO certificateItemToCertificateItemResponseDTO(CertificateItem certificateItem);
     @Mapping(source = "identity", target = "certificateItem.userId")
     @Mapping(source = "companyProfile.companyName", target = "certificateItem.companyName")
@@ -27,19 +27,19 @@ public interface CertificateItemMapper {
                                           @MappingTarget CertificateItem certificateItem);
 
     @AfterMapping
-    default void setDefaults(CertificateItemDTO certificateItemDTO, @MappingTarget CertificateItem certificateItem){
-        int quantity = certificateItemDTO.getQuantity();
+    default void setDefaults(CertificateItemRequestDTO certificateItemRequestDTO, @MappingTarget CertificateItem certificateItem){
+        int quantity = certificateItemRequestDTO.getQuantity();
         certificateItem.setQuantity(quantity > 0 ? quantity : 1);
 
-        DeliveryMethod deliveryMethod = certificateItemDTO.getItemOptions().getDeliveryMethod();
+        DeliveryMethod deliveryMethod = certificateItemRequestDTO.getItemOptions().getDeliveryMethod();
         certificateItem.getItemOptions().setDeliveryMethod(
                 deliveryMethod != null ? deliveryMethod : DeliveryMethod.POSTAL);
 
-        DeliveryTimescale deliveryTimescale = certificateItemDTO.getItemOptions().getDeliveryTimescale();
+        DeliveryTimescale deliveryTimescale = certificateItemRequestDTO.getItemOptions().getDeliveryTimescale();
         certificateItem.getItemOptions().setDeliveryTimescale(
                 deliveryTimescale != null ? deliveryTimescale : DeliveryTimescale.STANDARD);
 
-        CertificateType certificateType = certificateItemDTO.getItemOptions().getCertificateType();
+        CertificateType certificateType = certificateItemRequestDTO.getItemOptions().getCertificateType();
         certificateItem.getItemOptions().setCertificateType(
                 certificateType != null ? certificateType : CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
     }

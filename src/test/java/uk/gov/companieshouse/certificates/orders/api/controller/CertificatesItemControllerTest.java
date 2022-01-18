@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -58,7 +58,7 @@ class CertificatesItemControllerTest {
     private CertificateItem enrichedCertificateItem;
 
     @Mock
-    private CertificateItemDTO dto;
+    private CertificateItemRequestDTO dto;
 
     @Mock
     private PatchMerger merger;
