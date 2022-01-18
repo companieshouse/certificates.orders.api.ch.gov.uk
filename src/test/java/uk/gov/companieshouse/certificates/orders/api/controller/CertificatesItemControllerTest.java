@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -58,7 +59,10 @@ class CertificatesItemControllerTest {
     private CertificateItem enrichedCertificateItem;
 
     @Mock
-    private CertificateItemRequestDTO dto;
+    private CertificateItemRequestDTO requestDTO;
+
+    @Mock
+    private CertificateItemResponseDTO responseDTO;
 
     @Mock
     private PatchMerger merger;
@@ -93,7 +97,7 @@ class CertificatesItemControllerTest {
         when(item.getCompanyNumber()).thenReturn("12345678");
         when(item.getItemOptions()).thenReturn(certificateItemOptions);
         when(certificateItemService.saveCertificateItem(item)).thenReturn(item);
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
+        when(mapper.certificateItemToCertificateItemResponseDTO(item)).thenReturn(responseDTO);
 
         // When
         final ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
@@ -101,7 +105,7 @@ class CertificatesItemControllerTest {
 
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody(), is(dto));
+        assertThat(response.getBody(), is(responseDTO));
     }
 
     @Test
@@ -142,11 +146,11 @@ class CertificatesItemControllerTest {
     void getCertificateItemIsPresent() {
         when(certificateItemService.getCertificateItemWithCosts(ITEM_ID)).thenReturn(
                 Optional.of(item));
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
+        when(mapper.certificateItemToCertificateItemResponseDTO(item)).thenReturn(responseDTO);
         ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody(), is(dto));
+        assertThat(response.getBody(), is(responseDTO));
     }
 
     @Test
@@ -162,21 +166,21 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() {
-        when(dto.getCompanyNumber()).thenReturn("number");
+        when(requestDTO.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile("number")).thenReturn(
                 new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
-        when(certificateItemService.createCertificateItem(enrichedCertificateItem))
-                .thenReturn(item);
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
-        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(nonEnrichedCertificateItem);
+        when(mapper.certificateItemDTOtoCertificateItem(requestDTO)).thenReturn(nonEnrichedCertificateItem);
         when(mapper.enrichCertificateItem(any(), any(), eq(nonEnrichedCertificateItem)))
                 .thenReturn(enrichedCertificateItem);
+        when(certificateItemService.createCertificateItem(enrichedCertificateItem))
+                .thenReturn(item);
+        when(mapper.certificateItemToCertificateItemResponseDTO(item)).thenReturn(responseDTO);
 
         ResponseEntity<Object> response =
-                controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
+                controllerUnderTest.createCertificateItem(requestDTO, request, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
-        assertThat(response.getBody(), is(dto));
+        assertThat(response.getBody(), is(responseDTO));
     }
 
     @Test
@@ -184,13 +188,13 @@ class CertificatesItemControllerTest {
     void createCertificateItemValidationErrors() {
         List<String> errors = new ArrayList<>();
         errors.add("error");
-        when(dto.getCompanyNumber()).thenReturn("number");
+        when(requestDTO.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
         ResponseEntity<Object>
                 response =
-                controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
+                controllerUnderTest.createCertificateItem(requestDTO, request, TOKEN_REQUEST_ID_VALUE);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 }
