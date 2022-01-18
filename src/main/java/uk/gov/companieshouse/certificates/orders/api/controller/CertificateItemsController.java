@@ -110,7 +110,7 @@ public class CertificateItemsController {
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemDTO);
         item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
         item = certificateItemService.createCertificateItem(item);
-        final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item);
+        final CertificateItemResponseDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponseDTO(item);
 
         logMap.put(USER_ID_LOG_KEY, item.getUserId());
         logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
@@ -131,7 +131,7 @@ public class CertificateItemsController {
         logMap.remove(MESSAGE);
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if(item.isPresent()) {
-            final CertificateItemDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemDTO(item.get());
+            final CertificateItemResponseDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponseDTO(item.get());
             logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItemDTO.getCompanyNumber());
             logMap.put(STATUS_LOG_KEY, OK);
             LOGGER.info("certificate item found", logMap);
@@ -210,7 +210,9 @@ public class CertificateItemsController {
 
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
+
         //TODO: Fetch company profile if company status == null
+        //item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
 
         final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
                 new CompanyCertificateInformation(
@@ -225,7 +227,7 @@ public class CertificateItemsController {
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
         final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
-        final CertificateItemDTO savedItemDTO = mapper.certificateItemToCertificateItemDTO(savedItem);
+        final CertificateItemResponseDTO savedItemDTO = mapper.certificateItemToCertificateItemResponseDTO(savedItem);
 
         logMap.put(STATUS_LOG_KEY, OK);
         LOGGER.info("update certificate item request completed", logMap);

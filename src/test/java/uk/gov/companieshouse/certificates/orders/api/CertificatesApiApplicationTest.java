@@ -63,17 +63,6 @@ class CertificatesApiApplicationTest {
 	@Rule
 	public EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
-	@Test
-	@DisplayName("Create rejects read only company name")
-	void createCertificateItemRejectsReadOnlyCompanyName() {
-		// Given
-		final CertificateItemDTO newCertificateItemDTO = createValidNewItem();
-		newCertificateItemDTO.setCompanyName("Phillips & Daughters");
-
-		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemDTO, "company_name: must be null");
-	}
-
     @Test
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {

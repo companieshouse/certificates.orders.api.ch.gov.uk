@@ -32,6 +32,9 @@ public class CertificateItemResponseDTO extends ItemDTO {
     @JsonProperty("customer_reference")
     private String customerReference;
 
+    @JsonProperty("user_id")
+    private String userId;
+
     @Override
     public String getId() {
         return id;
@@ -72,6 +75,14 @@ public class CertificateItemResponseDTO extends ItemDTO {
 
     public String getCustomerReference() {
         return customerReference;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

@@ -1,41 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -53,15 +19,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
@@ -87,6 +52,29 @@ import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorServic
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -369,7 +357,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
-        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
         expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
@@ -490,7 +478,6 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemDTO newItem = new CertificateItemDTO();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        newItem.setCompanyName(COMPANY_NAME);
         newItem.setItemOptions(options);
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
@@ -501,7 +488,6 @@ class CertificateItemsControllerIntegrationTest {
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, asList("company_number: must not be null",
-                        "company_name: must be null",
                         "etag: must be null",
                         "links: must be null",
                         "postage_cost: must be null",
@@ -946,7 +932,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setLinks(LINKS);
         repository.save(newItem);
 
-        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
         expectedItem.setCompanyNumber(COMPANY_NUMBER);
         expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setQuantity(QUANTITY);
@@ -1131,7 +1117,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedCertificateItemOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         expectedCertificateItemOptions.setSurname(UPDATED_SURNAME);
 
-        final CertificateItemDTO expectedItem = new CertificateItemDTO();
+        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
         expectedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
         expectedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
         expectedItem.setQuantity(UPDATED_QUANTITY);
@@ -1955,8 +1941,8 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.company_number").value("123456"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_status").value("active"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value(
-                        "ltd"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value("ltd"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.user_id").value(ERIC_IDENTITY_VALUE));
     }
 
     @Test

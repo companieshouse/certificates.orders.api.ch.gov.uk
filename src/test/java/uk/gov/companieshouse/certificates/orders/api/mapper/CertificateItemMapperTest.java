@@ -186,7 +186,6 @@ class CertificateItemMapperTest {
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
         assertThat(item.getData().getId(), is(dto.getId()));
-        assertThat(item.getCompanyName(), is(dto.getCompanyName()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(dto.getQuantity()));
@@ -211,7 +210,6 @@ class CertificateItemMapperTest {
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
         assertThat(item.getData().getId(), is(dto.getId()));
-        assertThat(item.getCompanyName(), is(dto.getCompanyName()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(NO_DEFAULT_QUANTITY));
@@ -251,7 +249,6 @@ class CertificateItemMapperTest {
         final CertificateItemDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
-        assertThat(dto.getCompanyName(), is(item.getCompanyName()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
         assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
         assertThat(dto.getQuantity(), is(item.getQuantity()));
@@ -348,7 +345,6 @@ class CertificateItemMapperTest {
     private CertificateItemDTO setupCertificateItemDTO() {
         CertificateItemDTO dto = new CertificateItemDTO();
         dto.setId(ID);
-        dto.setCompanyName(COMPANY_NAME);
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);
         dto.setDescription(DESCRIPTION);
