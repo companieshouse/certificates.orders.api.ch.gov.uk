@@ -125,7 +125,7 @@ public class CompanyServiceIntegrationTest {
         ENVIRONMENT_VARIABLES.set("CHS_API_KEY", "MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz");
         ENVIRONMENT_VARIABLES.set("API_URL", "http://localhost:" + wireMockPort);
         givenThat(com.github.tomakehurst.wiremock.client.WireMock.get(urlEqualTo("/company/" + COMPANY_NUMBER))
-                .willReturn(badRequest()
+                .willReturn(notFound()
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(COMPANY_NOT_FOUND))));
 
@@ -134,7 +134,7 @@ public class CompanyServiceIntegrationTest {
                 Assertions.assertThrows(ResponseStatusException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
         assertThat(exception.getStatus(), is(BAD_REQUEST));
-        assertThat(exception.getReason(), is("Error getting company name for company number 00006400"));
+        assertThat(exception.getReason(), is("Company profile not found company number 00006400"));
     }
 
     @Test

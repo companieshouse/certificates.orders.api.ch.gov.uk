@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.service;
 
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,17 +72,16 @@ public class CompanyService {
                                                                final String uri) {
 
         final ResponseStatusException propagatedException;
-        if (apiException.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+        if (apiException.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+            final String error = "Company profile not found company number " + companyNumber;
+            LOGGER.error(error, apiException);
+            propagatedException =  new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
+        } else {
             final String error = "Error sending request to "
                     + client.getBasePath() + uri + ": " + apiException.getStatusMessage();
             LOGGER.error(error, apiException);
             propagatedException = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
-        } else {
-            final String error = "Error getting company name for company number " + companyNumber;
-            LOGGER.error(error, apiException);
-            propagatedException =  new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
         }
         return propagatedException;
     }
-
 }

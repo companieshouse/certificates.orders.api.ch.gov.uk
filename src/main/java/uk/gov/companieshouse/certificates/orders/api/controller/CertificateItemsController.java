@@ -110,7 +110,7 @@ public class CertificateItemsController {
         CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemRequestDTO);
         item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
         item = certificateItemService.createCertificateItem(item);
-        final CertificateItemResponseDTO createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponseDTO(item);
+        final CertificateItemResponseDTO responseDTO = mapper.certificateItemToCertificateItemResponseDTO(item);
 
         logMap.put(USER_ID_LOG_KEY, item.getUserId());
         logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
@@ -118,7 +118,7 @@ public class CertificateItemsController {
         logMap.put(STATUS_LOG_KEY, CREATED);
         logMap.remove(MESSAGE);
         LOGGER.infoRequest(request, "certificate item created", logMap);
-        return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
+        return ResponseEntity.status(CREATED).body(responseDTO);
     }
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
@@ -175,6 +175,8 @@ public class CertificateItemsController {
             return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
 
         } catch (ResponseStatusException ex) {
+            uk.gov.companieshouse.api.error.ApiError apiError = new uk.gov.companieshouse.api.error.ApiError();
+            apiError.setError("ERR_COMPANY_PROFILE_UNAVAILABLE");
             return ResponseEntity.status(BAD_REQUEST).body(new ApiError(ex.getStatus(),
                     Collections.singletonList(ex.getMessage())));
         }
@@ -227,12 +229,12 @@ public class CertificateItemsController {
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
         final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
-        final CertificateItemResponseDTO savedItemDTO = mapper.certificateItemToCertificateItemResponseDTO(savedItem);
+        final CertificateItemResponseDTO responseDTO = mapper.certificateItemToCertificateItemResponseDTO(savedItem);
 
         logMap.put(STATUS_LOG_KEY, OK);
         LOGGER.info("update certificate item request completed", logMap);
 
-        return ResponseEntity.ok().body(savedItemDTO);
+        return ResponseEntity.ok().body(responseDTO);
     }
     
     /**
