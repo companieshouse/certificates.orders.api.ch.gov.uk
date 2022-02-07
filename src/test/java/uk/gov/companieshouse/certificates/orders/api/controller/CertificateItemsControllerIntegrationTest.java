@@ -3,9 +3,6 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
-import org.hamcrest.Matchers;
-import org.json.JSONObject;
-import org.json.JSONString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticationInterceptor;
@@ -280,7 +276,10 @@ class CertificateItemsControllerIntegrationTest {
     private CompanyService companyService;
     @MockBean
     private CompanyProfileResource companyProfileResource;
-    private CertificateItemRequestDTO certificateItemRequestDto;
+    @MockBean
+    private CertificateTypeMapper certificateTypeMapper;
+
+    private CertificateItemCreate certificateItemCreate;
 
     private CertificateItemOptions certificateItemOptions;
 
@@ -332,16 +331,16 @@ class CertificateItemsControllerIntegrationTest {
 
     @BeforeEach
     void beforeEach() {
-        certificateItemRequestDto = new CertificateItemRequestDTO();
+        certificateItemCreate = new CertificateItemCreate();
         certificateItemOptions = new CertificateItemOptions();
-        certificateItemRequestDto.setItemOptions(certificateItemOptions);
+        certificateItemCreate.setItemOptions(certificateItemOptions);
     }
 
     @Test
     @DisplayName("Successfully creates certificate item")
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
@@ -362,7 +361,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
-        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
+        final CertificateItemResponse expectedItem = new CertificateItemResponse();
         expectedItem.setId(EXPECTED_ITEM_ID);
         expectedItem.setCompanyNumber(newItem.getCompanyNumber());
         expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
@@ -384,6 +383,7 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
                 new CompanyProfileResource(EXPECTED_COMPANY_NAME, PREVIOUS_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -442,7 +442,7 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Fails to create certificate item with incorrect token permission")
     void createCertificateItemUnauthorizedTokenPermission() throws Exception {
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
@@ -480,7 +480,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItem() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         newItem.setItemOptions(options);
@@ -521,7 +521,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
@@ -555,7 +555,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidCertificateType() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
@@ -589,7 +589,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCollectionLocation(COLLECTION_LOCATION);
@@ -623,7 +623,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionDetails() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
@@ -632,6 +632,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
@@ -661,7 +662,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryMethod(DELIVERY_METHOD);
@@ -697,7 +698,7 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CertificateType.DISSOLUTION);
@@ -711,6 +712,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -742,7 +744,7 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DeliveryTimescale.STANDARD);
@@ -752,6 +754,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -780,7 +783,7 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setIncludeEmailCopy(true);
@@ -789,6 +792,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -816,7 +820,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
         director.setIncludeDobType(INCLUDE_DOB_TYPE);
@@ -852,7 +856,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
         registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
@@ -888,7 +892,7 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithConflictingDetailsSettings() throws Exception {
 
         // Given
-        final CertificateItemRequestDTO newItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
@@ -898,6 +902,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -937,7 +942,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setLinks(LINKS);
         repository.save(newItem);
 
-        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
+        final CertificateItemResponse expectedItem = new CertificateItemResponse();
         expectedItem.setCompanyNumber(COMPANY_NUMBER);
         expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
         expectedItem.setQuantity(QUANTITY);
@@ -1122,7 +1127,7 @@ class CertificateItemsControllerIntegrationTest {
         expectedCertificateItemOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
         expectedCertificateItemOptions.setSurname(UPDATED_SURNAME);
 
-        final CertificateItemResponseDTO expectedItem = new CertificateItemResponseDTO();
+        final CertificateItemResponse expectedItem = new CertificateItemResponse();
         expectedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
         expectedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
         expectedItem.setQuantity(UPDATED_QUANTITY);
@@ -1340,7 +1345,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
 
-        final CertificateItemRequestDTO expectedItem = new CertificateItemRequestDTO();
+        final CertificateItemCreate expectedItem = new CertificateItemCreate();
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setItemOptions(options);
 
@@ -1882,9 +1887,9 @@ class CertificateItemsControllerIntegrationTest {
     void correctErrorsWhenCertificateLiquidatorsDetailsAreSupplied(CertificateItemsFixture fixture)
             throws Exception {
         // Given
-        certificateItemRequestDto.setCompanyNumber(COMPANY_NUMBER);
-        certificateItemRequestDto.setItemOptions(certificateItemOptions);
-        certificateItemRequestDto.setQuantity(QUANTITY);
+        certificateItemCreate.setCompanyNumber(COMPANY_NUMBER);
+        certificateItemCreate.setItemOptions(certificateItemOptions);
+        certificateItemCreate.setQuantity(QUANTITY);
 
         certificateItemOptions.setCertificateType(CertificateType.INCORPORATION);
         certificateItemOptions.setCompanyType(fixture.getCompanyType());
@@ -1893,6 +1898,7 @@ class CertificateItemsControllerIntegrationTest {
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError = new ApiError(BAD_REQUEST, fixture.getExpectedErrors());
 
@@ -1905,7 +1911,7 @@ class CertificateItemsControllerIntegrationTest {
                         .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                         .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemRequestDto)))
+                        .content(objectMapper.writeValueAsString(certificateItemCreate)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
                 .andDo(MockMvcResultHandlers.print());
@@ -1917,14 +1923,15 @@ class CertificateItemsControllerIntegrationTest {
     @Test
     void whenInitialCertificateItemRequestShouldRespondWithCreatedCertificateItem() throws Exception {
         //given
-        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
-        certificateItemInitialDTO.setCompanyNumber("123456");
+        CertificateItemInitial certificateItemInitial = new CertificateItemInitial();
+        certificateItemInitial.setCompanyNumber("123456");
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.getEnumValue("active"));
         when(companyProfileResource.getCompanyType()).thenReturn("ltd");
         when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
 
         //when
         ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
@@ -1935,7 +1942,7 @@ class CertificateItemsControllerIntegrationTest {
                         .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                         .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+                        .content(objectMapper.writeValueAsString(certificateItemInitial)));
 
         //then
         resultActions
@@ -1954,7 +1961,7 @@ class CertificateItemsControllerIntegrationTest {
     void whenInitialItemRequestWithNullCompanyNumberShouldRespondWithBadRequest()
             throws Exception {
         //given
-        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
+        CertificateItemInitial certificateItemInitial = new CertificateItemInitial();
 
         //when
         ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
@@ -1965,7 +1972,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+                .content(objectMapper.writeValueAsString(certificateItemInitial)));
 
         //then
         resultActions
@@ -1981,8 +1988,8 @@ class CertificateItemsControllerIntegrationTest {
     void whenInitialItemRequestWithCompanyProfileApiNotFoundShouldReturnCompanyNotFoundError()
             throws Exception {
         //given
-        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
-        certificateItemInitialDTO.setCompanyNumber("12345678");
+        CertificateItemInitial certificateItemInitial = new CertificateItemInitial();
+        certificateItemInitial.setCompanyNumber("12345678");
 
         when(companyService.getCompanyProfile(any())).thenThrow(new CompanyNotFoundException("Error getting "
                 + "company name for company number 12345678"));
@@ -1996,7 +2003,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+                .content(objectMapper.writeValueAsString(certificateItemInitial)));
 
         //then
         resultActions
@@ -2012,11 +2019,11 @@ class CertificateItemsControllerIntegrationTest {
     void whenInitialItemRequestWithCompanyStatusControllerReturnsBadRequestCompanyStatusIsInvalid()
             throws Exception {
         //given
-        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
-        certificateItemInitialDTO.setCompanyNumber("12345678");
+        CertificateItemInitial certificateItemInitial = new CertificateItemInitial();
+        certificateItemInitial.setCompanyNumber("12345678");
 
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
-
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(ApiErrors.ERR_COMPANY_STATUS_INVALID));
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         //when
@@ -2028,7 +2035,7 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+                .content(objectMapper.writeValueAsString(certificateItemInitial)));
 
         //then
         resultActions
@@ -2087,7 +2094,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makeIncorporationCertificateTypeInvalid(final CertificateItemRequestDTO newItem)
+    private String makeIncorporationCertificateTypeInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("incorporation", "unknown");
     }
@@ -2113,7 +2120,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makeBelfastCollectionLocationInvalid(final CertificateItemRequestDTO newItem)
+    private String makeBelfastCollectionLocationInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("belfast", "unknown");
     }
@@ -2139,7 +2146,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makePostalDeliveryMethodInvalid(final CertificateItemRequestDTO newItem)
+    private String makePostalDeliveryMethodInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("postal", "unknown");
     }
@@ -2165,7 +2172,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemRequestDTO newItem)
+    private String makeSameDayDeliveryTimescaleInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("same-day", "unknown");
     }
@@ -2191,7 +2198,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makePartialIncludeDobTypeInvalid(final CertificateItemRequestDTO newItem)
+    private String makePartialIncludeDobTypeInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("partial", "unknown");
     }
@@ -2217,7 +2224,7 @@ class CertificateItemsControllerIntegrationTest {
      * @return the corrupted JSON representation of the item
      * @throws JsonProcessingException should something unexpected happen
      */
-    private String makeCurrentIncludeAddressRecordsTypeInvalid(final CertificateItemRequestDTO newItem)
+    private String makeCurrentIncludeAddressRecordsTypeInvalid(final CertificateItemCreate newItem)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(newItem).replace("current", "unknown");
     }

@@ -4,9 +4,10 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
+import uk.gov.companieshouse.certificates.orders.api.controller.CertificateTypeable;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
@@ -15,31 +16,35 @@ import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 
 @Mapper(componentModel = "spring")
 public interface CertificateItemMapper {
-    CertificateItem certificateItemDTOtoCertificateItem(CertificateItemRequestDTO certificateItemRequestDTO);
-    CertificateItem certificateItemDTOtoCertificateItem(CertificateItemInitialDTO certificateItemInitialDTO);
-    CertificateItemRequestDTO certificateItemToCertificateItemDTO(CertificateItem certificateItem);
-    CertificateItemResponseDTO certificateItemToCertificateItemResponseDTO(CertificateItem certificateItem);
+    CertificateItem certificateItemCreateToCertificateItem(CertificateItemCreate certificateItemCreate);
+    @Mapping(target = "quantity", constant = "1")
+    CertificateItem certificateItemInitialToCertificateItem(CertificateItemInitial certificateItemInitial);
+    CertificateItemCreate certificateItemToCertificateItemDTO(CertificateItem certificateItem);
+    CertificateItemResponse certificateItemToCertificateItemResponse(CertificateItem certificateItem);
     @Mapping(source = "identity", target = "certificateItem.userId")
     @Mapping(source = "companyProfile.companyName", target = "certificateItem.companyName")
     @Mapping(source = "companyProfile.companyStatus.statusName", target = "certificateItem.itemOptions.companyStatus")
     @Mapping(source = "companyProfile.companyType", target = "certificateItem.itemOptions.companyType")
-    CertificateItem enrichCertificateItem(String identity, CompanyProfileResource companyProfile,
+    @Mapping(source = "certificateTypeable.certificateType", target = "certificateItem.itemOptions.certificateType")
+    CertificateItem enrichCertificateItem(String identity,
+                                          CompanyProfileResource companyProfile,
+                                          CertificateTypeable certificateTypeable,
                                           @MappingTarget CertificateItem certificateItem);
 
     @AfterMapping
-    default void setDefaults(CertificateItemRequestDTO certificateItemRequestDTO, @MappingTarget CertificateItem certificateItem){
-        int quantity = certificateItemRequestDTO.getQuantity();
+    default void setDefaults(CertificateItemCreate certificateItemCreate, @MappingTarget CertificateItem certificateItem){
+        int quantity = certificateItemCreate.getQuantity();
         certificateItem.setQuantity(quantity > 0 ? quantity : 1);
 
-        DeliveryMethod deliveryMethod = certificateItemRequestDTO.getItemOptions().getDeliveryMethod();
+        DeliveryMethod deliveryMethod = certificateItemCreate.getItemOptions().getDeliveryMethod();
         certificateItem.getItemOptions().setDeliveryMethod(
                 deliveryMethod != null ? deliveryMethod : DeliveryMethod.POSTAL);
 
-        DeliveryTimescale deliveryTimescale = certificateItemRequestDTO.getItemOptions().getDeliveryTimescale();
+        DeliveryTimescale deliveryTimescale = certificateItemCreate.getItemOptions().getDeliveryTimescale();
         certificateItem.getItemOptions().setDeliveryTimescale(
                 deliveryTimescale != null ? deliveryTimescale : DeliveryTimescale.STANDARD);
 
-        CertificateType certificateType = certificateItemRequestDTO.getItemOptions().getCertificateType();
+        CertificateType certificateType = certificateItemCreate.getItemOptions().getCertificateType();
         certificateItem.getItemOptions().setCertificateType(
                 certificateType != null ? certificateType : CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
     }

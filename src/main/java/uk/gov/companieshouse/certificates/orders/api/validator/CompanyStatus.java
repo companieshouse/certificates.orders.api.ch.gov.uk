@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 
 public enum CompanyStatus {
     ACTIVE("active"),
-    LIQUIDATION("liquidation");
+    LIQUIDATION("liquidation"),
+    DISSOLVED("dissolved");
 
     private static final Map<String, CompanyStatus> enumValues;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder(alphabetic = true)
-public class CertificateItemInitialDTO {
+public class CertificateItemInitial {
     @JsonProperty("company_number")
     private String companyNumber;
 

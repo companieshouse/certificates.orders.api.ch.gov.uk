@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
@@ -177,11 +177,11 @@ class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMapping() {
-        final CertificateItemRequestDTO dto = setupCertificateItemDTO();
+        final CertificateItemCreate dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS);
         dto.setQuantity(QUANTITY);
 
-        final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
+        final CertificateItem item = mapperUnderTest.certificateItemCreateToCertificateItem(dto);
 
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
@@ -202,10 +202,10 @@ class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemDtoToEntityMappingNoDefaults() {
-        final CertificateItemRequestDTO dto = setupCertificateItemDTO();
+        final CertificateItemCreate dto = setupCertificateItemDTO();
         dto.setItemOptions(ITEM_OPTIONS_NO_DEFAULTS);
 
-        final CertificateItem item = mapperUnderTest.certificateItemDTOtoCertificateItem(dto);
+        final CertificateItem item = mapperUnderTest.certificateItemCreateToCertificateItem(dto);
 
         assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
@@ -246,7 +246,7 @@ class CertificateItemMapperTest {
         item.setPostageCost(POSTAGE_COST);
         item.setTotalItemCost(TOTAL_ITEM_COST);
 
-        final CertificateItemRequestDTO dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
+        final CertificateItemCreate dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
         assertThat(dto.getId(), is(item.getId()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
@@ -271,13 +271,14 @@ class CertificateItemMapperTest {
         CompanyProfileResource companyProfileResource = new CompanyProfileResource("TEST LTD", "ltd", CompanyStatus.ACTIVE);
 
         //when
-        CertificateItem actual = mapperUnderTest.enrichCertificateItem("user", companyProfileResource, certificateItem);
+        CertificateItem actual = mapperUnderTest.enrichCertificateItem("user", companyProfileResource, ()->CertificateType.INCORPORATION, certificateItem);
 
         //then
         assertThat(actual.getUserId(), is("user"));
         assertThat(actual.getCompanyName(), is("TEST LTD"));
         assertThat(actual.getItemOptions().getCompanyType(), is("ltd"));
         assertThat(actual.getItemOptions().getCompanyStatus(), is("active"));
+        assertThat(actual.getItemOptions().getCertificateType(), is(INCORPORATION));
     }
 
     /**
@@ -342,8 +343,8 @@ class CertificateItemMapperTest {
         assertThat(details1.getIncludeDates(), is(details2.getIncludeDates()));
     }
 
-    private CertificateItemRequestDTO setupCertificateItemDTO() {
-        CertificateItemRequestDTO dto = new CertificateItemRequestDTO();
+    private CertificateItemCreate setupCertificateItemDTO() {
+        CertificateItemCreate dto = new CertificateItemCreate();
         dto.setId(ID);
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);

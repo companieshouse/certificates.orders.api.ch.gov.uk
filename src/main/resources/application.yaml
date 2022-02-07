@@ -24,6 +24,11 @@ llp:
     orders:
       enabled: ${DYNAMIC_LLP_CERTIFICATE_ORDERS_ENABLED}
 
+liquidated:
+  company:
+    certificate:
+      enabled: ${LIQUIDATED_COMPANY_CERTIFICATES_ENABLED}
+
 server:
   error:
     include-message: always

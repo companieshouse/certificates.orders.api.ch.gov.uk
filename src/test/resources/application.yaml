@@ -28,6 +28,11 @@ llp:
     orders:
       enabled: true
 
+liquidated:
+  company:
+    certificate:
+      enabled: true
+
 ---
 
 spring:
