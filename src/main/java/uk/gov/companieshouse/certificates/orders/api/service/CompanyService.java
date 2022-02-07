@@ -2,7 +2,6 @@ package uk.gov.companieshouse.certificates.orders.api.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriTemplate;
 import uk.gov.companieshouse.api.ApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -48,27 +47,19 @@ public class CompanyService {
                     companyProfile.getType(),
                     CompanyStatus.getEnumValue(companyProfile.getCompanyStatus()));
         } catch (ApiErrorResponseException ex) {
-            throw getResponseStatusException(ex, apiClient, companyNumber, uri);
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                final String error = "Company profile not found company number " + companyNumber;
+                LOGGER.error(error, ex);
+                throw new CompanyNotFoundException(error);
+            } else {
+                final String error = "Error sending request to "
+                        + apiClient.getBasePath() + uri + ": " + ex.getStatusMessage();
+                LOGGER.error(error, ex);
+                throw new CompanyServiceException(error);
+            }
         } catch (URIValidationException ex) {
             final String error = "Invalid URI " + uri + " for company details";
             LOGGER.error(error, ex);
-            throw new CompanyServiceException(error);
-        }
-    }
-
-    private ResponseStatusException getResponseStatusException(final ApiErrorResponseException apiException,
-                                                               final ApiClient client,
-                                                               final String companyNumber,
-                                                               final String uri) throws CompanyServiceException {
-
-        if (apiException.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-            final String error = "Company profile not found company number " + companyNumber;
-            LOGGER.error(error, apiException);
-            throw new CompanyNotFoundException(error);
-        } else {
-            final String error = "Error sending request to "
-                    + client.getBasePath() + uri + ": " + apiException.getStatusMessage();
-            LOGGER.error(error, apiException);
             throw new CompanyServiceException(error);
         }
     }

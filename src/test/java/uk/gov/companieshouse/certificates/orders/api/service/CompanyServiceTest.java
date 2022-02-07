@@ -29,10 +29,10 @@ import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromHttpResponseException;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromIOException;
 
@@ -145,7 +145,7 @@ class CompanyServiceTest {
      * This is a JUnit 4 test to take advantage of PowerMock.
      * @throws Exception should something unexpected happen
      */
-    @org.junit.Test
+    @Test
     public void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
 
         // Given
@@ -161,11 +161,30 @@ class CompanyServiceTest {
         when(get.execute()).thenThrow(ex);
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyNotFoundException exception =
+                Assertions.assertThrows(CompanyNotFoundException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(BAD_REQUEST));
-        assertThat(exception.getReason(), is(NOT_FOUND_EXPECTED_REASON));
+        assertThat(exception.getMessage(), is("Company profile not found company number 00006400"));
     }
 
+    @Test
+    void shouldThrowCompanyServiceExceptionWhenApiClientReturnsOtherNotFoundErrors() throws Exception {
+        //given
+        final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
+        when(httpResponseException.getStatusCode()).thenReturn(500);
+        when(httpResponseException.getStatusMessage()).thenReturn("Service unavailable");
+        when(httpResponseException.getHeaders()).thenReturn(new HttpHeaders());
+        final ApiErrorResponseException ex = fromHttpResponseException(httpResponseException);
+
+        when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
+        when(apiClient.company()).thenReturn(handler);
+        when(handler.get(anyString())).thenReturn(get);
+        when(get.execute()).thenThrow(ex);
+
+        // When and then
+        final CompanyServiceException exception =
+                Assertions.assertThrows(CompanyServiceException.class,
+                        () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
+        assertThat(exception.getMessage(), is("Error sending request to null/company/00006400: Service unavailable"));
+    }
 }
