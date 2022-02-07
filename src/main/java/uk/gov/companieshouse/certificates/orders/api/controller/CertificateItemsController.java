@@ -1,9 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static java.util.Objects.isNull;
+import static org.springframework.http.HttpStatus.*;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.CERTIFICATE_ID_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.COMPANY_NUMBER_LOG_KEY;
@@ -34,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemRequestDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitialDTO;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponseDTO;
@@ -42,7 +41,9 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyNotFoundException;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
@@ -51,11 +52,18 @@ import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestV
 import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.api.error.ApiError;
+
 
 @RestController
 public class CertificateItemsController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+
+    private static ApiError ERR_COMPANY_NOT_FOUND = new ApiError("company-not-found", "company_number", "string", "ch:validation");
+    private static ApiError ERR_COMPANY_NUMBER_IS_NULL = new ApiError("company-number-is-null", "company_number", "string", "ch:validation");
+    private static ApiError ERR_COMPANY_STATUS_INVALID = new ApiError("company-status-invalid", "company_number", "string", "ch:validation");
+    private static ApiError ERR_SERVICE_UNAVAILABLE = new ApiError("company-service-unavailable", "company_number", "string", "ch:service");
 
     private final CreateItemRequestValidator createItemRequestValidator;
     private final PatchItemRequestValidator patchItemRequestValidator;
@@ -95,30 +103,41 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(request, "create certificate item request", logMap);
 
-        String companyNumber = certificateItemRequestDTO.getCompanyNumber();
-        final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+        try {
+            String companyNumber = certificateItemRequestDTO.getCompanyNumber();
+            if (isNull(companyNumber) || "".equals(companyNumber)) {
+                return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse<>(Collections.singletonList(ERR_COMPANY_NUMBER_IS_NULL)));
+            }
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+            final List<String> errors = createItemRequestValidator.getValidationErrors(
+                    new CompanyCertificateInformation(companyProfile.getCompanyStatus(),
+                            certificateItemRequestDTO.getId(), certificateItemRequestDTO.getItemOptions()));
+            if (!errors.isEmpty()) {
+                logErrorsWithStatus(logMap, errors, BAD_REQUEST);
+                LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
+                // TODO: should this be changed to CH ApiError
+                return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, errors));
+            }
 
-        final List<String> errors = createItemRequestValidator.getValidationErrors(
-                new CompanyCertificateInformation(companyProfile.getCompanyStatus(),
-                        certificateItemRequestDTO.getId(), certificateItemRequestDTO.getItemOptions()));
-        if (!errors.isEmpty()) {
-            logErrorsWithStatus(logMap, errors, BAD_REQUEST);
-            LOGGER.errorRequest(request, "create certificate item validation errors", logMap);
-            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
+            CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemRequestDTO);
+            item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
+            item = certificateItemService.createCertificateItem(item);
+            final CertificateItemResponseDTO responseDTO = mapper.certificateItemToCertificateItemResponseDTO(item);
+
+            logMap.put(USER_ID_LOG_KEY, item.getUserId());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
+            logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
+            logMap.put(STATUS_LOG_KEY, CREATED);
+            logMap.remove(MESSAGE);
+            LOGGER.infoRequest(request, "certificate item created", logMap);
+            return ResponseEntity.status(CREATED).body(responseDTO);
+        } catch (CompanyNotFoundException e) {
+            ApiResponse<ApiError> apiResponse = new ApiResponse<>(Collections.singletonList(ERR_COMPANY_NOT_FOUND));
+            return ResponseEntity.status(BAD_REQUEST).body(apiResponse);
+        } catch (CompanyServiceException ex) {
+            ApiResponse<ApiError> apiResponse = new ApiResponse<>(Collections.singletonList(ERR_SERVICE_UNAVAILABLE));
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(apiResponse);
         }
-
-        CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemRequestDTO);
-        item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
-        item = certificateItemService.createCertificateItem(item);
-        final CertificateItemResponseDTO responseDTO = mapper.certificateItemToCertificateItemResponseDTO(item);
-
-        logMap.put(USER_ID_LOG_KEY, item.getUserId());
-        logMap.put(COMPANY_NUMBER_LOG_KEY, item.getCompanyNumber());
-        logMap.put(CERTIFICATE_ID_LOG_KEY, item.getId());
-        logMap.put(STATUS_LOG_KEY, CREATED);
-        logMap.remove(MESSAGE);
-        LOGGER.infoRequest(request, "certificate item created", logMap);
-        return ResponseEntity.status(CREATED).body(responseDTO);
     }
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
@@ -142,7 +161,8 @@ public class CertificateItemsController {
             errors.add(errorMsg);
             logErrorsWithStatus(logMap, errors, NOT_FOUND);
             LOGGER.error(errorMsg, logMap);
-            return ResponseEntity.status(NOT_FOUND).body(new ApiError(NOT_FOUND, errors));
+            // TODO: should this be replaced by CH ApiError
+            return ResponseEntity.status(NOT_FOUND).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(NOT_FOUND, errors));
         }
     }
 
@@ -155,8 +175,18 @@ public class CertificateItemsController {
         LOGGER.infoRequest(request, "create certificate item request", logMap);
 
         String companyNumber = certificateItemInitialDTO.getCompanyNumber();
+        if (isNull(companyNumber) || "".equals(companyNumber)) {
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse<>(Collections.singletonList(ERR_COMPANY_NUMBER_IS_NULL)));
+        }
+
         try {
             final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+
+            // Validate company status
+            if (! companyStatusIsValid(companyProfile)) {
+                ApiResponse<ApiError> apiResponse = new ApiResponse<>(Collections.singletonList(ERR_COMPANY_STATUS_INVALID));
+                return ResponseEntity.status(BAD_REQUEST).body(apiResponse);
+            }
 
             CertificateItem item = mapper.certificateItemDTOtoCertificateItem(certificateItemInitialDTO);
             item = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(request), companyProfile, item);
@@ -174,12 +204,17 @@ public class CertificateItemsController {
 
             return ResponseEntity.status(CREATED).body(createdCertificateItemDTO);
 
-        } catch (ResponseStatusException ex) {
-            uk.gov.companieshouse.api.error.ApiError apiError = new uk.gov.companieshouse.api.error.ApiError();
-            apiError.setError("ERR_COMPANY_PROFILE_UNAVAILABLE");
-            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(ex.getStatus(),
-                    Collections.singletonList(ex.getMessage())));
+        } catch (CompanyNotFoundException ex) {
+            ApiResponse<ApiError> apiResponse = new ApiResponse<>(Collections.singletonList(ERR_COMPANY_NOT_FOUND));
+            return ResponseEntity.status(BAD_REQUEST).body(apiResponse);
+        } catch (CompanyServiceException ex) {
+            ApiResponse<ApiError> apiResponse = new ApiResponse<>(Collections.singletonList(ERR_SERVICE_UNAVAILABLE));
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(apiResponse);
         }
+    }
+
+    private boolean companyStatusIsValid(CompanyProfileResource companyProfile) {
+        return true; //TODO
     }
 
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
@@ -197,7 +232,8 @@ public class CertificateItemsController {
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.error("update certificate item request had validation errors", logMap);
-            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, errors));
+            // TODO should this be replaced with CH ApiError
+            return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, errors));
         }
 
         Optional<CertificateItem> certRetrieved = certificateItemService.getCertificateItemById(id);
@@ -224,7 +260,8 @@ public class CertificateItemsController {
         if (!patchedErrors.isEmpty()) {
             logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
-            return ResponseEntity.status(BAD_REQUEST).body(new ApiError(BAD_REQUEST, patchedErrors));
+            // TODO should this be replaced with CH ApiError
+            return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, patchedErrors));
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());

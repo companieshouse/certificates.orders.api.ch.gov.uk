@@ -41,6 +41,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOption
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -76,7 +77,7 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create does not reject missing item costs")
-	void createCertificateItemDoesNotRejectMissingItemCosts() {
+	void createCertificateItemDoesNotRejectMissingItemCosts() throws CompanyServiceException {
 
 		// Given
 		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
@@ -201,7 +202,7 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only id")
-	void createCertificateItemRejectsReadOnlyId() {
+	void createCertificateItemRejectsReadOnlyId() throws CompanyServiceException {
 
 		// Given
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -216,7 +217,7 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only postage cost")
-	void createCertificateItemRejectsReadOnlyPostageCost() {
+	void createCertificateItemRejectsReadOnlyPostageCost() throws CompanyServiceException {
 
 		// Given
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -264,7 +265,7 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create reports company not found as bad request")
-	void createCertificateItemReportsCompanyNotFoundAsBadRequest() {
+	void createCertificateItemReportsCompanyNotFoundAsBadRequest() throws CompanyServiceException {
 		// Given
 		final CertificateItemRequestDTO newCertificateItemRequestDTO = createValidNewItem();
 		when(companyService.getCompanyProfile(COMPANY_NUMBER)).

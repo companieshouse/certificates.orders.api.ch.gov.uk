@@ -3,6 +3,9 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
+import org.hamcrest.Matchers;
+import org.json.JSONObject;
+import org.json.JSONString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +50,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyNotFoundException;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
@@ -64,11 +68,12 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -1965,18 +1970,21 @@ class CertificateItemsControllerIntegrationTest {
         //then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errors").value("company_number: must not be null"))
+                .andExpect(jsonPath("$.errors[0].error", is("company-number-is-null")))
+                .andExpect(jsonPath("$.errors[0].location", is("company_number")))
+                .andExpect(jsonPath("$.errors[0].location_type", is("string")))
+                .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
-    void whenInitialItemRequestWithCompanyProfileApiNotFoundShouldReturnValidationError()
+    void whenInitialItemRequestWithCompanyProfileApiNotFoundShouldReturnCompanyNotFoundError()
             throws Exception {
         //given
         CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
         certificateItemInitialDTO.setCompanyNumber("12345678");
 
-        when(companyService.getCompanyProfile(any())).thenThrow(new ResponseStatusException(BAD_REQUEST, "Error getting "
+        when(companyService.getCompanyProfile(any())).thenThrow(new CompanyNotFoundException("Error getting "
                 + "company name for company number 12345678"));
 
         //when
@@ -1993,8 +2001,42 @@ class CertificateItemsControllerIntegrationTest {
         //then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errors").value("400 BAD_REQUEST "
-                        + "\"Error getting company name for company number 12345678\""))
+                .andExpect(jsonPath("$.errors[0].error", is("company-not-found")))
+                .andExpect(jsonPath("$.errors[0].location", is("company_number")))
+                .andExpect(jsonPath("$.errors[0].location_type", is("string")))
+                .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void whenInitialItemRequestWithCompanyStatusControllerReturnsBadRequestCompanyStatusIsInvalid()
+            throws Exception {
+        //given
+        CertificateItemInitialDTO certificateItemInitialDTO = new CertificateItemInitialDTO();
+        certificateItemInitialDTO.setCompanyNumber("12345678");
+
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(certificateItemInitialDTO)));
+
+        //then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].error", is("company-status-invalid")))
+                .andExpect(jsonPath("$.errors[0].location", is("company_number")))
+                .andExpect(jsonPath("$.errors[0].location_type", is("string")))
+                .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))
                 .andDo(MockMvcResultHandlers.print());
     }
 

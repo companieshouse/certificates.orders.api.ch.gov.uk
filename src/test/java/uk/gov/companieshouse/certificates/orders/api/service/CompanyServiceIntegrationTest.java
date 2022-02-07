@@ -97,7 +97,7 @@ public class CompanyServiceIntegrationTest {
     private Environment environment;
 
     @Test
-    public void getCompanyProfileReturnsSuccessfully () throws JsonProcessingException {
+    public void getCompanyProfileReturnsSuccessfully () throws JsonProcessingException, CompanyServiceException {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
         final CompanyProfileResource expectedCompanyProfile = new CompanyProfileResource(
@@ -130,15 +130,14 @@ public class CompanyServiceIntegrationTest {
                         .withBody(objectMapper.writeValueAsString(COMPANY_NOT_FOUND))));
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyNotFoundException exception =
+                Assertions.assertThrows(CompanyNotFoundException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(BAD_REQUEST));
-        assertThat(exception.getReason(), is("Company profile not found company number 00006400"));
+        assertThat(exception.getMessage(), is("Company profile not found company number 00006400"));
     }
 
     @Test
-    public void getCompanyNameThrowsInternalServerErrorForForConnectionFailure() {
+    public void getCompanyProfileThrowsCompanyServiceExceptionForForConnectionFailure() {
 
         final String wireMockPort = environment.getProperty("wiremock.server.port");
 
@@ -149,13 +148,12 @@ public class CompanyServiceIntegrationTest {
                 .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyServiceException exception =
+                Assertions.assertThrows(CompanyServiceException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
         final String expectedReason = "Error sending request to http://localhost:"
                 + wireMockPort + "/company/" + COMPANY_NUMBER + ": Connection reset";
-        assertThat(exception.getReason(), is(expectedReason));
+        assertThat(exception.getMessage(), is(expectedReason));
     }
 
 }

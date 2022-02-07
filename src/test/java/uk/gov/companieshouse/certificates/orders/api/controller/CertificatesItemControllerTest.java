@@ -27,6 +27,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOption
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
@@ -166,7 +167,7 @@ class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Create certificate item is successful")
-    void createCertificateItemSuccessful() {
+    void createCertificateItemSuccessful() throws CompanyServiceException {
         when(certificateItemRequestDto.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile("number")).thenReturn(
                 new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
@@ -186,7 +187,7 @@ class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Create certificate item has validation errors")
-    void createCertificateItemValidationErrors() {
+    void createCertificateItemValidationErrors() throws CompanyServiceException {
         List<String> errors = new ArrayList<>();
         errors.add("error");
         when(certificateItemRequestDto.getCompanyNumber()).thenReturn("number");
