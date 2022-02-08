@@ -5,25 +5,25 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 
 import static java.util.Objects.isNull;
 
-public final class CertificateTypeMapping implements CertificateTypeable {
+final class CertificateTypeMapResult implements CertificateTypeable {
     private final ApiError mappingError;
     private final CertificateType certificateType;
 
-    public CertificateTypeMapping(ApiError mappingError) {
+    CertificateTypeMapResult(ApiError mappingError) {
         this.mappingError = mappingError;
         this.certificateType = null;
     }
 
-    public CertificateTypeMapping(CertificateType certificateType) {
+    CertificateTypeMapResult(CertificateType certificateType) {
         this.mappingError = null;
         this.certificateType = certificateType;
     }
 
-    public boolean isMappingError() {
+    boolean isMappingError() {
         return !isNull(mappingError);
     }
 
-    public ApiError getMappingError() {
+    ApiError getMappingError() {
         return mappingError;
     }
 

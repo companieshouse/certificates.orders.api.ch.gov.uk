@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
@@ -44,13 +44,25 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.Objects.isNull;
-import static org.springframework.http.HttpStatus.*;
-import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.CERTIFICATE_ID_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.COMPANY_NUMBER_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.ERRORS_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.MESSAGE;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.PATCHED_COMPANY_NUMBER;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.REQUEST_ID_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
+import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
 
 @RestController
 public class CertificateItemsController {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final CreateItemRequestValidator createItemRequestValidator;
@@ -59,7 +71,7 @@ public class CertificateItemsController {
     private final PatchMerger patcher;
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
-    private final CertificateTypeMapper certificateTypeMapper;
+    private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
 
     /**
      * Constructor.
@@ -80,7 +92,7 @@ public class CertificateItemsController {
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CertificateTypeMapper certificateTypeMapper) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.mapper = mapper;
@@ -224,6 +236,60 @@ public class CertificateItemsController {
         logMap.put(STATUS_LOG_KEY, status);
     }
 
+    private ResponseEntity<Object> createCertificateItem(HttpServletRequest servletRequest,
+                                                         String requestId,
+                                                         Supplier<String> companyNumberSupplier,
+                                                         Function<CompanyProfileResource, List<String>> customValidationFunction,
+                                                         Supplier<CertificateItem> certificateItemSupplier) {
+        Map<String, Object> logMap = createLoggingDataMap(requestId);
+        LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
+
+        try {
+            // Validate company number
+            String companyNumber = companyNumberSupplier.get();
+            if (isNull(companyNumber) || "".equals(companyNumber)) {
+                return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse<>(Collections.singletonList(ApiErrors.ERR_COMPANY_NUMBER_IS_NULL)));
+            }
+
+            // Get company profile
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+
+            // Map company to certificate type
+            CertificateTypeMapResult certificateTypeMapResult = certificateTypeMapper.mapToCertificateType(companyProfile);
+            if (certificateTypeMapResult.isMappingError()) {
+                return errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
+            }
+
+            // Perform custom validation
+            final List<String> errors = customValidationFunction.apply(companyProfile);
+            if (!errors.isEmpty()) {
+                logErrorsWithStatus(logMap, errors, BAD_REQUEST);
+                LOGGER.errorRequest(servletRequest, "create certificate certificateItem validation errors", logMap);
+                // TODO: should this be changed to CH ApiError
+                return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, errors));
+            }
+
+            CertificateItem certificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItemSupplier.get());
+            certificateItem = certificateItemService.createCertificateItem(certificateItem);
+            logMap.put(USER_ID_LOG_KEY, certificateItem.getUserId());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, certificateItem.getCompanyNumber());
+            logMap.put(CERTIFICATE_ID_LOG_KEY, certificateItem.getId());
+            logMap.put(STATUS_LOG_KEY, CREATED);
+            logMap.remove(MESSAGE);
+            LOGGER.infoRequest(servletRequest, "certificate certificateItem created", logMap);
+            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(certificateItem);
+            return ResponseEntity.status(CREATED).body(certificateItemResponse);
+        } catch (CompanyNotFoundException e) {
+            return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
+        } catch (CompanyServiceException ex) {
+            return errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, ApiError apiError) {
+        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(Collections.singletonList(apiError)));
+    }
+
     private static class CompanyCertificateInformation implements RequestValidatable {
 
         private final CompanyStatus companyStatus;
@@ -252,59 +318,5 @@ public class CertificateItemsController {
         public CertificateItemOptions getItemOptions() {
             return itemOptions;
         }
-    }
-
-    private ResponseEntity<Object> createCertificateItem(HttpServletRequest servletRequest,
-                                                         String requestId,
-                                                         Supplier<String> companyNumberSupplier,
-                                                         Function<CompanyProfileResource, List<String>> customValidationFunction,
-                                                         Supplier<CertificateItem> certificateItemSupplier) {
-        Map<String, Object> logMap = createLoggingDataMap(requestId);
-        LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
-
-        try {
-            // Validate company number
-            String companyNumber = companyNumberSupplier.get();
-            if (isNull(companyNumber) || "".equals(companyNumber)) {
-                return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse<>(Collections.singletonList(ApiErrors.ERR_COMPANY_NUMBER_IS_NULL)));
-            }
-
-            // Get company profile
-            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
-
-            // Map company to certificate type
-            CertificateTypeMapping certificateTypeMapping = certificateTypeMapper.mapToCertificateType(companyProfile);
-            if (certificateTypeMapping.isMappingError()) {
-                return errorResponse(BAD_REQUEST, certificateTypeMapping.getMappingError());
-            }
-
-            // Perform custom validation
-            final List<String> errors = customValidationFunction.apply(companyProfile);
-            if (!errors.isEmpty()) {
-                logErrorsWithStatus(logMap, errors, BAD_REQUEST);
-                LOGGER.errorRequest(servletRequest, "create certificate certificateItem validation errors", logMap);
-                // TODO: should this be changed to CH ApiError
-                return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, errors));
-            }
-
-            CertificateItem certificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapping, certificateItemSupplier.get());
-            certificateItem = certificateItemService.createCertificateItem(certificateItem);
-            logMap.put(USER_ID_LOG_KEY, certificateItem.getUserId());
-            logMap.put(COMPANY_NUMBER_LOG_KEY, certificateItem.getCompanyNumber());
-            logMap.put(CERTIFICATE_ID_LOG_KEY, certificateItem.getId());
-            logMap.put(STATUS_LOG_KEY, CREATED);
-            logMap.remove(MESSAGE);
-            LOGGER.infoRequest(servletRequest, "certificate certificateItem created", logMap);
-            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(certificateItem);
-            return ResponseEntity.status(CREATED).body(certificateItemResponse);
-        } catch (CompanyNotFoundException e) {
-            return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
-        } catch (CompanyServiceException ex) {
-            return errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
-        }
-    }
-
-    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, ApiError apiError) {
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(Collections.singletonList(apiError)));
     }
 }

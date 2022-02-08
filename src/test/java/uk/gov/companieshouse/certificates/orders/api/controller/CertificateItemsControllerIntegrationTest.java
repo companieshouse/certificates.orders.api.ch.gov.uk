@@ -64,18 +64,29 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 /**
  * Unit/integration tests the {@link CertificateItemsController} class.
@@ -277,7 +288,7 @@ class CertificateItemsControllerIntegrationTest {
     @MockBean
     private CompanyProfileResource companyProfileResource;
     @MockBean
-    private CertificateTypeMapper certificateTypeMapper;
+    private CompanyProfileToCertificateTypeMapper certificateTypeMapperIF;
 
     private CertificateItemCreate certificateItemCreate;
 
@@ -383,7 +394,7 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
                 new CompanyProfileResource(EXPECTED_COMPANY_NAME, PREVIOUS_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -632,7 +643,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationErrors =
                 new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
@@ -712,7 +723,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -754,7 +765,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -792,7 +803,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
@@ -902,7 +913,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError =
                 new ApiError(BAD_REQUEST,
@@ -1898,7 +1909,7 @@ class CertificateItemsControllerIntegrationTest {
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiError expectedValidationError = new ApiError(BAD_REQUEST, fixture.getExpectedErrors());
 
@@ -1931,7 +1942,7 @@ class CertificateItemsControllerIntegrationTest {
         when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapping(CertificateType.INCORPORATION));
+        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         //when
         ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
@@ -2023,7 +2034,7 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemInitial.setCompanyNumber("12345678");
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapping(ApiErrors.ERR_COMPANY_STATUS_INVALID));
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(ApiErrors.ERR_COMPANY_STATUS_INVALID));
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         //when
