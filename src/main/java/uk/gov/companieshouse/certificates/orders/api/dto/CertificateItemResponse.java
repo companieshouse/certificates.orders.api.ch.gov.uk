@@ -14,10 +14,6 @@ import javax.validation.constraints.Null;
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemResponse extends ItemDTO {
     @NotNull
-    @JsonProperty("id")
-    private String id;
-
-    @NotNull
     @JsonProperty("item_options")
     private CertificateItemOptions itemOptions;
 
@@ -36,13 +32,10 @@ public class CertificateItemResponse extends ItemDTO {
     private String userId;
 
     @Override
+    @NotNull
+    @JsonProperty("id")
     public String getId() {
         return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
     }
 
     public CertificateItemOptions getItemOptions() {

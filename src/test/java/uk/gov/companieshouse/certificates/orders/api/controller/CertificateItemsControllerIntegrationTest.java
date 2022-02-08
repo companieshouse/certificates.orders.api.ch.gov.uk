@@ -1178,37 +1178,9 @@ class CertificateItemsControllerIntegrationTest {
                 is(PREVIOUS_COMPANY_NUMBER));
         assertThat(retrievedCertificateItem.get().getCompanyName(),
                 is(PREVIOUS_COMPANY_NAME));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyType(),
-                is(PREVIOUS_COMPANY_TYPE));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getCompanyStatus(),
-                is(PREVIOUS_COMPANY_STATUS.getStatusName()));
         assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getCertificateType(),
-                is(UPDATED_CERTIFICATE_TYPE));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getCollectionLocation(),
-                is(UPDATED_COLLECTION_LOCATION));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getContactNumber(),
-                is(UPDATED_CONTACT_NUMBER));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryMethod(),
-                is(UPDATED_DELIVERY_METHOD));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getDeliveryTimescale(),
-                is(UPDATED_DELIVERY_TIMESCALE));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getDirectorDetails(),
-                is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getForename(),
-                is(FORENAME));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeCompanyObjectsInformation(),
-                is(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeEmailCopy(),
-                is(UPDATED_INCLUDE_EMAIL_COPY));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getIncludeGoodStandingInformation(),
-                is(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getRegisteredOfficeAddressDetails(),
-                is(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getSecretaryDetails(),
-                is(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS));
-        assertThat(retrievedCertificateItem.get().getItemOptions().getSurname(),
-                is(UPDATED_SURNAME));
+        assertThat(retrievedCertificateItem.get().getItemOptions(),
+                is(expectedCertificateItemOptions));
         assertThat(retrievedCertificateItem.get().getLinks(), is(LINKS));
 
         // Costs are calculated on the fly and are NOT to be saved to the DB.

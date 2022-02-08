@@ -36,7 +36,7 @@ public class CompanyService {
      * @throws CompanyNotFoundException when the company is not found
      * @throws CompanyServiceException  for all other internal errors
      */
-    public CompanyProfileResource getCompanyProfile(final String companyNumber) throws CompanyNotFoundException, CompanyServiceException {
+    public CompanyProfileResource getCompanyProfile(final String companyNumber) throws CompanyServiceException {
 
         final ApiClient apiClient = apiClientService.getInternalApiClient();
         final String uri = GET_COMPANY_URI.expand(companyNumber).toString();
