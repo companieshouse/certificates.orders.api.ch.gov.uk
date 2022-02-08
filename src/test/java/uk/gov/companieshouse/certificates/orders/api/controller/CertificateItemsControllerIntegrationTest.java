@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
@@ -54,6 +55,7 @@ import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,36 +302,36 @@ class CertificateItemsControllerIntegrationTest {
                         .withCompanyType("limited")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company status is active"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company status is active", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList("include_good_standing_information: must not exist when company status is liquidation"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_good_standing_information: must not exist when company status is liquidation", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("llp")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company status is active"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company status is active", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("llp")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList("include_good_standing_information: must not exist when company status is liquidation"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_good_standing_information: must not exist when company status is liquidation", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited-partnership")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList("include_liquidators_details: must not exist when company type is limited-partnership"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company type is limited-partnership", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited-partnership")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .withExpectedErrors(singletonList("company_status: liquidation not valid for company type limited-partnership"))
+                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("company_status: liquidation not valid for company type limited-partnership", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
                         .build())
 
         );
@@ -502,12 +504,13 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, asList("company_number: must not be null",
-                        "etag: must be null",
-                        "links: must be null",
-                        "postage_cost: must be null",
-                        "total_item_cost: must be null"));
+        final ApiResponse expectedValidationError = new ApiResponse(asList(
+                new uk.gov.companieshouse.api.error.ApiError("company_number: must not be null", "company_number", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError("etag: must be null", "etag", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError("links: must be null", "links", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError("postage_cost: must be null", "postage_cost", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError("total_item_cost: must be null", "total_item_cost", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
+        ));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -645,10 +648,10 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationErrors =
-                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
-                        MISSING_COLLECTION_FORENAME_MESSAGE,
-                        MISSING_COLLECTION_SURNAME_MESSAGE));
+        final ApiResponse<Object> expectedValidationErrors = new ApiResponse<>(asList(
+                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_LOCATION_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_FORENAME_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_SURNAME_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -725,11 +728,13 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE,
-                                DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE,
-                                DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE));
+        final ApiResponse<Object> expectedValidationErrors = new ApiResponse<>(asList(
+                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
+        ));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -742,7 +747,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -767,8 +772,8 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
+        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(singletonList(
+                new uk.gov.companieshouse.api.error.ApiError(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -805,8 +810,8 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
+        final ApiResponse expectedValidationError = new ApiResponse(Collections.singletonList(
+                new uk.gov.companieshouse.api.error.ApiError(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -915,9 +920,10 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
+        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(asList(
+                new uk.gov.companieshouse.api.error.ApiError(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError(CONFLICTING_SECRETARY_DETAILS_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
+        ));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1883,7 +1889,7 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiError expectedValidationError = new ApiError(BAD_REQUEST, fixture.getExpectedErrors());
+        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(fixture.getExpectedErrors());
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1960,7 +1966,7 @@ class CertificateItemsControllerIntegrationTest {
         //then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is("company-number-is-null")))
+                .andExpect(jsonPath("$.errors[0].error", is("company_number: must not be null")))
                 .andExpect(jsonPath("$.errors[0].location", is("company_number")))
                 .andExpect(jsonPath("$.errors[0].location_type", is("string")))
                 .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))

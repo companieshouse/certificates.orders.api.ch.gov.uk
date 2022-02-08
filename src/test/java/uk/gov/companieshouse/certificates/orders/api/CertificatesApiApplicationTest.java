@@ -25,6 +25,8 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.http.HttpResponse;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +34,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
@@ -344,7 +348,7 @@ class CertificatesApiApplicationTest {
 	 */
 	private void postCreateRequestAndExpectBadRequestResponse(final CertificateItemCreate itemToCreate,
 															  final String expectedError) {
-		webTestClient.post().uri("/orderable/certificates")
+		WebTestClient.BodyContentSpec bodyContentSpec = webTestClient.post().uri("/orderable/certificates")
 				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
 				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
 				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
@@ -355,8 +359,8 @@ class CertificatesApiApplicationTest {
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody()
-				.jsonPath("$.status").isEqualTo("BAD_REQUEST")
-				.jsonPath("$.errors[0]").isEqualTo(expectedError);
+				.jsonPath("$.status_code").isEqualTo(BAD_REQUEST.value())
+				.jsonPath("$.errors[0].error").isEqualTo(expectedError);
 	}
 
 	/**

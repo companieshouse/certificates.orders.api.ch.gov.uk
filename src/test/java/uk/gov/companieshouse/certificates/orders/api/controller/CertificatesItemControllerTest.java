@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,9 @@ import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestV
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Validator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,9 +46,6 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
 class CertificatesItemControllerTest {
 
     private static final String ITEM_ID = "CHS00000000000000001";
-
-    @InjectMocks
-    private CertificateItemsController controllerUnderTest;
 
     @Mock
     private JsonMergePatch patch;
@@ -93,7 +93,18 @@ class CertificatesItemControllerTest {
     private CertificateItemResponse certificateItemResponse;
 
     @Mock
-    private CompanyProfileToCertificateTypeMapper certificateTypeMapperIF;
+    private CompanyProfileToCertificateTypeMapper certificateTypeMapper;
+
+    @Mock
+    private Validator constraintValidator;
+
+    @InjectMocks
+    private CertificateItemsController controllerUnderTest;
+
+    @BeforeEach
+    void beforeEach() {
+        controllerUnderTest.setValidator(constraintValidator);
+    }
 
     @Test
     @DisplayName("Update request updates successfully")
@@ -183,7 +194,8 @@ class CertificatesItemControllerTest {
         when(mapper.enrichCertificateItem(any(), any(), any(), eq(nonEnrichedCertificateItem)))
                 .thenReturn(enrichedCertificateItem);
         when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
-        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
 
         ResponseEntity<Object> response =
                 controllerUnderTest.createCertificateItem(certificateItemCreate, request, TOKEN_REQUEST_ID_VALUE);
@@ -201,7 +213,8 @@ class CertificatesItemControllerTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
-        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
 
         ResponseEntity<Object>
                 response =

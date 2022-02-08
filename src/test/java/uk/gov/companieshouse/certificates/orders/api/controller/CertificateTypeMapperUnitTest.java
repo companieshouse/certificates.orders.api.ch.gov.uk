@@ -34,7 +34,7 @@ class CertificateTypeMapperUnitTest {
 
     @ParameterizedTest
     @MethodSource("validCompanyTypes")
-    void shouldErrorWhenCompanyStatusIsOther(String companyType) {
+    void shouldErrorWhenCompanyStatusIsInvalid(String companyType) {
         //given
         when(companyProfileResource.getCompanyType()).thenReturn(companyType);
         when(companyProfileResource.getCompanyStatus()).thenReturn(null);
@@ -168,6 +168,14 @@ class CertificateTypeMapperUnitTest {
     }
 
     private static Stream<String> validCompanyTypes() {
-        return Stream.of("llp", "ltd", "plc", "old-public-company", "private-limited-guarant-nsc", "private-limited-guarant-nsc-limited-exemption", "private-limited-shares-section-30-exemption", "private-unlimited", "private-unlimited-nsc");
+        return Stream.of("llp",
+                "ltd",
+                "plc",
+                "old-public-company",
+                "private-limited-guarant-nsc",
+                "private-limited-guarant-nsc-limited-exemption",
+                "private-limited-shares-section-30-exemption",
+                "private-unlimited",
+                "private-unlimited-nsc");
     }
 }

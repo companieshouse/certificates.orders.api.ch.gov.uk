@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
@@ -10,7 +11,7 @@ class CertificateItemsFixture {
     private final CompanyStatus companyStatus;
     private final Boolean includeGoodStandingInformation;
     private final LiquidatorsDetails liquidatorsDetails;
-    private final List<String> expectedErrors;
+    private final List<ApiError> expectedErrors;
 
     private CertificateItemsFixture(Builder builder) {
         companyType = builder.companyType;
@@ -29,7 +30,7 @@ class CertificateItemsFixture {
         private CompanyStatus companyStatus;
         private Boolean includeGoodStandingInformation;
         private LiquidatorsDetails liquidatorsDetails;
-        private List<String> expectedErrors;
+        private List<ApiError> expectedErrors;
 
         private Builder() {
         }
@@ -54,7 +55,7 @@ class CertificateItemsFixture {
             return this;
         }
 
-        public Builder withExpectedErrors(List<String> expectedErrors) {
+        public Builder withExpectedErrors(List<ApiError> expectedErrors) {
             this.expectedErrors = expectedErrors;
             return this;
         }
@@ -80,7 +81,7 @@ class CertificateItemsFixture {
         return liquidatorsDetails;
     }
 
-    public List<String> getExpectedErrors() {
+    public List<ApiError> getExpectedErrors() {
         return expectedErrors;
     }
 }

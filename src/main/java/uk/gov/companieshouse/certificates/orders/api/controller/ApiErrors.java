@@ -4,9 +4,10 @@ import uk.gov.companieshouse.api.error.ApiError;
 
 final class ApiErrors {
 
+    public static final String ERROR_TYPE_VALIDATION = "ch:validation";
+    public static final String STRING_LOCATION_TYPE = "string";
+
     private static final String COMPANY_NUMBER_LOCATION = "company_number";
-    private static final String STRING_LOCATION_TYPE = "string";
-    private static final String ERROR_TYPE_VALIDATION = "ch:validation";
     private static final String ERROR_TYPE_SERVICE = "ch:service";
     private static final String COMPANY_NOT_FOUND_ERROR = "company-not-found";
     private static final String COMPANY_NUMBER_IS_NULL_ERROR = "company-number-is-null";
