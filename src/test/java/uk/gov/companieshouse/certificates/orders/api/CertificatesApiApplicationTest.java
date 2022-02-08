@@ -43,6 +43,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CertificatesApiApplicationTest {
@@ -82,7 +83,7 @@ class CertificatesApiApplicationTest {
 		// Given
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		when(companyProfileResource.getCompanyName()).thenReturn("name");
-		when(companyProfileResource.getCompanyType()).thenReturn("type");
+		when(companyProfileResource.getCompanyType()).thenReturn("ltd");
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
 		when(companyService.getCompanyProfile("00006400")).thenReturn(companyProfileResource);
 
@@ -207,6 +208,7 @@ class CertificatesApiApplicationTest {
 		// Given
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn("ltd");
 
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setId("TEST_ID");
