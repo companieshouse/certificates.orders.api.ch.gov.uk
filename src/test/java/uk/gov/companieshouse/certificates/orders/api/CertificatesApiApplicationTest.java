@@ -77,7 +77,7 @@ class CertificatesApiApplicationTest {
 		newCertificateItemCreate.setCompanyNumber(null);
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "company_number: must not be null");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "company-number-is-null");
     }
 
 	@Test

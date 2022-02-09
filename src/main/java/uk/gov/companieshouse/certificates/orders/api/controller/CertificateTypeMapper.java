@@ -35,9 +35,10 @@ class CertificateTypeMapper implements CompanyProfileToCertificateTypeMapper {
         }
 
         // Use company status to derive certificate type
-        if (companyStatus == CompanyStatus.ACTIVE ||
-                (companyStatus == CompanyStatus.LIQUIDATION && featureOptions.isLiquidatedCompanyCertificateEnabled())) {
-            return new CertificateTypeMapResult(CertificateType.INCORPORATION);
+        if (companyStatus == CompanyStatus.ACTIVE) {
+            return new CertificateTypeMapResult(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        } else if (companyStatus == CompanyStatus.LIQUIDATION && featureOptions.isLiquidatedCompanyCertificateEnabled()) {
+            return new CertificateTypeMapResult(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
         } else if (companyStatus == CompanyStatus.DISSOLVED) {
             return new CertificateTypeMapResult(CertificateType.DISSOLUTION);
         } else {

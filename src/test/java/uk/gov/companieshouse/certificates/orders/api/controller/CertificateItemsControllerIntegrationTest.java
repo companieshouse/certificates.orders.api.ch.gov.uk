@@ -505,7 +505,7 @@ class CertificateItemsControllerIntegrationTest {
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiResponse expectedValidationError = new ApiResponse(asList(
-                new uk.gov.companieshouse.api.error.ApiError("company_number: must not be null", "company_number", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
+                new uk.gov.companieshouse.api.error.ApiError("company-number-is-null", "company_number", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
                 new uk.gov.companieshouse.api.error.ApiError("etag: must be null", "etag", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
                 new uk.gov.companieshouse.api.error.ApiError("links: must be null", "links", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
                 new uk.gov.companieshouse.api.error.ApiError("postage_cost: must be null", "postage_cost", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
@@ -1966,7 +1966,7 @@ class CertificateItemsControllerIntegrationTest {
         //then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is("company_number: must not be null")))
+                .andExpect(jsonPath("$.errors[0].error", is("company-number-is-null")))
                 .andExpect(jsonPath("$.errors[0].location", is("company_number")))
                 .andExpect(jsonPath("$.errors[0].location_type", is("string")))
                 .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>9</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>477</x>
+      <y>207</y>
+      <w>324</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>api.error::
+ApiError
+--
+String error
+Map&lt;String, String&gt; errorValues
+String location
+String locationType
+String type {ch:validation, ch:service}
+bg=cyan
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>558</x>
+      <y>414</y>
+      <w>144</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>api.error::
+ApiErrorResponse
+-
+List&lt;ApiError&gt; errors
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>621</x>
+      <y>324</y>
+      <w>45</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=0..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>117</x>
+      <y>207</y>
+      <w>243</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>api.model::
+ApiResponse
+template=&lt;T&gt;
+--
+int statusCode
+Map&lt;String, Object&gt; headers
+T data
+List&lt;ApiError&gt; errors
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>324</x>
+      <y>270</y>
+      <w>171</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>170.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>513</x>
+      <y>45</y>
+      <w>234</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>certificates.orders.api.controller::
+ApiError
+--
+String HTTPStatus status
+List&lt;String&gt; errors
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

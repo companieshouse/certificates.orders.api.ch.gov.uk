@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,8 +75,13 @@ public class CertificateItemsController {
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
-    private javax.validation.Validator validator;
-    private FieldNameConverter fieldNameConverter;
+    private final Validator constraintValidator;
+    private final FieldNameConverter fieldNameConverter;
+    private static final Map<String, ApiError> errorMap = new HashMap<String, ApiError>() {
+        {
+            put("company_number", ApiErrors.ERR_COMPANY_NUMBER_IS_NULL);
+        }
+    };
 
     /**
      * Constructor.
@@ -98,7 +102,9 @@ public class CertificateItemsController {
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
+                                      final Validator validator,
+                                      final FieldNameConverter fieldNameConverter) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.mapper = mapper;
@@ -106,15 +112,7 @@ public class CertificateItemsController {
         this.certificateItemService = certificateItemService;
         this.companyService = companyService;
         this.certificateTypeMapper = certificateTypeMapper;
-    }
-
-    @Autowired
-    public void setValidator(Validator validator) {
-        this.validator = validator;
-    }
-
-    @Autowired
-    public void setFieldNameConverter(FieldNameConverter fieldNameConverter) {
+        this.constraintValidator = validator;
         this.fieldNameConverter = fieldNameConverter;
     }
 
@@ -122,7 +120,7 @@ public class CertificateItemsController {
     public ResponseEntity<Object> createCertificateItem(final @RequestBody CertificateItemCreate certificateItem,
                                                         HttpServletRequest servletRequest,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Set<ConstraintViolation<CertificateItemCreate>> violations = validator.validate(certificateItem);
+        Set<ConstraintViolation<CertificateItemCreate>> violations = constraintValidator.validate(certificateItem);
         if (!violations.isEmpty()) {
             return errorResponse(BAD_REQUEST, violations);
         }
@@ -166,7 +164,7 @@ public class CertificateItemsController {
                                                          HttpServletRequest servletRequest,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
-        Set<ConstraintViolation<CertificateItemInitial>> violations = validator.validate(certificateItem);
+        Set<ConstraintViolation<CertificateItemInitial>> violations = constraintValidator.validate(certificateItem);
         if (!violations.isEmpty()) {
             return errorResponse(BAD_REQUEST, violations);
         }
@@ -265,14 +263,8 @@ public class CertificateItemsController {
         LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
 
         try {
-            // Validate company number
-            String companyNumber = companyNumberSupplier.get();
-//            if (isNull(companyNumber) || "".equals(companyNumber)) {
-//                return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NUMBER_IS_NULL);
-//            }
-
             // Get company profile
-            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumber);
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumberSupplier.get());
 
             // Map company to certificate type
             CertificateTypeMapResult certificateTypeMapResult = certificateTypeMapper.mapToCertificateType(companyProfile);
@@ -340,15 +332,15 @@ public class CertificateItemsController {
     }
 
     private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, List<String> errors) {
-        List<ApiError> apiErrors = errors.stream().map(e->new ApiError(e, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)).collect(Collectors.toList());
+        List<ApiError> apiErrors = errors.stream().map(e -> new ApiError(e, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)).collect(Collectors.toList());
         return ResponseEntity.status(httpStatus).body(new ApiResponse<>(apiErrors));
     }
 
     private <T> ResponseEntity<Object> errorResponse(HttpStatus httpStatus, Set<ConstraintViolation<T>> violations) {
-        List<ApiError> apiErrors = violations.stream().map(v->
-        {
+        List<ApiError> apiErrors = violations.stream().map(v -> {
             String fieldName = fieldNameConverter.toSnakeCase(v.getPropertyPath().toString());
-            return new ApiError(fieldName + ": " + v.getMessage(), fieldName, ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION);
+            return errorMap.getOrDefault(fieldName,
+                    new ApiError(fieldName + ": " + v.getMessage(), fieldName, ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION));
         }).collect(Collectors.toList());
         return ResponseEntity.status(httpStatus).body(new ApiResponse<>(apiErrors));
     }

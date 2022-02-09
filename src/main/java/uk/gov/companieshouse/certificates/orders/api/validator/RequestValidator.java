@@ -28,7 +28,7 @@ public class RequestValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
 
-    private CertificateOptionsValidator certificateOptionsValidator;
+    private final CertificateOptionsValidator certificateOptionsValidator;
 
     public RequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
         this.certificateOptionsValidator = certificateOptionsValidator;

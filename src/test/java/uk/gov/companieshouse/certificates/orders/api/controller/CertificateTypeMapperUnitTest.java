@@ -61,7 +61,7 @@ class CertificateTypeMapperUnitTest {
 
         //then
         assertThat(result, not(nullValue()));
-        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION));
+        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES));
         assertThat(result.isMappingError(), is(false));
         assertThat(result.getMappingError(), is(nullValue()));
     }
@@ -79,7 +79,7 @@ class CertificateTypeMapperUnitTest {
 
         //then
         assertThat(result, not(nullValue()));
-        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION));
+        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES));
         assertThat(result.isMappingError(), is(false));
         assertThat(result.getMappingError(), is(nullValue()));
     }
@@ -162,7 +162,7 @@ class CertificateTypeMapperUnitTest {
 
         //then
         assertThat(result, not(nullValue()));
-        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION));
+        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES));
         assertThat(result.isMappingError(), is(false));
         assertThat(result.getMappingError(), is(nullValue()));
     }

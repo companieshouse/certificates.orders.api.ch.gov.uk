@@ -101,11 +101,6 @@ class CertificatesItemControllerTest {
     @InjectMocks
     private CertificateItemsController controllerUnderTest;
 
-    @BeforeEach
-    void beforeEach() {
-        controllerUnderTest.setValidator(constraintValidator);
-    }
-
     @Test
     @DisplayName("Update request updates successfully")
     void updateUpdatesSuccessfully() {

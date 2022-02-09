@@ -36,5 +36,4 @@ public class CreateItemRequestValidator extends RequestValidator {
         errors.addAll(getValidationErrors(requestValidatable, converter));
         return errors;
     }
-
 }
