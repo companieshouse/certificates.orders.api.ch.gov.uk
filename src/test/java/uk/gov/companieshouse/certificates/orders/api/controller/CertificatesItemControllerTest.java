@@ -1,18 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import javax.json.JsonMergePatch;
-import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,18 +9,35 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
-import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
+
+import javax.json.JsonMergePatch;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 /**
  * Unit tests the {@link CertificateItemsController} class.
@@ -41,9 +46,6 @@ import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatabl
 class CertificatesItemControllerTest {
 
     private static final String ITEM_ID = "CHS00000000000000001";
-
-    @InjectMocks
-    private CertificateItemsController controllerUnderTest;
 
     @Mock
     private JsonMergePatch patch;
@@ -58,7 +60,10 @@ class CertificatesItemControllerTest {
     private CertificateItem nonEnrichedCertificateItem;
 
     @Mock
-    private CertificateItemDTO dto;
+    private CertificateItem enrichedCertificateItem;
+
+    @Mock
+    private CertificateItemCreate certificateItemCreate;
 
     @Mock
     private PatchMerger merger;
@@ -84,6 +89,18 @@ class CertificatesItemControllerTest {
     @Mock
     private CertificateItemOptions certificateItemOptions;
 
+    @Mock
+    private CertificateItemResponse certificateItemResponse;
+
+    @Mock
+    private CompanyProfileToCertificateTypeMapper certificateTypeMapper;
+
+    @Mock
+    private Validator constraintValidator;
+
+    @InjectMocks
+    private CertificateItemsController controllerUnderTest;
+
     @Test
     @DisplayName("Update request updates successfully")
     void updateUpdatesSuccessfully() {
@@ -92,11 +109,8 @@ class CertificatesItemControllerTest {
         when(merger.mergePatch(patch, item, CertificateItem.class)).thenReturn(item);
         when(item.getCompanyNumber()).thenReturn("12345678");
         when(item.getItemOptions()).thenReturn(certificateItemOptions);
-        when(companyService.getCompanyProfile(anyString())).thenReturn(companyProfileResource);
-        when(companyProfileResource.getCompanyName()).thenReturn("TEST LIMITED");
-        when(companyProfileResource.getCompanyType()).thenReturn("limited");
         when(certificateItemService.saveCertificateItem(item)).thenReturn(item);
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
+        when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
 
         // When
         final ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
@@ -104,8 +118,7 @@ class CertificatesItemControllerTest {
 
         // Then
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody(), is(dto));
-        verify(companyService).getCompanyProfile("12345678");
+        assertThat(response.getBody(), is(certificateItemResponse));
     }
 
     @Test
@@ -146,11 +159,12 @@ class CertificatesItemControllerTest {
     void getCertificateItemIsPresent() {
         when(certificateItemService.getCertificateItemWithCosts(ITEM_ID)).thenReturn(
                 Optional.of(item));
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
+        when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
+
         ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody(), is(dto));
+        assertThat(response.getBody(), is(certificateItemResponse));
     }
 
     @Test
@@ -165,38 +179,41 @@ class CertificatesItemControllerTest {
 
     @Test
     @DisplayName("Create certificate item is successful")
-    void createCertificateItemSuccessful() {
-        when(dto.getCompanyNumber()).thenReturn("number");
-        when(nonEnrichedCertificateItem.getItemOptions()).thenReturn(certificateItemOptions);
+    void createCertificateItemSuccessful() throws CompanyServiceException {
+        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile("number")).thenReturn(
                 new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
-        when(certificateItemService.createCertificateItem(nonEnrichedCertificateItem))
+        when(certificateItemService.createCertificateItem(enrichedCertificateItem))
                 .thenReturn(item);
-        when(mapper.certificateItemToCertificateItemDTO(item)).thenReturn(dto);
-        when(mapper.certificateItemDTOtoCertificateItem(dto)).thenReturn(nonEnrichedCertificateItem);
+        when(mapper.certificateItemCreateToCertificateItem(certificateItemCreate)).thenReturn(nonEnrichedCertificateItem);
+        when(mapper.enrichCertificateItem(any(), any(), any(), eq(nonEnrichedCertificateItem)))
+                .thenReturn(enrichedCertificateItem);
+        when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
+        when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
 
-        ResponseEntity<Object>
-                response =
-                controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
+        ResponseEntity<Object> response =
+                controllerUnderTest.createCertificateItem(certificateItemCreate, request, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
-        assertThat(response.getBody(), is(dto));
-        verify(nonEnrichedCertificateItem).setCompanyName("name");
-        verify(certificateItemOptions).setCompanyType("type");
+        assertThat(response.getBody(), is(certificateItemResponse));
     }
 
     @Test
     @DisplayName("Create certificate item has validation errors")
-    void createCertificateItemValidationErrors() {
+    void createCertificateItemValidationErrors() throws CompanyServiceException {
         List<String> errors = new ArrayList<>();
         errors.add("error");
-        when(dto.getCompanyNumber()).thenReturn("number");
+        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
+        when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
+
         ResponseEntity<Object>
                 response =
-                controllerUnderTest.createCertificateItem(dto, request, TOKEN_REQUEST_ID_VALUE);
+                controllerUnderTest.createCertificateItem(certificateItemCreate, request, TOKEN_REQUEST_ID_VALUE);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 }

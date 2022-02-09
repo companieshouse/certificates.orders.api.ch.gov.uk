@@ -5,6 +5,7 @@ uk:
         orders:
           api:
             certificates: /orderable/certificates
+            initial: /orderable/certificates/initial
             health: /healthcheck
 
 spring:
@@ -22,6 +23,11 @@ llp:
   certificate:
     orders:
       enabled: ${DYNAMIC_LLP_CERTIFICATE_ORDERS_ENABLED}
+
+liquidated:
+  company:
+    certificate:
+      enabled: ${LIQUIDATED_COMPANY_CERTIFICATES_ENABLED}
 
 server:
   error:

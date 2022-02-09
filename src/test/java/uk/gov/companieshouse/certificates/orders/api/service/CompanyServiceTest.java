@@ -29,10 +29,10 @@ import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromHttpResponseException;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromIOException;
 
@@ -79,7 +79,7 @@ class CompanyServiceTest {
 
     @Test
     @DisplayName("getCompanyProfile() returns model if request handled successfully")
-    void getCompanyProfileReturnsCompanyProfileModel() throws ApiErrorResponseException, URIValidationException {
+    void getCompanyProfileReturnsCompanyProfileModel() throws ApiErrorResponseException, URIValidationException, CompanyServiceException {
         //given
         when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
         when(apiClient.company()).thenReturn(handler);
@@ -105,8 +105,8 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("getCompanyProfile() Invalid URL reported as Internal Server Error (500)")
-    void getCompanyProfileThrowsInternalServerErrorForInvalidUri() throws Exception {
+    @DisplayName("getCompanyProfile() Invalid URL results in CompanyServiceException")
+    void getCompanyProfileThrowsCompanyServiceExceptionForInvalidUri() throws Exception {
 
         // Given
         when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
@@ -115,15 +115,14 @@ class CompanyServiceTest {
         when(get.execute()).thenThrow(new URIValidationException(INVALID_URI));
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyServiceException exception =
+                Assertions.assertThrows(CompanyServiceException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
-        assertThat(exception.getReason(), is(INVALID_URI_EXPECTED_REASON));
+        assertThat(exception.getMessage(), is(INVALID_URI_EXPECTED_REASON));
     }
 
     @Test
-    @DisplayName("getCompanyProfile() ApiErrorResponseException Internal Server Error is reported as such (500)")
+    @DisplayName("getCompanyProfile() IOException results CompanyServiceException")
     void getCompanyProfileInternalServerErrorApiExceptionIsPropagated() throws Exception {
 
         final IOException ioException = new IOException(IOEXCEPTION_MESSAGE);
@@ -136,19 +135,18 @@ class CompanyServiceTest {
         when(apiClient.getBasePath()).thenReturn("http://host");
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyServiceException exception =
+                Assertions.assertThrows(CompanyServiceException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(INTERNAL_SERVER_ERROR));
-        assertThat(exception.getReason(), is(IOEXCEPTION_EXPECTED_REASON));
+        assertThat(exception.getMessage(), is(IOEXCEPTION_EXPECTED_REASON));
     }
 
     /**
      * This is a JUnit 4 test to take advantage of PowerMock.
      * @throws Exception should something unexpected happen
      */
-    @org.junit.Test
-    public void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
+    @Test
+    void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
 
         // Given
         final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
@@ -163,11 +161,30 @@ class CompanyServiceTest {
         when(get.execute()).thenThrow(ex);
 
         // When and then
-        final ResponseStatusException exception =
-                Assertions.assertThrows(ResponseStatusException.class,
+        final CompanyNotFoundException exception =
+                Assertions.assertThrows(CompanyNotFoundException.class,
                         () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
-        assertThat(exception.getStatus(), is(BAD_REQUEST));
-        assertThat(exception.getReason(), is(NOT_FOUND_EXPECTED_REASON));
+        assertThat(exception.getMessage(), is("Company profile not found company number 00006400"));
     }
 
+    @Test
+    void shouldThrowCompanyServiceExceptionWhenApiClientReturnsOtherNotFoundErrors() throws Exception {
+        //given
+        final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
+        when(httpResponseException.getStatusCode()).thenReturn(500);
+        when(httpResponseException.getStatusMessage()).thenReturn("Service unavailable");
+        when(httpResponseException.getHeaders()).thenReturn(new HttpHeaders());
+        final ApiErrorResponseException ex = fromHttpResponseException(httpResponseException);
+
+        when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
+        when(apiClient.company()).thenReturn(handler);
+        when(handler.get(anyString())).thenReturn(get);
+        when(get.execute()).thenThrow(ex);
+
+        // When and then
+        final CompanyServiceException exception =
+                Assertions.assertThrows(CompanyServiceException.class,
+                        () -> serviceUnderTest.getCompanyProfile(COMPANY_NUMBER));
+        assertThat(exception.getMessage(), is("Error sending request to null/company/00006400: Service unavailable"));
+    }
 }

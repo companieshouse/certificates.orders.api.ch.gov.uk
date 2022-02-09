@@ -2,7 +2,6 @@ package uk.gov.companieshouse.certificates.orders.api.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriTemplate;
 import uk.gov.companieshouse.api.ApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -20,9 +19,7 @@ public class CompanyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    private static final UriTemplate
-            GET_COMPANY_URI =
-            new UriTemplate("/company/{companyNumber}");
+    private static final UriTemplate GET_COMPANY_URI = new UriTemplate("/company/{companyNumber}");
 
     private final ApiClientService apiClientService;
 
@@ -32,12 +29,14 @@ public class CompanyService {
 
     /**
      * Interrogates the company profiles API to get the company name, type and status for the
-     * companynumber provided.
+     * company number provided.
      *
      * @param companyNumber the number of the company
      * @return A {@link CompanyProfileResource} object containing required company profile details.
+     * @throws CompanyNotFoundException when the company is not found
+     * @throws CompanyServiceException  for all other internal errors
      */
-    public CompanyProfileResource getCompanyProfile(final String companyNumber) {
+    public CompanyProfileResource getCompanyProfile(final String companyNumber) throws CompanyServiceException {
 
         final ApiClient apiClient = apiClientService.getInternalApiClient();
         final String uri = GET_COMPANY_URI.expand(companyNumber).toString();
@@ -48,40 +47,20 @@ public class CompanyService {
                     companyProfile.getType(),
                     CompanyStatus.getEnumValue(companyProfile.getCompanyStatus()));
         } catch (ApiErrorResponseException ex) {
-            throw getResponseStatusException(ex, apiClient, companyNumber, uri);
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                final String error = "Company profile not found company number " + companyNumber;
+                LOGGER.error(error, ex);
+                throw new CompanyNotFoundException(error);
+            } else {
+                final String error = "Error sending request to "
+                        + apiClient.getBasePath() + uri + ": " + ex.getStatusMessage();
+                LOGGER.error(error, ex);
+                throw new CompanyServiceException(error);
+            }
         } catch (URIValidationException ex) {
-            // Should this happen (unlikely), it is a broken contract, hence 500.
             final String error = "Invalid URI " + uri + " for company details";
             LOGGER.error(error, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
+            throw new CompanyServiceException(error);
         }
     }
-
-    /**
-     * Creates an appropriate exception to report the underlying problem.
-     * @param apiException the API exception caught
-     * @param client the API client
-     * @param companyNumber the number of the company looked up
-     * @param uri the URI used to communicate with the company profiles API
-     * @return the {@link ResponseStatusException} exception to report the problem
-     */
-    private ResponseStatusException getResponseStatusException(final ApiErrorResponseException apiException,
-                                                               final ApiClient client,
-                                                               final String companyNumber,
-                                                               final String uri) {
-
-        final ResponseStatusException propagatedException;
-        if (apiException.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-            final String error = "Error sending request to "
-                    + client.getBasePath() + uri + ": " + apiException.getStatusMessage();
-            LOGGER.error(error, apiException);
-            propagatedException = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, error);
-        } else {
-            final String error = "Error getting company name for company number " + companyNumber;
-            LOGGER.error(error, apiException);
-            propagatedException =  new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
-        }
-        return propagatedException;
-    }
-
 }

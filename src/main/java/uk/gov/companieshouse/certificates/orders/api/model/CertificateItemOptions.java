@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
+import java.util.Objects;
 
 /**
  * An instance of this represents the item options for a certificate item.
@@ -50,6 +51,8 @@ public class CertificateItemOptions {
     private String companyType;
 
     private LiquidatorsDetails liquidatorsDetails;
+
+    private String companyStatus;
 
     public CertificateType getCertificateType() {
         return certificateType;
@@ -219,7 +222,63 @@ public class CertificateItemOptions {
         this.liquidatorsDetails = liquidatorsDetails;
     }
 
+    public String getCompanyStatus() {
+        return companyStatus;
+    }
+
+    public void setCompanyStatus(String companyStatus) {
+        this.companyStatus = companyStatus;
+    }
+
     @Override
     public String toString() { return new Gson().toJson(this); }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CertificateItemOptions that = (CertificateItemOptions) o;
+        return certificateType == that.certificateType &&
+                collectionLocation == that.collectionLocation &&
+                Objects.equals(contactNumber, that.contactNumber) &&
+                deliveryMethod == that.deliveryMethod &&
+                deliveryTimescale == that.deliveryTimescale &&
+                Objects.equals(directorDetails, that.directorDetails) &&
+                Objects.equals(forename, that.forename) &&
+                Objects.equals(includeCompanyObjectsInformation,
+                        that.includeCompanyObjectsInformation) &&
+                Objects.equals(includeEmailCopy, that.includeEmailCopy) &&
+                Objects.equals(includeGoodStandingInformation,
+                        that.includeGoodStandingInformation) &&
+                Objects.equals(registeredOfficeAddressDetails,
+                        that.registeredOfficeAddressDetails) &&
+                Objects.equals(secretaryDetails, that.secretaryDetails) &&
+                Objects.equals(surname, that.surname) &&
+                Objects.equals(designatedMemberDetails, that.designatedMemberDetails) &&
+                Objects.equals(memberDetails, that.memberDetails) &&
+                Objects.equals(generalPartnerDetails, that.generalPartnerDetails) &&
+                Objects.equals(limitedPartnerDetails, that.limitedPartnerDetails) &&
+                Objects.equals(principalPlaceOfBusinessDetails,
+                        that.principalPlaceOfBusinessDetails) &&
+                Objects.equals(includeGeneralNatureOfBusinessInformation,
+                        that.includeGeneralNatureOfBusinessInformation) &&
+                Objects.equals(companyType, that.companyType) &&
+                Objects.equals(liquidatorsDetails, that.liquidatorsDetails) &&
+                Objects.equals(companyStatus, that.companyStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(certificateType, collectionLocation, contactNumber, deliveryMethod,
+                deliveryTimescale, directorDetails, forename, includeCompanyObjectsInformation,
+                includeEmailCopy, includeGoodStandingInformation, registeredOfficeAddressDetails,
+                secretaryDetails, surname, designatedMemberDetails, memberDetails,
+                generalPartnerDetails, limitedPartnerDetails, principalPlaceOfBusinessDetails,
+                includeGeneralNatureOfBusinessInformation, companyType, liquidatorsDetails,
+                companyStatus);
+    }
 }

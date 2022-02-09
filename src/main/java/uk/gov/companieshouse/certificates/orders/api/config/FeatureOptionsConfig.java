@@ -10,9 +10,11 @@ public class FeatureOptionsConfig {
     private boolean llpCertificateOrdersEnabled;
     @Value("${lp.certificate.orders.enabled:false}")
     private boolean lpCertificateOrdersEnabled;
+    @Value("${liquidated.company.certificate.enabled:false}")
+    private boolean liquidatedCompanyCertificateEnabled;
 
     @Bean
     public FeatureOptions featureOptions() {
-        return new FeatureOptions(llpCertificateOrdersEnabled, lpCertificateOrdersEnabled);
+        return new FeatureOptions(llpCertificateOrdersEnabled, lpCertificateOrdersEnabled, liquidatedCompanyCertificateEnabled);
     }
 }
