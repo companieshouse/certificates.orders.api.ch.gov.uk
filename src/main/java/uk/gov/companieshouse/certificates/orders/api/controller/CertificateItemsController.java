@@ -77,11 +77,7 @@ public class CertificateItemsController {
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
     private final Validator constraintValidator;
     private final FieldNameConverter fieldNameConverter;
-    private static final Map<String, ApiError> errorMap = new HashMap<String, ApiError>() {
-        {
-            put("company_number", ApiErrors.ERR_COMPANY_NUMBER_IS_NULL);
-        }
-    };
+    private final Map<String, ApiError> errorMap;
 
     /**
      * Constructor.
@@ -114,6 +110,11 @@ public class CertificateItemsController {
         this.certificateTypeMapper = certificateTypeMapper;
         this.constraintValidator = validator;
         this.fieldNameConverter = fieldNameConverter;
+        this.errorMap = new HashMap<String, ApiError>() {
+            {
+                put("company_number", ApiErrors.ERR_COMPANY_NUMBER_IS_NULL);
+            }
+        };
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")

@@ -146,7 +146,7 @@ class CompanyServiceTest {
      * @throws Exception should something unexpected happen
      */
     @Test
-    public void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
+    void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
 
         // Given
         final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
