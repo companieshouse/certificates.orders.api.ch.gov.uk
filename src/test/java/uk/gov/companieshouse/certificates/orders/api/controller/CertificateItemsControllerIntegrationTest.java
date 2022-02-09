@@ -1199,9 +1199,6 @@ class CertificateItemsControllerIntegrationTest {
         verify(etagGenerator).generateEtag();
     }
 
-    //TODO: fetch company status from company profile on update if absent
-    //TODO: raise error if company info provided in update request
-
     @Test
     @DisplayName("Fails to create certificate item with incorrect token permission")
     void updateCertificateItemUnauthorizedTokenPermission() throws Exception {
