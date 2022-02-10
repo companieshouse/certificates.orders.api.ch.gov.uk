@@ -2027,7 +2027,7 @@ class CertificateItemsControllerIntegrationTest {
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].error", is("company-status-invalid")))
-                .andExpect(jsonPath("$.errors[0].location", is("company_number")))
+                .andExpect(jsonPath("$.errors[0].location", is("company_status")))
                 .andExpect(jsonPath("$.errors[0].location_type", is("string")))
                 .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))
                 .andDo(MockMvcResultHandlers.print());
