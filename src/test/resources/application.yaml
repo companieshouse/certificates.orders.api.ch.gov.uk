@@ -33,6 +33,11 @@ liquidated:
     certificate:
       enabled: true
 
+administrator:
+  company:
+    certificate:
+      enabled: true
+
 ---
 
 spring:

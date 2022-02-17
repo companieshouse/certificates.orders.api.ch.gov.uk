@@ -54,6 +54,8 @@ public class CertificateItemOptions {
 
     private String companyStatus;
 
+    private AdministratorsDetails administratorsDetails;
+
     public CertificateType getCertificateType() {
         return certificateType;
     }
@@ -230,6 +232,14 @@ public class CertificateItemOptions {
         this.companyStatus = companyStatus;
     }
 
+    public AdministratorsDetails getAdministratorsDetails() {
+        return administratorsDetails;
+    }
+
+    public void setAdministratorsDetails(AdministratorsDetails administratorsDetails) {
+        this.administratorsDetails = administratorsDetails;
+    }
+
     @Override
     public String toString() { return new Gson().toJson(this); }
 
@@ -268,7 +278,8 @@ public class CertificateItemOptions {
                         that.includeGeneralNatureOfBusinessInformation) &&
                 Objects.equals(companyType, that.companyType) &&
                 Objects.equals(liquidatorsDetails, that.liquidatorsDetails) &&
-                Objects.equals(companyStatus, that.companyStatus);
+                Objects.equals(companyStatus, that.companyStatus) &&
+                Objects.equals(administratorsDetails, that.administratorsDetails);
     }
 
     @Override
@@ -279,6 +290,6 @@ public class CertificateItemOptions {
                 secretaryDetails, surname, designatedMemberDetails, memberDetails,
                 generalPartnerDetails, limitedPartnerDetails, principalPlaceOfBusinessDetails,
                 includeGeneralNatureOfBusinessInformation, companyType, liquidatorsDetails,
-                companyStatus);
+                companyStatus, administratorsDetails);
     }
 }
