@@ -1,9 +1,12 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -41,9 +44,9 @@ public class RequestValidator {
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    List<String> getValidationErrors(final RequestValidatable requestValidatable,
-            final FieldNameConverter converter) {
-        final List<String> errors = new ArrayList<>();
+    List<ApiError> getValidationErrors(final RequestValidatable requestValidatable,
+                                       final FieldNameConverter converter) {
+        final List<ApiError> errors = new ArrayList<>();
         CertificateItemOptions options = requestValidatable.getItemOptions();
         if (options == null) {
             return errors;
@@ -52,49 +55,55 @@ public class RequestValidator {
 
         if (options.getCertificateType() == DISSOLUTION) {
             if (options.getIncludeCompanyObjectsInformation() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED,
                         "include_company_objects_information: must not exist when certificate type is dissolution");
             }
             if (options.getIncludeGeneralNatureOfBusinessInformation() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED,
                         "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
             }
             if (options.getIncludeGoodStandingInformation() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
                         "include_good_standing_information: must not exist when certificate type is dissolution");
             }
             if (options.getRegisteredOfficeAddressDetails() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED,
                         "include_registered_office_address_details: must not exist when certificate type is dissolution");
             }
             if (options.getSecretaryDetails() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,
                         "include_secretary_details: must not exist when certificate type is dissolution");
             }
             if (options.getDirectorDetails() != null) {
-                errors.add(
+                ApiErrors.raiseError(errors, ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,
                         "include_director_details: must not exist when certificate type is dissolution");
             }
             if (options.getDesignatedMemberDetails() != null) {
-                errors.add("include_designated_member_details: must not exist when certificate type is dissolution");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,
+                        "include_designated_member_details: must not exist when certificate type is dissolution");
             }
             if (options.getMemberDetails() != null) {
-                errors.add("include_member_details: must not exist when certificate type is dissolution");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,
+                        "include_member_details: must not exist when certificate type is dissolution");
             }
             if (options.getGeneralPartnerDetails() != null) {
-                errors.add("include_general_partner_details: must not exist when certificate type is dissolution");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED,
+                        "include_general_partner_details: must not exist when certificate type is dissolution");
             }
             if (options.getLimitedPartnerDetails() != null) {
-                errors.add("include_limited_partner_details: must not exist when certificate type is dissolution");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED,
+                        "include_limited_partner_details: must not exist when certificate type is dissolution");
             }
             if (options.getPrincipalPlaceOfBusinessDetails() != null) {
-                errors.add("include_principal_place_of_business_details: must not exist when certificate type is dissolution");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED,
+                        "include_principal_place_of_business_details: must not exist when certificate type is dissolution");
             }
         }
 
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
-            errors.add("include_email_copy: can only be true when delivery timescale is same_day");
+            ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED,
+                    "include_email_copy: can only be true when delivery timescale is same_day");
         }
 
         errors.addAll(certificateOptionsValidator.validate(requestValidatable));
@@ -116,10 +125,10 @@ public class RequestValidator {
      * @param converter        the converter this uses to present field names as they appear in the request JSON payload
      * @return the resulting errors, which will be empty if the details are found to be valid
      */
-    List<String> getValidationErrors(final BasicInformationIncludable details,
+    List<ApiError> getValidationErrors(final BasicInformationIncludable details,
                                      final String detailsFieldName,
                                      final FieldNameConverter converter) {
-        final List<String> errors = new ArrayList<>();
+        final List<ApiError> errors = new ArrayList<>();
         if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
             return errors;
         }
@@ -132,21 +141,26 @@ public class RequestValidator {
                 .map(field -> converter.toSnakeCase(field.getName()))
                 .collect(Collectors.toList());
         if (!incorrectlySetFields.isEmpty()) {
-            final String fieldList = incorrectlySetFields.toString().replace("[", "").replace("]", "");
-            errors.add(detailsFieldName + ": " + fieldList + " must not be true when include_basic_information is false");
+            errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
+                            new ApiError(converter.toLowerHyphenCase(field) + "-error", detailsFieldName + "_" + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(field + ": must not be true when include_basic_information is false")
+                    .build()).collect(Collectors.toList()));
         }
         return errors;
     }
 
-    List<String> getValidationErrors(final DateOfBirthIncludable details, final String detailsFieldName,
+    List<ApiError> getValidationErrors(final DateOfBirthIncludable details, final String detailsFieldName,
                                      final FieldNameConverter converter) {
-        List<String> errors = new ArrayList<>();
+        List<ApiError> errors = new ArrayList<>();
         if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
             return errors;
         }
         errors = getValidationErrors((BasicInformationIncludable) details, detailsFieldName, converter);
         if (details.getIncludeDobType() != null) {
-            errors.add(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false");
+            errors.add(ApiErrorBuilder.builder(
+                    new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false")
+                    .build());
         }
         return errors;
     }
@@ -157,17 +171,23 @@ public class RequestValidator {
      * @param options the options to be validated
      * @return the resulting errors, which will be empty if the fields are found to be valid
      */
-    List<String> getCollectionDeliveryValidationErrors(final CertificateItemOptions options) {
-        final List<String> errors = new ArrayList<>();
+    List<ApiError> getCollectionDeliveryValidationErrors(final CertificateItemOptions options) {
+        final List<ApiError> errors = new ArrayList<>();
         if (options.getDeliveryMethod() == COLLECTION) {
             if (options.getCollectionLocation() == null) {
-                errors.add("collection_location: must not be null when delivery method is collection");
+                ApiErrors.raiseError(errors,
+                        ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED,
+                        "collection_location: must not be null when delivery method is collection");
             }
             if (isBlank(options.getForename())) {
-                errors.add("forename: must not be blank when delivery method is collection");
+                ApiErrors.raiseError(errors,
+                        ApiErrors.ERR_FORENAME_REQUIRED,
+                        "forename: must not be blank when delivery method is collection");
             }
             if (isBlank(options.getSurname())) {
-                errors.add("surname: must not be blank when delivery method is collection");
+                ApiErrors.raiseError(errors,
+                        ApiErrors.ERR_SURNAME_REQUIRED,
+                        "surname: must not be blank when delivery method is collection");
             }
         }
         return errors;

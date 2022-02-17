@@ -3,7 +3,10 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
@@ -48,21 +51,28 @@ public class PatchItemRequestValidator extends RequestValidator {
      * @param patch the item to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    public List<String> getValidationErrors(final JsonMergePatch patch) {
+    public List<ApiError> getValidationErrors(final JsonMergePatch patch) {
         try {
             final PatchValidationCertificateItemDTO dto =
                     objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
             final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
             return violations.stream()
-                    .map(violation -> converter.toSnakeCase(violation.getPropertyPath().toString())
-                            + ": " + violation.getMessage())
+                    .map(violation -> raiseError(violation))
                     .collect(Collectors.toList());
         } catch (JsonProcessingException jpe) {
-            return singletonList(jpe.getOriginalMessage());
+            return singletonList(ApiErrors.ERR_JSON_PROCESSING);
         } catch (IOException ex) {
             // This exception will not occur because there are no low-level IO operations here.
             return EMPTY_LIST;
         }
+    }
+
+    private ApiError raiseError(ConstraintViolation<PatchValidationCertificateItemDTO> violation) {
+        String fieldName = violation.getPropertyPath().toString();
+        String snakeCaseFieldName = converter.toSnakeCase(fieldName);
+        return ApiErrorBuilder.builder(new ApiError(converter.toLowerHyphenCase(fieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                .withErrorMessage(snakeCaseFieldName + ": " + violation.getMessage())
+                .build();
     }
 
     /**
@@ -70,7 +80,7 @@ public class PatchItemRequestValidator extends RequestValidator {
      * @param requestValidatable to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
+    public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
         return getValidationErrors(requestValidatable, converter);
     }
 }

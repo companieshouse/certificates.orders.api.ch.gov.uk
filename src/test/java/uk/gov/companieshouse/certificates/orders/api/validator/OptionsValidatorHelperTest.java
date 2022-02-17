@@ -1,5 +1,18 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
+
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -7,18 +20,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 
 @ExtendWith(MockitoExtension.class)
 class OptionsValidatorHelperTest {
@@ -30,7 +31,7 @@ class OptionsValidatorHelperTest {
 
     @Mock
     private RequestValidatable requestValidatable;
-    
+
     @Mock
     private FeatureOptions featureOptions;
 
@@ -50,7 +51,7 @@ class OptionsValidatorHelperTest {
 
         // When
         boolean result = helper.notCompanyTypeIsNull();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(result, is(true));
@@ -64,7 +65,7 @@ class OptionsValidatorHelperTest {
 
         // When
         boolean result = helper.notCompanyTypeIsNull();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(result, is(false));
@@ -81,7 +82,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_liquidators_details: must not exist when company status is active"));
@@ -97,7 +98,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_good_standing_information: must not exist when company status is administration"));
@@ -115,7 +116,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedLiabilityPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_liquidators_details: must not exist when company status is administration"));
@@ -131,7 +132,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedLiabilityPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_good_standing_information: must not exist when company status is liquidation"));
@@ -148,7 +149,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_liquidators_details: must not exist when company type is limited-partnership"));
@@ -164,7 +165,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_liquidators_details: must not exist"));
@@ -181,7 +182,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_administrators_details: must not exist when company type is limited-partnership"));
@@ -197,7 +198,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("include_administrators_details: must not exist"));
@@ -213,7 +214,7 @@ class OptionsValidatorHelperTest {
 
         // When
         helper.validateLimitedPartnershipOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         // Then
         assertThat(errors, hasItem("company_status: liquidation not valid for company type limited-partnership"));
@@ -230,7 +231,7 @@ class OptionsValidatorHelperTest {
 
         //when
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         //then
         assertTrue(errors.isEmpty());
@@ -247,7 +248,7 @@ class OptionsValidatorHelperTest {
 
         //when
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         //then
         assertThat(errors, hasItem("include_administrators_details: must not exist when company status is active"));
@@ -263,7 +264,7 @@ class OptionsValidatorHelperTest {
 
         //when
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         //then
         assertThat(errors, hasItem("include_administrators_details: must not exist"));
@@ -279,7 +280,7 @@ class OptionsValidatorHelperTest {
 
         //when
         helper.validateLimitedCompanyOptions();
-        List<String> errors = helper.getErrors();
+        List<ApiError> errors = helper.getErrors();
 
         //then
         assertThat(errors, hasItem("include_liquidators_details: must not exist"));

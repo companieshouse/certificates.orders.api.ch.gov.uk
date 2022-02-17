@@ -1,15 +1,19 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 class OptionsValidationHelper {
     private final RequestValidatable requestValidatable;
-    private final List<String> errors = new ArrayList<>();
+    private final List<ApiError> errors = new ArrayList<>();
     private final CertificateItemOptions options;
     private final FeatureOptions featureOptions;
 
@@ -40,34 +44,43 @@ class OptionsValidationHelper {
         notLLPDetails();
         if (options.getLiquidatorsDetails() != null) {
             if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
-                errors.add(String.format("include_liquidators_details: must not exist when company type is %s",
+                ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
+                        String.format("include_liquidators_details: must not exist when company type is %s",
                         options.getCompanyType()));
             } else {
-                errors.add("include_liquidators_details: must not exist");
+                ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
+                        "include_liquidators_details: must not exist");
             }
         }
 
         if (options.getAdministratorsDetails() != null) {
             if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
-                errors.add(String.format("include_administrators_details: must not exist when company type is %s",
+                ApiErrors.raiseError(errors,  ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
+                        String.format("include_administrators_details: must not exist when company type is %s",
                         options.getCompanyType()));
 
             } else {
-                errors.add("include_administrators_details: must not exist");
+                ApiErrors.raiseError(errors,  ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
+                        "include_administrators_details: must not exist");
             }
         }
 
         if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus()) {
-            errors.add(String.format("company_status: %s not valid for company type %s",
-                    requestValidatable.getCompanyStatus().toString(), options.getCompanyType()));
+            ApiErrors.raiseError(errors, ApiErrors.ERR_COMPANY_STATUS_INVALID,
+                    String.format("company_status: %s not valid for company type %s",
+                            requestValidatable.getCompanyStatus().toString(), options.getCompanyType()));
         }
     }
 
     boolean notCompanyTypeIsNull() {
-        return isNotNull(options.getCompanyType());
+        if (!isNull(options.getCompanyType())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_COMPANY_TYPE_REQUIRED, "company type: is a mandatory field");
+            return true;
+        }
+        return false;
     }
 
-    List<String> getErrors() {
+    List<ApiError> getErrors() {
         return Collections.unmodifiableList(errors);
     }
 
@@ -93,79 +106,103 @@ class OptionsValidationHelper {
         if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
             validateLiquidatorsDetails();
         } else if (options.getLiquidatorsDetails() != null) {
-            errors.add("include_liquidators_details: must not exist");
+            ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
+                    "include_liquidators_details: must not exist");
         }
         if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
             validateAdministratorsDetails();
         } else if (options.getAdministratorsDetails() != null) {
-            errors.add("include_administrators_details: must not exist");
+            ApiErrors.raiseError(errors, ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
+                    "include_administrators_details: must not exist");
         }
     }
 
     private void validateGoodStanding() {
         if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus() && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
-            errors.add(String.format("include_good_standing_information: must not exist when company status is %s",
-                    requestValidatable.getCompanyStatus()));
+            ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
+                    "include_good_standing_information: must not exist when company status is %s",
+                            requestValidatable.getCompanyStatus());
         }
     }
 
     private void validateLiquidatorsDetails() {
         if (CompanyStatus.LIQUIDATION != requestValidatable.getCompanyStatus() && options.getLiquidatorsDetails() != null) {
-            errors.add(String.format("include_liquidators_details: must not exist when company status is %s",
-                    requestValidatable.getCompanyStatus()));
+            ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
+                    "include_liquidators_details: must not exist when company status is %s",
+                            requestValidatable.getCompanyStatus());
         }
     }
 
     private void validateAdministratorsDetails() {
         if (CompanyStatus.ADMINISTRATION != requestValidatable.getCompanyStatus() && options.getAdministratorsDetails() != null) {
-            errors.add(String.format("include_administrators_details: must not exist when company status is %s",
-                    requestValidatable.getCompanyStatus()));
+            ApiErrors.raiseError(errors, ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
+                    "include_administrators_details: must not exist when company status is %s",
+                            requestValidatable.getCompanyStatus());
         }
     }
 
     private void notDirectorsDetails() {
-        isNull(options.getDirectorDetails(), "include_director_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getDirectorDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,
+                    "include_director_details: must not exist when company type is %s",
+                            options.getCompanyType());
+        }
     }
 
     private void notSecretaryDetails() {
-        isNull(options.getSecretaryDetails(), "include_secretary_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getSecretaryDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,
+                    "include_secretary_details: must not exist when company type is %s",
+                            options.getCompanyType());
+        }
     }
 
     private void notDesignatedMemberDetails() {
-        isNull(options.getDesignatedMemberDetails(), "include_designated_member_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getDesignatedMemberDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,
+                    "include_designated_member_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
     }
 
     private void notMemberDetails() {
-        isNull(options.getMemberDetails(), "include_member_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getDesignatedMemberDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,
+                    "include_member_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
     }
 
     private void notGeneralPartnerDetails() {
-        isNull(options.getGeneralPartnerDetails(), "include_general_partner_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getGeneralPartnerDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED,
+                    "include_general_partner_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
     }
 
     private void notLimitedPartnerDetails() {
-        isNull(options.getLimitedPartnerDetails(), "include_limited_partner_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getLimitedPartnerDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED,
+                    "include_limited_partner_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
     }
 
     private void notPrincipalPlaceOfBusinessDetails() {
-        isNull(options.getPrincipalPlaceOfBusinessDetails(), "include_principal_place_of_business_details: must not exist when company type is %s", options.getCompanyType());
+        if (isNull(options.getPrincipalPlaceOfBusinessDetails())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED,
+                    "include_principal_place_of_business_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
     }
 
     private void notIncludeGeneralNatureOfBusinessInformation() {
-        isNull(options.getIncludeGeneralNatureOfBusinessInformation(), "include_general_nature_of_business_information: must not exist when company type is %s", options.getCompanyType());
-    }
+        if (isNull(options.getIncludeGeneralNatureOfBusinessInformation())) {
+            ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED,
+                    "include_general_nature_of_business_information: must not exist when company type is %s",
+                    options.getCompanyType());
 
-    private void isNull(Object object, String message, Object... messageArgs) {
-        if (object != null) {
-            errors.add(String.format(message, messageArgs));
         }
-    }
-
-    private boolean isNotNull(Object object, Object... messageArgs) {
-        if (object == null) {
-            errors.add(String.format("company type: is a mandatory field", messageArgs));
-            return false;
-        }
-        return true;
     }
 }

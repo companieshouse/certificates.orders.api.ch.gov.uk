@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 
@@ -48,7 +49,7 @@ class CertificateOptionsValidator {
      * @param requestValidatable to be validated
      * @return list containing any errors; an empty list if no validation errors occur
      */
-    List<String> validate(RequestValidatable requestValidatable) {
+    List<ApiError> validate(RequestValidatable requestValidatable) {
         OptionsValidationHelper optionsValidationHelper = this.optionsValidationHelperFactory.createOptionsValidationHelper(requestValidatable);
         if (optionsValidationHelper.notCompanyTypeIsNull()) {
 
