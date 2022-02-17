@@ -46,7 +46,7 @@ class CertificateOptionsValidatorConfig {
      * @return
      */
     @Bean
-    CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions) {
+    CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions, OptionsValidationHelperFactory factory) {
         Consumer<OptionsValidationHelper> strategy;
         if (featureOptions.isLlpCertificateOrdersEnabled() && featureOptions.isLpCertificateOrdersEnabled()) {
             strategy = this::allFeatureOptionsEnabledStrategy;
@@ -57,7 +57,7 @@ class CertificateOptionsValidatorConfig {
         } else {
             strategy = this::noFeatureOptionsEnabledStrategy;
         }
-        return new CertificateOptionsValidator(strategy);
+        return new CertificateOptionsValidator(strategy, factory);
     }
 
     private void noFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {

@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 
 import java.util.ArrayList;
@@ -10,9 +11,11 @@ class OptionsValidationHelper {
     private final RequestValidatable requestValidatable;
     private final List<String> errors = new ArrayList<>();
     private final CertificateItemOptions options;
+    private final FeatureOptions featureOptions;
 
-    OptionsValidationHelper(RequestValidatable requestValidatable) {
+    OptionsValidationHelper(RequestValidatable requestValidatable, FeatureOptions featureOptions) {
         this.requestValidatable = requestValidatable;
+        this.featureOptions = featureOptions;
         this.options = requestValidatable.getItemOptions();
     }
 
@@ -36,10 +39,25 @@ class OptionsValidationHelper {
         notLimitedCompanyDetails();
         notLLPDetails();
         if (options.getLiquidatorsDetails() != null) {
-            errors.add(String.format("include_liquidators_details: must not exist when company type is %s",
-                    options.getCompanyType()));
+            if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
+                errors.add(String.format("include_liquidators_details: must not exist when company type is %s",
+                        options.getCompanyType()));
+            } else {
+                errors.add("include_liquidators_details: must not exist");
+            }
         }
-        if (CompanyStatus.LIQUIDATION == requestValidatable.getCompanyStatus()) {
+
+        if (options.getAdministratorsDetails() != null) {
+            if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
+                errors.add(String.format("include_administrators_details: must not exist when company type is %s",
+                        options.getCompanyType()));
+
+            } else {
+                errors.add("include_administrators_details: must not exist");
+            }
+        }
+
+        if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus()) {
             errors.add(String.format("company_status: %s not valid for company type %s",
                     requestValidatable.getCompanyStatus().toString(), options.getCompanyType()));
         }
@@ -71,13 +89,36 @@ class OptionsValidationHelper {
     }
 
     private void verifyCompanyStatus() {
-        if (CompanyStatus.ACTIVE == requestValidatable.getCompanyStatus() && options.getLiquidatorsDetails() != null) {
+        validateGoodStanding();
+        if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
+            validateLiquidatorsDetails();
+        } else if (options.getLiquidatorsDetails() != null) {
+            errors.add("include_liquidators_details: must not exist");
+        }
+        if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
+            validateAdministratorsDetails();
+        } else if (options.getAdministratorsDetails() != null) {
+            errors.add("include_administrators_details: must not exist");
+        }
+    }
+
+    private void validateGoodStanding() {
+        if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus() && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
+            errors.add(String.format("include_good_standing_information: must not exist when company status is %s",
+                    requestValidatable.getCompanyStatus()));
+        }
+    }
+
+    private void validateLiquidatorsDetails() {
+        if (CompanyStatus.LIQUIDATION != requestValidatable.getCompanyStatus() && options.getLiquidatorsDetails() != null) {
             errors.add(String.format("include_liquidators_details: must not exist when company status is %s",
                     requestValidatable.getCompanyStatus()));
         }
+    }
 
-        if (CompanyStatus.LIQUIDATION == requestValidatable.getCompanyStatus() && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
-            errors.add(String.format("include_good_standing_information: must not exist when company status is %s",
+    private void validateAdministratorsDetails() {
+        if (CompanyStatus.ADMINISTRATION != requestValidatable.getCompanyStatus() && options.getAdministratorsDetails() != null) {
+            errors.add(String.format("include_administrators_details: must not exist when company status is %s",
                     requestValidatable.getCompanyStatus()));
         }
     }

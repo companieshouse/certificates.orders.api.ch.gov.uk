@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 
 import java.util.List;
@@ -28,15 +29,17 @@ import java.util.function.Consumer;
  * @see CertificateOptionsValidatorConfig
  */
 class CertificateOptionsValidator {
-    private Consumer<OptionsValidationHelper> strategy;
+    private final Consumer<OptionsValidationHelper> strategy;
+    private final OptionsValidationHelperFactory optionsValidationHelperFactory;
 
     /**
      * Creates a new CertificateOptionsValidator
      *
      * @param strategy consumer (method) that accepts {@link OptionsValidationHelper}
      */
-    public CertificateOptionsValidator(Consumer<OptionsValidationHelper> strategy) {
+    public CertificateOptionsValidator(Consumer<OptionsValidationHelper> strategy, OptionsValidationHelperFactory optionsValidationHelperFactory) {
         this.strategy = strategy;
+        this.optionsValidationHelperFactory = optionsValidationHelperFactory;
     }
 
     /**
@@ -46,7 +49,7 @@ class CertificateOptionsValidator {
      * @return list containing any errors; an empty list if no validation errors occur
      */
     List<String> validate(RequestValidatable requestValidatable) {
-        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(requestValidatable);
+        OptionsValidationHelper optionsValidationHelper = this.optionsValidationHelperFactory.createOptionsValidationHelper(requestValidatable);
         if (optionsValidationHelper.notCompanyTypeIsNull()) {
 
             // Delegate additional validation to supplied validation strategy
