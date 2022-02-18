@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
@@ -27,7 +27,6 @@ import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestV
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Validator;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -134,8 +133,7 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Update certificate item supplied patch has validation errors")
     void updateCertificateItemPatchValidationErrors() {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
+        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED);
         when(validator.getValidationErrors(patch)).thenReturn(errors);
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
                 TOKEN_REQUEST_ID_VALUE);
@@ -145,8 +143,7 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Update certificate item patched certificate has validation errors")
     void updateCertificateItemMergedValidationErrors() {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
+        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED);
         when(validator.getValidationErrors(patch)).thenReturn(errors);
 
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
@@ -202,8 +199,7 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item has validation errors")
     void createCertificateItemValidationErrors() throws CompanyServiceException {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
+        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED);
         when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
