@@ -12,7 +12,7 @@ public class FeatureOptionsConfig {
     private boolean lpCertificateOrdersEnabled;
     @Value("${liquidated.company.certificate.enabled:false}")
     private boolean liquidatedCompanyCertificateEnabled;
-    @Value("${administrator.company.certificate.enabled}")
+    @Value("${administrator.company.certificate.enabled:false}")
     private boolean administratorCompanyCertificateEnabled;
 
     @Bean

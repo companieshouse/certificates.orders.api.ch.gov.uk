@@ -11,8 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
@@ -114,7 +116,7 @@ class PatchItemRequestValidatorTest {
         final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
 
         // Then
         assertThat(errors, is(empty()));
@@ -124,56 +126,56 @@ class PatchItemRequestValidatorTest {
     @DisplayName("ID is read only")
     void getValidationErrorsRejectsReadOnlyId() throws IOException {
         itemUpdate.setId(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("id");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED, "id: must be null"));
     }
 
     @Test
     @DisplayName("Description is read only")
     void getValidationErrorsRejectsReadOnlyDescription() throws IOException {
         itemUpdate.setDescription(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("description");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_VALUES_SUPPLIED, "description: must be null"));
     }
 
     @Test
     @DisplayName("Description identifier is read only")
     void getValidationErrorsRejectsReadOnlyDescriptionIdentifier() throws IOException {
         itemUpdate.setDescriptionIdentifier(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("description_identifier");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_IDENTIFIER, "description_identifier: must be null"));
     }
 
     @Test
     @DisplayName("Description values are read only")
     void getValidationErrorsRejectsReadOnlyDescriptionValues() throws IOException {
         itemUpdate.setDescriptionValues(TOKEN_VALUES);
-        assertFieldMustBeNullErrorProduced("description_values");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_VALUES_SUPPLIED, "description_values: must be null"));
     }
 
     @Test
     @DisplayName("Item costs are read only")
     void getValidationErrorsRejectsReadOnlyItemCosts() throws IOException {
         itemUpdate.setItemCosts(TOKEN_ITEM_COSTS);
-        assertFieldMustBeNullErrorProduced("item_costs");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_ITEM_COSTS_SUPPLIED, "item_costs: must be null"));
     }
 
     @Test
     @DisplayName("Kind is read only")
     void getValidationErrorsRejectsReadOnlyKind() throws IOException {
         itemUpdate.setKind(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("kind");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_KIND_SUPPLIED_LOCATION, "kind: must be null"));
     }
 
     @Test
     @DisplayName("Etag is read only")
     void getValidationErrorsRejectsReadOnlyEtag() throws IOException {
         itemUpdate.setEtag(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced("etag");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_ETAG_SUPPLIED, "etag: must be null"));
     }
 
     @Test
     @DisplayName("Postal delivery is read only")
     void getValidationErrorsRejectsReadOnlyPostalDelivery() throws IOException {
         itemUpdate.setPostalDelivery(TOKEN_POSTAL_DELIVERY_VALUE);
-        assertFieldMustBeNullErrorProduced("postal_delivery");
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_POSTAL_DELIVERY, "postal_delivery: must be null"));
     }
 
     @Test
@@ -187,14 +189,14 @@ class PatchItemRequestValidatorTest {
         final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
 
         // Then
         assertThat(errors,
-                containsInAnyOrder("description_values: must be null",
-                        "item_costs: must be null",
-                        "kind: must be null",
-                        "etag: must be null"));
+                containsInAnyOrder(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_VALUES_SUPPLIED, "description_values: must be null"),
+                        ApiErrors.raiseError(ApiErrors.ERR_ITEM_COSTS_SUPPLIED, "item_costs: must be null"),
+                        ApiErrors.raiseError(ApiErrors.ERR_KIND_SUPPLIED_LOCATION, "kind: must be null"),
+                        ApiErrors.raiseError(ApiErrors.ERR_ETAG_SUPPLIED, "etag: must be null")));
     }
 
     @Test
@@ -205,10 +207,10 @@ class PatchItemRequestValidatorTest {
         final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
 
         // Then
-        assertThat(errors, contains("quantity: must be greater than or equal to 1"));
+        assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_QUANTITY_AMOUNT, "quantity: must be greater than or equal to 1")));
     }
 
     @Test
@@ -219,7 +221,7 @@ class PatchItemRequestValidatorTest {
         final JsonMergePatch patch = patchFactory.patchFromJson(jsonWithUnknownField);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
 
         // Then
         assertThat(errors, is(empty()));
@@ -233,7 +235,7 @@ class PatchItemRequestValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -247,13 +249,13 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
-                "collection_location: must not be null when delivery method is collection",
-                "forename: must not be blank when delivery method is collection",
-                "surname: must not be blank when delivery method is collection"));
+                ApiErrors.raiseError(ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED, "collection_location: must not be null when delivery method is collection"),
+                ApiErrors.raiseError(ApiErrors.ERR_FORENAME_REQUIRED, "forename: must not be blank when delivery method is collection"),
+                ApiErrors.raiseError(ApiErrors.ERR_SURNAME_REQUIRED, "surname: must not be blank when delivery method is collection")));
     }
 
     @Test
@@ -265,7 +267,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -298,15 +300,15 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
-                "include_company_objects_information: must not exist when certificate type is dissolution",
-                "include_good_standing_information: must not exist when certificate type is dissolution",
-                "include_registered_office_address_details: must not exist when certificate type is dissolution",
-                "include_secretary_details: must not exist when certificate type is dissolution",
-                "include_director_details: must not exist when certificate type is dissolution"));
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when certificate type is dissolution"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when certificate type is dissolution"),
+                ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when certificate type is dissolution"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when certificate type is dissolution"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution")));
     }
 
     @Test
@@ -318,7 +320,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -333,10 +335,10 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
-        assertThat(errors, contains("include_email_copy: can only be true when delivery timescale is same_day"));
+        assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED,"include_email_copy: can only be true when delivery timescale is same_day")));
     }
 
 
@@ -357,18 +359,23 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
-                "director_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
-                        + " is false",
-                "director_details: include_dob_type must not be non-null when include_basic_information is false",
-                "secretary_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
-                        + " is false",
-                "secretary_details: include_dob_type must not be non-null when include_basic_information is false"));
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS,"director_details.include_address: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_APPOINTMENT_DATE,"director_details.include_appointment_date: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR,"director_details.include_country_of_residence: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY_ERROR,"director_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION_ERROR,"director_details.include_occupation: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR,"director_details.include_dob_type: must not be non-null when include_basic_information is false"),
+
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS,"secretary_details.include_address: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_APPOINTMENT_DATE,"secretary_details.include_appointment_date: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR,"secretary_details.include_country_of_residence: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY_ERROR,"secretary_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION_ERROR,"secretary_details.include_occupation: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR,"secretary_details.include_dob_type: must not be non-null when include_basic_information is false")));
     }
 
     @Test
@@ -389,7 +396,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -410,14 +417,14 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
-                "director_details: include_address, include_nationality, include_occupation must not be true when "
-                        + "include_basic_information is false",
-                "secretary_details: include_address, include_nationality, include_occupation must not be true when "
-                        + "include_basic_information is false"));
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,"director_details: include_address, include_nationality, include_occupation must not be true when "
+                        + "include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,"secretary_details: include_address, include_nationality, include_occupation must not be true when "
+                        + "include_basic_information is false")));
     }
 
     @Test
@@ -427,7 +434,7 @@ class PatchItemRequestValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(null);
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -440,7 +447,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -450,15 +457,14 @@ class PatchItemRequestValidatorTest {
      * Utility method that asserts that the validator produces a "<field name>: must be null"
      * error message.
      *
-     * @param fieldName the name of the field for which the error is expected
      * @throws IOException should something unexpected happen
      */
-    private void assertFieldMustBeNullErrorProduced(final String fieldName) throws IOException {
+    private void assertFieldMustBeNullErrorProduced(ApiError apiError) throws IOException {
         // Given
         final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
         // When
-        final List<String> errors = validatorUnderTest.getValidationErrors(patch);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
         // Then
-        assertThat(errors, contains(fieldName + ": must be null"));
+        assertThat(errors, contains(apiError));
     }
 }

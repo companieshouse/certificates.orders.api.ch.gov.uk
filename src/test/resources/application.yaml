@@ -51,6 +51,11 @@ llp:
     orders:
       enabled: false
 
+administrator:
+  company:
+    certificate:
+      enabled: false
+
 ---
 
 spring:
@@ -62,6 +67,11 @@ lp:
 llp:
   certificate:
     orders:
+      enabled: false
+
+administrator:
+  company:
+    certificate:
       enabled: false
 
 ---
@@ -76,6 +86,11 @@ llp:
   certificate:
     orders:
       enabled: true
+
+administrator:
+  company:
+    certificate:
+      enabled: false
 
 server:
   error:
