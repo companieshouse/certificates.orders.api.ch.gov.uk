@@ -8,7 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.DesignatedMemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.GeneralPartnerDetails;
@@ -18,6 +20,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,13 +68,16 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemOptions.setDesignatedMemberDetails(designatedMemberDetails);
         certificateItemOptions.setCompanyType("llp");
 
+        List<ApiError> expectedErrors = Arrays.asList(
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is llp"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is llp")
+        );
+
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, containsInAnyOrder(
-                "include_designated_member_details: must not exist when company type is llp",
-                "include_member_details: must not exist when company type is llp"));
+        assertThat(errors, containsInAnyOrder(expectedErrors));
     }
 
     @Test
@@ -94,15 +100,17 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         certificateItemOptions.setCompanyType("limited-partnership");
+        List<ApiError> expectedErrors = Arrays.asList(
+                ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company type is limited-partnership")
+        );
 
         //when
-        final List<String> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, containsInAnyOrder(
-                "include_general_partner_details: must not exist when company type is limited-partnership",
-                "include_limited_partner_details: must not exist when company type is limited-partnership",
-                "include_principal_place_of_business_details: must not exist when company type is limited-partnership",
-                "include_general_nature_of_business_information: must not exist when company type is limited-partnership"));
+        assertThat(errors, containsInAnyOrder(expectedErrors));
     }
 }

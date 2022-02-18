@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 
 import java.util.List;
@@ -59,7 +60,7 @@ class CertificateOptionsValidatorTest {
         CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
 
         // When
-        List<String> result = validator.validate(requestValidatable);
+        List<ApiError> result = validator.validate(requestValidatable);
 
         // Then
         assertThat(result, is(empty()));
