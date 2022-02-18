@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,9 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 
 import java.util.List;
 
@@ -72,6 +76,10 @@ class OptionsValidatorHelperTest {
         assertThat(errors, containsInAnyOrder("company type: is a mandatory field"));
     }
 
+    public static <T> org.hamcrest.Matcher<java.lang.Iterable<? super T>> hasItem(T item) {
+        return IsIterableContaining.hasItem(item);
+    }
+
     @Test
     void correctlyErrorsWhenLimitedCompanyNotInLiquidationAndLiquidatorsDetailsSuppliedAndFeatureFlagEnabled() {
         // Given
@@ -79,13 +87,15 @@ class OptionsValidatorHelperTest {
         when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
+        ApiError expected = ApiErrorBuilder.builder(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED)
+                .withErrorMessage("include_liquidators_details: must not exist when company status is active").build();
 
         // When
         helper.validateLimitedCompanyOptions();
         List<ApiError> errors = helper.getErrors();
 
         // Then
-        assertThat(errors, hasItem("include_liquidators_details: must not exist when company status is active"));
+        assertThat(errors, hasItem(expected));
     }
 
     @Test
