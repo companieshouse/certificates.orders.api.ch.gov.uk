@@ -2,12 +2,14 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * An instance of this represents the director or secretary details item options selected.
  */
-public class DirectorOrSecretaryDetails implements BasicInformationIncludable, DateOfBirthIncludable {
+public class DirectorOrSecretaryDetails implements DateOfBirthIncludable<Map<String, Object>> {
 
     private Boolean includeAddress;
     private Boolean includeAppointmentDate;
@@ -16,6 +18,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
     private IncludeDobType includeDobType;
     private Boolean includeNationality;
     private Boolean includeOccupation;
+    private transient final Map<String, Object> fieldValues = new HashMap<>();
 
     public Boolean getIncludeAddress() {
         return includeAddress;
@@ -23,6 +26,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeAddress(Boolean includeAddress) {
         this.includeAddress = includeAddress;
+        fieldValues.put("include_address", includeAddress);
     }
 
     public Boolean getIncludeAppointmentDate() {
@@ -31,6 +35,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeAppointmentDate(Boolean includeAppointmentDate) {
         this.includeAppointmentDate = includeAppointmentDate;
+        fieldValues.put("include_appointment_date", includeAppointmentDate);
     }
 
     public Boolean getIncludeBasicInformation() {
@@ -47,6 +52,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeCountryOfResidence(Boolean includeCountryOfResidence) {
         this.includeCountryOfResidence = includeCountryOfResidence;
+        fieldValues.put("include_country_of_residence", includeCountryOfResidence);
     }
 
     public IncludeDobType getIncludeDobType() {
@@ -55,6 +61,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeDobType(IncludeDobType includeDobType) {
         this.includeDobType = includeDobType;
+        fieldValues.put("include_dob_type", includeDobType);
     }
 
     public Boolean getIncludeNationality() {
@@ -63,6 +70,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeNationality(Boolean includeNationality) {
         this.includeNationality = includeNationality;
+        fieldValues.put("include_nationality", includeNationality);
     }
 
     public Boolean getIncludeOccupation() {
@@ -71,6 +79,7 @@ public class DirectorOrSecretaryDetails implements BasicInformationIncludable, D
 
     public void setIncludeOccupation(Boolean includeOccupation) {
         this.includeOccupation = includeOccupation;
+        fieldValues.put("include_occupation", includeOccupation);
     }
 
     @Override

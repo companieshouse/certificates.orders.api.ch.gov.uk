@@ -2,18 +2,21 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * The designated details item options that have been selected.
  */
-public class DesignatedMemberDetails implements BasicInformationIncludable, DateOfBirthIncludable {
+public class DesignatedMemberDetails implements DateOfBirthIncludable<Map<String, Object>> {
 
     private Boolean includeAddress;
     private Boolean includeAppointmentDate;
     private Boolean includeBasicInformation;
     private Boolean includeCountryOfResidence;
     private IncludeDobType includeDobType;
+    private transient final Map<String, Object> fieldValues = new HashMap<>();
 
     public Boolean getIncludeAddress() {
         return includeAddress;
@@ -21,6 +24,7 @@ public class DesignatedMemberDetails implements BasicInformationIncludable, Date
 
     public void setIncludeAddress(Boolean includeAddress) {
         this.includeAddress = includeAddress;
+        fieldValues.put("include_address", includeAddress);
     }
 
     public Boolean getIncludeAppointmentDate() {
@@ -29,6 +33,7 @@ public class DesignatedMemberDetails implements BasicInformationIncludable, Date
 
     public void setIncludeAppointmentDate(Boolean includeAppointmentDate) {
         this.includeAppointmentDate = includeAppointmentDate;
+        fieldValues.put("include_appointment_date", includeAppointmentDate);
     }
 
     public Boolean getIncludeBasicInformation() {
@@ -45,6 +50,7 @@ public class DesignatedMemberDetails implements BasicInformationIncludable, Date
 
     public void setIncludeCountryOfResidence(Boolean includeCountryOfResidence) {
         this.includeCountryOfResidence = includeCountryOfResidence;
+        fieldValues.put("include_country_of_residence", includeCountryOfResidence);
     }
 
     public IncludeDobType getIncludeDobType() {
@@ -53,6 +59,12 @@ public class DesignatedMemberDetails implements BasicInformationIncludable, Date
 
     public void setIncludeDobType(IncludeDobType includeDobType) {
         this.includeDobType = includeDobType;
+        fieldValues.put("include_dob_type", includeDobType);
+    }
+
+    @Override
+    public void accept(Visitor<Map<String, Object>> visitor) {
+        visitor.visit(this.fieldValues);
     }
 
     @Override

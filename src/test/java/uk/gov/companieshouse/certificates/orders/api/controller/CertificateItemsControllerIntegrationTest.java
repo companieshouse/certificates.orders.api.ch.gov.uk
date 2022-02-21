@@ -303,38 +303,37 @@ class CertificateItemsControllerIntegrationTest {
                         .withCompanyType("limited")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company status is active", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_good_standing_information: must not exist when company status is liquidation", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("llp")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company status is active", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("llp")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_good_standing_information: must not exist when company status is liquidation", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited-partnership")
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("include_liquidators_details: must not exist when company type is limited-partnership", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company type is limited-partnership")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
                         .withCompanyType("limited-partnership")
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .withExpectedErrors(singletonList(new uk.gov.companieshouse.api.error.ApiError("company_status: liquidation not valid for company type limited-partnership", "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_COMPANY_STATUS_INVALID, "company_status: liquidation not valid for company type limited-partnership")))
                         .build())
-
         );
     }
 
@@ -811,9 +810,6 @@ class CertificateItemsControllerIntegrationTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
-        final ApiResponse expectedValidationError = new ApiResponse(Collections.singletonList(
-                new uk.gov.companieshouse.api.error.ApiError(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
-
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -825,7 +821,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is("include-email-copy-is-true-error")))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -1630,17 +1626,12 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
         savedOptions.setCompanyType("limited");
-        savedOptions.setCertificateType(CertificateType.DISSOLUTION);
+        savedOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
         savedItem.setItemOptions(savedOptions);
 
         repository.save(savedItem);
 
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
-
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1652,7 +1643,8 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED.getError())))
+                .andExpect(jsonPath("$.errors[1].error").value(is(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1673,11 +1665,9 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         CertificateItemOptions savedOptions = new CertificateItemOptions();
         savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1689,7 +1679,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1715,9 +1705,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE));
-
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1728,7 +1715,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
