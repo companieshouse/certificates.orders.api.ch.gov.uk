@@ -14,10 +14,12 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
@@ -53,53 +55,6 @@ public class RequestValidator {
         }
         errors.addAll(getCollectionDeliveryValidationErrors(options));
 
-        if (options.getCertificateType() == DISSOLUTION) {
-            if (options.getIncludeCompanyObjectsInformation() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED,
-                        "include_company_objects_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getIncludeGeneralNatureOfBusinessInformation() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED,
-                        "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getIncludeGoodStandingInformation() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
-                        "include_good_standing_information: must not exist when certificate type is dissolution");
-            }
-            if (options.getRegisteredOfficeAddressDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED,
-                        "include_registered_office_address_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getSecretaryDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,
-                        "include_secretary_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getDirectorDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,
-                        "include_director_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getDesignatedMemberDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,
-                        "include_designated_member_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getMemberDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,
-                        "include_member_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getGeneralPartnerDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED,
-                        "include_general_partner_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getLimitedPartnerDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED,
-                        "include_limited_partner_details: must not exist when certificate type is dissolution");
-            }
-            if (options.getPrincipalPlaceOfBusinessDetails() != null) {
-                ApiErrors.raiseError(errors, ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED,
-                        "include_principal_place_of_business_details: must not exist when certificate type is dissolution");
-            }
-        }
-
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED,
@@ -134,6 +89,7 @@ public class RequestValidator {
         }
         final Field[] fields = details.getClass().getDeclaredFields();
         final List<String> incorrectlySetFields = stream(fields)
+                .sorted(Comparator.comparing(Field::getName))
                 .filter(field ->
                         !field.getName().equals("includeBasicInformation") &&
                                 field.getType().equals(Boolean.class) &&

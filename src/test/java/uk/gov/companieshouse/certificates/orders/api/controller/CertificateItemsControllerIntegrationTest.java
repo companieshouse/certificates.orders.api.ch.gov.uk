@@ -1310,7 +1310,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is("quantity-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1453,9 +1453,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
-
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1466,7 +1463,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is("json-processing-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1597,12 +1594,9 @@ class CertificateItemsControllerIntegrationTest {
         CertificateItemOptions savedOptions = new CertificateItemOptions();
         savedOptions.setCertificateType(CertificateType.DISSOLUTION);
         savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1614,7 +1608,8 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is("include-company-objects-information-error")))
+                .andExpect(jsonPath("$.errors[1].error", is("include-good-standing-information-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1838,7 +1833,9 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is("include-address-error")))
+                .andExpect(jsonPath("$.errors[1].error").value(is("include-nationality-error")))
+                .andExpect(jsonPath("$.errors[2].error").value(is("include-occupation-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 

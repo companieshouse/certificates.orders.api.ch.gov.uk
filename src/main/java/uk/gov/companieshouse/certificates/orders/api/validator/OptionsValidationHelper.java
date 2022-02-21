@@ -103,6 +103,7 @@ class OptionsValidationHelper {
     }
 
     private void verifyCompanyStatus() {
+        validateDissolvedCompany();
         validateGoodStanding();
         if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
             validateLiquidatorsDetails();
@@ -115,6 +116,27 @@ class OptionsValidationHelper {
         } else if (options.getAdministratorsDetails() != null) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
                     "include_administrators_details: must not exist");
+        }
+    }
+
+    private void validateDissolvedCompany() {
+        if (CompanyStatus.DISSOLVED == requestValidatable.getCompanyStatus()) {
+            validateObjectIsNull(options.getIncludeCompanyObjectsInformation(), ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getIncludeGeneralNatureOfBusinessInformation(), ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getRegisteredOfficeAddressDetails(), ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getSecretaryDetails(), ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getDirectorDetails(), ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getDesignatedMemberDetails(), ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getMemberDetails(), ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getGeneralPartnerDetails(), ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getLimitedPartnerDetails(), ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when certificate type is dissolution");
+            validateObjectIsNull(options.getPrincipalPlaceOfBusinessDetails(), ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when certificate type is dissolution");
+        }
+    }
+
+    private void validateObjectIsNull(Object object, ApiError failureError, String errorMessage) {
+        if (nonNull(object)) {
+            ApiErrors.raiseError(errors, failureError, errorMessage);
         }
     }
 
