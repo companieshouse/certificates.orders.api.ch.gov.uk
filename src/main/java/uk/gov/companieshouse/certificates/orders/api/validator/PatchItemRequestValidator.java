@@ -70,7 +70,7 @@ public class PatchItemRequestValidator extends RequestValidator {
     private ApiError raiseError(ConstraintViolation<PatchValidationCertificateItemDTO> violation) {
         String fieldName = violation.getPropertyPath().toString();
         String snakeCaseFieldName = converter.toSnakeCase(fieldName);
-        return ApiErrorBuilder.builder(new ApiError(converter.toLowerHyphenCase(fieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+        return ApiErrorBuilder.builder(new ApiError(converter.toLowerHyphenCase(snakeCaseFieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
                 .withErrorMessage(snakeCaseFieldName + ": " + violation.getMessage())
                 .build();
     }

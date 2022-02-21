@@ -17,6 +17,6 @@ public class FieldNameConverter {
     }
 
     public String toLowerHyphenCase(final String fieldName) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, fieldName).replace("is_", "");
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, fieldName).replace("is_", "");
     }
 }

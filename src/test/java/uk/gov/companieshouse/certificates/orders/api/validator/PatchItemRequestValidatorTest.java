@@ -139,7 +139,7 @@ class PatchItemRequestValidatorTest {
     @DisplayName("Description is read only")
     void getValidationErrorsRejectsReadOnlyDescription() throws IOException {
         itemUpdate.setDescription(TOKEN_STRING);
-        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_VALUES_SUPPLIED, "description: must be null"));
+        assertFieldMustBeNullErrorProduced(ApiErrors.raiseError(ApiErrors.ERR_DESCRIPTION_SUPPLIED, "description: must be null"));
     }
 
     @Test

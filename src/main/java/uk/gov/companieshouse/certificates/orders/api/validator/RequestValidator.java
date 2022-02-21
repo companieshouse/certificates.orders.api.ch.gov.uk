@@ -142,8 +142,8 @@ public class RequestValidator {
                 .collect(Collectors.toList());
         if (!incorrectlySetFields.isEmpty()) {
             errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
-                            new ApiError(converter.toLowerHyphenCase(field) + "-error", detailsFieldName + "_" + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(field + ": must not be true when include_basic_information is false")
+                            new ApiError(converter.toLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(detailsFieldName + "." + field + ": must not be true when include_basic_information is false")
                     .build()).collect(Collectors.toList()));
         }
         return errors;
@@ -158,8 +158,8 @@ public class RequestValidator {
         errors = getValidationErrors((BasicInformationIncludable) details, detailsFieldName, converter);
         if (details.getIncludeDobType() != null) {
             errors.add(ApiErrorBuilder.builder(
-                    new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + ": include_dob_type must not be non-null when include_basic_information is false")
+                    new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName + ".include_dob_type", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(detailsFieldName + ".include_dob_type: must not be non-null when include_basic_information is false")
                     .build());
         }
         return errors;

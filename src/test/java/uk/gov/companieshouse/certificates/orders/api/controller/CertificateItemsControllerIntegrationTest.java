@@ -33,6 +33,7 @@ import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthenticat
 import uk.gov.companieshouse.certificates.orders.api.interceptor.UserAuthorisationInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
@@ -1109,11 +1110,10 @@ class CertificateItemsControllerIntegrationTest {
         repository.save(savedItem);
 
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions itemUpdateOptions = new CertificateItemOptions();
+        final CertificateItemOptionsRequest itemUpdateOptions = new CertificateItemOptionsRequest();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
         itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
         itemUpdate.setItemOptions(itemUpdateOptions);
-        itemUpdateOptions.setCertificateType(UPDATED_CERTIFICATE_TYPE);
         itemUpdateOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
         itemUpdateOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
         itemUpdateOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
@@ -1240,7 +1240,7 @@ class CertificateItemsControllerIntegrationTest {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         itemUpdate.setQuantity(UPDATED_QUANTITY);
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         itemUpdate.setItemOptions(options);
 
@@ -1261,6 +1261,7 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Should not modify user_id when performing an update")
     void updateCertificateItemDoesNotModifyWhenPerformingAnUpdate() throws Exception {
         // Given
+        // TODO: this may fail
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
@@ -1410,7 +1411,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsInvalidDeliveryTimescale() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
         itemUpdate.setItemOptions(options);
 
@@ -1438,43 +1439,11 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Rejects update request containing an invalid certificate type")
-    void updateCertificateItemRejectsInvalidCertificateType() throws Exception {
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CERTIFICATE_TYPE);
-        itemUpdate.setItemOptions(options);
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_CERTIFICATE_TYPE_MESSAGE));
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                        .content(makeIncorporationCertificateTypeInvalid(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
     @DisplayName("Rejects update request containing an invalid collection location")
     void updateCertificateItemRejectsInvalidCollectionLocation() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setCollectionLocation(COLLECTION_LOCATION);
         itemUpdate.setItemOptions(options);
 
@@ -1506,17 +1475,18 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsMissingCollectionDetails() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDeliveryMethod(DeliveryMethod.COLLECTION);
-        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setItemOptions(new CertificateItemOptions());
+        CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus("active");
+        savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
         final ApiError expectedValidationErrors =
@@ -1551,6 +1521,7 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
         savedOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
         savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus("active");
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
@@ -1580,7 +1551,7 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsInvalidDeliveryMethod() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDeliveryMethod(DELIVERY_METHOD);
         itemUpdate.setItemOptions(options);
 
@@ -1614,18 +1585,19 @@ class CertificateItemsControllerIntegrationTest {
         // Given
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.DISSOLUTION);
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
-        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setItemOptions(new CertificateItemOptions());
+        CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCertificateType(CertificateType.DISSOLUTION);
+        savedOptions.setCompanyType("limited");
+        savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -1652,10 +1624,9 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setIncludeCompanyObjectsInformation(true);
         options.setIncludeGoodStandingInformation(true);
-        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
@@ -1663,6 +1634,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCompanyType("limited");
         savedOptions.setCertificateType(CertificateType.DISSOLUTION);
         savedItem.setItemOptions(savedOptions);
 
@@ -1694,9 +1666,8 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsRequestWithIncludeEmailCopyAndDefaultDeliveryTimescale() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setIncludeEmailCopy(true);
-        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
 
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -1705,7 +1676,9 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setItemOptions(new CertificateItemOptions());
+        CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCompanyType("limited");
+        savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
 
         final ApiError expectedValidationError =
@@ -1731,9 +1704,8 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setIncludeEmailCopy(true);
-        options.setCompanyType("limited");
         itemUpdate.setItemOptions(options);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
@@ -1742,6 +1714,8 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus("active");
         savedOptions.setDeliveryTimescale(DeliveryTimescale.STANDARD);
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
@@ -1770,11 +1744,12 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
         director.setIncludeDobType(INCLUDE_DOB_TYPE);
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDirectorDetails(director);
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
+        // TODO: this may fail; set company type & company status
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
@@ -1804,7 +1779,7 @@ class CertificateItemsControllerIntegrationTest {
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
         final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
         registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
         itemUpdate.setItemOptions(options);
 
@@ -1813,9 +1788,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1827,7 +1799,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is("json-processing-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1836,17 +1808,19 @@ class CertificateItemsControllerIntegrationTest {
     void updateCertificateItemRejectsConflictingDetailsSettings() throws Exception {
         // Given
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptions options = new CertificateItemOptions();
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
         options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
         itemUpdate.setItemOptions(options);
-        options.setCompanyType("limited");
 
         final CertificateItem savedItem = new CertificateItem();
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        savedItem.setItemOptions(new CertificateItemOptions());
+        CertificateItemOptions savedOptions = new CertificateItemOptions();
+        savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyStatus("active");
+        savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 

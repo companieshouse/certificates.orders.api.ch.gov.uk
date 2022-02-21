@@ -2,15 +2,14 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
+
 import java.util.Objects;
 
 /**
  * An instance of this represents the item options for a certificate item.
  */
 @JsonPropertyOrder(alphabetic = true)
-public class CertificateItemOptions {
-
-    private CertificateType certificateType;
+public class CertificateItemOptionsRequest {
 
     private CollectionLocation collectionLocation;
 
@@ -48,21 +47,9 @@ public class CertificateItemOptions {
 
     private Boolean includeGeneralNatureOfBusinessInformation;
 
-    private String companyType;
-
     private LiquidatorsDetails liquidatorsDetails;
-    
-    private String companyStatus;
 
     private AdministratorsDetails administratorsDetails;
-
-    public CertificateType getCertificateType() {
-        return certificateType;
-    }
-
-    public void setCertificateType(CertificateType certificateType) {
-        this.certificateType = certificateType;
-    }
 
     public CollectionLocation getCollectionLocation() {
         return collectionLocation;
@@ -208,28 +195,12 @@ public class CertificateItemOptions {
         this.includeGeneralNatureOfBusinessInformation = includeGeneralNatureOfBusinessInformation;
     }
 
-    public String getCompanyType() {
-        return companyType;
-    }
-
-    public void setCompanyType(String companyType) {
-        this.companyType = companyType;
-    }
-
     public LiquidatorsDetails getLiquidatorsDetails() {
         return liquidatorsDetails;
     }
 
     public void setLiquidatorsDetails(LiquidatorsDetails liquidatorsDetails) {
         this.liquidatorsDetails = liquidatorsDetails;
-    }
-
-    public String getCompanyStatus() {
-        return companyStatus;
-    }
-
-    public void setCompanyStatus(String companyStatus) {
-        this.companyStatus = companyStatus;
     }
 
     public AdministratorsDetails getAdministratorsDetails() {
@@ -251,9 +222,8 @@ public class CertificateItemOptions {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CertificateItemOptions that = (CertificateItemOptions) o;
-        return certificateType == that.certificateType &&
-                collectionLocation == that.collectionLocation &&
+        CertificateItemOptionsRequest that = (CertificateItemOptionsRequest) o;
+        return collectionLocation == that.collectionLocation &&
                 Objects.equals(contactNumber, that.contactNumber) &&
                 deliveryMethod == that.deliveryMethod &&
                 deliveryTimescale == that.deliveryTimescale &&
@@ -276,20 +246,17 @@ public class CertificateItemOptions {
                         that.principalPlaceOfBusinessDetails) &&
                 Objects.equals(includeGeneralNatureOfBusinessInformation,
                         that.includeGeneralNatureOfBusinessInformation) &&
-                Objects.equals(companyType, that.companyType) &&
                 Objects.equals(liquidatorsDetails, that.liquidatorsDetails) &&
-                Objects.equals(companyStatus, that.companyStatus) &&
                 Objects.equals(administratorsDetails, that.administratorsDetails);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(certificateType, collectionLocation, contactNumber, deliveryMethod,
+        return Objects.hash(collectionLocation, contactNumber, deliveryMethod,
                 deliveryTimescale, directorDetails, forename, includeCompanyObjectsInformation,
                 includeEmailCopy, includeGoodStandingInformation, registeredOfficeAddressDetails,
                 secretaryDetails, surname, designatedMemberDetails, memberDetails,
                 generalPartnerDetails, limitedPartnerDetails, principalPlaceOfBusinessDetails,
-                includeGeneralNatureOfBusinessInformation, companyType, liquidatorsDetails,
-                companyStatus, administratorsDetails);
+                includeGeneralNatureOfBusinessInformation, liquidatorsDetails, administratorsDetails);
     }
 }
