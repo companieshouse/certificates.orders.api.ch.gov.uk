@@ -51,6 +51,11 @@ llp:
     orders:
       enabled: false
 
+liquidated:
+  company:
+    certificate:
+      enabled: false
+
 administrator:
   company:
     certificate:
@@ -67,6 +72,11 @@ lp:
 llp:
   certificate:
     orders:
+      enabled: false
+
+liquidated:
+  company:
+    certificate:
       enabled: false
 
 administrator:
@@ -87,6 +97,11 @@ llp:
     orders:
       enabled: true
 
+liquidated:
+  company:
+    certificate:
+      enabled: false
+
 administrator:
   company:
     certificate:
@@ -96,4 +111,3 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-

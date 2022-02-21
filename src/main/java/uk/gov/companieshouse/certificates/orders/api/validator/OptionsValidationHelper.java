@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 class OptionsValidationHelper {
     private final RequestValidatable requestValidatable;
@@ -72,8 +73,8 @@ class OptionsValidationHelper {
         }
     }
 
-    boolean notCompanyTypeIsNull() {
-        if (!isNull(options.getCompanyType())) {
+    boolean companyTypeIsNull() {
+        if (isNull(options.getCompanyType())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_COMPANY_TYPE_REQUIRED, "company type: is a mandatory field");
             return true;
         }
@@ -142,7 +143,7 @@ class OptionsValidationHelper {
     }
 
     private void notDirectorsDetails() {
-        if (isNull(options.getDirectorDetails())) {
+        if (!isNull(options.getDirectorDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,
                     "include_director_details: must not exist when company type is %s",
                             options.getCompanyType());
@@ -150,7 +151,7 @@ class OptionsValidationHelper {
     }
 
     private void notSecretaryDetails() {
-        if (isNull(options.getSecretaryDetails())) {
+        if (nonNull(options.getSecretaryDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,
                     "include_secretary_details: must not exist when company type is %s",
                             options.getCompanyType());
@@ -158,7 +159,7 @@ class OptionsValidationHelper {
     }
 
     private void notDesignatedMemberDetails() {
-        if (isNull(options.getDesignatedMemberDetails())) {
+        if (nonNull(options.getDesignatedMemberDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,
                     "include_designated_member_details: must not exist when company type is %s",
                     options.getCompanyType());
@@ -166,7 +167,7 @@ class OptionsValidationHelper {
     }
 
     private void notMemberDetails() {
-        if (isNull(options.getDesignatedMemberDetails())) {
+        if (nonNull(options.getDesignatedMemberDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,
                     "include_member_details: must not exist when company type is %s",
                     options.getCompanyType());
@@ -174,7 +175,7 @@ class OptionsValidationHelper {
     }
 
     private void notGeneralPartnerDetails() {
-        if (isNull(options.getGeneralPartnerDetails())) {
+        if (nonNull(options.getGeneralPartnerDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED,
                     "include_general_partner_details: must not exist when company type is %s",
                     options.getCompanyType());
@@ -182,7 +183,7 @@ class OptionsValidationHelper {
     }
 
     private void notLimitedPartnerDetails() {
-        if (isNull(options.getLimitedPartnerDetails())) {
+        if (nonNull(options.getLimitedPartnerDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED,
                     "include_limited_partner_details: must not exist when company type is %s",
                     options.getCompanyType());
@@ -190,7 +191,7 @@ class OptionsValidationHelper {
     }
 
     private void notPrincipalPlaceOfBusinessDetails() {
-        if (isNull(options.getPrincipalPlaceOfBusinessDetails())) {
+        if (nonNull(options.getPrincipalPlaceOfBusinessDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED,
                     "include_principal_place_of_business_details: must not exist when company type is %s",
                     options.getCompanyType());
@@ -198,7 +199,7 @@ class OptionsValidationHelper {
     }
 
     private void notIncludeGeneralNatureOfBusinessInformation() {
-        if (isNull(options.getIncludeGeneralNatureOfBusinessInformation())) {
+        if (nonNull(options.getIncludeGeneralNatureOfBusinessInformation())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED,
                     "include_general_nature_of_business_information: must not exist when company type is %s",
                     options.getCompanyType());

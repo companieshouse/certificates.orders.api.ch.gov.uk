@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
-import org.hamcrest.Matcher;
 import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,11 +53,11 @@ class OptionsValidatorHelperTest {
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
 
         // When
-        boolean result = helper.notCompanyTypeIsNull();
+        boolean result = helper.companyTypeIsNull();
         List<ApiError> errors = helper.getErrors();
 
         // Then
-        assertThat(result, is(true));
+        assertThat(result, is(false));
         assertThat(errors, is(empty()));
     }
 
@@ -68,11 +67,11 @@ class OptionsValidatorHelperTest {
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
 
         // When
-        boolean result = helper.notCompanyTypeIsNull();
+        boolean result = helper.companyTypeIsNull();
         List<ApiError> errors = helper.getErrors();
 
         // Then
-        assertThat(result, is(false));
+        assertThat(result, is(true));
         assertThat(errors, containsInAnyOrder("company type: is a mandatory field"));
     }
 

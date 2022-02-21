@@ -218,7 +218,8 @@ class CertificatesApiApplicationTest {
 		newCertificateItemCreate.setId("TEST_ID");
 
 		// When and Then
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "id: must be null in a create item request");
+		// "id: must be null in a create item request"
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "certificate-id-supplied");
 	}
 
 	@Test

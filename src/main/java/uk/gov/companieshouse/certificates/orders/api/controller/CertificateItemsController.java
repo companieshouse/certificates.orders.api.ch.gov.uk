@@ -47,6 +47,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -185,6 +186,7 @@ public class CertificateItemsController {
         LOGGER.info("update certificate item request", logMap);
         logMap.remove(MESSAGE);
 
+        // Domain validation
         final List<ApiError> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
@@ -196,7 +198,7 @@ public class CertificateItemsController {
         if (!certRetrieved.isPresent()) {
             logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
             LOGGER.error("certificate item not found", logMap);
-            return ResponseEntity.notFound().build();
+            return errorResponse(NOT_FOUND, ApiErrors.ERR_CERTIFICATE_NOT_FOUND);
         }
         final CertificateItem itemRetrieved = certRetrieved.get();
         logMap.put(COMPANY_NUMBER_LOG_KEY, itemRetrieved.getCompanyNumber());
@@ -205,6 +207,7 @@ public class CertificateItemsController {
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
 
+        // Certificate item options validation
         final List<ApiError> patchedErrors = patchItemRequestValidator.getValidationErrors(
                 new CompanyCertificateInformation(
                         CompanyStatus.getEnumValue(itemRetrieved.getItemOptions().getCompanyStatus()),

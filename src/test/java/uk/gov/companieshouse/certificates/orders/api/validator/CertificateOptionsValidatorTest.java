@@ -42,7 +42,7 @@ class CertificateOptionsValidatorTest {
     void correctlyFailsWhenCompanyTypeIsNull() {
         // Given
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        when(optionsValidationHelper.notCompanyTypeIsNull()).thenReturn(false);
+        when(optionsValidationHelper.companyTypeIsNull()).thenReturn(true);
         CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
 
         // When
@@ -56,7 +56,7 @@ class CertificateOptionsValidatorTest {
     void correctlyPassesWhenCompanyTypeIsNotNull() {
         // Given
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        when(optionsValidationHelper.notCompanyTypeIsNull()).thenReturn(true);
+        when(optionsValidationHelper.companyTypeIsNull()).thenReturn(false);
         CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
 
         // When

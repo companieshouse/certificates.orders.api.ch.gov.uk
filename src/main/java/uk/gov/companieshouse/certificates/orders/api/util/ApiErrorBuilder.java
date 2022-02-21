@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ApiErrorBuilder {
     /** Defines ApiError value containing an error message */
-    public static final String ERROR_MESSAGE_FIELD = "ERROR_MESSAGE";
+    public static final String ERROR_MESSAGE_FIELD = "error_message";
     private final Map<String, String> errorValues = new HashMap<>();
     private final ApiError apiError;
 

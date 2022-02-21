@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
+import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
@@ -78,6 +79,11 @@ class PatchItemRequestValidatorTest {
         @Bean
         TestMergePatchFactory patchFactory() {
             return new TestMergePatchFactory(objectMapper());
+        }
+
+        @Bean
+        OptionsValidationHelperFactory optionsValidationHelperFactory(FeatureOptions featureOptions) {
+            return new OptionsValidationHelperFactory(featureOptions);
         }
     }
 
