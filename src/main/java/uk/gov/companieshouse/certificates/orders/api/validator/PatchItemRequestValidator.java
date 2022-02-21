@@ -39,8 +39,12 @@ public class PatchItemRequestValidator extends RequestValidator {
     public PatchItemRequestValidator(final ObjectMapper objectMapper,
                                      final Validator validator,
                                      final FieldNameConverter converter,
-                                     final CertificateOptionsValidator certificateOptionsValidator) {
-        super(certificateOptionsValidator);
+                                     final CertificateOptionsValidator certificateOptionsValidator,
+                                     final BasicInformationIncludeableValidator basicInformationIncludeableValidator,
+                                     final DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
+        super(certificateOptionsValidator,
+                basicInformationIncludeableValidator,
+                dateOfBirthIncludeableValidator);
         this.objectMapper = objectMapper;
         this.validator = validator;
         this.converter = converter;
@@ -73,14 +77,5 @@ public class PatchItemRequestValidator extends RequestValidator {
         return ApiErrorBuilder.builder(new ApiError(converter.toLowerHyphenCase(snakeCaseFieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
                 .withErrorMessage(snakeCaseFieldName + ": " + violation.getMessage())
                 .build();
-    }
-
-    /**
-     * Validates the patched item provided, returning any errors found.
-     * @param requestValidatable to be validated
-     * @return the errors found, which will be empty if the item is found to be valid
-     */
-    public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
-        return getValidationErrors(requestValidatable, converter);
     }
 }

@@ -15,15 +15,15 @@ import java.util.List;
 @Component
 public class CreateItemRequestValidator extends RequestValidator {
 
-    private final FieldNameConverter converter;
-
     /**
      * Constructor.
      * @param converter the converter this uses to present field names as they appear in the request JSON payload
      */
-    public CreateItemRequestValidator(FieldNameConverter converter, CertificateOptionsValidator certificateOptionsValidator) {
-        super(certificateOptionsValidator);
-        this.converter = converter;
+    public CreateItemRequestValidator(FieldNameConverter converter,
+                                      CertificateOptionsValidator certificateOptionsValidator,
+                                      BasicInformationIncludeableValidator basicInformationIncludeableValidator,
+                                      DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
+        super(certificateOptionsValidator, basicInformationIncludeableValidator, dateOfBirthIncludeableValidator);
     }
 
     /**
@@ -37,7 +37,7 @@ public class CreateItemRequestValidator extends RequestValidator {
             errors.add(ApiErrorBuilder.builder(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED)
                     .withErrorMessage("id: must be null in a create item request").build());
         }
-        errors.addAll(getValidationErrors(requestValidatable, converter));
+        errors.addAll(super.getValidationErrors(requestValidatable));
         return errors;
     }
 }

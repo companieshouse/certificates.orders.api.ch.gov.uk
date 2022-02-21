@@ -103,4 +103,9 @@ public class DirectorOrSecretaryDetails implements DateOfBirthIncludable<Map<Str
     public int hashCode() {
         return Objects.hash(includeAddress, includeAppointmentDate, includeBasicInformation, includeCountryOfResidence, includeDobType, includeNationality, includeOccupation);
     }
+
+    @Override
+    public void accept(Visitor<Map<String, Object>> visitor) {
+        visitor.visit(fieldValues);
+    }
 }

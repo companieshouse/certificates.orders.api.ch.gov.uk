@@ -2,14 +2,17 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.google.gson.Gson;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * An instance of this represents the limited partner details item options selected.
  */
-public class LimitedPartnerDetails implements BasicInformationIncludable {
+public class LimitedPartnerDetails implements BasicInformationIncludable<Map<String, Object>> {
 
     private Boolean includeBasicInformation;
+    private transient final Map<String, Object> fieldValues = Collections.emptyMap();
 
     public Boolean getIncludeBasicInformation() {
         return includeBasicInformation;
@@ -39,5 +42,10 @@ public class LimitedPartnerDetails implements BasicInformationIncludable {
     @Override
     public int hashCode() {
         return Objects.hash(includeBasicInformation);
+    }
+
+    @Override
+    public void accept(Visitor<Map<String, Object>> visitor) {
+        visitor.visit(fieldValues);
     }
 }

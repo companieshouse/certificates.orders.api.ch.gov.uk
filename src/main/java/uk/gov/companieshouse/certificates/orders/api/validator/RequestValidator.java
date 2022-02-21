@@ -3,26 +3,15 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants;
-import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
-import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 
@@ -34,20 +23,24 @@ public class RequestValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingConstants.APPLICATION_NAMESPACE);
 
     private final CertificateOptionsValidator certificateOptionsValidator;
+    private final BasicInformationIncludeableValidator basicInformationIncludableValidator;
+    private final DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator;
 
-    public RequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
+    public RequestValidator(CertificateOptionsValidator certificateOptionsValidator,
+                            BasicInformationIncludeableValidator basicInformationIncludableValidator,
+                            DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
         this.certificateOptionsValidator = certificateOptionsValidator;
+        this.basicInformationIncludableValidator = basicInformationIncludableValidator;
+        this.dateOfBirthIncludeableValidator = dateOfBirthIncludeableValidator;
     }
 
     /**
      * Validates the options provided, returning any errors found.
      *
      * @param requestValidatable to be validated
-     * @param converter the converter this uses to present field names as they appear in the request JSON payload
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    List<ApiError> getValidationErrors(final RequestValidatable requestValidatable,
-                                       final FieldNameConverter converter) {
+    public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
         final List<ApiError> errors = new ArrayList<>();
         CertificateItemOptions options = requestValidatable.getItemOptions();
         if (options == null) {
@@ -63,61 +56,12 @@ public class RequestValidator {
 
         errors.addAll(certificateOptionsValidator.validate(requestValidatable));
 
-        errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details", converter));
-        errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details", converter));
-        errors.addAll(getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details", converter));
-        errors.addAll(getValidationErrors(options.getMemberDetails(), "member_details", converter));
-        errors.addAll(getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details", converter));
-        errors.addAll(getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details", converter));
-        return errors;
-    }
-
-    /**
-     * Validates the details provided, returning any errors found, prefixed with the supplied details field name.
-     *
-     * @param details          the details to be validated
-     * @param detailsFieldName the field name of the details to be validated
-     * @param converter        the converter this uses to present field names as they appear in the request JSON payload
-     * @return the resulting errors, which will be empty if the details are found to be valid
-     */
-    List<ApiError> getValidationErrors(final BasicInformationIncludable details,
-                                     final String detailsFieldName,
-                                     final FieldNameConverter converter) {
-        final List<ApiError> errors = new ArrayList<>();
-        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
-            return errors;
-        }
-        final Field[] fields = details.getClass().getDeclaredFields();
-        final List<String> incorrectlySetFields = stream(fields)
-                .sorted(Comparator.comparing(Field::getName))
-                .filter(field ->
-                        !field.getName().equals("includeBasicInformation") &&
-                                field.getType().equals(Boolean.class) &&
-                                isTrue(field, details))
-                .map(field -> converter.toSnakeCase(field.getName()))
-                .collect(Collectors.toList());
-        if (!incorrectlySetFields.isEmpty()) {
-            errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
-                            new ApiError(converter.toLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + "." + field + ": must not be true when include_basic_information is false")
-                    .build()).collect(Collectors.toList()));
-        }
-        return errors;
-    }
-
-    List<ApiError> getValidationErrors(final DateOfBirthIncludable details, final String detailsFieldName,
-                                     final FieldNameConverter converter) {
-        List<ApiError> errors = new ArrayList<>();
-        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
-            return errors;
-        }
-        errors = getValidationErrors((BasicInformationIncludable) details, detailsFieldName, converter);
-        if (details.getIncludeDobType() != null) {
-            errors.add(ApiErrorBuilder.builder(
-                    new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName + ".include_dob_type", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + ".include_dob_type: must not be non-null when include_basic_information is false")
-                    .build());
-        }
+        errors.addAll(dateOfBirthIncludeableValidator.getValidationErrors(options.getDirectorDetails(), "director_details"));
+        errors.addAll(dateOfBirthIncludeableValidator.getValidationErrors(options.getSecretaryDetails(), "secretary_details"));
+        errors.addAll(dateOfBirthIncludeableValidator.getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details"));
+        errors.addAll(dateOfBirthIncludeableValidator.getValidationErrors(options.getMemberDetails(), "member_details"));
+        errors.addAll(basicInformationIncludableValidator.getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details"));
+        errors.addAll(basicInformationIncludableValidator.getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details"));
         return errors;
     }
 
@@ -147,26 +91,5 @@ public class RequestValidator {
             }
         }
         return errors;
-    }
-
-    /**
-     * Determines whether the value of the field on the details object is equivalent to <code>true</code> or not.
-     *
-     * @param field   the reflective representation of the details field
-     * @param details the details object
-     * @return whether the field value is equivalent to <code>true</code> (<code>true</code>), or not
-     * (<code>false</code>)
-     */
-    boolean isTrue(final Field field, final BasicInformationIncludable details) {
-        Boolean include;
-        try {
-            include = (Boolean) new PropertyDescriptor(field.getName(), details.getClass())
-                    .getReadMethod().invoke(details);
-        } catch (Exception e) {
-            // This should only arise should someone alter or remove the getter for a field.
-            LOGGER.error("Error invoking getter for " + details.getClass().getSimpleName() + "." + field.getName(), e);
-            include = null;
-        }
-        return TRUE.equals(include);
     }
 }

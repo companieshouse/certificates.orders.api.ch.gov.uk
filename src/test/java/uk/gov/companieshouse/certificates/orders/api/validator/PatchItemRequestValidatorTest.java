@@ -72,8 +72,8 @@ class PatchItemRequestValidatorTest {
         }
 
         @Bean
-        public PatchItemRequestValidator patchItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
-            return new PatchItemRequestValidator(objectMapper(), validator(), converter(), certificateOptionsValidator);
+        public PatchItemRequestValidator patchItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator, BasicInformationIncludeableValidator basicInformationIncludableValidator, DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
+            return new PatchItemRequestValidator(objectMapper(), validator(), converter(), certificateOptionsValidator, basicInformationIncludableValidator, dateOfBirthIncludeableValidator);
         }
 
         @Bean
@@ -84,6 +84,16 @@ class PatchItemRequestValidatorTest {
         @Bean
         OptionsValidationHelperFactory optionsValidationHelperFactory(FeatureOptions featureOptions) {
             return new OptionsValidationHelperFactory(featureOptions);
+        }
+
+        @Bean
+        BasicInformationIncludeableValidator basicInformationIncludableValidator() {
+            return new BasicInformationIncludeableValidator(converter());
+        }
+
+        @Bean
+        DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator(BasicInformationIncludeableValidator basicInformationIncludeableValidator) {
+            return new DateOfBirthIncludeableValidator(converter(), basicInformationIncludeableValidator);
         }
     }
 
@@ -372,15 +382,15 @@ class PatchItemRequestValidatorTest {
                 ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS,"director_details.include_address: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_APPOINTMENT_DATE,"director_details.include_appointment_date: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR,"director_details.include_country_of_residence: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY_ERROR,"director_details.include_nationality: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION_ERROR,"director_details.include_occupation: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY,"director_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION,"director_details.include_occupation: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR,"director_details.include_dob_type: must not be non-null when include_basic_information is false"),
 
                 ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS,"secretary_details.include_address: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_APPOINTMENT_DATE,"secretary_details.include_appointment_date: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR,"secretary_details.include_country_of_residence: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY_ERROR,"secretary_details.include_nationality: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION_ERROR,"secretary_details.include_occupation: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY,"secretary_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION,"secretary_details.include_occupation: must not be true when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR,"secretary_details.include_dob_type: must not be non-null when include_basic_information is false")));
     }
 
@@ -427,10 +437,12 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors, contains(
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,"director_details: include_address, include_nationality, include_occupation must not be true when "
-                        + "include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,"secretary_details: include_address, include_nationality, include_occupation must not be true when "
-                        + "include_basic_information is false")));
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS,"director_details.include_address: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY,"director_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION,"director_details.include_occupation: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS,"secretary_details.include_address: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY,"secretary_details.include_nationality: must not be true when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION,"secretary_details.include_occupation: must not be true when include_basic_information is false")));
     }
 
     @Test
