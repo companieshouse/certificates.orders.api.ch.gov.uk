@@ -9,16 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
-import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.*;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -200,56 +197,14 @@ class CertificateOptionsValidatorTest {
     }
 
     @Test
-    @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
-            "should not be requested for dissolution")
-    void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
-        // Given
-        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
-        directorOrSecretaryDetails.setIncludeAddress(true);
-        directorOrSecretaryDetails.setIncludeAppointmentDate(false);
-        directorOrSecretaryDetails.setIncludeBasicInformation(true);
-        directorOrSecretaryDetails.setIncludeCountryOfResidence(false);
-        directorOrSecretaryDetails.setIncludeDobType(PARTIAL);
-        directorOrSecretaryDetails.setIncludeNationality(false);
-        directorOrSecretaryDetails.setIncludeOccupation(true);
-
-        RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-        registeredOfficeAddressDetails.setIncludeAddressRecordsType(IncludeAddressRecordsType.CURRENT);
-        registeredOfficeAddressDetails.setIncludeDates(true);
-
-        certificateItemOptions.setCertificateType(DISSOLUTION);
-        certificateItemOptions.setIncludeCompanyObjectsInformation(true);
-        certificateItemOptions.setIncludeGoodStandingInformation(true);
-        certificateItemOptions.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
-        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
-        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
-        certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
-        FeatureOptions featureOptions = new FeatureOptions(true, true, true, true);
-        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(requestValidatable, featureOptions);
-        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        validator = new CertificateOptionsValidatorConfig().certificateOptionsValidator(featureOptions, optionsValidationHelperFactory, new FieldNameConverter());
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
-
-        // When
-        final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
-
-        // Then
-        assertThat(errors, contains(
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is dissolved")));
-    }
-
-    @Test
     @DisplayName("(Only) include email copy for same day delivery timescale")
     void includeEmailCopyForSameDayDeliveryTimescale() {
         // Given
         certificateItemOptions.setDeliveryTimescale(SAME_DAY);
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
         final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
@@ -265,6 +220,8 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryTimescale(STANDARD);
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
         final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
@@ -327,6 +284,8 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
         final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
@@ -388,5 +347,36 @@ class CertificateOptionsValidatorTest {
 
         // Then
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    @DisplayName("Raise a validation error when validating an object implementing BasicInformationIncludable that" +
+            "contains another field set to true")
+    void testRaiseValidationErrorIfBasicInformationObjectOtherFieldValuesSet() {
+        // Given
+        BasicInformationIncludable<Map<String, Object>> containsBasicInformation = new BasicInformationIncludable<Map<String, Object>>() {
+
+            @Override
+            public Boolean getIncludeBasicInformation() {
+                return false;
+            }
+
+            @Override
+            public void accept(Visitor<Map<String, Object>> visitor) {
+                visitor.visit(Collections.singletonMap("other_field", Boolean.TRUE));
+            }
+        };
+
+        // When
+        List<ApiError> errors = validator.getValidationErrors(containsBasicInformation, "parent");
+
+        // Then
+        assertThat(errors, contains(ApiErrorBuilder.builder(new ApiError(
+                "other-field-error",
+                "parent.other_field",
+                ApiErrors.BOOLEAN_LOCATION_TYPE,
+                ApiErrors.ERROR_TYPE_VALIDATION))
+                .withErrorMessage("parent.other_field: must not be set when include_basic_information is false")
+                .build()));
     }
 }

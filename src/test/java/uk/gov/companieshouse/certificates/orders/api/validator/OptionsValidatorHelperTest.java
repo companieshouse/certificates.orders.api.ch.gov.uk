@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -9,20 +10,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
-import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.*;
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
+import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
+import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
 
 @ExtendWith(MockitoExtension.class)
 class OptionsValidatorHelperTest {
@@ -315,5 +315,46 @@ class OptionsValidatorHelperTest {
 
         //then
         assertThat(errors, hasItem(expectedError));
+    }
+
+    @Test
+    @DisplayName("Company objects, good standing, registered office details, secretary details or director details" +
+            "should not be requested for dissolution")
+    void companyObjectsGoodStandingOfficeAddressSecretaryDetailsDirectorDetailsMustNotBeRequestedForDissolution() {
+        // Given
+        DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
+        directorOrSecretaryDetails.setIncludeAddress(true);
+        directorOrSecretaryDetails.setIncludeAppointmentDate(false);
+        directorOrSecretaryDetails.setIncludeBasicInformation(true);
+        directorOrSecretaryDetails.setIncludeCountryOfResidence(false);
+        directorOrSecretaryDetails.setIncludeDobType(PARTIAL);
+        directorOrSecretaryDetails.setIncludeNationality(false);
+        directorOrSecretaryDetails.setIncludeOccupation(true);
+
+        RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(IncludeAddressRecordsType.CURRENT);
+        registeredOfficeAddressDetails.setIncludeDates(true);
+
+        certificateItemOptions.setCertificateType(DISSOLUTION);
+        certificateItemOptions.setIncludeCompanyObjectsInformation(true);
+        certificateItemOptions.setIncludeGoodStandingInformation(true);
+        certificateItemOptions.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+        certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
+        certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
+
+        // When
+        helper.validateLimitedCompanyOptions();
+
+        // Then
+        assertThat(helper.getErrors(), containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is dissolved")));
     }
 }

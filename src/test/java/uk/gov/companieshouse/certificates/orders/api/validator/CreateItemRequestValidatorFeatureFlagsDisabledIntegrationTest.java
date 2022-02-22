@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
 @SpringBootTest
 @ActiveProfiles("feature-flags-disabled")
-class CreateItemRequestValidatorFeatureFlagsDisabledTest {
+class CreateItemRequestValidatorFeatureFlagsDisabledIntegrationTest {
 
     @MockBean
     private RequestValidatable requestValidatable;
@@ -47,7 +47,7 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
     }
 
     @Test
-    @DisplayName("Request is valid if company type is llp and appropriate fields set")
+    @DisplayName("Request is invalid if company type is llp and appropriate fields set")
     void correctlyErrorWhenCompanyTypeIsLLPAndMembersAndLLPSpecificFieldsAreSet() {
         //given
         MemberDetails memberDetails = new MemberDetails();
@@ -67,17 +67,17 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemOptions.setMemberDetails(memberDetails);
         certificateItemOptions.setDesignatedMemberDetails(designatedMemberDetails);
         certificateItemOptions.setCompanyType("llp");
-
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is llp"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is llp")
-        );
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, containsInAnyOrder(expectedErrors));
+        assertThat(errors, containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is llp"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is llp")
+            )
+        );
     }
 
     @Test
@@ -100,17 +100,16 @@ class CreateItemRequestValidatorFeatureFlagsDisabledTest {
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         certificateItemOptions.setCompanyType("limited-partnership");
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when company type is limited-partnership"),
-                ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when company type is limited-partnership"),
-                ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when company type is limited-partnership"),
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company type is limited-partnership")
-        );
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, containsInAnyOrder(expectedErrors));
+        assertThat(errors, containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company type is limited-partnership")
+        ));
     }
 }
