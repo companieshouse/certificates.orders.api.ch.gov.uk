@@ -51,11 +51,7 @@ class CertificateOptionsValidatorTest {
     @BeforeEach
     void beforeEach() {
         certificateItemOptions = new CertificateItemOptions();
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
-        FeatureOptions featureOptions = new FeatureOptions(true, true, true, true);
-        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(requestValidatable, featureOptions);
-        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        validator = new CertificateOptionsValidatorConfig().certificateOptionsValidator(featureOptions, optionsValidationHelperFactory, new FieldNameConverter());
+        validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, new FieldNameConverter());
     }
 
     @Test
@@ -228,6 +224,12 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        FeatureOptions featureOptions = new FeatureOptions(true, true, true, true);
+        OptionsValidationHelper optionsValidationHelper = new OptionsValidationHelper(requestValidatable, featureOptions);
+        when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
+        validator = new CertificateOptionsValidatorConfig().certificateOptionsValidator(featureOptions, optionsValidationHelperFactory, new FieldNameConverter());
+        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
 
         // When
         final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
