@@ -13,15 +13,15 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 class OptionsValidationHelper {
-    private final RequestValidatable requestValidatable;
     private final List<ApiError> errors = new ArrayList<>();
     private final CertificateItemOptions options;
     private final FeatureOptions featureOptions;
+    private final CompanyStatus companyStatus;
 
     OptionsValidationHelper(RequestValidatable requestValidatable, FeatureOptions featureOptions) {
-        this.requestValidatable = requestValidatable;
         this.featureOptions = featureOptions;
         this.options = requestValidatable.getItemOptions();
+        this.companyStatus = CompanyStatus.getEnumValue(this.options.getCompanyStatus());
     }
 
     String getCompanyType() {
@@ -66,10 +66,10 @@ class OptionsValidationHelper {
             }
         }
 
-        if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus()) {
+        if (CompanyStatus.ACTIVE != companyStatus) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_COMPANY_STATUS_INVALID,
                     String.format("company_status: %s not valid for company type %s",
-                            requestValidatable.getCompanyStatus().toString(), options.getCompanyType()));
+                            companyStatus.getStatusName(), options.getCompanyType()));
         }
     }
 
@@ -120,7 +120,7 @@ class OptionsValidationHelper {
     }
 
     private void validateDissolvedCompany() {
-        if (CompanyStatus.DISSOLVED == requestValidatable.getCompanyStatus()) {
+        if (CompanyStatus.DISSOLVED == companyStatus) {
             validateObjectIsNull(options.getIncludeCompanyObjectsInformation(), ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when company status is dissolved");
             validateObjectIsNull(options.getIncludeGeneralNatureOfBusinessInformation(), ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company status is dissolved");
             validateObjectIsNull(options.getRegisteredOfficeAddressDetails(), ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when company status is dissolved");
@@ -141,26 +141,26 @@ class OptionsValidationHelper {
     }
 
     private void validateGoodStanding() {
-        if (CompanyStatus.ACTIVE != requestValidatable.getCompanyStatus() && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
+        if (CompanyStatus.ACTIVE != companyStatus && Boolean.TRUE == options.getIncludeGoodStandingInformation()) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
                     "include_good_standing_information: must not exist when company status is %s",
-                            requestValidatable.getCompanyStatus());
+                            companyStatus);
         }
     }
 
     private void validateLiquidatorsDetails() {
-        if (CompanyStatus.LIQUIDATION != requestValidatable.getCompanyStatus() && options.getLiquidatorsDetails() != null) {
+        if (CompanyStatus.LIQUIDATION != companyStatus && options.getLiquidatorsDetails() != null) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
                     "include_liquidators_details: must not exist when company status is %s",
-                            requestValidatable.getCompanyStatus());
+                            companyStatus);
         }
     }
 
     private void validateAdministratorsDetails() {
-        if (CompanyStatus.ADMINISTRATION != requestValidatable.getCompanyStatus() && options.getAdministratorsDetails() != null) {
+        if (CompanyStatus.ADMINISTRATION != companyStatus && options.getAdministratorsDetails() != null) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
                     "include_administrators_details: must not exist when company status is %s",
-                            requestValidatable.getCompanyStatus());
+                            companyStatus);
         }
     }
 

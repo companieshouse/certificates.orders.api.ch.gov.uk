@@ -27,7 +27,6 @@ import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
@@ -45,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -118,22 +116,21 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
-    public ResponseEntity<Object> createCertificateItem(final @RequestBody CertificateItemCreate certificateItem,
+    public ResponseEntity<Object> createCertificateItem(final @RequestBody CertificateItemCreate certificateItemCreate,
                                                         HttpServletRequest servletRequest,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Set<ConstraintViolation<CertificateItemCreate>> violations = constraintValidator.validate(certificateItem);
+        Set<ConstraintViolation<CertificateItemCreate>> violations = constraintValidator.validate(certificateItemCreate);
         if (!violations.isEmpty()) {
             return errorResponse(BAD_REQUEST, violations);
         }
 
+        CertificateItem certificateItem = mapper.certificateItemCreateToCertificateItem(certificateItemCreate);
+
         return createCertificateItem(servletRequest,
                 requestId,
-                certificateItem::getCompanyNumber,
-                companyProfileResource -> createItemRequestValidator.getValidationErrors(
-                        new CompanyCertificateInformation(companyProfileResource.getCompanyStatus(),
-                                certificateItem.getId(),
-                                certificateItem.getItemOptions())),
-                () -> mapper.certificateItemCreateToCertificateItem(certificateItem));
+                enrichedCertificateItem -> createItemRequestValidator.getValidationErrors(
+                        new CompanyCertificateInformation(enrichedCertificateItem.getItemOptions())),
+                certificateItem);
     }
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
@@ -161,20 +158,21 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.initial}")
-    public ResponseEntity<Object> initialCertificateItem(final @RequestBody CertificateItemInitial certificateItem,
+    public ResponseEntity<Object> initialCertificateItem(final @RequestBody CertificateItemInitial certificateItemInitial,
                                                          HttpServletRequest servletRequest,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
 
-        Set<ConstraintViolation<CertificateItemInitial>> violations = constraintValidator.validate(certificateItem);
+        Set<ConstraintViolation<CertificateItemInitial>> violations = constraintValidator.validate(certificateItemInitial);
         if (!violations.isEmpty()) {
             return errorResponse(BAD_REQUEST, violations);
         }
 
+        CertificateItem certificateItem = mapper.certificateItemInitialToCertificateItem(certificateItemInitial);
+
         return createCertificateItem(servletRequest,
                 requestId,
-                certificateItem::getCompanyNumber,
-                companyStatus -> Collections.emptyList(),
-                () -> mapper.certificateItemInitialToCertificateItem(certificateItem));
+                enrichedCertificateItem -> Collections.emptyList(),
+                certificateItem);
     }
 
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
@@ -211,10 +209,7 @@ public class CertificateItemsController {
 
         // Certificate item options validation
         final List<ApiError> patchedErrors = certificateOptionsValidator.getValidationErrors(
-                new CompanyCertificateInformation(
-                        CompanyStatus.getEnumValue(itemRetrieved.getItemOptions().getCompanyStatus()),
-                        patchedItem.getId(),
-                        patchedItem.getItemOptions()));
+                new CompanyCertificateInformation(patchedItem.getItemOptions()));
         if (!patchedErrors.isEmpty()) {
             logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
@@ -257,17 +252,16 @@ public class CertificateItemsController {
         logMap.put(STATUS_LOG_KEY, status);
     }
 
-    private ResponseEntity<Object> createCertificateItem(HttpServletRequest servletRequest,
-                                                         String requestId,
-                                                         Supplier<String> companyNumberSupplier,
-                                                         Function<CompanyProfileResource, List<ApiError>> customValidationFunction,
-                                                         Supplier<CertificateItem> certificateItemSupplier) {
+    private ResponseEntity<Object> createCertificateItem(final HttpServletRequest servletRequest,
+                                                         final String requestId,
+                                                         final Function<CertificateItem, List<ApiError>> customValidationFunction,
+                                                         final CertificateItem certificateItem) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
 
         try {
             // Get company profile
-            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumberSupplier.get());
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(certificateItem.getCompanyNumber());
 
             // Map company to certificate type
             CertificateTypeMapResult certificateTypeMapResult = certificateTypeMapper.mapToCertificateType(companyProfile);
@@ -275,23 +269,24 @@ public class CertificateItemsController {
                 return errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
             }
 
+            CertificateItem enrichedCertificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItem);
+
             // Perform custom validation
-            final List<ApiError> errors = customValidationFunction.apply(companyProfile);
+            final List<ApiError> errors = customValidationFunction.apply(enrichedCertificateItem);
             if (!errors.isEmpty()) {
                 logErrorsWithStatus(logMap, errors, BAD_REQUEST);
                 LOGGER.errorRequest(servletRequest, "create certificate certificateItem validation errors", logMap);
                 return errorResponse(BAD_REQUEST, errors);
             }
 
-            CertificateItem certificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItemSupplier.get());
-            certificateItem = certificateItemService.createCertificateItem(certificateItem);
-            logMap.put(USER_ID_LOG_KEY, certificateItem.getUserId());
-            logMap.put(COMPANY_NUMBER_LOG_KEY, certificateItem.getCompanyNumber());
-            logMap.put(CERTIFICATE_ID_LOG_KEY, certificateItem.getId());
+            CertificateItem createdCertificateItem = certificateItemService.createCertificateItem(enrichedCertificateItem);
+            logMap.put(USER_ID_LOG_KEY, createdCertificateItem.getUserId());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItem.getCompanyNumber());
+            logMap.put(CERTIFICATE_ID_LOG_KEY, createdCertificateItem.getId());
             logMap.put(STATUS_LOG_KEY, CREATED);
             logMap.remove(MESSAGE);
             LOGGER.infoRequest(servletRequest, "certificate certificateItem created", logMap);
-            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(certificateItem);
+            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(createdCertificateItem);
             return ResponseEntity.status(CREATED).body(certificateItemResponse);
         } catch (CompanyNotFoundException e) {
             return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
@@ -302,26 +297,10 @@ public class CertificateItemsController {
 
     private static class CompanyCertificateInformation implements RequestValidatable {
 
-        private final CompanyStatus companyStatus;
-        private final String certificateId;
         private final CertificateItemOptions itemOptions;
 
-        public CompanyCertificateInformation(CompanyStatus companyStatus,
-                                             String certificateId,
-                                             CertificateItemOptions itemOptions) {
-            this.companyStatus = companyStatus;
-            this.certificateId = certificateId;
+        public CompanyCertificateInformation(CertificateItemOptions itemOptions) {
             this.itemOptions = itemOptions;
-        }
-
-        @Override
-        public CompanyStatus getCompanyStatus() {
-            return companyStatus;
-        }
-
-        @Override
-        public String getCertificateId() {
-            return certificateId;
         }
 
         @Override

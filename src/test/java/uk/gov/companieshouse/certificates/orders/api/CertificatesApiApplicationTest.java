@@ -1,5 +1,29 @@
 package uk.gov.companieshouse.certificates.orders.api;
 
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
+import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
+import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
+import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import static java.util.Arrays.stream;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,33 +45,6 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.E
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.EntityExchangeResult;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.server.ResponseStatusException;
-import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
-import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
-import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
-import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
-import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CertificatesApiApplicationTest {
@@ -87,9 +84,9 @@ class CertificatesApiApplicationTest {
 		// Given
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		when(companyProfileResource.getCompanyName()).thenReturn("name");
-		when(companyProfileResource.getCompanyType()).thenReturn("ltd");
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-		when(companyService.getCompanyProfile("00006400")).thenReturn(companyProfileResource);
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
 		// When and Then
 		webTestClient.post().uri("/orderable/certificates")
@@ -170,9 +167,13 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only description")
-	void createCertificateItemRejectsReadOnlyDescription() {
+	void createCertificateItemRejectsReadOnlyDescription() throws Exception {
 
 		// Given
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setDescription("description text");
 
@@ -183,9 +184,13 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only description identifier")
-	void createCertificateItemRejectsReadOnlyDescriptionIdentifier() {
+	void createCertificateItemRejectsReadOnlyDescriptionIdentifier() throws Exception {
 
 		// Given
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setDescriptionIdentifier("description identifier text");
 
@@ -195,31 +200,18 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only description values")
-	void createCertificateItemRejectsReadOnlyDescriptionValues() {
+	void createCertificateItemRejectsReadOnlyDescriptionValues() throws Exception {
 
 		// Given
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setDescriptionValues(new HashMap<>());
 
 		// When and Then
 		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "description_values: must be null");
-	}
-
-	@Test
-	@DisplayName("Create rejects read only id")
-	void createCertificateItemRejectsReadOnlyId() throws CompanyServiceException {
-
-		// Given
-		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-		when(companyProfileResource.getCompanyType()).thenReturn("ltd");
-
-		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
-		newCertificateItemCreate.setId("TEST_ID");
-
-		// When and Then
-		// "id: must be null in a create item request"
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "id-error");
 	}
 
 	@Test
@@ -229,6 +221,7 @@ class CertificatesApiApplicationTest {
 		// Given
 		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
 
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setPostageCost("0");
@@ -240,9 +233,13 @@ class CertificatesApiApplicationTest {
 
 	@Test
 	@DisplayName("Create rejects read only total item cost")
-	void createCertificateItemRejectsReadOnlyTotalItemCost() {
+	void createCertificateItemRejectsReadOnlyTotalItemCost() throws Exception {
 
 		// Given
+		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
 		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
 		newCertificateItemCreate.setTotalItemCost("100");
 
@@ -394,9 +391,8 @@ class CertificatesApiApplicationTest {
 	private CertificateItemCreate createValidNewItem() {
 		final CertificateItemCreate newCertificateItemCreate = new CertificateItemCreate();
 		newCertificateItemCreate.setCompanyNumber(COMPANY_NUMBER);
-		final CertificateItemOptions options = new CertificateItemOptions();
+		final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
 		options.setDeliveryTimescale(STANDARD);
-		options.setCompanyType("limited");
 		newCertificateItemCreate.setItemOptions(options);
 		newCertificateItemCreate.setQuantity(5);
 		return newCertificateItemCreate;

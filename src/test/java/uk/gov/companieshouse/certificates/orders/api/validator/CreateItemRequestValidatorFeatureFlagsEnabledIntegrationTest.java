@@ -67,23 +67,6 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
     }
 
     @Test
-    @DisplayName("ID is mandatory")
-    void idIsMandatory() {
-        // Given
-        certificateItemOptions.setCompanyType("limited");
-        certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(null);
-        when(requestValidatable.getCertificateId()).thenReturn("1");
-        ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED,
-                "id: must be null in a create item request");
-
-        // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
-
-        // Then
-        assertThat(errors, contains(expectedError));
-    }
-
-    @Test
     @DisplayName("Collection location is optional by default")
     void collectionLocationIsOptionalByDefault() {
         // Given
@@ -124,8 +107,8 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setIncludeCompanyObjectsInformation(true);
         certificateItemOptions.setIncludeGoodStandingInformation(true);
         certificateItemOptions.setCompanyType("any");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-	
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
+
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
@@ -164,7 +147,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setLimitedPartnerDetails(new LimitedPartnerDetails());
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(new PrincipalPlaceOfBusinessDetails());
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -279,7 +262,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setMemberDetails(memberDetails);
         certificateItemOptions.setCompanyType("limited");
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(null);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -366,7 +349,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -443,7 +426,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(null);
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -466,7 +449,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
         certificateItemOptions.setCompanyType("limited-partnership");
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
 	    //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);

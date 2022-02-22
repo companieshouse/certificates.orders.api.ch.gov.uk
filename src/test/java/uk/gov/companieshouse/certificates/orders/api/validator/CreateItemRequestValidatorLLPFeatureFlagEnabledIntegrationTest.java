@@ -61,21 +61,6 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
     }
 
     @Test
-    @DisplayName("ID is mandatory")
-    void idIsMandatory() {
-        // Given
-        certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getCertificateId()).thenReturn("1");
-        ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED, "id: must be null in a create item request");
-
-        // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
-
-        // Then
-        assertThat(errors, contains(expectedError));
-    }
-
-    @Test
     @DisplayName("Collection location is optional by default")
     void collectionLocationIsOptionalByDefault() {
         // Given
@@ -112,7 +97,8 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setIncludeCompanyObjectsInformation(true);
         certificateItemOptions.setIncludeGoodStandingInformation(true);
         certificateItemOptions.setCompanyType("any");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
+
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -157,7 +143,6 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setLimitedPartnerDetails(new LimitedPartnerDetails());
         certificateItemOptions.setCompanyType("limited");
         certificateItemOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);

@@ -9,7 +9,6 @@ import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
@@ -43,9 +42,6 @@ public interface CertificateItemMapper {
         DeliveryTimescale deliveryTimescale = certificateItemCreate.getItemOptions().getDeliveryTimescale();
         certificateItem.getItemOptions().setDeliveryTimescale(
                 deliveryTimescale != null ? deliveryTimescale : DeliveryTimescale.STANDARD);
-
-        CertificateType certificateType = certificateItemCreate.getItemOptions().getCertificateType();
-        certificateItem.getItemOptions().setCertificateType(
-                certificateType != null ? certificateType : CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        certificateItem.setCompanyNumber(certificateItemCreate.getCompanyNumber());
     }
 }

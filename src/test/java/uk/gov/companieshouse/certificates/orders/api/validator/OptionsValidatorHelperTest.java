@@ -12,14 +12,12 @@ import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.*;
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
@@ -83,7 +81,7 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenLimitedCompanyNotInLiquidationAndLiquidatorsDetailsSuppliedAndFeatureFlagEnabled() {
         // Given
         certificateItemOptions.setLiquidatorsDetails(liquidatorsDetails);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         ApiError expected = ApiErrorBuilder.builder(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED)
@@ -101,7 +99,7 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenLimitedCompanyInAdministrationAndGoodStandingInformationSuppliedAndFeatureFlagEnabled() {
         // Given
         certificateItemOptions.setIncludeGoodStandingInformation(true);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ADMINISTRATION.getStatusName());
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
@@ -120,7 +118,7 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setLiquidatorsDetails(liquidatorsDetails);
         certificateItemOptions.setCompanyType("llp");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ADMINISTRATION.getStatusName());
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
 
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
@@ -139,7 +137,7 @@ class OptionsValidatorHelperTest {
     void correctlyErrorsWhenLiquidatedLLPCompanyAndGoodStandingInformationSuppliedAndFeatureFlagEnabled() {
         // Given
         certificateItemOptions.setIncludeGoodStandingInformation(true);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.LIQUIDATION.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED,
@@ -158,7 +156,7 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setLiquidatorsDetails(liquidatorsDetails);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
@@ -177,7 +175,7 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setLiquidatorsDetails(liquidatorsDetails);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
                 "include_liquidators_details: must not exist");
@@ -195,7 +193,7 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setAdministratorsDetails(administratorsDetails);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         when(featureOptions.isAdministratorCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
@@ -214,7 +212,7 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setAdministratorsDetails(administratorsDetails);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
                 "include_administrators_details: must not exist");
@@ -232,17 +230,15 @@ class OptionsValidatorHelperTest {
         // Given
         certificateItemOptions.setLiquidatorsDetails(liquidatorsDetails);
         certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
-        ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_COMPANY_STATUS_INVALID,
-                "company_status: liquidation not valid for company type limited-partnership");
 
         // When
         helper.validateLimitedPartnershipOptions();
         List<ApiError> errors = helper.getErrors();
 
         // Then
-        assertThat(errors, hasItem(expectedError));
+        assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist")));
     }
 
     @Test
@@ -250,7 +246,7 @@ class OptionsValidatorHelperTest {
         // given
         certificateItemOptions.setAdministratorsDetails(administratorsDetails);
         certificateItemOptions.setCompanyType("ltd");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ADMINISTRATION.getStatusName());
         when(featureOptions.isAdministratorCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
 
@@ -267,7 +263,7 @@ class OptionsValidatorHelperTest {
         // given
         certificateItemOptions.setAdministratorsDetails(administratorsDetails);
         certificateItemOptions.setCompanyType("ltd");
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         when(featureOptions.isAdministratorCompanyCertificateEnabled()).thenReturn(Boolean.TRUE);
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
         ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
@@ -343,7 +339,7 @@ class OptionsValidatorHelperTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
-        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
         OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
 
         // When

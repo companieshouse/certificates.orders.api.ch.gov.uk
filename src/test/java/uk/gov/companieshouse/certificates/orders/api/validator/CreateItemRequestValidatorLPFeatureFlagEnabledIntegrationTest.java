@@ -64,21 +64,6 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
     }
 
     @Test
-    @DisplayName("ID is mandatory")
-    void idIsMandatory() {
-        // Given
-        certificateItemOptions.setCompanyType("limited-partnership");
-        when(requestValidatable.getCertificateId()).thenReturn("1");
-        ApiError expectedError = ApiErrors.raiseError(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED, "id: must be null in a create item request");
-
-        // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
-
-        // Then
-        assertThat(errors, contains(expectedError));
-    }
-
-    @Test
     @DisplayName("Collection location is optional by default")
     void collectionLocationIsOptionalByDefault() {
         // Given

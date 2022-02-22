@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,9 @@ import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemServ
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
 
@@ -97,6 +100,15 @@ class CertificatesItemControllerTest {
     @Mock
     private Validator constraintValidator;
 
+    @Mock
+    private PatchItemRequestValidator patchItemRequestValidator;
+
+    @Mock
+    private CertificateOptionsValidator certificateOptionsValidator;
+
+    @Mock
+    private CertificateItem certificateItem;
+
     @InjectMocks
     private CertificateItemsController controllerUnderTest;
 
@@ -133,8 +145,10 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Update certificate item supplied patch has validation errors")
     void updateCertificateItemPatchValidationErrors() {
-        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED);
-        when(validator.getValidationErrors(patch)).thenReturn(errors);
+
+        when(patchItemRequestValidator.getValidationErrors(patch))
+                .thenReturn(Collections.singletonList(ApiErrors.ERR_SURNAME_REQUIRED));
+
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
                 TOKEN_REQUEST_ID_VALUE);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
@@ -177,9 +191,8 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() throws CompanyServiceException {
-        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
-        when(companyService.getCompanyProfile("number")).thenReturn(
-                new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
+        when(companyService.getCompanyProfile(any())).thenReturn(
+                new CompanyProfileResource("name", CompanyType.LIMITED_COMPANY.getCompanyType(), CompanyStatus.ACTIVE));
         when(certificateItemService.createCertificateItem(enrichedCertificateItem))
                 .thenReturn(item);
         when(mapper.certificateItemCreateToCertificateItem(certificateItemCreate)).thenReturn(nonEnrichedCertificateItem);
@@ -200,12 +213,15 @@ class CertificatesItemControllerTest {
     @DisplayName("Create certificate item has validation errors")
     void createCertificateItemValidationErrors() throws CompanyServiceException {
         List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED);
-        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
+        CertificateItemCreate certificateItemCreate = new CertificateItemCreate();
+        certificateItemCreate.setCompanyNumber("number");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
         when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
         when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
+        when(certificateItem.getCompanyNumber()).thenReturn("number");
+        when(mapper.certificateItemCreateToCertificateItem(any())).thenReturn(certificateItem);
+        when(mapper.enrichCertificateItem(any(), any(), any(), any())).thenReturn(enrichedCertificateItem);
 
         ResponseEntity<Object>
                 response =

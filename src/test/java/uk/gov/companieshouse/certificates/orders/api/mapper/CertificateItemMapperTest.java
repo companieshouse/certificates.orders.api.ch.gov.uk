@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateType;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
@@ -34,6 +35,7 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.INCORPORATION;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES;
@@ -80,7 +82,8 @@ class CertificateItemMapperTest {
     private static final boolean INCLUDE_DATES = true;
 
     private static final CertificateItemOptions ITEM_OPTIONS;
-    private static final CertificateItemOptions ITEM_OPTIONS_NO_DEFAULTS;
+    private static final CertificateItemOptionsRequest ITEM_OPTIONS_REQUEST;
+    private static final CertificateItemOptionsRequest ITEM_OPTIONS_NO_DEFAULTS;
     private static final DirectorOrSecretaryDetails DIRECTOR_OR_SECRETARY_DETAILS;
     private static final RegisteredOfficeAddressDetails REGISTERED_OFFICE_ADDRESS_DETAILS;
 
@@ -140,8 +143,30 @@ class CertificateItemMapperTest {
         PRINCIPAL_PLACE_OF_BUSINESS_DETAILS.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
         PRINCIPAL_PLACE_OF_BUSINESS_DETAILS.setIncludeDates(INCLUDE_DATES);
 
+        ITEM_OPTIONS_REQUEST = new CertificateItemOptionsRequest();
+        ITEM_OPTIONS_REQUEST.setCollectionLocation(BELFAST);
+        ITEM_OPTIONS_REQUEST.setContactNumber(CONTACT_NUMBER);
+        ITEM_OPTIONS_REQUEST.setDeliveryMethod(POSTAL);
+        ITEM_OPTIONS_REQUEST.setDeliveryTimescale(STANDARD);
+        ITEM_OPTIONS_REQUEST.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        ITEM_OPTIONS_REQUEST.setForename(FORENAME);
+        ITEM_OPTIONS_REQUEST.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        ITEM_OPTIONS_REQUEST.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        ITEM_OPTIONS_REQUEST.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        ITEM_OPTIONS_REQUEST.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        ITEM_OPTIONS_REQUEST.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        ITEM_OPTIONS_REQUEST.setSurname(SURNAME);
+        ITEM_OPTIONS_REQUEST.setDesignatedMemberDetails(DESIGNATED_MEMBER_DETAILS);
+        ITEM_OPTIONS_REQUEST.setMemberDetails(MEMBER_DETAILS);
+        ITEM_OPTIONS_REQUEST.setGeneralPartnerDetails(GENERAL_PARTNER_DETAILS);
+        ITEM_OPTIONS_REQUEST.setLimitedPartnerDetails(LIMITED_PARTNER_DETAILS);
+        ITEM_OPTIONS_REQUEST.setPrincipalPlaceOfBusinessDetails(PRINCIPAL_PLACE_OF_BUSINESS_DETAILS);
+        ITEM_OPTIONS_REQUEST.setIncludeGeneralNatureOfBusinessInformation(INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS);
+
         ITEM_OPTIONS = new CertificateItemOptions();
-        ITEM_OPTIONS.setCertificateType(INCORPORATION);
+        ITEM_OPTIONS.setCertificateType(INCORPORATION_WITH_ALL_NAME_CHANGES);
+        ITEM_OPTIONS.setCompanyType(COMPANY_TYPE);
+        ITEM_OPTIONS.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         ITEM_OPTIONS.setCollectionLocation(BELFAST);
         ITEM_OPTIONS.setContactNumber(CONTACT_NUMBER);
         ITEM_OPTIONS.setDeliveryMethod(POSTAL);
@@ -160,9 +185,8 @@ class CertificateItemMapperTest {
         ITEM_OPTIONS.setLimitedPartnerDetails(LIMITED_PARTNER_DETAILS);
         ITEM_OPTIONS.setPrincipalPlaceOfBusinessDetails(PRINCIPAL_PLACE_OF_BUSINESS_DETAILS);
         ITEM_OPTIONS.setIncludeGeneralNatureOfBusinessInformation(INCLUDE_GENERAL_NATURE_OF_BUSINESS_DETAILS);
-        ITEM_OPTIONS.setCompanyType(COMPANY_TYPE);
 
-        ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptions();
+        ITEM_OPTIONS_NO_DEFAULTS = new CertificateItemOptionsRequest();
 
         ITEM_COSTS = new ArrayList<>();
         ITEM_COSTS.add(new ItemCosts("1", "2", "3", CERTIFICATE));
@@ -178,14 +202,12 @@ class CertificateItemMapperTest {
     @Test
     void testCertificateItemDtoToEntityMapping() {
         final CertificateItemCreate dto = setupCertificateItemDTO();
-        dto.setItemOptions(ITEM_OPTIONS);
+        dto.setItemOptions(ITEM_OPTIONS_REQUEST);
         dto.setQuantity(QUANTITY);
 
         final CertificateItem item = mapperUnderTest.certificateItemCreateToCertificateItem(dto);
 
-        assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
-        assertThat(item.getData().getId(), is(dto.getId()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(dto.getQuantity()));
@@ -195,7 +217,7 @@ class CertificateItemMapperTest {
         assertThat(item.getItemCosts(), is(dto.getItemCosts()));
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
-        assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
+        assertItemOptionsSame(item.getItemOptions(), dto.getItemOptions());
         assertThat(item.getPostageCost(), is(dto.getPostageCost()));
         assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
@@ -207,9 +229,7 @@ class CertificateItemMapperTest {
 
         final CertificateItem item = mapperUnderTest.certificateItemCreateToCertificateItem(dto);
 
-        assertThat(item.getId(), is(dto.getId()));
         assertThat(item.getData(), is(notNullValue()));
-        assertThat(item.getData().getId(), is(dto.getId()));
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(NO_DEFAULT_QUANTITY));
@@ -220,7 +240,7 @@ class CertificateItemMapperTest {
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         CertificateItemOptions itemOptions = item.getItemOptions();
-        assertEquals(NO_DEFAULT_CERTIFICATE_TYPE, itemOptions.getCertificateType());
+        assertNull(itemOptions.getCertificateType());
         assertEquals(NO_DEFAULT_DELIVERY_METHOD, itemOptions.getDeliveryMethod());
         assertEquals(NO_DEFAULT_DELIVERY_TIMESCALE, itemOptions.getDeliveryTimescale());
         assertThat(item.getPostageCost(), is(dto.getPostageCost()));
@@ -248,7 +268,6 @@ class CertificateItemMapperTest {
 
         final CertificateItemCreate dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
-        assertThat(dto.getId(), is(item.getId()));
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
         assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
         assertThat(dto.getQuantity(), is(item.getQuantity()));
@@ -258,7 +277,7 @@ class CertificateItemMapperTest {
         assertThat(dto.getItemCosts(), is(item.getItemCosts()));
         assertThat(dto.getKind(), is(item.getKind()));
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
-        assertItemOptionsSame(dto.getItemOptions(), item.getItemOptions());
+        assertItemOptionsSame(item.getItemOptions(), dto.getItemOptions());
         assertThat(dto.getEtag(), is(item.getEtag()));
         assertThat(dto.getPostageCost(), is(item.getPostageCost()));
         assertThat(dto.getTotalItemCost(), is(item.getTotalItemCost()));
@@ -285,33 +304,31 @@ class CertificateItemMapperTest {
      * Utility that asserts that each member of the options objects passed it has the same value
      * in both. The alternative would be to generate CertificateItemOptions equals() and hashCode()
      * and thoroughly unit test those.
-     * @param options1 options
-     * @param options2 options
+     * @param actual options
+     * @param expected options
      */
-    private void assertItemOptionsSame(final CertificateItemOptions options1,
-                                       final CertificateItemOptions options2) {
-        assertThat(options1.getCertificateType(), is(options2.getCertificateType()));
-        assertThat(options1.getCollectionLocation(), is(options2.getCollectionLocation()));
-        assertThat(options1.getContactNumber(), is(options2.getContactNumber()));
-        assertThat(options1.getDeliveryMethod(), is(options2.getDeliveryMethod()));
-        assertThat(options1.getDeliveryTimescale(), is(options2.getDeliveryTimescale()));
-        assertDetailsSame(options1.getDirectorDetails(), options2.getDirectorDetails());
-        assertThat(options1.getForename(), is(options2.getForename()));
-        assertThat(options1.getIncludeCompanyObjectsInformation(), is(options2.getIncludeCompanyObjectsInformation()));
-        assertThat(options1.getIncludeEmailCopy(), is(options2.getIncludeEmailCopy()));
-        assertThat(options1.getIncludeGoodStandingInformation(), is(options2.getIncludeGoodStandingInformation()));
-        assertAddressDetailsSame(options1.getRegisteredOfficeAddressDetails(), options2.getRegisteredOfficeAddressDetails());
-        assertDetailsSame(options1.getSecretaryDetails(), options2.getSecretaryDetails());
-        assertThat(options1.getSurname(), is(options2.getSurname()));
+    private void assertItemOptionsSame(final CertificateItemOptions actual,
+                                       final CertificateItemOptionsRequest expected) {
+        assertThat(actual.getCollectionLocation(), is(expected.getCollectionLocation()));
+        assertThat(actual.getContactNumber(), is(expected.getContactNumber()));
+        assertThat(actual.getDeliveryMethod(), is(expected.getDeliveryMethod()));
+        assertThat(actual.getDeliveryTimescale(), is(expected.getDeliveryTimescale()));
+        assertDetailsSame(actual.getDirectorDetails(), expected.getDirectorDetails());
+        assertThat(actual.getForename(), is(expected.getForename()));
+        assertThat(actual.getIncludeCompanyObjectsInformation(), is(expected.getIncludeCompanyObjectsInformation()));
+        assertThat(actual.getIncludeEmailCopy(), is(expected.getIncludeEmailCopy()));
+        assertThat(actual.getIncludeGoodStandingInformation(), is(expected.getIncludeGoodStandingInformation()));
+        assertAddressDetailsSame(actual.getRegisteredOfficeAddressDetails(), expected.getRegisteredOfficeAddressDetails());
+        assertDetailsSame(actual.getSecretaryDetails(), expected.getSecretaryDetails());
+        assertThat(actual.getSurname(), is(expected.getSurname()));
 
         // New LLP and LP options
-        assertDesignatedMembersDetailsSame(options1.getDesignatedMemberDetails(), options2.getDesignatedMemberDetails());
-        assertMembersDetailsSame(options1.getMemberDetails(), options2.getMemberDetails());
-        assertGeneralPartnerDetailsSame(options1.getGeneralPartnerDetails(), options2.getGeneralPartnerDetails());
-        assertLimitedPartnerDetailsSame(options1.getLimitedPartnerDetails(), options2.getLimitedPartnerDetails());
-        assertPrincipalPlaceOfBusinessDetailsSame(options1.getPrincipalPlaceOfBusinessDetails(), options2.getPrincipalPlaceOfBusinessDetails());
-        assertThat(options1.getIncludeGeneralNatureOfBusinessInformation(), is(options2.getIncludeGeneralNatureOfBusinessInformation()));
-        assertThat(options1.getCompanyType(), is(options2.getCompanyType()));
+        assertDesignatedMembersDetailsSame(actual.getDesignatedMemberDetails(), expected.getDesignatedMemberDetails());
+        assertMembersDetailsSame(actual.getMemberDetails(), expected.getMemberDetails());
+        assertGeneralPartnerDetailsSame(actual.getGeneralPartnerDetails(), expected.getGeneralPartnerDetails());
+        assertLimitedPartnerDetailsSame(actual.getLimitedPartnerDetails(), expected.getLimitedPartnerDetails());
+        assertPrincipalPlaceOfBusinessDetailsSame(actual.getPrincipalPlaceOfBusinessDetails(), expected.getPrincipalPlaceOfBusinessDetails());
+        assertThat(actual.getIncludeGeneralNatureOfBusinessInformation(), is(expected.getIncludeGeneralNatureOfBusinessInformation()));
     }
 
     /**
@@ -345,7 +362,6 @@ class CertificateItemMapperTest {
 
     private CertificateItemCreate setupCertificateItemDTO() {
         CertificateItemCreate dto = new CertificateItemCreate();
-        dto.setId(ID);
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);
         dto.setDescription(DESCRIPTION);

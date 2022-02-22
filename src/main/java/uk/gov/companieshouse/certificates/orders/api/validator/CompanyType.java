@@ -33,4 +33,8 @@ public enum CompanyType {
     public static CompanyType getEnumValue(String companyType) {
         return enumValues.get(companyType);
     }
+
+    public String getCompanyType() {
+        return name;
+    }
 }

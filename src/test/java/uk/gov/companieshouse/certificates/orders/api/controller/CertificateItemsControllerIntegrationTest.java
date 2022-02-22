@@ -56,7 +56,6 @@ import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -295,7 +294,7 @@ class CertificateItemsControllerIntegrationTest {
 
     private CertificateItemCreate certificateItemCreate;
 
-    private CertificateItemOptions certificateItemOptions;
+    private CertificateItemOptionsRequest certificateItemOptions;
 
     private static Stream<Arguments> provideLiquidatorsDetailsErrorFixtures() {
         return Stream.of(
@@ -345,7 +344,7 @@ class CertificateItemsControllerIntegrationTest {
     @BeforeEach
     void beforeEach() {
         certificateItemCreate = new CertificateItemCreate();
-        certificateItemOptions = new CertificateItemOptions();
+        certificateItemOptions = new CertificateItemOptionsRequest();
         certificateItemCreate.setItemOptions(certificateItemOptions);
     }
 
@@ -353,8 +352,26 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Successfully creates certificate item")
     void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
+        itemOptionsRequest.setContactNumber(CONTACT_NUMBER);
+        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
+        itemOptionsRequest.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        itemOptionsRequest.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setForename(FORENAME);
+        itemOptionsRequest.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        itemOptionsRequest.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        itemOptionsRequest.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        itemOptionsRequest.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        itemOptionsRequest.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setSurname(SURNAME);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
+        newItem.setQuantity(QUANTITY);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
+        newItem.setItemOptions(itemOptionsRequest);
+
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
         options.setCompanyType(PREVIOUS_COMPANY_TYPE);
@@ -370,9 +387,6 @@ class CertificateItemsControllerIntegrationTest {
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSurname(SURNAME);
-        newItem.setItemOptions(options);
-        newItem.setQuantity(QUANTITY);
-        newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         final CertificateItemResponse expectedItem = new CertificateItemResponse();
         expectedItem.setId(EXPECTED_ITEM_ID);
@@ -455,8 +469,26 @@ class CertificateItemsControllerIntegrationTest {
     @DisplayName("Fails to create certificate item with incorrect token permission")
     void createCertificateItemUnauthorizedTokenPermission() throws Exception {
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
+        itemOptionsRequest.setContactNumber(CONTACT_NUMBER);
+        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
+        itemOptionsRequest.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        itemOptionsRequest.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setForename(FORENAME);
+        itemOptionsRequest.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        itemOptionsRequest.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        itemOptionsRequest.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
+        itemOptionsRequest.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        itemOptionsRequest.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setSurname(SURNAME);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
+        newItem.setItemOptions(itemOptionsRequest);
+        newItem.setQuantity(QUANTITY);
+        newItem.setCustomerReference(CUSTOMER_REFERENCE);
+
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setCertificateType(CERTIFICATE_TYPE);
         options.setCollectionLocation(COLLECTION_LOCATION);
@@ -471,9 +503,6 @@ class CertificateItemsControllerIntegrationTest {
         options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
         options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
         options.setSurname(SURNAME);
-        newItem.setItemOptions(options);
-        newItem.setQuantity(QUANTITY);
-        newItem.setCustomerReference(CUSTOMER_REFERENCE);
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -493,15 +522,17 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItem() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDeliveryTimescale(DELIVERY_TIMESCALE);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         newItem.setEtag(TOKEN_ETAG);
         newItem.setLinks(LINKS);
         newItem.setPostageCost(POSTAGE_COST);
         newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
+
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiResponse expectedValidationError = new ApiResponse(asList(
@@ -535,12 +566,14 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
+
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
@@ -569,12 +602,13 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidCertificateType() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CERTIFICATE_TYPE);
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
+
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiError expectedValidationError =
@@ -603,11 +637,12 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCollectionLocation(COLLECTION_LOCATION);
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
@@ -637,12 +672,12 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithMissingCollectionDetails() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDeliveryMethod(DeliveryMethod.COLLECTION);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryMethod(DeliveryMethod.COLLECTION);
-        options.setCompanyType("limited");
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -676,11 +711,12 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryMethod(DELIVERY_METHOD);
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
@@ -712,17 +748,16 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setIncludeCompanyObjectsInformation(true);
+        itemOptionsRequest.setIncludeGoodStandingInformation(true);
+        itemOptionsRequest.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        itemOptionsRequest.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CertificateType.DISSOLUTION);
-        options.setIncludeCompanyObjectsInformation(true);
-        options.setIncludeGoodStandingInformation(true);
-        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
-        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setCompanyType("limited");
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -760,13 +795,13 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDeliveryTimescale(DeliveryTimescale.STANDARD);
+        itemOptionsRequest.setIncludeEmailCopy(true);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDeliveryTimescale(DeliveryTimescale.STANDARD);
-        options.setIncludeEmailCopy(true);
-        options.setCompanyType("limited");
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -799,12 +834,12 @@ class CertificateItemsControllerIntegrationTest {
             throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setIncludeEmailCopy(true);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setIncludeEmailCopy(true);
-        options.setCompanyType("limited");
-        newItem.setItemOptions(options);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -833,13 +868,15 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
 
         // Given
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
         final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
         director.setIncludeDobType(INCLUDE_DOB_TYPE);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDirectorDetails(director);
-        newItem.setItemOptions(options);
+
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDirectorDetails(director);
+
+        final CertificateItemCreate newItem = new CertificateItemCreate();
+        newItem.setItemOptions(itemOptionsRequest);
+        newItem.setCompanyNumber(COMPANY_NUMBER);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
@@ -869,13 +906,15 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
 
         // Given
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
         final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
         registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
-        newItem.setItemOptions(options);
+
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+
+        final CertificateItemCreate newItem = new CertificateItemCreate();
+        newItem.setCompanyNumber(COMPANY_NUMBER);
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
@@ -905,13 +944,13 @@ class CertificateItemsControllerIntegrationTest {
     void createCertificateItemFailsToCreateCertificateItemWithConflictingDetailsSettings() throws Exception {
 
         // Given
+        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+        itemOptionsRequest.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemOptionsRequest.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setCompanyNumber(COMPANY_NUMBER);
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-        newItem.setItemOptions(options);
-        options.setCompanyType("limited");
+        newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
@@ -1328,7 +1367,7 @@ class CertificateItemsControllerIntegrationTest {
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
 
-        final CertificateItemCreate expectedItem = new CertificateItemCreate();
+        final CertificateItem expectedItem = new CertificateItem();
         expectedItem.setQuantity(QUANTITY);
         expectedItem.setItemOptions(options);
 
@@ -1835,8 +1874,6 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemCreate.setItemOptions(certificateItemOptions);
         certificateItemCreate.setQuantity(QUANTITY);
 
-        certificateItemOptions.setCertificateType(CertificateType.INCORPORATION);
-        certificateItemOptions.setCompanyType(fixture.getCompanyType());
         certificateItemOptions.setLiquidatorsDetails(fixture.getLiquidatorsDetails());
         certificateItemOptions.setIncludeGoodStandingInformation(fixture.getIncludeGoodStandingInformation());
 

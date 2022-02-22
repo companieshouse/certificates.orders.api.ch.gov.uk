@@ -3,10 +3,7 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.error.ApiError;
-import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
-import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,12 +24,6 @@ public class CreateItemRequestValidator {
      * @return the errors found, which will be empty if the item is found to be valid
      */
     public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
-        final List<ApiError> errors = new ArrayList<>();
-        if (requestValidatable.getCertificateId() != null) {
-            errors.add(ApiErrorBuilder.builder(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED)
-                    .withErrorMessage("id: must be null in a create item request").build());
-        }
-        errors.addAll(certificateOptionsValidator.getValidationErrors(requestValidatable));
-        return errors;
+        return certificateOptionsValidator.getValidationErrors(requestValidatable);
     }
 }
