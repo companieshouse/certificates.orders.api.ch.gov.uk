@@ -24,7 +24,7 @@ import static java.util.Collections.singletonList;
  * Implements validation of the request payload specific to the the patch item request only.
  */
 @Component
-public class PatchItemRequestValidator extends RequestValidator {
+public class PatchItemRequestValidator {
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
@@ -38,13 +38,7 @@ public class PatchItemRequestValidator extends RequestValidator {
      */
     public PatchItemRequestValidator(final ObjectMapper objectMapper,
                                      final Validator validator,
-                                     final FieldNameConverter converter,
-                                     final CertificateOptionsValidator certificateOptionsValidator,
-                                     final BasicInformationIncludeableValidator basicInformationIncludeableValidator,
-                                     final DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
-        super(certificateOptionsValidator,
-                basicInformationIncludeableValidator,
-                dateOfBirthIncludeableValidator);
+                                     final FieldNameConverter converter) {
         this.objectMapper = objectMapper;
         this.validator = validator;
         this.converter = converter;

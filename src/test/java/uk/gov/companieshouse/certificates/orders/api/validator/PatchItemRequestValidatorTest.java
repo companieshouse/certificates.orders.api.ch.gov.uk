@@ -72,8 +72,8 @@ class PatchItemRequestValidatorTest {
         }
 
         @Bean
-        public PatchItemRequestValidator patchItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator, BasicInformationIncludeableValidator basicInformationIncludableValidator, DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator) {
-            return new PatchItemRequestValidator(objectMapper(), validator(), converter(), certificateOptionsValidator, basicInformationIncludableValidator, dateOfBirthIncludeableValidator);
+        public PatchItemRequestValidator patchItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
+            return new PatchItemRequestValidator(objectMapper(), validator(), converter());
         }
 
         @Bean
@@ -84,16 +84,6 @@ class PatchItemRequestValidatorTest {
         @Bean
         OptionsValidationHelperFactory optionsValidationHelperFactory(FeatureOptions featureOptions) {
             return new OptionsValidationHelperFactory(featureOptions);
-        }
-
-        @Bean
-        BasicInformationIncludeableValidator basicInformationIncludableValidator() {
-            return new BasicInformationIncludeableValidator(converter());
-        }
-
-        @Bean
-        DateOfBirthIncludeableValidator dateOfBirthIncludeableValidator(BasicInformationIncludeableValidator basicInformationIncludeableValidator) {
-            return new DateOfBirthIncludeableValidator(converter(), basicInformationIncludeableValidator);
         }
     }
 
@@ -109,6 +99,9 @@ class PatchItemRequestValidatorTest {
 
     @Autowired
     private TestMergePatchFactory patchFactory;
+
+    @Autowired
+    private CertificateOptionsValidator certificateOptionsValidator;
 
     private PatchValidationCertificateItemDTO itemUpdate;
 
@@ -251,7 +244,7 @@ class PatchItemRequestValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -265,7 +258,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -281,9 +274,13 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setIncludeCompanyObjectsInformation(true);
         certificateItemOptions.setIncludeGoodStandingInformation(true);
         certificateItemOptions.setCompanyType("limited");
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(requestValidatable.getCertificateId()).thenReturn("123456");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -314,17 +311,19 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
+        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
-        assertThat(errors, containsInAnyOrder(
+        assertThat(errors, contains(
                 ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when certificate type is dissolution"),
                 ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when certificate type is dissolution"),
                 ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution")));
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is dissolved")));
     }
 
     @Test
@@ -336,7 +335,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -351,12 +350,11 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED,"include_email_copy: can only be true when delivery timescale is same_day")));
     }
-
 
     @Test
     @DisplayName("Do not include other details without basic information")
@@ -375,7 +373,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
@@ -412,7 +410,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -433,7 +431,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
@@ -452,7 +450,7 @@ class PatchItemRequestValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(null);
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -465,7 +463,7 @@ class PatchItemRequestValidatorTest {
         certificateItemOptions.setCompanyType("limited");
 
         // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+        final List<ApiError> errors = certificateOptionsValidator.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));

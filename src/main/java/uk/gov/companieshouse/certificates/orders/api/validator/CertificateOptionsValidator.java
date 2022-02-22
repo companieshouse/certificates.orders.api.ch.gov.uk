@@ -2,12 +2,19 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
+import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.DateOfBirthIncludable;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
+import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -36,18 +43,22 @@ import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimesc
  *
  * @see CertificateOptionsValidatorConfig
  */
-class CertificateOptionsValidator {
+public class CertificateOptionsValidator {
     private final Consumer<OptionsValidationHelper> strategy;
     private final OptionsValidationHelperFactory optionsValidationHelperFactory;
+    private final FieldNameConverter fieldNameConverter;
 
     /**
      * Creates a new CertificateOptionsValidator
      *
      * @param strategy consumer (method) that accepts {@link OptionsValidationHelper}
      */
-    public CertificateOptionsValidator(Consumer<OptionsValidationHelper> strategy, OptionsValidationHelperFactory optionsValidationHelperFactory) {
+    public CertificateOptionsValidator(Consumer<OptionsValidationHelper> strategy,
+                                       OptionsValidationHelperFactory optionsValidationHelperFactory,
+                                       FieldNameConverter fieldNameConverter) {
         this.strategy = strategy;
         this.optionsValidationHelperFactory = optionsValidationHelperFactory;
+        this.fieldNameConverter = fieldNameConverter;
     }
 
     /**
@@ -56,12 +67,12 @@ class CertificateOptionsValidator {
      * @param requestValidatable to be validated
      * @return list containing any errors; an empty list if no validation errors occur
      */
-    List<ApiError> validate(RequestValidatable requestValidatable) {
+    List<ApiError> validateCertificateOptions(RequestValidatable requestValidatable) {
         List<ApiError> errors = new ArrayList<>();
         OptionsValidationHelper optionsValidationHelper = this.optionsValidationHelperFactory.createOptionsValidationHelper(requestValidatable);
         if (Objects.nonNull(requestValidatable.getItemOptions()) && !optionsValidationHelper.companyTypeIsNull()) {
-            validateDeliveryMethod(errors, requestValidatable.getItemOptions());
-            validateDeliveryTimescale(errors, requestValidatable.getItemOptions());
+            errors.addAll(validateDeliveryMethod(requestValidatable.getItemOptions()));
+            errors.addAll(validateDeliveryTimescale(requestValidatable.getItemOptions()));
             // Delegate additional validation to supplied validation strategy
             strategy.accept(optionsValidationHelper);
         }
@@ -69,7 +80,37 @@ class CertificateOptionsValidator {
         return errors;
     }
 
-    private void validateDeliveryMethod(List<ApiError> errors, final CertificateItemOptions options) {
+    /**
+     * Validates the options provided, returning any errors found.
+     *
+     * @param requestValidatable to be validated
+     * @return the errors found, which will be empty if the item is found to be valid
+     */
+    public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
+        final List<ApiError> errors = new ArrayList<>();
+        CertificateItemOptions options = requestValidatable.getItemOptions();
+        if (options == null) {
+            return errors;
+        }
+        errors.addAll(validateCertificateOptions(requestValidatable));
+
+        errors.addAll(getValidationErrors(options.getDirectorDetails(), "director_details"));
+        errors.addAll(getValidationErrors(options.getSecretaryDetails(), "secretary_details"));
+        errors.addAll(getValidationErrors(options.getDesignatedMemberDetails(), "designated_member_details"));
+        errors.addAll(getValidationErrors(options.getMemberDetails(), "member_details"));
+        errors.addAll(getValidationErrors(options.getGeneralPartnerDetails(), "general_partner_details"));
+        errors.addAll(getValidationErrors(options.getLimitedPartnerDetails(), "limited_partner_details"));
+        return errors;
+    }
+
+    /**
+     * Validates the collection delivery related fields on the options provided.
+     *
+     * @param options the options to be validated
+     * @return the resulting errors, which will be empty if the fields are found to be valid
+     */
+    List<ApiError> validateDeliveryMethod(final CertificateItemOptions options) {
+        final List<ApiError> errors = new ArrayList<>();
         if (options.getDeliveryMethod() == COLLECTION) {
             if (options.getCollectionLocation() == null) {
                 ApiErrors.raiseError(errors,
@@ -87,13 +128,60 @@ class CertificateOptionsValidator {
                         "surname: must not be blank when delivery method is collection");
             }
         }
+        return errors;
     }
 
-    private void validateDeliveryTimescale(List<ApiError> errors, final CertificateItemOptions options) {
+    public List<ApiError> validateDeliveryTimescale(final CertificateItemOptions options) {
+        final List<ApiError> errors = new ArrayList<>();
         if (TRUE.equals(options.getIncludeEmailCopy()) &&
                 (options.getDeliveryTimescale() != SAME_DAY)) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED,
                     "include_email_copy: can only be true when delivery timescale is same_day");
         }
+        return errors;
+    }
+
+    /**
+     * Validates the details provided, returning any errors found, prefixed with the supplied details field name.
+     *
+     * @param details          the details to be validated
+     * @param detailsFieldName the field name of the details to be validated
+     * @return the resulting errors, which will be empty if the details are found to be valid
+     */
+    List<ApiError> getValidationErrors(final BasicInformationIncludable<Map<String, Object>> details,
+                                       final String detailsFieldName) {
+        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
+            return Collections.emptyList();
+        }
+        return getBasicInformationFieldErrors(details, detailsFieldName);
+    }
+
+    List<ApiError> getValidationErrors(final DateOfBirthIncludable<Map<String, Object>> details, final String detailsFieldName) {
+        if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
+            return Collections.emptyList();
+        }
+        List<ApiError> errors = getBasicInformationFieldErrors(details, detailsFieldName);
+        if (details.getIncludeDobType() != null) {
+            errors.add(ApiErrorBuilder.builder(
+                            new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName + ".include_dob_type", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(detailsFieldName + ".include_dob_type: must not be non-null when include_basic_information is false")
+                    .build());
+        }
+        return errors;
+    }
+
+    private List<ApiError> getBasicInformationFieldErrors(final BasicInformationIncludable<Map<String, Object>> details,
+                                                          final String detailsFieldName) {
+        FindByValueVisitor valueFinder = new FindByValueVisitor(TRUE);
+        details.accept(valueFinder);
+        final List<String> incorrectlySetFields = valueFinder.getKeys();
+        final List<ApiError> errors = new ArrayList<>();
+        if (!incorrectlySetFields.isEmpty()) {
+            errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
+                            new ApiError(fieldNameConverter.toLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                    .withErrorMessage(detailsFieldName + "." + field + ": must not be true when include_basic_information is false")
+                    .build()).collect(Collectors.toList()));
+        }
+        return errors;
     }
 }

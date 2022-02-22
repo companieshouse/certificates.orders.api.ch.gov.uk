@@ -26,6 +26,7 @@ import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
@@ -47,7 +48,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -64,13 +64,13 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
-
 @RestController
 public class CertificateItemsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final CreateItemRequestValidator createItemRequestValidator;
     private final PatchItemRequestValidator patchItemRequestValidator;
+    private final CertificateOptionsValidator certificateOptionsValidator;
     private final CertificateItemMapper mapper;
     private final PatchMerger patcher;
     private final CertificateItemService certificateItemService;
@@ -95,6 +95,7 @@ public class CertificateItemsController {
      */
     public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
                                       final PatchItemRequestValidator patchItemRequestValidator,
+                                      final CertificateOptionsValidator certificateOptionsValidator,
                                       final CertificateItemMapper mapper,
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
@@ -104,6 +105,7 @@ public class CertificateItemsController {
                                       final FieldNameConverter fieldNameConverter) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
+        this.certificateOptionsValidator = certificateOptionsValidator;
         this.mapper = mapper;
         this.patcher = patcher;
         this.certificateItemService = certificateItemService;
@@ -208,7 +210,7 @@ public class CertificateItemsController {
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
 
         // Certificate item options validation
-        final List<ApiError> patchedErrors = patchItemRequestValidator.getValidationErrors(
+        final List<ApiError> patchedErrors = certificateOptionsValidator.getValidationErrors(
                 new CompanyCertificateInformation(
                         CompanyStatus.getEnumValue(itemRetrieved.getItemOptions().getCompanyStatus()),
                         patchedItem.getId(),

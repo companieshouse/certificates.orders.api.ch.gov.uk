@@ -12,6 +12,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOption
 import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,6 +38,9 @@ class CertificateOptionsValidatorTest {
     @Mock
     private OptionsValidationHelper optionsValidationHelper;
 
+    @Mock
+    private FieldNameConverter fieldNameConverter;
+
     @BeforeEach
     void beforeEach() {
         certificateItemOptions = new CertificateItemOptions();
@@ -48,10 +52,10 @@ class CertificateOptionsValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
         when(optionsValidationHelper.companyTypeIsNull()).thenReturn(true);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         // When
-        validator.validate(requestValidatable);
+        validator.validateCertificateOptions(requestValidatable);
 
         // Then
         verifyNoInteractions(optionsValidationHelperConsumer);
@@ -64,10 +68,10 @@ class CertificateOptionsValidatorTest {
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
         when(optionsValidationHelper.companyTypeIsNull()).thenReturn(false);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         // When
-        List<ApiError> result = validator.validate(requestValidatable);
+        List<ApiError> result = validator.validateCertificateOptions(requestValidatable);
 
         // Then
         assertThat(result, is(empty()));
@@ -77,10 +81,10 @@ class CertificateOptionsValidatorTest {
     void correctlyPassesWhenItemOptionsNull() {
         //given
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         // When
-        List<ApiError> result = validator.validate(requestValidatable);
+        List<ApiError> result = validator.validateCertificateOptions(requestValidatable);
 
         // Then
         assertThat(result, is(empty()));
@@ -94,10 +98,10 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         // When
-        final List<ApiError> errors = validator.validate(requestValidatable);
+        final List<ApiError> errors = validator.validateCertificateOptions(requestValidatable);
 
         // Then
         assertThat(errors, containsInAnyOrder(
@@ -117,10 +121,10 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setCollectionLocation(CollectionLocation.LONDON);
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         // When
-        final List<ApiError> errors = validator.validate(requestValidatable);
+        final List<ApiError> errors = validator.validateCertificateOptions(requestValidatable);
 
         // Then
         assertThat(errors, is(empty()));
@@ -133,10 +137,10 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryTimescale(DeliveryTimescale.STANDARD);
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         //when
-        final List<ApiError> errors = validator.validate(requestValidatable);
+        final List<ApiError> errors = validator.validateCertificateOptions(requestValidatable);
 
         //then
         assertThat(errors, contains(
@@ -151,10 +155,10 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
         when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
-        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory);
+        CertificateOptionsValidator validator = new CertificateOptionsValidator(optionsValidationHelperConsumer, optionsValidationHelperFactory, fieldNameConverter);
 
         //when
-        final List<ApiError> errors = validator.validate(requestValidatable);
+        final List<ApiError> errors = validator.validateCertificateOptions(requestValidatable);
 
         //then
         assertThat(errors, is(empty()));
