@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class LiquidatorsDetails implements BasicInformationIncludable<Map<String, Object>> {
     private Boolean includeBasicInformation;
-    private transient final Map<String, Object> fieldValues = Collections.emptyMap();
+    private final Map<String, Object> fieldValues = Collections.emptyMap();
 
     @Override
     public Boolean getIncludeBasicInformation() {

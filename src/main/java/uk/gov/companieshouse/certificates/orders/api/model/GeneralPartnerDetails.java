@@ -12,7 +12,7 @@ import java.util.Objects;
 public class GeneralPartnerDetails implements BasicInformationIncludable<Map<String, Object>> {
 
     private Boolean includeBasicInformation;
-    private transient final Map<String, Object> fieldValues = Collections.emptyMap();
+    private final Map<String, Object> fieldValues = Collections.emptyMap();
 
     public Boolean getIncludeBasicInformation() {
         return includeBasicInformation;

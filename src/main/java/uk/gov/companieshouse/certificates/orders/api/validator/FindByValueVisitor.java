@@ -6,21 +6,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.nonNull;
 
 /**
  * Produces a list of map keys corresponding to found map target values.
- *
+ * <p>
  * Note: keys are returned in alphanumeric order.
  */
 public class FindByValueVisitor implements Visitor<Map<String, Object>> {
     private final List<Map.Entry<String, Object>> keys = new ArrayList<>();
-    private final Object targetValue;
+    private final Predicate<Map.Entry<String, Object>> predicate;
 
-    public FindByValueVisitor(Object targetValue) {
-        this.targetValue = targetValue;
+    public FindByValueVisitor(Predicate<Map.Entry<String, Object>> targetPredicate) {
+        this.predicate = targetPredicate;
     }
 
     @Override
@@ -28,7 +27,7 @@ public class FindByValueVisitor implements Visitor<Map<String, Object>> {
 
         keys.addAll(map.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .filter(field -> nonNull(field.getValue()) && field.getValue() == targetValue)
+                .filter(predicate::test)
                 .collect(Collectors.toList()));
     }
 

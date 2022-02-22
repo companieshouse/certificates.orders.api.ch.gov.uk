@@ -12,11 +12,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
@@ -44,6 +45,11 @@ import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimesc
  * @see CertificateOptionsValidatorConfig
  */
 public class CertificateOptionsValidator {
+    private static final Predicate<Map.Entry<String, Object>> INCLUDEABLE_FIELDS =
+            entry -> entry.getValue() == TRUE;
+    private static final Predicate<Map.Entry<String, Object>> INCLUDE_DOB_TYPE_FIELD =
+            entry -> "include_dob_type".equals(entry.getKey()) && nonNull(entry.getValue());
+
     private final Consumer<OptionsValidationHelper> strategy;
     private final OptionsValidationHelperFactory optionsValidationHelperFactory;
     private final FieldNameConverter fieldNameConverter;
@@ -70,7 +76,7 @@ public class CertificateOptionsValidator {
     List<ApiError> validateCertificateOptions(RequestValidatable requestValidatable) {
         List<ApiError> errors = new ArrayList<>();
         OptionsValidationHelper optionsValidationHelper = this.optionsValidationHelperFactory.createOptionsValidationHelper(requestValidatable);
-        if (Objects.nonNull(requestValidatable.getItemOptions()) && !optionsValidationHelper.companyTypeIsNull()) {
+        if (nonNull(requestValidatable.getItemOptions()) && !optionsValidationHelper.companyTypeIsNull()) {
             errors.addAll(validateDeliveryMethod(requestValidatable.getItemOptions()));
             errors.addAll(validateDeliveryTimescale(requestValidatable.getItemOptions()));
             // Delegate additional validation to supplied validation strategy
@@ -153,33 +159,27 @@ public class CertificateOptionsValidator {
         if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
             return Collections.emptyList();
         }
-        return getBasicInformationFieldErrors(details, detailsFieldName);
+        return getBasicInformationFieldErrors(details, detailsFieldName, INCLUDEABLE_FIELDS);
     }
 
     List<ApiError> getValidationErrors(final DateOfBirthIncludable<Map<String, Object>> details, final String detailsFieldName) {
         if (details == null || TRUE.equals(details.getIncludeBasicInformation())) {
             return Collections.emptyList();
         }
-        List<ApiError> errors = getBasicInformationFieldErrors(details, detailsFieldName);
-        if (details.getIncludeDobType() != null) {
-            errors.add(ApiErrorBuilder.builder(
-                            new ApiError(ApiErrors.INCLUDE_DOB_TYPE_REQUIRED_ERROR, detailsFieldName + ".include_dob_type", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + ".include_dob_type: must not be non-null when include_basic_information is false")
-                    .build());
-        }
-        return errors;
+        return getBasicInformationFieldErrors(details, detailsFieldName, INCLUDEABLE_FIELDS.or(INCLUDE_DOB_TYPE_FIELD));
     }
 
     private List<ApiError> getBasicInformationFieldErrors(final BasicInformationIncludable<Map<String, Object>> details,
-                                                          final String detailsFieldName) {
-        FindByValueVisitor valueFinder = new FindByValueVisitor(TRUE);
-        details.accept(valueFinder);
-        final List<String> incorrectlySetFields = valueFinder.getKeys();
+                                                          final String detailsFieldName,
+                                                          final Predicate<Map.Entry<String, Object>> targetPredicate) {
+        FindByValueVisitor incorrectlySetFieldsValueFinder = new FindByValueVisitor(targetPredicate);
+        details.accept(incorrectlySetFieldsValueFinder);
+        final List<String> incorrectlySetFields = incorrectlySetFieldsValueFinder.getKeys();
         final List<ApiError> errors = new ArrayList<>();
         if (!incorrectlySetFields.isEmpty()) {
             errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
                             new ApiError(fieldNameConverter.toLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + "." + field + ": must not be true when include_basic_information is false")
+                    .withErrorMessage(detailsFieldName + "." + field + ": must not be set when include_basic_information is false")
                     .build()).collect(Collectors.toList()));
         }
         return errors;

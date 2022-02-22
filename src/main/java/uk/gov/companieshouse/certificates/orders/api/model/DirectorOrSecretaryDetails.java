@@ -18,7 +18,7 @@ public class DirectorOrSecretaryDetails implements DateOfBirthIncludable<Map<Str
     private IncludeDobType includeDobType;
     private Boolean includeNationality;
     private Boolean includeOccupation;
-    private transient final Map<String, Object> fieldValues = new HashMap<>();
+    private final Map<String, Object> fieldValues = new HashMap<>();
 
     public Boolean getIncludeAddress() {
         return includeAddress;

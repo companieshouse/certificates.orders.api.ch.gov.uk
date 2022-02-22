@@ -17,7 +17,7 @@ public class MemberDetails implements DateOfBirthIncludable<Map<String, Object>>
     private Boolean includeBasicInformation;
     private Boolean includeCountryOfResidence;
     private IncludeDobType includeDobType;
-    private transient final Map<String, Object> fieldValues = new HashMap<>();
+    private final Map<String, Object> fieldValues = new HashMap<>();
 
     public Boolean getIncludeAddress() {
         return includeAddress;
