@@ -72,7 +72,7 @@ class OptionsValidatorHelperTest {
 
         // Then
         assertThat(result, is(true));
-        assertThat(errors, containsInAnyOrder("company type: is a mandatory field"));
+        assertThat(errors, containsInAnyOrder(ApiErrors.raiseError(ApiErrors.ERR_COMPANY_TYPE_REQUIRED, "company type: is a mandatory field")));
     }
 
     public static <T> org.hamcrest.Matcher<java.lang.Iterable<? super T>> hasItem(T item) {

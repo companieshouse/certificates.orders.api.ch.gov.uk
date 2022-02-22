@@ -219,7 +219,7 @@ class CertificatesApiApplicationTest {
 
 		// When and Then
 		// "id: must be null in a create item request"
-		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "certificate-id-supplied");
+		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "id-error");
 	}
 
 	@Test
