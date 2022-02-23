@@ -342,124 +342,124 @@ class CertificateItemsControllerIntegrationTest {
     private static Stream<Arguments> provideInitialCertificateItemFixtures() {
         return Stream.of(
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
                         .withCompanyStatus(CompanyStatus.ADMINISTRATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC.getCompanyType())
+                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .build())
-                );
+        );
     }
 
     //TODO::
     private static Stream<Arguments> provideFailingCreateCertificateFixtures() {
         return Stream.of(
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType())
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withAdministratorsDetails(new AdministratorsDetails())
-                                .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED, "include_administrators_details: must not exist when company status is active")))
+                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED, "include_administrators_details: must not exist when company status is active")))
                         .build())
         );
     }
@@ -1119,7 +1119,7 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemCreate.setCompanyNumber("123456");
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
-        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType());
+        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType().getCompanyType());
         when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -1991,7 +1991,7 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemInitial.setCompanyNumber("123456");
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
-        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType());
+        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType().getCompanyType());
         when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
@@ -1999,14 +1999,14 @@ class CertificateItemsControllerIntegrationTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemInitial)));
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(certificateItemInitial)));
 
         //then
         resultActions
