@@ -54,8 +54,10 @@ import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorServic
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -844,6 +847,8 @@ class CertificateItemsControllerIntegrationTest {
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1361,15 +1366,12 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemOptions options = new CertificateItemOptions();
         options.setDeliveryTimescale(DELIVERY_TIMESCALE);
         options.setCompanyType("ltd");
+        options.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         savedItem.setItemOptions(options);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
         final TestDTO itemUpdate = new TestDTO("Unknown field value");
-
-        final CertificateItem expectedItem = new CertificateItem();
-        expectedItem.setQuantity(QUANTITY);
-        expectedItem.setItemOptions(options);
 
         when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
                 new CompanyProfileResource(EXPECTED_COMPANY_NAME, "ltd", EXPECTED_COMPANY_STATUS));
@@ -1384,7 +1386,13 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
+                .andExpect(jsonPath("$.id", is(EXPECTED_ITEM_ID)))
+                .andExpect(jsonPath("$.quantity", is(QUANTITY)))
+                .andExpect(jsonPath("$.company_number", is(COMPANY_NUMBER)))
+                .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
+                .andExpect(jsonPath("$.item_options.company_type", is(CompanyType.LIMITED_COMPANY.getCompanyType())))
+                .andExpect(jsonPath("$.item_options.company_status", is(CompanyStatus.ACTIVE.getStatusName())))
+                .andExpect(jsonPath("$.item_costs", hasSize(5)))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then

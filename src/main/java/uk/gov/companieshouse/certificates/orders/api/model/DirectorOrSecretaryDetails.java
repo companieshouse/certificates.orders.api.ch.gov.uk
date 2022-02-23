@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.google.gson.Gson;
+import org.springframework.data.annotation.Transient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class DirectorOrSecretaryDetails implements DateOfBirthIncludable<Map<Str
     private IncludeDobType includeDobType;
     private Boolean includeNationality;
     private Boolean includeOccupation;
+    @Transient
     private final Map<String, Object> fieldValues = new HashMap<>();
 
     public Boolean getIncludeAddress() {

@@ -259,6 +259,9 @@ public class CertificateItemsController {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
 
+        // TODO: validation of input request models should be performed in prior to certificate creation. i.e. all
+        //  validation that does not required company status and company type
+
         try {
             // Get company profile
             final CompanyProfileResource companyProfile = companyService.getCompanyProfile(certificateItem.getCompanyNumber());

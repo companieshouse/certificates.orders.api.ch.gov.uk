@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.model;
 
 import com.google.gson.Gson;
+import org.springframework.data.annotation.Transient;
 
 import java.util.Collections;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Objects;
 
 public class LiquidatorsDetails implements BasicInformationIncludable<Map<String, Object>> {
     private Boolean includeBasicInformation;
+    @Transient
     private final Map<String, Object> fieldValues = Collections.emptyMap();
 
     @Override
