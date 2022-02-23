@@ -4,11 +4,12 @@ import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 import java.util.List;
 
 class CertificateItemsFixture {
-    private final String companyType;
+    private final CompanyType companyType;
     private final CompanyStatus companyStatus;
     private final Boolean includeGoodStandingInformation;
     private final LiquidatorsDetails liquidatorsDetails;
@@ -29,7 +30,7 @@ class CertificateItemsFixture {
     }
 
     public static final class Builder {
-        private String companyType;
+        private CompanyType companyType;
         private CompanyStatus companyStatus;
         private Boolean includeGoodStandingInformation;
         private LiquidatorsDetails liquidatorsDetails;
@@ -39,7 +40,7 @@ class CertificateItemsFixture {
         private Builder() {
         }
 
-        public Builder withCompanyType(String companyType) {
+        public Builder withCompanyType(CompanyType companyType) {
             this.companyType = companyType;
             return this;
         }
@@ -74,7 +75,7 @@ class CertificateItemsFixture {
         }
     }
 
-    public String getCompanyType() {
+    public CompanyType getCompanyType() {
         return companyType;
     }
 

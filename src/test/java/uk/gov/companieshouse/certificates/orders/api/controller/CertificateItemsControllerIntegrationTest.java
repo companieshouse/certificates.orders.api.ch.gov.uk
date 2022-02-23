@@ -302,37 +302,37 @@ class CertificateItemsControllerIntegrationTest {
     private static Stream<Arguments> provideLiquidatorsDetailsErrorFixtures() {
         return Stream.of(
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("limited")
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("limited")
+                        .withCompanyType(CompanyType.LIMITED_COMPANY)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("llp")
+                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("llp")
+                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withIncludeGoodStandingInformation(true)
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("limited-partnership")
+                        .withCompanyType(CompanyType.LIMITED_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.ACTIVE)
                         .withLiquidatorsDetails(new LiquidatorsDetails())
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company type is limited-partnership")))
                         .build()),
                 Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType("limited-partnership")
+                        .withCompanyType(CompanyType.LIMITED_PARTNERSHIP)
                         .withCompanyStatus(CompanyStatus.LIQUIDATION)
                         .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_COMPANY_STATUS_INVALID, "company_status: liquidation not valid for company type limited-partnership")))
                         .build())
@@ -726,8 +726,8 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Fails to create certificate item with an invalid certificate type")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidCertificateType() throws Exception {
+    @DisplayName("Fails to create certificate item with an invalid company status")
+    void createCertificateItemFailsToCreateCertificateItemWithInvalidCompanyStatus() throws Exception {
 
         // Given
         final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
@@ -738,9 +738,7 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
 
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_CERTIFICATE_TYPE_MESSAGE));
+        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(ApiErrors.ERR_COMPANY_STATUS_INVALID));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -751,9 +749,9 @@ class CertificateItemsControllerIntegrationTest {
                         .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                         .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(makeIncorporationCertificateTypeInvalid(newItem)))
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_COMPANY_STATUS_INVALID.getError())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -809,12 +807,9 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-
-        final ApiResponse<Object> expectedValidationErrors = new ApiResponse<>(asList(
-                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_LOCATION_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_FORENAME_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(MISSING_COLLECTION_SURNAME_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -827,7 +822,9 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED.getError())))
+                .andExpect(jsonPath("$.errors[1].error", is(ApiErrors.ERR_FORENAME_REQUIRED.getError())))
+                .andExpect(jsonPath("$.errors[2].error", is(ApiErrors.ERR_SURNAME_REQUIRED.getError())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -889,15 +886,9 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-
-        final ApiResponse<Object> expectedValidationErrors = new ApiResponse<>(asList(
-                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_COMPANY_OBJECTS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_GOOD_STANDING_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_DIRECTOR_DETAILS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_REGISTERED_OFFICE_ADDRESS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(DO_NOT_INCLUDE_SECRETARY_DETAILS_INFO_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
-        ));
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.DISSOLUTION));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -910,7 +901,11 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED.getError())))
+                .andExpect(jsonPath("$.errors[1].error", is(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED.getError())))
+                .andExpect(jsonPath("$.errors[2].error", is(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED.getError())))
+                .andExpect(jsonPath("$.errors[3].error", is(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED.getError())))
+                .andExpect(jsonPath("$.errors[4].error", is(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED.getError())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -933,10 +928,9 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-
-        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(singletonList(
-                new uk.gov.companieshouse.api.error.ApiError(INCLUDE_EMAIL_COPY_FOR_SAME_DAY_ONLY_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -949,7 +943,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_INCLUDE_EMAIL_COPY_NOT_ALLOWED.getError())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -1084,12 +1078,9 @@ class CertificateItemsControllerIntegrationTest {
         newItem.setQuantity(QUANTITY);
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(certificateTypeMapperIF.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-
-        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(asList(
-                new uk.gov.companieshouse.api.error.ApiError(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError(CONFLICTING_SECRETARY_DETAILS_MESSAGE, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
-        ));
 
         // When and Then
         mockMvc.perform(post(CERTIFICATES_URL)
@@ -1102,7 +1093,12 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS.getError())))
+                .andExpect(jsonPath("$.errors[1].error", is(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY.getError())))
+                .andExpect(jsonPath("$.errors[2].error", is(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION.getError())))
+                .andExpect(jsonPath("$.errors[3].error", is(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS.getError())))
+                .andExpect(jsonPath("$.errors[4].error", is(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY.getError())))
+                .andExpect(jsonPath("$.errors[5].error", is(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION.getError())))
                 .andDo(MockMvcResultHandlers.print());
 
         // Then
@@ -1299,8 +1295,8 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
 
         final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CERTIFICATE_TYPE);
-        options.setCompanyType(PREVIOUS_COMPANY_TYPE);
+        options.setCertificateType(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        options.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
         options.setCompanyStatus(PREVIOUS_COMPANY_STATUS.getStatusName());
         options.setCollectionLocation(COLLECTION_LOCATION);
         options.setContactNumber(CONTACT_NUMBER);
@@ -1337,8 +1333,8 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdateOptions.setSurname(UPDATED_SURNAME);
 
         final CertificateItemOptions expectedCertificateItemOptions = new CertificateItemOptions();
-        expectedCertificateItemOptions.setCertificateType(UPDATED_CERTIFICATE_TYPE);
-        expectedCertificateItemOptions.setCompanyType(PREVIOUS_COMPANY_TYPE);
+        expectedCertificateItemOptions.setCertificateType(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        expectedCertificateItemOptions.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
         expectedCertificateItemOptions.setCompanyStatus(PREVIOUS_COMPANY_STATUS.getStatusName());
         expectedCertificateItemOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
         expectedCertificateItemOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
@@ -1593,17 +1589,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationErrors =
-                new ApiError(BAD_REQUEST, asList("company_name: must be null",
-                        "description_values: must be null",
-                        "item_costs: must be null",
-                        "kind: must be null",
-                        "etag: must be null",
-                        "links: must be null",
-                        "id: must be null",
-                        "postage_cost: must be null",
-                        "total_item_cost: must be null"));
-
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1614,7 +1599,15 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
+                .andExpect(jsonPath("$.errors[0].error", is("company-name-error")))
+                .andExpect(jsonPath("$.errors[1].error", is("description-values-error")))
+                .andExpect(jsonPath("$.errors[2].error", is("etag-error")))
+                .andExpect(jsonPath("$.errors[3].error", is("id-error")))
+                .andExpect(jsonPath("$.errors[4].error", is("item-costs-error")))
+                .andExpect(jsonPath("$.errors[5].error", is("kind-error")))
+                .andExpect(jsonPath("$.errors[6].error", is("links-error")))
+                .andExpect(jsonPath("$.errors[7].error", is("postage-cost-error")))
+                .andExpect(jsonPath("$.errors[8].error", is("total-item-cost-error")))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1633,9 +1626,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
-
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1646,7 +1636,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeSameDayDeliveryTimescaleInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_JSON_PROCESSING.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1675,7 +1665,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeBelfastCollectionLocationInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error").value(is("json-processing-error")))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_JSON_PROCESSING.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1693,15 +1683,10 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCompanyType("limited");
-        savedOptions.setCompanyStatus("active");
+        savedOptions.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
+        savedOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
-
-        final ApiError expectedValidationErrors =
-                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
-                        MISSING_COLLECTION_FORENAME_MESSAGE,
-                        MISSING_COLLECTION_SURNAME_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1713,45 +1698,9 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(objectMapper.writeValueAsString(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    @DisplayName("Rejects update request with missing collection details to an item with collection delivery method")
-    void updateCertificateItemRejectsMissingCollectionDetailsToCollectionDeliveryMethodItem() throws Exception {
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        final CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
-        savedOptions.setCompanyType("limited");
-        savedOptions.setCompanyStatus("active");
-        savedItem.setItemOptions(savedOptions);
-        repository.save(savedItem);
-
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationErrors =
-                new ApiError(BAD_REQUEST, asList(MISSING_COLLECTION_LOCATION_MESSAGE,
-                        MISSING_COLLECTION_FORENAME_MESSAGE,
-                        MISSING_COLLECTION_SURNAME_MESSAGE));
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                        .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationErrors)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED.getError())))
+                .andExpect(jsonPath("$.errors[1].error", is(ApiErrors.ERR_FORENAME_REQUIRED.getError())))
+                .andExpect(jsonPath("$.errors[2].error", is(ApiErrors.ERR_SURNAME_REQUIRED.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1770,9 +1719,6 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
 
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
-
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -1783,14 +1729,13 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makePostalDeliveryMethodInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_JSON_PROCESSING.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
-    @DisplayName("Rejects update request with include company objects, good standing info and dissolution liquidation")
-    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsGoodStandingInfoAndDissolutionLiquidation()
-            throws Exception {
+    @DisplayName("Rejects update request for dissolved company if good standing or company objects requested")
+    void testRejectUpdateRequestForDissolvedCompanyIfGoodStandingOrCompanyObjectsRequested() throws Exception {
         // Given
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
@@ -1809,45 +1754,6 @@ class CertificateItemsControllerIntegrationTest {
         savedOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                        .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is("include-company-objects-information-error")))
-                .andExpect(jsonPath("$.errors[1].error", is("include-good-standing-information-error")))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    @DisplayName("Rejects update request with include company objects, good standing info updating dissolution liquidation item")
-    void updateCertificateItemRejectsRequestWithIncludeCompanyObjectsGoodStandingInfoUpdatingDissolutionLiquidationItem()
-            throws Exception {
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
-        options.setIncludeCompanyObjectsInformation(true);
-        options.setIncludeGoodStandingInformation(true);
-        itemUpdate.setItemOptions(options);
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        final CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCompanyType("limited");
-        savedOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
-        savedItem.setItemOptions(savedOptions);
-
-        repository.save(savedItem);
-
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1880,7 +1786,7 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCompanyType("limited");
+        savedOptions.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
         savedOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
@@ -1915,8 +1821,8 @@ class CertificateItemsControllerIntegrationTest {
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         final CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCompanyType("limited");
-        savedOptions.setCompanyStatus("active");
+        savedOptions.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
+        savedOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
         savedOptions.setDeliveryTimescale(DeliveryTimescale.STANDARD);
         savedItem.setItemOptions(savedOptions);
         repository.save(savedItem);
@@ -1947,14 +1853,10 @@ class CertificateItemsControllerIntegrationTest {
         itemUpdate.setItemOptions(options);
 
         final CertificateItem savedItem = new CertificateItem();
-        // TODO: this may fail; set company type & company status
         savedItem.setId(EXPECTED_ITEM_ID);
         savedItem.setQuantity(QUANTITY);
         savedItem.setUserId(ERIC_IDENTITY_VALUE);
         repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
 
         // When and then
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
@@ -1966,7 +1868,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makePartialIncludeDobTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_JSON_PROCESSING.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -1997,7 +1899,7 @@ class CertificateItemsControllerIntegrationTest {
                         .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
                         .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error").value(is("json-processing-error")))
+                .andExpect(jsonPath("$.errors[0].error").value(is(ApiErrors.ERR_JSON_PROCESSING.getError())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -2056,6 +1958,8 @@ class CertificateItemsControllerIntegrationTest {
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType().getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
         when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
 
         final ApiResponse<Object> expectedValidationError = new ApiResponse<>(fixture.getExpectedErrors());
