@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
@@ -12,6 +13,7 @@ class CertificateItemsFixture {
     private final Boolean includeGoodStandingInformation;
     private final LiquidatorsDetails liquidatorsDetails;
     private final List<ApiError> expectedErrors;
+    private final AdministratorsDetails administratorsDetails;
 
     private CertificateItemsFixture(Builder builder) {
         companyType = builder.companyType;
@@ -19,6 +21,7 @@ class CertificateItemsFixture {
         includeGoodStandingInformation = builder.includeGoodStandingInformation;
         liquidatorsDetails = builder.liquidatorsDetails;
         expectedErrors = builder.expectedErrors;
+        administratorsDetails = builder.administratorsDetails;
     }
 
     public static Builder newBuilder() {
@@ -31,6 +34,7 @@ class CertificateItemsFixture {
         private Boolean includeGoodStandingInformation;
         private LiquidatorsDetails liquidatorsDetails;
         private List<ApiError> expectedErrors;
+        private AdministratorsDetails administratorsDetails;
 
         private Builder() {
         }
@@ -60,6 +64,11 @@ class CertificateItemsFixture {
             return this;
         }
 
+        public Builder withAdministratorsDetails(AdministratorsDetails administratorsDetails) {
+            this.administratorsDetails = administratorsDetails;
+            return this;
+        }
+
         public CertificateItemsFixture build() {
             return new CertificateItemsFixture(this);
         }
@@ -79,6 +88,10 @@ class CertificateItemsFixture {
 
     public LiquidatorsDetails getLiquidatorsDetails() {
         return liquidatorsDetails;
+    }
+
+    public AdministratorsDetails getAdministratorsDetails() {
+        return administratorsDetails;
     }
 
     public List<ApiError> getExpectedErrors() {
