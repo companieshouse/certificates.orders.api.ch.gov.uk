@@ -1,19 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
-import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
-
-import java.util.Arrays;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +21,21 @@ import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusin
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
+import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
@@ -69,6 +70,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         // Given
         certificateItemOptions.setCompanyType("limited-partnership");
         certificateItemOptions.setCollectionLocation(null);
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -83,17 +85,16 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         // Given
         certificateItemOptions.setDeliveryMethod(COLLECTION);
         certificateItemOptions.setCompanyType("any");
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED, "collection_location: must not be null when delivery method is collection"),
-                ApiErrors.raiseError(ApiErrors.ERR_FORENAME_REQUIRED, "forename: must not be blank when delivery method is collection"),
-                ApiErrors.raiseError(ApiErrors.ERR_SURNAME_REQUIRED, "surname: must not be blank when delivery method is collection")
-        );
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
-        assertThat(errors, containsInAnyOrder(expectedErrors));
+        assertThat(errors, containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_COLLECTION_LOCATION_REQUIRED, "collection_location: must not be null when delivery method is collection"),
+                ApiErrors.raiseError(ApiErrors.ERR_FORENAME_REQUIRED, "forename: must not be blank when delivery method is collection"),
+                ApiErrors.raiseError(ApiErrors.ERR_SURNAME_REQUIRED, "surname: must not be blank when delivery method is collection")
+        ));
     }
 
     @Test
@@ -103,6 +104,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setIncludeCompanyObjectsInformation(true);
         certificateItemOptions.setIncludeGoodStandingInformation(true);
         certificateItemOptions.setCompanyType("any");
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -148,49 +150,31 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setLimitedPartnerDetails(limitedPartnerDetails);
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         certificateItemOptions.setCompanyType("limited");
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when certificate type is dissolution"),
-                ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when certificate type is dissolution"),
+        certificateItemOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
+
+        // When
+        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
+
+        // Then
+        assertThat(errors, containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_COMPANY_OBJECTS_INFORMATION_SUPPLIED, "include_company_objects_information: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when company status is dissolved"),
+                ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when company status is dissolved"),
                 ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is limited"),
                 ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is limited"),
                 ApiErrors.raiseError(ApiErrors.ERR_GENERAL_PARTNER_DETAILS_SUPPLIED, "include_general_partner_details: must not exist when company type is limited"),
                 ApiErrors.raiseError(ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED, "include_limited_partner_details: must not exist when company type is limited"),
                 ApiErrors.raiseError(ApiErrors.ERR_PRINCIPAL_PLACE_OF_BUSINESS_DETAILS_SUPPLIED, "include_principal_place_of_business_details: must not exist when company type is limited"),
                 ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GENERAL_NATURE_OF_BUSINESS_INFORMATION_SUPPLIED, "include_general_nature_of_business_information: must not exist when company type is limited")
-        );
-
-        // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
-
-        // Then
-//        assertThat(errors, containsInAnyOrder(
-//                "include_company_objects_information: must not exist when certificate type is dissolution",
-//                "include_good_standing_information: must not exist when certificate type is dissolution",
-//                "include_general_nature_of_business_information: must not exist when certificate type is dissolution",
-//                "include_registered_office_address_details: must not exist when certificate type is dissolution",
-//                "include_secretary_details: must not exist when certificate type is dissolution",
-//                "include_director_details: must not exist when certificate type is dissolution",
-//                "include_member_details: must not exist when certificate type is dissolution",
-//                "include_designated_member_details: must not exist when certificate type is dissolution",
-//                "include_general_partner_details: must not exist when certificate type is dissolution",
-//                "include_limited_partner_details: must not exist when certificate type is dissolution",
-//                "include_principal_place_of_business_details: must not exist when certificate type is dissolution",
-//                "include_member_details: must not exist when company type is limited",
-//                "include_designated_member_details: must not exist when company type is limited",
-//                "include_general_partner_details: must not exist when company type is limited",
-//                "include_limited_partner_details: must not exist when company type is limited",
-//                "include_principal_place_of_business_details: must not exist when company type is limited",
-//                "include_general_nature_of_business_information: must not exist when company type is limited"));
-        assertThat(errors, containsInAnyOrder(expectedErrors));
+        ));
     }
 
     @Test
@@ -271,29 +255,36 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setDesignatedMemberDetails(designatedMemberDetails);
         certificateItemOptions.setMemberDetails(memberDetails);
         certificateItemOptions.setCompanyType("limited");
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
         assertThat(errors, contains(
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,"include_designated_member_details: must not exist when company type is limited"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,"include_member_details: must not exist when company type is limited"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,"director_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
-                        + " is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED,"director_details: include_dob_type must not be non-null when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,"secretary_details: include_address, include_appointment_date, include_country_of_residence,"
-                        + " include_nationality, include_occupation must not be true when include_basic_information"
-                        + " is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED,"secretary_details: include_dob_type must not be non-null when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,"designated_member_details: include_address, include_appointment_date, include_country_of_residence"
-                        + " must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED,"designated_member_details: include_dob_type must not be non-null when "
-                        + "include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,"member_details: include_address, include_appointment_date, include_country_of_residence"
-                        + " must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED,"member_details: include_dob_type must not be non-null when include_basic_information is false")));
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is limited"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is limited"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS, "director_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_APPOINTMENT_DATE, "director_details.include_appointment_date: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, "director_details.include_country_of_residence: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR, "director_details.include_dob_type: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY, "director_details.include_nationality: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION, "director_details.include_occupation: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS, "secretary_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_APPOINTMENT_DATE, "secretary_details.include_appointment_date: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, "secretary_details.include_country_of_residence: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR, "secretary_details.include_dob_type: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY, "secretary_details.include_nationality: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION, "secretary_details.include_occupation: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBER_DETAILS_INCLUDE_ADDRESS, "designated_member_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBER_DETAILS_INCLUDE_APPOINTMENT_DATE, "designated_member_details.include_appointment_date: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBER_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, "designated_member_details.include_country_of_residence: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBER_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR, "designated_member_details.include_dob_type: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_ADDRESS, "member_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_APPOINTMENT_DATE, "member_details.include_appointment_date: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, "member_details.include_country_of_residence: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR, "member_details.include_dob_type: must not be set when include_basic_information is false")
+                ));
     }
 
     @Test
@@ -346,16 +337,15 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setMemberDetails(memberDetails);
         certificateItemOptions.setDesignatedMemberDetails(designatedMemberDetails);
         certificateItemOptions.setCompanyType("llp");
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is llp"),
-                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is llp")
-        );
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, containsInAnyOrder(expectedErrors));
+        assertThat(errors, containsInAnyOrder(
+                ApiErrors.raiseError(ApiErrors.ERR_DESIGNATED_MEMBERS_DETAILS_SUPPLIED, "include_designated_member_details: must not exist when company type is llp"),
+                ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is llp")
+        ));
     }
 
     @Test
@@ -377,6 +367,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setPrincipalPlaceOfBusinessDetails(principalPlaceOfBusinessDetails);
         certificateItemOptions.setIncludeGeneralNatureOfBusinessInformation(true);
         certificateItemOptions.setCompanyType("limited-partnership");
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
@@ -398,20 +389,20 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(new ApiError("include-address-error", "director_details.include_address", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_address: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(new ApiError("include-nationality-error", "director_details.include_nationality", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_nationality: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(new ApiError("include-occupation-error", "director_details.include_occupation", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_occupation: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(new ApiError("include-address-error", "secretary_details.include_address", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_address: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(new ApiError("include-nationality-error", "secretary_details.include_nationality", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_nationality: must not be true when include_basic_information is false"),
-                ApiErrors.raiseError(new ApiError("include-occupation-error", "secretary_details.include_occupation", ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "include_occupation: must not be true when include_basic_information is false")
-        );
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         // Then
-        assertThat(errors, contains(expectedErrors));
+        assertThat(errors, contains(
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_ADDRESS, "director_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_NATIONALITY, "director_details.include_nationality: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_INCLUDE_OCCUPATION, "director_details.include_occupation: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_ADDRESS, "secretary_details.include_address: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_NATIONALITY, "secretary_details.include_nationality: must not be set when include_basic_information is false"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_INCLUDE_OCCUPATION, "secretary_details.include_occupation: must not be set when include_basic_information is false")
+        ));
     }
 
     @Test
@@ -467,16 +458,16 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setCompanyType("limited-partnership");
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
-        List<ApiError> expectedErrors = Arrays.asList(
-                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when company type is limited-partnership"),
-                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when company type is limited-partnership")
-        );
-	
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
+
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
         //then
-        assertThat(errors, contains(expectedErrors));
+        assertThat(errors, contains(
+                ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when company type is limited-partnership"),
+                ApiErrors.raiseError(ApiErrors.ERR_SECRETARY_DETAILS_SUPPLIED, "include_secretary_details: must not exist when company type is limited-partnership")
+        ));
     }
 
     @Test

@@ -101,9 +101,6 @@ class CertificatesItemControllerTest {
     private Validator constraintValidator;
 
     @Mock
-    private PatchItemRequestValidator patchItemRequestValidator;
-
-    @Mock
     private CertificateOptionsValidator certificateOptionsValidator;
 
     @Mock
@@ -146,7 +143,7 @@ class CertificatesItemControllerTest {
     @DisplayName("Update certificate item supplied patch has validation errors")
     void updateCertificateItemPatchValidationErrors() {
 
-        when(patchItemRequestValidator.getValidationErrors(patch))
+        when(validator.getValidationErrors(patch))
                 .thenReturn(Collections.singletonList(ApiErrors.ERR_SURNAME_REQUIRED));
 
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
