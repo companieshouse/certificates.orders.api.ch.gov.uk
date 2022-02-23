@@ -13,6 +13,7 @@ import javax.json.JsonMergePatch;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,13 +56,11 @@ public class PatchItemRequestValidator {
                     objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
             final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
             return violations.stream()
-                    .map(violation -> raiseError(violation))
+                    .sorted(Comparator.comparing(a -> a.getPropertyPath().toString()))
+                    .map(this::raiseError)
                     .collect(Collectors.toList());
         } catch (JsonProcessingException jpe) {
             return singletonList(ApiErrors.ERR_JSON_PROCESSING);
-        } catch (IOException ex) {
-            // This exception will not occur because there are no low-level IO operations here.
-            return EMPTY_LIST;
         }
     }
 
