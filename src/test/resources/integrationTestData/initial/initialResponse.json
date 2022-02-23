@@ -1,0 +1,9 @@
+{
+  "company_number": "12345678",
+  "company_name": "ACME Limited",
+  "item_options": {
+    "company_status": "active",
+    "company_type": "ltd"
+  },
+  "quantity": 1
+}

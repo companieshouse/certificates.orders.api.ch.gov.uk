@@ -43,6 +43,7 @@
 			See https://github.com/stefanbirkner/system-rules/issues/70 -->
 		<system-rules-version>1.17.2</system-rules-version>
 		<powermock.version>2.0.6</powermock.version>
+		<commons.io.version>2.11.0</commons.io.version>
 
 		<!-- Docker -->
 		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
@@ -114,6 +115,12 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>${commons.lang.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons.io.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>

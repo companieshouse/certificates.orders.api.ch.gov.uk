@@ -293,176 +293,12 @@ class CertificateItemsControllerIntegrationTest {
     @MockBean
     private CompanyProfileResource companyProfileResource;
     @MockBean
+    // TODO: use real CertificateTypeMapper object
     private CompanyProfileToCertificateTypeMapper certificateTypeMapperIF;
 
     private CertificateItemCreate certificateItemCreate;
 
     private CertificateItemOptionsRequest certificateItemOptions;
-
-    private static Stream<Arguments> provideLiquidatorsDetailsErrorFixtures() {
-        return Stream.of(
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company status is active")))
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .withIncludeGoodStandingInformation(true)
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is liquidation")))
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .withLiquidatorsDetails(new LiquidatorsDetails())
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist when company type is limited-partnership")))
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_COMPANY_STATUS_INVALID, "company_status: liquidation not valid for company type limited-partnership")))
-                        .build())
-        );
-    }
-
-    private static Stream<Arguments> provideInitialCertificateItemFixtures() {
-        return Stream.of(
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
-                        .withCompanyStatus(CompanyStatus.ADMINISTRATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PUBLIC_LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.OLD_PUBLIC_COMPANY)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build()),
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.PRIVATE_UNLIMITED_NSC)
-                        .withCompanyStatus(CompanyStatus.LIQUIDATION)
-                        .build())
-        );
-    }
-
-    //TODO::
-    private static Stream<Arguments> provideFailingCreateCertificateFixtures() {
-        return Stream.of(
-                Arguments.of(CertificateItemsFixture.newBuilder()
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .withAdministratorsDetails(new AdministratorsDetails())
-                        .withExpectedErrors(singletonList(ApiErrors.raiseError(ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED, "include_administrators_details: must not exist when company status is active")))
-                        .build())
-        );
-    }
 
     @AfterEach
     void tearDown() {
@@ -1105,50 +941,6 @@ class CertificateItemsControllerIntegrationTest {
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    // TODO::
-    @ParameterizedTest
-    @MethodSource("provideFailingCreateCertificateFixtures")
-    @DisplayName("Test create a certificate item fails if incorrect details are supplied for given company status and type")
-    void createCertificateItemFailsIfAdministratorsDetailsSuppliedAndCompanyNotInAdministration(CertificateItemsFixture fixture) throws Exception {
-        //given
-        CertificateItemOptionsRequest certificateItemOptionsRequest = new CertificateItemOptionsRequest();
-        certificateItemOptionsRequest.setIncludeGoodStandingInformation(fixture.getIncludeGoodStandingInformation());
-        certificateItemOptionsRequest.setLiquidatorsDetails(fixture.getLiquidatorsDetails());
-        certificateItemOptionsRequest.setAdministratorsDetails(fixture.getAdministratorsDetails());
-        CertificateItemCreate certificateItemCreate = new CertificateItemCreate();
-        certificateItemCreate.setCompanyNumber("123456");
-
-        when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
-        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType().getCompanyType());
-        when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-
-        //when
-        ResultActions resultActions = mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(certificateItemInitial)));
-
-        //then
-        resultActions
-                .andExpect(status().isCreated())
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(EXPECTED_ITEM_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.company_name").value("ACME Limited"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.company_number").value("123456"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_status").value(fixture.getCompanyStatus().getStatusName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value(fixture.getCompanyType()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.user_id").value(ERIC_IDENTITY_VALUE));
-    }
-
     @Test
     @DisplayName("Successfully gets a certificate item")
     void getCertificateItemSuccessfully() throws Exception {
@@ -1347,6 +1139,156 @@ class CertificateItemsControllerIntegrationTest {
         expectedCertificateItemOptions.setIncludeGoodStandingInformation(UPDATED_INCLUDE_GOOD_STANDING_INFORMATION);
         expectedCertificateItemOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
         expectedCertificateItemOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        expectedCertificateItemOptions.setSurname(UPDATED_SURNAME);
+
+        final CertificateItemResponse expectedItem = new CertificateItemResponse();
+        expectedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
+        expectedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
+        expectedItem.setQuantity(UPDATED_QUANTITY);
+        expectedItem.setItemOptions(expectedCertificateItemOptions);
+        expectedItem.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
+        expectedItem.setDescription(DESCRIPTION);
+        expectedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, PREVIOUS_COMPANY_NUMBER));
+
+        final List<ItemCosts> costs = generateExpectedCosts(UPDATED_QUANTITY, UPDATED_DELIVERY_TIMESCALE);
+        expectedItem.setItemCosts(costs);
+        expectedItem.setEtag(TOKEN_ETAG);
+        expectedItem.setLinks(LINKS);
+        expectedItem.setPostageCost(POSTAGE_COST);
+        expectedItem.setTotalItemCost(calculateExpectedTotalItemCost(costs, POSTAGE_COST));
+
+        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
+
+        // When and then
+        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+                        .content(objectMapper.writeValueAsString(itemUpdate)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
+                .andDo(MockMvcResultHandlers.print());
+
+        // Then
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(EXPECTED_ITEM_ID);
+        assertThat(retrievedCertificateItem.isPresent(), is(true));
+        assertThat(retrievedCertificateItem.get().getId(), is(EXPECTED_ITEM_ID));
+        assertThat(retrievedCertificateItem.get().getCompanyNumber(),
+                is(PREVIOUS_COMPANY_NUMBER));
+        assertThat(retrievedCertificateItem.get().getCompanyName(),
+                is(PREVIOUS_COMPANY_NAME));
+        assertThat(retrievedCertificateItem.get().getQuantity(), is(UPDATED_QUANTITY));
+        assertThat(retrievedCertificateItem.get().getItemOptions(),
+                is(expectedCertificateItemOptions));
+        assertThat(retrievedCertificateItem.get().getLinks(), is(LINKS));
+
+        // Costs are calculated on the fly and are NOT to be saved to the DB.
+        assertThat(retrievedCertificateItem.get().getItemCosts(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getPostageCost(), is(nullValue()));
+        assertThat(retrievedCertificateItem.get().getTotalItemCost(), is(nullValue()));
+
+        assertItemOptionsEnumValueNamesSavedCorrectly(ITEM_OPTIONS_ENUM_FIELDS);
+
+        verify(etagGenerator).generateEtag();
+    }
+
+    @ParameterizedTest
+    @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#betterInitial")
+    void testInitialEndpoint(JsonRequestFixture requestFixture) throws Exception {
+        when(companyProfileResource.getCompanyStatus()).thenReturn(requestFixture.getCompanyStatus());
+        when(companyProfileResource.getCompanyType()).thenReturn(requestFixture.getCompanyType().getCompanyType());
+        when(companyProfileResource.getCompanyName()).thenReturn("ACME Limited");
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+        when(certificateTypeMapperIF.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
+        mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestFixture.getRequest()))
+                .andExpect(content().json(requestFixture.getExpectedResponse()));
+    }
+
+    @Test
+    @DisplayName("Successfully updates certificate item for company in administration")
+    void updateCertificateItemSuccessfullyUpdatesCertificateItemForCompanyInAdministration() throws Exception {
+
+        // Given
+        final CertificateItem savedItem = new CertificateItem();
+        savedItem.setCompanyNumber(PREVIOUS_COMPANY_NUMBER);
+        savedItem.setCompanyName(PREVIOUS_COMPANY_NAME);
+        savedItem.setId(EXPECTED_ITEM_ID);
+        savedItem.setQuantity(QUANTITY);
+        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+        savedItem.setCustomerReference(CUSTOMER_REFERENCE);
+        savedItem.setDescription(DESCRIPTION);
+        savedItem.setDescriptionValues(singletonMap(COMPANY_NUMBER_KEY, COMPANY_NUMBER));
+
+        AdministratorsDetails administratorsDetails = new AdministratorsDetails();
+        administratorsDetails.setIncludeBasicInformation(true);
+        final CertificateItemOptions options = new CertificateItemOptions();
+        options.setCertificateType(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        options.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
+        options.setCompanyStatus(CompanyStatus.ADMINISTRATION.getStatusName());
+        options.setCollectionLocation(COLLECTION_LOCATION);
+        options.setContactNumber(CONTACT_NUMBER);
+        options.setDeliveryMethod(DELIVERY_METHOD);
+        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
+        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setForename(FORENAME);
+        options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
+        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
+        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
+        options.setAdministratorsDetails(administratorsDetails);
+        options.setSurname(SURNAME);
+        savedItem.setItemOptions(options);
+        savedItem.setLinks(LINKS);
+        repository.save(savedItem);
+
+        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+        final CertificateItemOptionsRequest itemUpdateOptions = new CertificateItemOptionsRequest();
+        AdministratorsDetails updatedAdministratorsDetails = new AdministratorsDetails();
+        updatedAdministratorsDetails.setIncludeBasicInformation(false);
+        itemUpdate.setQuantity(UPDATED_QUANTITY);
+        itemUpdate.setCustomerReference(UPDATED_CUSTOMER_REFERENCE);
+        itemUpdate.setItemOptions(itemUpdateOptions);
+        itemUpdateOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        itemUpdateOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
+        itemUpdateOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
+        itemUpdateOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        itemUpdateOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemUpdateOptions.setForename(FORENAME);
+        itemUpdateOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        itemUpdateOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        itemUpdateOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
+        itemUpdateOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        itemUpdateOptions.setAdministratorsDetails(updatedAdministratorsDetails);
+        itemUpdateOptions.setSurname(UPDATED_SURNAME);
+
+        final CertificateItemOptions expectedCertificateItemOptions = new CertificateItemOptions();
+        expectedCertificateItemOptions.setCertificateType(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        expectedCertificateItemOptions.setCompanyType(CompanyType.LIMITED_COMPANY.getCompanyType());
+        expectedCertificateItemOptions.setCompanyStatus(CompanyStatus.ADMINISTRATION.getStatusName());
+        expectedCertificateItemOptions.setCollectionLocation(UPDATED_COLLECTION_LOCATION);
+        expectedCertificateItemOptions.setContactNumber(UPDATED_CONTACT_NUMBER);
+        expectedCertificateItemOptions.setDeliveryMethod(UPDATED_DELIVERY_METHOD);
+        expectedCertificateItemOptions.setDeliveryTimescale(UPDATED_DELIVERY_TIMESCALE);
+        expectedCertificateItemOptions.setDirectorDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        expectedCertificateItemOptions.setForename(FORENAME);
+        expectedCertificateItemOptions.setIncludeCompanyObjectsInformation(UPDATED_INCLUDE_COMPANY_OBJECTS_INFORMATION);
+        expectedCertificateItemOptions.setIncludeEmailCopy(UPDATED_INCLUDE_EMAIL_COPY);
+        expectedCertificateItemOptions.setRegisteredOfficeAddressDetails(UPDATED_REGISTERED_OFFICE_ADDRESS_DETAILS);
+        expectedCertificateItemOptions.setSecretaryDetails(UPDATED_DIRECTOR_OR_SECRETARY_DETAILS);
+        expectedCertificateItemOptions.setAdministratorsDetails(updatedAdministratorsDetails);
         expectedCertificateItemOptions.setSurname(UPDATED_SURNAME);
 
         final CertificateItemResponse expectedItem = new CertificateItemResponse();
@@ -1944,9 +1886,9 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    @ParameterizedTest
-    @MethodSource("provideLiquidatorsDetailsErrorFixtures")
-    void correctErrorsWhenCertificateLiquidatorsDetailsAreSupplied(CertificateItemsFixture fixture)
+    @ParameterizedTest(name = "Raise errors if {0}")
+    @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#invalidStatusTypeErrorFixtures")
+    void correctErrorsRaisedWhenInvalidOptionsAreSuppliedForCompanyStatusAndType(CertificateItemsFixture fixture)
             throws Exception {
         // Given
         certificateItemCreate.setCompanyNumber(COMPANY_NUMBER);
@@ -1954,6 +1896,7 @@ class CertificateItemsControllerIntegrationTest {
         certificateItemCreate.setQuantity(QUANTITY);
 
         certificateItemOptions.setLiquidatorsDetails(fixture.getLiquidatorsDetails());
+        certificateItemOptions.setAdministratorsDetails(fixture.getAdministratorsDetails());
         certificateItemOptions.setIncludeGoodStandingInformation(fixture.getIncludeGoodStandingInformation());
 
         when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
@@ -1983,7 +1926,7 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideInitialCertificateItemFixtures")
+    @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#initialCertificateItemFixtures")
     @DisplayName("Test successfully create an initial certificate item for applicable companies types  (types* all except LP) and status'")
     void whenInitialCertificateItemRequestShouldRespondWithCreatedCertificateItem(CertificateItemsFixture fixture) throws Exception {
         //given
@@ -2017,7 +1960,7 @@ class CertificateItemsControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.company_number").value("123456"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_status").value(fixture.getCompanyStatus().getStatusName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value(fixture.getCompanyType()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item_options.company_type").value(fixture.getCompanyType().getCompanyType()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.user_id").value(ERIC_IDENTITY_VALUE));
     }
 
