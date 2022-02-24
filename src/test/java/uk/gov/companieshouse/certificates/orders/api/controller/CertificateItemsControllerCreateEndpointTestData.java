@@ -24,7 +24,6 @@ class CertificateItemsControllerCreateEndpointTestData {
                             .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                             .withDescription("Successfully create certificate resource for an active limited company")
                             .build()),
-                    // TODO: change global exception handler to return List<ApiError>
                     Arguments.of(JsonRequestFixture.builder()
                             .withRequestBody(IOUtils.resourceToString("/integrationTestData/create/negative/deserialisation_error/request.json", StandardCharsets.UTF_8))
                             .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())

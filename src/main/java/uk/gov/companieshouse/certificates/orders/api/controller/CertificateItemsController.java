@@ -36,6 +36,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
 import javax.validation.Validator;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,14 +117,9 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
-    public ResponseEntity<Object> createCertificateItem(final @RequestBody CertificateItemCreate certificateItemCreate,
+    public ResponseEntity<Object> createCertificateItem(final @RequestBody @Valid CertificateItemCreate certificateItemCreate,
                                                         HttpServletRequest servletRequest,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Set<ConstraintViolation<CertificateItemCreate>> violations = constraintValidator.validate(certificateItemCreate);
-        if (!violations.isEmpty()) {
-            return errorResponse(BAD_REQUEST, violations);
-        }
-
         CertificateItem certificateItem = mapper.certificateItemCreateToCertificateItem(certificateItemCreate);
 
         return createCertificateItem(servletRequest,
@@ -158,15 +154,9 @@ public class CertificateItemsController {
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.initial}")
-    public ResponseEntity<Object> initialCertificateItem(final @RequestBody CertificateItemInitial certificateItemInitial,
+    public ResponseEntity<Object> initialCertificateItem(final @RequestBody @Valid CertificateItemInitial certificateItemInitial,
                                                          HttpServletRequest servletRequest,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-
-        Set<ConstraintViolation<CertificateItemInitial>> violations = constraintValidator.validate(certificateItemInitial);
-        if (!violations.isEmpty()) {
-            return errorResponse(BAD_REQUEST, violations);
-        }
-
         CertificateItem certificateItem = mapper.certificateItemInitialToCertificateItem(certificateItemInitial);
 
         return createCertificateItem(servletRequest,

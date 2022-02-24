@@ -100,6 +100,7 @@ public class UserAuthorisationInterceptor extends HandlerInterceptorAdapter {
                     return false;
                 }
             } else {
+                // TODO: exposes whether a resource has been created for the given ID or not
                 logMap.put(STATUS_LOG_KEY,NOT_FOUND);
                 LOGGER.error("Resource certificate item not found", logMap);
                 response.setStatus(NOT_FOUND.value());

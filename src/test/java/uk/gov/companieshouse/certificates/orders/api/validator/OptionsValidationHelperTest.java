@@ -23,7 +23,7 @@ import static uk.gov.companieshouse.certificates.orders.api.model.CertificateTyp
 import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
 
 @ExtendWith(MockitoExtension.class)
-class OptionsValidatorHelperTest {
+class OptionsValidationHelperTest {
     private CertificateItemOptions certificateItemOptions;
 
     private LiquidatorsDetails liquidatorsDetails;
@@ -239,6 +239,24 @@ class OptionsValidatorHelperTest {
 
         // Then
         assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED, "include_liquidators_details: must not exist")));
+    }
+
+    @Test
+    void correctlyErrorsWhenLPCompanyAndRegisteredOfficeAddressDetailsRequested() {
+        // Given
+        RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+        registeredOfficeAddressDetails.setIncludeAddressRecordsType(IncludeAddressRecordsType.CURRENT);
+        certificateItemOptions.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+        certificateItemOptions.setCompanyType("limited-partnership");
+        certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
+        OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
+
+        // When
+        helper.validateLimitedPartnershipOptions();
+        List<ApiError> errors = helper.getErrors();
+
+        // Then
+        assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED, "include_registered_office_address_details: must not exist when company type is limited-partnership")));
     }
 
     @Test

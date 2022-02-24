@@ -19,6 +19,8 @@ import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 
+import java.util.Optional;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,7 +63,8 @@ public class CertificateItemsControllerUpdateEndpointIntegrationTest {
             "CertificateItemsControllerUpdateEndpointTestData#updateEndpointTestData")
     @DisplayName("Update certificate endpoint")
     void testUpdateEndpoint(JsonRequestFixture requestFixture) throws Exception {
-        mongoTemplate.insert(Document.parse(requestFixture.getSavedResource()), "certificates");
+        Optional.ofNullable(requestFixture.getSavedResource())
+                .ifPresent(resource -> mongoTemplate.insert(Document.parse(resource), "certificates"));
         mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)

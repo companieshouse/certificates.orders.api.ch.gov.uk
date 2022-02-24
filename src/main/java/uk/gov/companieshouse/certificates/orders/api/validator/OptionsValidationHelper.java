@@ -41,8 +41,11 @@ class OptionsValidationHelper {
     }
 
     void validateLimitedPartnershipOptions() {
-        notLimitedCompanyDetails();
-        notLLPDetails();
+        notDirectorsDetails();
+        notSecretaryDetails();
+        notDesignatedMemberDetails();
+        notMemberDetails();
+        notRegisteredOfficeAddressDetails();
         if (options.getLiquidatorsDetails() != null) {
             if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
                 ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
@@ -208,6 +211,15 @@ class OptionsValidationHelper {
         if (nonNull(options.getLimitedPartnerDetails())) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_LIMITED_PARTNER_DETAILS_SUPPLIED,
                     "include_limited_partner_details: must not exist when company type is %s",
+                    options.getCompanyType());
+        }
+    }
+
+    private void notRegisteredOfficeAddressDetails() {
+        if (nonNull(options.getRegisteredOfficeAddressDetails())) {
+            ApiErrors.raiseError(errors,
+                    ApiErrors.ERR_REGISTERED_OFFICE_ADDRESS_DETAILS_SUPPLIED,
+                    "include_registered_office_address_details: must not exist when company type is %s",
                     options.getCompanyType());
         }
     }

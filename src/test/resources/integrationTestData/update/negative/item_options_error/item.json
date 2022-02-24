@@ -1,0 +1,35 @@
+{
+  "_id": "CRT-123456-123456",
+  "created_at" : ISODate("2022-01-01T12:00:00.000Z"),
+  "updated_at" : ISODate("2022-01-01T12:00:00.000Z"),
+  "data": {
+    "company_name": "ACME LIMITED",
+    "company_number": "12345678",
+    "customer_reference": "Test",
+    "item_options": {
+      "certificate_type": "incorporation-with-all-name-changes",
+      "collection_location": "cardiff",
+      "company_type": "limited-partnership",
+      "company_status": "active",
+      "contact_number": "12345678901",
+      "delivery_method": "collection",
+      "delivery_timescale": "standard",
+      "forename": "John",
+      "general_partner_details": {
+        "include_basic_information": true
+      },
+      "include_email_copy": false,
+      "include_good_standing_information": false,
+      "limited_partner_details": {
+        "include_basic_information": true
+      },
+      "principal_place_of_business": {
+        "include_address_records_type": "current-previous-and-prior",
+        "include_dates": false
+      },
+      "surname": "Smith"
+    },
+    "quantity": 1
+  },
+  "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT"
+}
