@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.error.ApiError;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
@@ -35,7 +34,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
 import java.util.Collections;
@@ -43,9 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -300,14 +296,5 @@ public class CertificateItemsController {
         public CertificateItemOptions getItemOptions() {
             return itemOptions;
         }
-    }
-
-    private <T> ResponseEntity<Object> errorResponse(HttpStatus httpStatus, Set<ConstraintViolation<T>> violations) {
-        List<ApiError> apiErrors = violations.stream().map(v -> {
-            String fieldName = fieldNameConverter.toSnakeCase(v.getPropertyPath().toString());
-            return errorMap.getOrDefault(fieldName,
-                    new ApiError(fieldName + ": " + v.getMessage(), fieldName, ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION));
-        }).collect(Collectors.toList());
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(apiErrors));
     }
 }

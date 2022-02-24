@@ -67,8 +67,8 @@ class GlobalExceptionHandlerTest {
         when(mex.getBindingResult()).thenReturn(result);
         when(result.getFieldErrors()).thenReturn(Collections.singletonList(new FieldError(OBJECT1, FIELD1, MESSAGE1)));
         when(result.getGlobalErrors()).thenReturn(Collections.singletonList(new ObjectError(OBJECT2, MESSAGE2)));
-        when(converter.toSnakeCase(FIELD1)).thenReturn(FIELD1);
-        when(converter.toSnakeCase(OBJECT2)).thenReturn(OBJECT2);
+        when(converter.fromUpperCamelToSnakeCase(FIELD1)).thenReturn(FIELD1);
+        when(converter.fromUpperCamelToSnakeCase(OBJECT2)).thenReturn(OBJECT2);
 
         // When
         final ResponseEntity<Object> response = handlerUnderTest.handleMethodArgumentNotValid(mex, headers, ORIGINAL_STATUS, request);

@@ -63,9 +63,6 @@ class CertificatesApiApplicationTest {
 	@Autowired
 	private WebTestClient webTestClient;
 
-	@Rule
-	public EnvironmentVariables environmentVariables = new EnvironmentVariables();
-
     @Test
     @DisplayName("Create rejects missing company number")
     void createCertificateItemRejectsMissingCompanyNumber() {
@@ -75,51 +72,6 @@ class CertificatesApiApplicationTest {
 
 		// When and Then
 		postCreateRequestAndExpectBadRequestResponse(newCertificateItemCreate, "company-number-is-null");
-    }
-
-	@Test
-	@DisplayName("Create does not reject missing item costs")
-	void createCertificateItemDoesNotRejectMissingItemCosts() throws CompanyServiceException {
-
-		// Given
-		final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
-		when(companyProfileResource.getCompanyName()).thenReturn("name");
-		when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
-		when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
-		when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-		// When and Then
-		webTestClient.post().uri("/orderable/certificates")
-				.header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-				.header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-				.header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-				.header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-				.header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(fromValue(newCertificateItemCreate))
-				.exchange()
-				.expectStatus().isCreated();
-
-	}
-	
-    @Test
-    @DisplayName("Create rejects wrong permission")
-    void createCertificateUnauthorised() {
-
-        // Given
-        final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
-
-        // When and Then
-        webTestClient.post().uri("/orderable/certificates")
-                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "read"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(fromValue(newCertificateItemCreate))
-                .exchange()
-                .expectStatus().isUnauthorized();
     }
 
 	@Test
@@ -279,64 +231,6 @@ class CertificatesApiApplicationTest {
 		postCreateRequestAndExpectBadRequestResponseStatusError(newCertificateItemCreate, COMPANY_NOT_FOUND_ERROR);
 	}
 
-	@Test
-	@DisplayName("Check returns true where all required environment variables are populated")
-	void checkEnvironmentVariablesAllPresentReturnsTrue() {
-
-		stream(RequiredEnvironmentVariables.values()).forEach(
-				variable -> environmentVariables.set(variable.getName(), variable.getName()));
-
-		assertTrue(CertificatesApiApplication.checkEnvironmentVariables());
-
-		stream(RequiredEnvironmentVariables.values()).forEach(
-				variable -> environmentVariables.clear(variable.getName()));
-	}
-
-	@Test
-	@DisplayName("Check returns false if ITEMS_DATABASE is not populated")
-	void checkEnvironmentVariablesItemsDatabaseMissingReturnsFalse() {
-		checkEnvironmentVariableMissing(ITEMS_DATABASE);
-	}
-
-	@Test
-	@DisplayName("Check returns false if MONGODB_URL is not populated")
-	void checkEnvironmentVariablesMongoDbUrlMissingReturnsFalse() {
-		checkEnvironmentVariableMissing(MONGODB_URL);
-	}
-
-	@Test
-	@DisplayName("Check returns false if CHS_API_KEY is not populated")
-	void checkEnvironmentVariablesChsApiKeyMissingReturnsFalse() {
-		checkEnvironmentVariableMissing(CHS_API_KEY);
-	}
-
-	@Test
-	@DisplayName("Check returns false if API_URL is not populated")
-	void checkEnvironmentVariablesApiUrlMissingReturnsFalse() {
-		checkEnvironmentVariableMissing(API_URL);
-	}
-
-	/**
-	 * Utility method that asserts that if the environment variable specified is not populated,
-	 * then {@link CertificatesApiApplication#checkEnvironmentVariables()} returns <code>false</code>.
-	 * @param missingVariable the {@link RequiredEnvironmentVariables} value indicating the variable that is to be
-	 *                        left unpopulated for the test
-	 */
-	private void checkEnvironmentVariableMissing(final RequiredEnvironmentVariables missingVariable) {
-		stream(RequiredEnvironmentVariables.values()).forEach(
-				variable -> {
-					if (variable != missingVariable) {
-						environmentVariables.set(variable.getName(), variable.getName());
-					}
-				});
-		assertFalse(CertificatesApiApplication.checkEnvironmentVariables());
-		stream(RequiredEnvironmentVariables.values()).forEach(
-				variable -> {
-					if (variable != missingVariable) {
-						environmentVariables.clear(variable.getName());
-					}
-				});
-	}
 
 	/**
 	 * Utility method that posts the create certificate item request, asserts a bad request status response and an

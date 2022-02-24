@@ -178,7 +178,7 @@ public class CertificateOptionsValidator {
         final List<ApiError> errors = new ArrayList<>();
         if (!incorrectlySetFields.isEmpty()) {
             errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
-                            new ApiError(fieldNameConverter.toLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                            new ApiError(fieldNameConverter.fromLowerUnderscoreToLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
                     .withErrorMessage(detailsFieldName + "." + field + ": must not be set when include_basic_information is false")
                     .build()).collect(Collectors.toList()));
         }

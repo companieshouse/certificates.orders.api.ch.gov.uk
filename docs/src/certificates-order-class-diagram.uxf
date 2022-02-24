@@ -4,12 +4,12 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>477</x>
-      <y>207</y>
+      <x>549</x>
+      <y>180</y>
       <w>324</w>
       <h>126</h>
     </coordinates>
-    <panel_attributes>api.error::
+    <panel_attributes>uk.gov.companieshouse.api.error::
 ApiError
 --
 String error
@@ -24,8 +24,8 @@ bg=cyan
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>558</x>
-      <y>414</y>
+      <x>630</x>
+      <y>387</y>
       <w>144</w>
       <h>63</h>
     </coordinates>
@@ -33,30 +33,31 @@ bg=cyan
 ApiErrorResponse
 -
 List&lt;ApiError&gt; errors
-bg=cyan</panel_attributes>
+bg=gray</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>621</x>
-      <y>324</y>
+      <x>693</x>
+      <y>297</y>
       <w>45</w>
       <h>108</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-m1=0..n</panel_attributes>
+m1=0..n
+bg=gray</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>117</x>
-      <y>207</y>
+      <x>189</x>
+      <y>180</y>
       <w>243</w>
       <h>126</h>
     </coordinates>
-    <panel_attributes>api.model::
+    <panel_attributes>uk.gov.companieshouse.api.error::
 ApiResponse
 template=&lt;T&gt;
 --
@@ -70,28 +71,38 @@ bg=cyan</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>324</x>
-      <y>270</y>
+      <x>396</x>
+      <y>243</y>
       <w>171</w>
-      <h>27</h>
+      <h>36</h>
     </coordinates>
-    <panel_attributes>lt=&lt;-</panel_attributes>
+    <panel_attributes>lt=&lt;-
+m1=0..n</panel_attributes>
     <additional_attributes>170.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>513</x>
-      <y>45</y>
+      <x>198</x>
+      <y>378</y>
       <w>234</w>
       <h>81</h>
     </coordinates>
-    <panel_attributes>certificates.orders.api.controller::
-ApiError
---
-String HTTPStatus status
-List&lt;String&gt; errors
-bg=red</panel_attributes>
+    <panel_attributes>org.springframework.http::
+template=&lt;Object&gt;
+ResponseEntity
+--</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>288</x>
+      <y>297</y>
+      <w>27</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
   </element>
 </diagram>

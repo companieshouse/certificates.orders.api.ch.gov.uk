@@ -12,13 +12,11 @@ import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import javax.json.JsonMergePatch;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 
 /**
@@ -66,8 +64,8 @@ public class PatchItemRequestValidator {
 
     private ApiError raiseError(ConstraintViolation<PatchValidationCertificateItemDTO> violation) {
         String fieldName = violation.getPropertyPath().toString();
-        String snakeCaseFieldName = converter.toSnakeCase(fieldName);
-        return ApiErrorBuilder.builder(new ApiError(converter.toLowerHyphenCase(snakeCaseFieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+        String snakeCaseFieldName = converter.fromUpperCamelToSnakeCase(fieldName);
+        return ApiErrorBuilder.builder(new ApiError(converter.fromLowerUnderscoreToLowerHyphenCase(snakeCaseFieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
                 .withErrorMessage(snakeCaseFieldName + ": " + violation.getMessage())
                 .build();
     }

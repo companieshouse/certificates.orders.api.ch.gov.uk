@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
@@ -49,6 +50,7 @@ import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddre
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyNotFoundException;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.service.EtagGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
@@ -78,6 +80,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
+import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
@@ -305,122 +309,6 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Successfully creates certificate item")
-    void createCertificateItemSuccessfullyCreatesCertificateItem() throws Exception {
-        // Given
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
-        itemOptionsRequest.setContactNumber(CONTACT_NUMBER);
-        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
-        itemOptionsRequest.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        itemOptionsRequest.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        itemOptionsRequest.setForename(FORENAME);
-        itemOptionsRequest.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
-        itemOptionsRequest.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
-        itemOptionsRequest.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
-        itemOptionsRequest.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
-        itemOptionsRequest.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        itemOptionsRequest.setSurname(SURNAME);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setQuantity(QUANTITY);
-        newItem.setCustomerReference(CUSTOMER_REFERENCE);
-        newItem.setItemOptions(itemOptionsRequest);
-
-        final CertificateItemOptions options = new CertificateItemOptions();
-        options.setCertificateType(CERTIFICATE_TYPE);
-        options.setCompanyType(PREVIOUS_COMPANY_TYPE);
-        options.setCollectionLocation(COLLECTION_LOCATION);
-        options.setContactNumber(CONTACT_NUMBER);
-        options.setDeliveryMethod(DELIVERY_METHOD);
-        options.setDeliveryTimescale(DELIVERY_TIMESCALE);
-        options.setDirectorDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setForename(FORENAME);
-        options.setIncludeCompanyObjectsInformation(INCLUDE_COMPANY_OBJECTS_INFORMATION);
-        options.setIncludeEmailCopy(INCLUDE_EMAIL_COPY);
-        options.setIncludeGoodStandingInformation(INCLUDE_GOOD_STANDING_INFORMATION);
-        options.setRegisteredOfficeAddressDetails(REGISTERED_OFFICE_ADDRESS_DETAILS);
-        options.setSecretaryDetails(DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setSurname(SURNAME);
-
-        final CertificateItemResponse expectedItem = new CertificateItemResponse();
-        expectedItem.setId(EXPECTED_ITEM_ID);
-        expectedItem.setCompanyNumber(newItem.getCompanyNumber());
-        expectedItem.setCompanyName(EXPECTED_COMPANY_NAME);
-        expectedItem.setKind("item#certificate");
-        expectedItem.setDescriptionIdentifier("certificate");
-        final List<ItemCosts> costs = generateExpectedCosts(QUANTITY, DELIVERY_TIMESCALE);
-        expectedItem.setItemCosts(costs);
-        expectedItem.setItemOptions(options);
-        expectedItem.setPostalDelivery(true);
-        expectedItem.setQuantity(QUANTITY);
-        expectedItem.setCustomerReference(CUSTOMER_REFERENCE);
-        expectedItem.setLinks(LINKS);
-        expectedItem.setEtag(TOKEN_ETAG);
-        expectedItem.setPostageCost(POSTAGE_COST);
-        final String totalItemCost = calculateExpectedTotalItemCost(costs, POSTAGE_COST);
-        expectedItem.setTotalItemCost(totalItemCost);
-
-        when(etagGenerator.generateEtag()).thenReturn(TOKEN_ETAG);
-        when(companyService.getCompanyProfile(COMPANY_NUMBER)).thenReturn(
-                new CompanyProfileResource(EXPECTED_COMPANY_NAME, PREVIOUS_COMPANY_TYPE, EXPECTED_COMPANY_STATUS));
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newItem)))
-                .andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedItem)))
-                .andExpect(jsonPath("$.company_name", is(EXPECTED_COMPANY_NAME)))
-                .andExpect(jsonPath("$.item_options.certificate_type", is(CERTIFICATE_TYPE.getJsonName())))
-                .andExpect(jsonPath("$.item_options.company_type", is(PREVIOUS_COMPANY_TYPE)))
-                .andExpect(jsonPath("$.item_options.collection_location", is(COLLECTION_LOCATION.getJsonName())))
-                .andExpect(jsonPath("$.item_options.contact_number", is(CONTACT_NUMBER)))
-                .andExpect(jsonPath("$.item_options.delivery_method", is(DELIVERY_METHOD.getJsonName())))
-                .andExpect(jsonPath("$.item_options.delivery_timescale", is(DELIVERY_TIMESCALE.getJsonName())))
-                .andExpect(jsonPath("$.item_options.director_details",
-                        is(objectMapper.convertValue(DIRECTOR_OR_SECRETARY_DETAILS, Map.class))))
-                .andExpect(jsonPath("$.item_options.forename",
-                        is(FORENAME)))
-                .andExpect(jsonPath("$.item_options.include_company_objects_information",
-                        is(INCLUDE_COMPANY_OBJECTS_INFORMATION)))
-                .andExpect(jsonPath("$.item_options.include_email_copy", is(INCLUDE_EMAIL_COPY)))
-                .andExpect(jsonPath("$.item_options.include_good_standing_information",
-                        is(INCLUDE_GOOD_STANDING_INFORMATION)))
-                .andExpect(jsonPath("$.item_options.registered_office_address_details",
-                        is(objectMapper.convertValue(REGISTERED_OFFICE_ADDRESS_DETAILS, Map.class))))
-                .andExpect(jsonPath("$.postal_delivery", is(true)))
-                .andExpect(jsonPath("$.description_values." + COMPANY_NUMBER_KEY, is(COMPANY_NUMBER)))
-                .andExpect(jsonPath("$.item_options.secretary_details",
-                        is(objectMapper.convertValue(DIRECTOR_OR_SECRETARY_DETAILS, Map.class))))
-                .andExpect(jsonPath("$.item_options.surname",
-                        is(SURNAME)))
-                .andExpect(jsonPath("$.links",
-                        is(objectMapper.convertValue(LINKS, Map.class))))
-                .andExpect(jsonPath("$.postage_cost",
-                        is(POSTAGE_COST)))
-                .andExpect(jsonPath("$.total_item_cost",
-                        is(totalItemCost)))
-                .andExpect(jsonPath("$.item_options.company_status",
-                        is(EXPECTED_COMPANY_STATUS.getStatusName())))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemSavedCorrectly(EXPECTED_ITEM_ID);
-
-        verify(etagGenerator).generateEtag();
-        verify(companyService).getCompanyProfile(COMPANY_NUMBER);
-    }
-
-    @Test
     @DisplayName("Fails to create certificate item with incorrect token permission")
     void createCertificateItemUnauthorizedTokenPermission() throws Exception {
         // Given
@@ -491,11 +379,11 @@ class CertificateItemsControllerIntegrationTest {
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiResponse expectedValidationError = new ApiResponse(asList(
-                new uk.gov.companieshouse.api.error.ApiError("company-number-is-null", "company_number", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError("etag: must be null", "etag", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError("links: must be null", "links", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError("postage_cost: must be null", "postage_cost", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION),
-                new uk.gov.companieshouse.api.error.ApiError("total_item_cost: must be null", "total_item_cost", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)
+                ApiErrors.raiseError(new ApiError("company-number-error", "company_number", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must not be null"),
+                ApiErrors.raiseError(new ApiError("etag-error", "etag", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
+                ApiErrors.raiseError(new ApiError("links-error", "links", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
+                ApiErrors.raiseError(new ApiError("postage-cost-error", "postage_cost", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
+                ApiErrors.raiseError(new ApiError("total-item-cost-error", "total_item_cost", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null")
         ));
 
         // When and Then
@@ -515,109 +403,6 @@ class CertificateItemsControllerIntegrationTest {
         // Then
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
-
-//    @Test
-//    @DisplayName("Fails to create certificate item with an invalid delivery timescale")
-//    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
-//
-//        // Given
-//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-//        itemOptionsRequest.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
-//
-//        final CertificateItemCreate newItem = new CertificateItemCreate();
-//        newItem.setCompanyNumber(COMPANY_NUMBER);
-//        newItem.setItemOptions(itemOptionsRequest);
-//        newItem.setQuantity(QUANTITY);
-//
-//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
-//
-//        // When and Then
-//        mockMvc.perform(post(CERTIFICATES_URL)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//        // Then
-//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-//    }
-
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid company status")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidCompanyStatus() throws Exception {
-
-        // Given
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setQuantity(QUANTITY);
-
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is(ApiErrors.ERR_COMPANY_STATUS_INVALID.getError())))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-//    @Test
-//    @DisplayName("Fails to create certificate item with an invalid collection location")
-//    void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
-//
-//        // Given
-//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-//        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
-//
-//        final CertificateItemCreate newItem = new CertificateItemCreate();
-//        newItem.setCompanyNumber(COMPANY_NUMBER);
-//        newItem.setItemOptions(itemOptionsRequest);
-//        newItem.setQuantity(QUANTITY);
-//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
-//
-//        // When and Then
-//        mockMvc.perform(post(CERTIFICATES_URL)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(makeBelfastCollectionLocationInvalid(newItem)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//        // Then
-//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-//    }
 
     @Test
     @DisplayName("Fails to create certificate item with missing collection details")
@@ -655,41 +440,6 @@ class CertificateItemsControllerIntegrationTest {
         // Then
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
-
-//    @Test
-//    @DisplayName("Fails to create certificate item with an invalid delivery method")
-//    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
-//
-//        // Given
-//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-//        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
-//
-//        final CertificateItemCreate newItem = new CertificateItemCreate();
-//        newItem.setCompanyNumber(COMPANY_NUMBER);
-//        newItem.setItemOptions(itemOptionsRequest);
-//        newItem.setQuantity(QUANTITY);
-//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
-//
-//        // When and Then
-//        mockMvc.perform(post(CERTIFICATES_URL)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(makePostalDeliveryMethodInvalid(newItem)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//        // Then
-//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-//    }
 
     @Test
     @DisplayName("Fails to create certificate item with include Company objects, good standing," +
@@ -808,82 +558,6 @@ class CertificateItemsControllerIntegrationTest {
         // Then
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
-
-//    @Test
-//    @DisplayName("Fails to create certificate item with an invalid include DOB type")
-//    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
-//
-//        // Given
-//        final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
-//        director.setIncludeDobType(INCLUDE_DOB_TYPE);
-//
-//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-//        itemOptionsRequest.setDirectorDetails(director);
-//
-//        final CertificateItemCreate newItem = new CertificateItemCreate();
-//        newItem.setItemOptions(itemOptionsRequest);
-//        newItem.setCompanyNumber(COMPANY_NUMBER);
-//        newItem.setQuantity(QUANTITY);
-//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
-//
-//        // When and Then
-//        mockMvc.perform(post(CERTIFICATES_URL)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(makePartialIncludeDobTypeInvalid(newItem)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//        // Then
-//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-//    }
-
-//    @Test
-//    @DisplayName("Fails to create certificate item with an invalid include address records type")
-//    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
-//
-//        // Given
-//        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-//        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-//
-//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-//        itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
-//
-//        final CertificateItemCreate newItem = new CertificateItemCreate();
-//        newItem.setCompanyNumber(COMPANY_NUMBER);
-//        newItem.setItemOptions(itemOptionsRequest);
-//        newItem.setQuantity(QUANTITY);
-//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
-//
-//        // When and Then
-//        mockMvc.perform(post(CERTIFICATES_URL)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//        // Then
-//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-//    }
 
     @Test
     @DisplayName("Fails to create certificate item with conflicting details settings")
@@ -1395,36 +1069,6 @@ class CertificateItemsControllerIntegrationTest {
         Assertions.assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
     }
 
-//    @Test
-//    @DisplayName("Quantity must be greater than 0")
-//    void updateCertificateItemRejectsZeroQuantity() throws Exception {
-//        // Given
-//        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-//        itemUpdate.setQuantity(INVALID_QUANTITY);
-//
-//        final CertificateItem savedItem = new CertificateItem();
-//        savedItem.setId(EXPECTED_ITEM_ID);
-//        savedItem.setQuantity(QUANTITY);
-//        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-//        repository.save(savedItem);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
-//
-//        // When and then
-//        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-//                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-//                        .content(objectMapper.writeValueAsString(itemUpdate)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.errors[0].error", is("quantity-error")))
-//                .andDo(MockMvcResultHandlers.print());
-//    }
-
     @Test
     @DisplayName("Unknown field is ignored")
     void updateCertificateItemIgnoresUnknownField() throws Exception {
@@ -1809,85 +1453,6 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-//    @Test
-//    @DisplayName("Rejects update request with conflicting details settings")
-//    void updateCertificateItemRejectsConflictingDetailsSettings() throws Exception {
-//        // Given
-//        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-//        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
-//        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-//        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-//        itemUpdate.setItemOptions(options);
-//
-//        final CertificateItem savedItem = new CertificateItem();
-//        savedItem.setId(EXPECTED_ITEM_ID);
-//        savedItem.setQuantity(QUANTITY);
-//        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-//        CertificateItemOptions savedOptions = new CertificateItemOptions();
-//        savedOptions.setCompanyType("limited");
-//        savedOptions.setCompanyStatus("active");
-//        savedItem.setItemOptions(savedOptions);
-//        repository.save(savedItem);
-//        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-//
-//        final ApiError expectedValidationError =
-//                new ApiError(BAD_REQUEST,
-//                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
-//
-//        // When and then
-//        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-//                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-//                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.errors[0].error").value(is("include-address-error")))
-//                .andExpect(jsonPath("$.errors[1].error").value(is("include-nationality-error")))
-//                .andExpect(jsonPath("$.errors[2].error").value(is("include-occupation-error")))
-//                .andDo(MockMvcResultHandlers.print());
-//    }
-
-    @ParameterizedTest(name = "Raise errors if {0}")
-    @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#invalidStatusTypeErrorFixtures")
-    void correctErrorsRaisedWhenInvalidOptionsAreSuppliedForCompanyStatusAndType(CertificateItemsFixture fixture)
-            throws Exception {
-        // Given
-        certificateItemCreate.setCompanyNumber(COMPANY_NUMBER);
-        certificateItemCreate.setItemOptions(certificateItemOptions);
-        certificateItemCreate.setQuantity(QUANTITY);
-
-        certificateItemOptions.setLiquidatorsDetails(fixture.getLiquidatorsDetails());
-        certificateItemOptions.setAdministratorsDetails(fixture.getAdministratorsDetails());
-        certificateItemOptions.setIncludeGoodStandingInformation(fixture.getIncludeGoodStandingInformation());
-
-        when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(companyProfileResource.getCompanyType()).thenReturn(fixture.getCompanyType().getCompanyType());
-        when(companyProfileResource.getCompanyStatus()).thenReturn(fixture.getCompanyStatus());
-
-        final ApiResponse<Object> expectedValidationError = new ApiResponse<>(fixture.getExpectedErrors());
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(certificateItemCreate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
     @ParameterizedTest
     @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#initialCertificateItemFixtures")
     @DisplayName("Test successfully create an initial certificate item for applicable companies types  (types* all except LP) and status'")
@@ -1946,9 +1511,9 @@ class CertificateItemsControllerIntegrationTest {
         //then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is("company-number-is-null")))
+                .andExpect(jsonPath("$.errors[0].error", is("company-number-error")))
                 .andExpect(jsonPath("$.errors[0].location", is("company_number")))
-                .andExpect(jsonPath("$.errors[0].location_type", is("string")))
+                .andExpect(jsonPath("$.errors[0].location_type", is("object")))
                 .andExpect(jsonPath("$.errors[0].type", is("ch:validation")))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -1985,13 +1550,14 @@ class CertificateItemsControllerIntegrationTest {
     }
 
     @Test
-    void whenInitialItemRequestWithCompanyStatusControllerReturnsBadRequestCompanyStatusIsInvalid()
+    void whenInitialItemRequestWithCompanyStatusControllerReturnsBadRequestIfCompanyStatusIsInvalid()
             throws Exception {
         //given
         CertificateItemInitial certificateItemInitial = new CertificateItemInitial();
         certificateItemInitial.setCompanyNumber("12345678");
 
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(null);
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
 
         //when
@@ -2015,10 +1581,31 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //TODO:
-    // Test successfully update a certificate item for applicable company (types* all except LP) in
-    // Test successfully create an certificate item for a applicable company (types* all except LP) in administration
-    // Test update a certificate item fails if administrators details are supplied and applicable company (types* all inc. LP) not in administration
+    @Test
+    @DisplayName("Create does not reject missing item costs")
+    void createCertificateItemDoesNotRejectMissingItemCosts() throws Exception {
+
+        // Given
+        final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
+        when(idGeneratorService.autoGenerateId()).thenReturn("CERTID");
+        when(companyProfileResource.getCompanyName()).thenReturn("name");
+        when(companyProfileResource.getCompanyType()).thenReturn(CompanyType.LIMITED_COMPANY.getCompanyType());
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+
+        // When and Then
+        mockMvc.perform(post("/orderable/certificates")
+                .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newCertificateItemCreate)))
+                .andExpect(status().isCreated())
+                .andDo(MockMvcResultHandlers.print());
+    }
 
     /**
      * Generates the costs we expect to be calculated given the quantity of certificates and the delivery timescale.
@@ -2288,5 +1875,20 @@ class CertificateItemsControllerIntegrationTest {
         public String getUnknownField() {
             return unknownField;
         }
+    }
+
+
+    /**
+     * Factory method that produces a DTO for a valid create item request payload.
+     * @return a valid item DTO
+     */
+    private CertificateItemCreate createValidNewItem() {
+        final CertificateItemCreate newCertificateItemCreate = new CertificateItemCreate();
+        newCertificateItemCreate.setCompanyNumber(COMPANY_NUMBER);
+        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
+        options.setDeliveryTimescale(STANDARD);
+        newCertificateItemCreate.setItemOptions(options);
+        newCertificateItemCreate.setQuantity(5);
+        return newCertificateItemCreate;
     }
 }

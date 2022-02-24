@@ -12,11 +12,15 @@ public class FieldNameConverter {
      * @return the field name's snake case representation minus any <code>is_</code>
      * string, assumed to be a prefix.
      */
-    public String toSnakeCase(final String fieldName) {
+    public String fromUpperCamelToSnakeCase(final String fieldName) {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName).replace("is_", "");
     }
 
-    public String toLowerHyphenCase(final String fieldName) {
+    public String fromLowerUnderscoreToLowerHyphenCase(final String fieldName) {
         return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, fieldName).replace("is_", "");
+    }
+
+    public String fromCamelToLowerHyphenCase(final String fieldName) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, fieldName).replace("is_", "");
     }
 }

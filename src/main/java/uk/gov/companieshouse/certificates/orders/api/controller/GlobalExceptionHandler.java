@@ -5,7 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,11 +15,11 @@ import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
-import static uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors.BAD_REQUEST_ERROR;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -62,18 +62,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return the resulting ApiError
      */
     List<ApiError> buildBadRequestApiError(final MethodArgumentNotValidException ex) {
-        final List<ApiError> errors = new ArrayList<>();
-        for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
-            raiseBadRequestError(error, errors, error.getField());
-        }
-        for (final ObjectError error : ex.getBindingResult().getGlobalErrors()) {
-            raiseBadRequestError(error, errors, error.getObjectName());
-        }
 
-        return errors;
+        BindingResult bindingResult = ex.getBindingResult();
+        return Stream.concat(bindingResult.getFieldErrors().stream()
+                                .map(field -> raiseBadRequestError(field, field.getField())),
+                        bindingResult.getGlobalErrors().stream()
+                                .map(field -> raiseBadRequestError(field, field.getObjectName())))
+                .sorted(Comparator.comparing(ApiError::getError))
+                .collect(Collectors.toList());
     }
 
-    private void raiseBadRequestError(ObjectError error, List<ApiError> errors, String objectName) {
-        errors.add(ApiErrors.raiseError(new ApiError(BAD_REQUEST_ERROR, converter.toSnakeCase(objectName), ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), error.getDefaultMessage()));
+    private ApiError raiseBadRequestError(ObjectError error, String objectName) {
+        return ApiErrors.raiseError(new ApiError(converter.fromCamelToLowerHyphenCase(objectName) + "-error", converter.fromUpperCamelToSnakeCase(objectName), ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), error.getDefaultMessage());
     }
 }
