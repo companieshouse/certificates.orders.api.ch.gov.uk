@@ -65,7 +65,24 @@ class CertificateItemsControllerCreateEndpointTestData {
                             .withCompanyStatus(CompanyStatus.ACTIVE)
                             .withCompanyType(CompanyType.LIMITED_COMPANY)
                             .withDescription("Create endpoint raises client error if item options validation error occurs")
+                            .build()),
+                    Arguments.of(JsonRequestFixture.builder()
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/create/negative/item_options_absent/request.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/create/negative/item_options_absent/response.json", StandardCharsets.UTF_8))
+                            .withCompanyStatus(CompanyStatus.ACTIVE)
+                            .withCompanyType(CompanyType.LIMITED_COMPANY)
+                            .withDescription("Create endpoint raises client error if item options absent")
+                            .build()),
+                    Arguments.of(JsonRequestFixture.builder()
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/create/negative/quantity_error/request.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/create/negative/quantity_error/response.json", StandardCharsets.UTF_8))
+                            .withCompanyStatus(CompanyStatus.ACTIVE)
+                            .withCompanyType(CompanyType.LIMITED_COMPANY)
+                            .withDescription("Create endpoint raises client error if quantity is less than 1")
                             .build())
+
             );
         } catch(IOException e) {
             throw new RuntimeException(e);

@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
@@ -81,6 +82,7 @@ public class CertificateItemsControllerInitialEndpointIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestFixture.getRequestBody()))
                 .andExpect(status().is(requestFixture.getExpectedResponseCode()))
-                .andExpect(content().json(requestFixture.getExpectedResponseBody()));
+                .andExpect(content().json(requestFixture.getExpectedResponseBody()))
+                .andDo(MockMvcResultHandlers.print());
     }
 }

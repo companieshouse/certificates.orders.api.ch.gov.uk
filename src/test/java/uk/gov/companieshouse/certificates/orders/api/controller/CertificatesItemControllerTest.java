@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -197,7 +196,6 @@ class CertificatesItemControllerTest {
                 .thenReturn(enrichedCertificateItem);
         when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
         when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
 
         ResponseEntity<Object> response =
                 controllerUnderTest.createCertificateItem(certificateItemCreate, request, TOKEN_REQUEST_ID_VALUE);
@@ -215,8 +213,6 @@ class CertificatesItemControllerTest {
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
         when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
-        when(certificateItem.getCompanyNumber()).thenReturn("number");
         when(mapper.certificateItemCreateToCertificateItem(any())).thenReturn(certificateItem);
         when(mapper.enrichCertificateItem(any(), any(), any(), any())).thenReturn(enrichedCertificateItem);
 

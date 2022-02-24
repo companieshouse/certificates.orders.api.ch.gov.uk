@@ -69,6 +69,8 @@ class GlobalExceptionHandlerTest {
         when(result.getGlobalErrors()).thenReturn(Collections.singletonList(new ObjectError(OBJECT2, MESSAGE2)));
         when(converter.fromUpperCamelToSnakeCase(FIELD1)).thenReturn(FIELD1);
         when(converter.fromUpperCamelToSnakeCase(OBJECT2)).thenReturn(OBJECT2);
+        when(converter.fromCamelToLowerHyphenCase(FIELD1)).thenReturn(FIELD1);
+        when(converter.fromCamelToLowerHyphenCase(OBJECT2)).thenReturn(OBJECT2);
 
         // When
         final ResponseEntity<Object> response = handlerUnderTest.handleMethodArgumentNotValid(mex, headers, ORIGINAL_STATUS, request);
@@ -79,8 +81,8 @@ class GlobalExceptionHandlerTest {
         assertThat(errorResponse, is(notNullValue()));
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
         assertThat(errors, contains(
-                ApiErrors.raiseError(new ApiError(ApiErrors.BAD_REQUEST_ERROR, FIELD1, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE1),
-                ApiErrors.raiseError(new ApiError(ApiErrors.BAD_REQUEST_ERROR, OBJECT2, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE2))
+                ApiErrors.raiseError(new ApiError("field1-error", FIELD1, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE1),
+                ApiErrors.raiseError(new ApiError("object2-error", OBJECT2, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE2))
         );
     }
 

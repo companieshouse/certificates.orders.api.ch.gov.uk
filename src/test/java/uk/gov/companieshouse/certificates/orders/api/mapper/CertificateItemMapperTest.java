@@ -211,15 +211,9 @@ class CertificateItemMapperTest {
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(dto.getQuantity()));
-        assertThat(item.getDescription(), is(dto.getDescription()));
-        assertThat(item.getDescriptionIdentifier(), is(dto.getDescriptionIdentifier()));
-        assertThat(item.getDescriptionValues(), is(dto.getDescriptionValues()));
-        assertThat(item.getItemCosts(), is(dto.getItemCosts()));
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         assertItemOptionsSame(item.getItemOptions(), dto.getItemOptions());
-        assertThat(item.getPostageCost(), is(dto.getPostageCost()));
-        assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
 
     @Test
@@ -233,18 +227,12 @@ class CertificateItemMapperTest {
         assertThat(item.getCompanyNumber(), is(dto.getCompanyNumber()));
         assertThat(item.getCustomerReference(), is(dto.getCustomerReference()));
         assertThat(item.getQuantity(), is(NO_DEFAULT_QUANTITY));
-        assertThat(item.getDescription(), is(dto.getDescription()));
-        assertThat(item.getDescriptionIdentifier(), is(dto.getDescriptionIdentifier()));
-        assertThat(item.getDescriptionValues(), is(dto.getDescriptionValues()));
-        assertThat(item.getItemCosts(), is(dto.getItemCosts()));
         assertThat(item.getKind(), is(dto.getKind()));
         assertThat(item.isPostalDelivery(), is(dto.isPostalDelivery()));
         CertificateItemOptions itemOptions = item.getItemOptions();
         assertNull(itemOptions.getCertificateType());
         assertEquals(NO_DEFAULT_DELIVERY_METHOD, itemOptions.getDeliveryMethod());
         assertEquals(NO_DEFAULT_DELIVERY_TIMESCALE, itemOptions.getDeliveryTimescale());
-        assertThat(item.getPostageCost(), is(dto.getPostageCost()));
-        assertThat(item.getTotalItemCost(), is(dto.getTotalItemCost()));
     }
 
     @Test
@@ -271,16 +259,9 @@ class CertificateItemMapperTest {
         assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
         assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
         assertThat(dto.getQuantity(), is(item.getQuantity()));
-        assertThat(dto.getDescription(), is(item.getDescription()));
-        assertThat(dto.getDescriptionIdentifier(), is(item.getDescriptionIdentifier()));
-        assertThat(dto.getDescriptionValues(), is(item.getDescriptionValues()));
-        assertThat(dto.getItemCosts(), is(item.getItemCosts()));
         assertThat(dto.getKind(), is(item.getKind()));
         assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
         assertItemOptionsSame(item.getItemOptions(), dto.getItemOptions());
-        assertThat(dto.getEtag(), is(item.getEtag()));
-        assertThat(dto.getPostageCost(), is(item.getPostageCost()));
-        assertThat(dto.getTotalItemCost(), is(item.getTotalItemCost()));
     }
 
     @Test
@@ -364,14 +345,8 @@ class CertificateItemMapperTest {
         CertificateItemCreate dto = new CertificateItemCreate();
         dto.setCompanyNumber(COMPANY_NUMBER);
         dto.setCustomerReference(CUSTOMER_REFERENCE);
-        dto.setDescription(DESCRIPTION);
-        dto.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
-        dto.setDescriptionValues(DESCRIPTION_VALUES);
-        dto.setItemCosts(ITEM_COSTS);
         dto.setKind(KIND);
         dto.setPostalDelivery(POSTAL_DELIVERY);
-        dto.setPostageCost(POSTAGE_COST);
-        dto.setTotalItemCost(TOTAL_ITEM_COST);
         return dto;
     }
 

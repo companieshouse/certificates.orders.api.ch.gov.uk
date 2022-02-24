@@ -1,5 +1,5 @@
 {
   "errors": [{
-    "error": "bad-request-error"
+    "error": "company-number-error"
   }]
 }

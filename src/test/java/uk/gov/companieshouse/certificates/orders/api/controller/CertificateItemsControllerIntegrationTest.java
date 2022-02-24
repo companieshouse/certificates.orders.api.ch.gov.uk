@@ -371,19 +371,10 @@ class CertificateItemsControllerIntegrationTest {
         final CertificateItemCreate newItem = new CertificateItemCreate();
         newItem.setItemOptions(itemOptionsRequest);
         newItem.setQuantity(QUANTITY);
-        newItem.setEtag(TOKEN_ETAG);
-        newItem.setLinks(LINKS);
-        newItem.setPostageCost(POSTAGE_COST);
-        newItem.setTotalItemCost(TOKEN_TOTAL_ITEM_COST);
-
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
 
         final ApiResponse expectedValidationError = new ApiResponse(asList(
-                ApiErrors.raiseError(new ApiError("company-number-error", "company_number", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must not be null"),
-                ApiErrors.raiseError(new ApiError("etag-error", "etag", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
-                ApiErrors.raiseError(new ApiError("links-error", "links", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
-                ApiErrors.raiseError(new ApiError("postage-cost-error", "postage_cost", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null"),
-                ApiErrors.raiseError(new ApiError("total-item-cost-error", "total_item_cost", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must be null")
+                ApiErrors.raiseError(new ApiError("company-number-error", "company_number", ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), "must not be null")
         ));
 
         // When and Then
@@ -1601,9 +1592,27 @@ class CertificateItemsControllerIntegrationTest {
                 .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
                 .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newCertificateItemCreate)))
                 .andExpect(status().isCreated())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("Create rejects missing X-Request-ID")
+    void createCertificateItemRejectsMissingRequestId() throws Exception {
+
+        // Given
+        final CertificateItemCreate newCertificateItemCreate = createValidNewItem();
+
+        // When and Then
+        mockMvc.perform(post("/orderable/certificates")
+                .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+                .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+                .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+                .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newCertificateItemCreate)))
+                .andExpect(status().isBadRequest())
                 .andDo(MockMvcResultHandlers.print());
     }
 
