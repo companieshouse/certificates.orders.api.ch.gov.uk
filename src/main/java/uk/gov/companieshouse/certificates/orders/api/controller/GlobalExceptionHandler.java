@@ -11,12 +11,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
+import static uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors.BAD_REQUEST_ERROR;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -33,8 +36,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             final HttpHeaders headers,
             final HttpStatus status,
             final WebRequest request) {
-        final ApiError apiError = buildBadRequestApiError(ex);
-        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+
+        return ApiErrors.errorResponse(HttpStatus.BAD_REQUEST, buildBadRequestApiError(ex));
     }
 
     @Override
@@ -45,8 +48,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             final WebRequest request) {
 
         if (ex.getCause() instanceof JsonProcessingException) {
-            final ApiError apiError = buildBadRequestApiError((JsonProcessingException) ex.getCause());
-            return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+            final ApiResponse<List<ApiError>> apiResponse = new ApiResponse<>(Collections.singletonList(ApiErrors.raiseError(ApiErrors.ERR_JSON_PROCESSING, ((JsonProcessingException) ex.getCause()).getOriginalMessage())));
+            return handleExceptionInternal(ex, apiResponse, headers, HttpStatus.BAD_REQUEST, request);
         }
 
         return super.handleHttpMessageNotReadable(ex, headers, status, request);
@@ -54,29 +57,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Utility to build ApiError from MethodArgumentNotValidException.
+     *
      * @param ex the MethodArgumentNotValidException handled
      * @return the resulting ApiError
      */
-    ApiError buildBadRequestApiError(final MethodArgumentNotValidException ex) {
-        final List<String> errors = new ArrayList<>();
+    List<ApiError> buildBadRequestApiError(final MethodArgumentNotValidException ex) {
+        final List<ApiError> errors = new ArrayList<>();
         for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.add(converter.toSnakeCase(error.getField()) + ": " + error.getDefaultMessage());
+            raiseBadRequestError(error, errors, error.getField());
         }
         for (final ObjectError error : ex.getBindingResult().getGlobalErrors()) {
-            errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
+            raiseBadRequestError(error, errors, error.getObjectName());
         }
 
-        return new ApiError(HttpStatus.BAD_REQUEST, errors);
+        return errors;
     }
 
-    /**
-     * Utility to build ApiError from JsonProcessingException.
-     * @param jpe the JsonProcessingException handled
-     * @return the resulting ApiError
-     */
-    ApiError buildBadRequestApiError(final JsonProcessingException jpe) {
-        final String errorMessage = jpe.getOriginalMessage();
-        return new ApiError(HttpStatus.BAD_REQUEST, singletonList(errorMessage));
+    private void raiseBadRequestError(ObjectError error, List<ApiError> errors, String objectName) {
+        errors.add(ApiErrors.raiseError(new ApiError(BAD_REQUEST_ERROR, converter.toSnakeCase(objectName), ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), error.getDefaultMessage()));
     }
-
 }

@@ -15,13 +15,19 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.Collections;
+import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.MULTI_STATUS;
 
 /**
@@ -30,54 +36,27 @@ import static org.springframework.http.HttpStatus.MULTI_STATUS;
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
-    private static final String OBJECT1 =  "object1";
-    private static final String OBJECT2 =  "object2";
-    private static final String FIELD1 =   "field1";
+    private static final String OBJECT1 = "object1";
+    private static final String OBJECT2 = "object2";
+    private static final String FIELD1 = "field1";
     private static final String MESSAGE1 = "message1";
     private static final String MESSAGE2 = "message2";
     private static final String ORIGINAL_MESSAGE = "original";
     private static final HttpStatus ORIGINAL_STATUS = MULTI_STATUS;
-
-    /**
-     * Extends {@link GlobalExceptionHandler} to facilitate its unit testing.
-     */
-    private static final class TestGlobalExceptionHandler extends GlobalExceptionHandler {
-
-        public TestGlobalExceptionHandler(FieldNameConverter converter) {
-            super(converter);
-        }
-
-        @Override
-        protected ResponseEntity<Object> handleExceptionInternal(final Exception ex,
-                                                                 final Object body,
-                                                                 final HttpHeaders headers,
-                                                                 final HttpStatus status,
-                                                                 final WebRequest request) {
-            return new ResponseEntity<>(body, status);
-        }
-    }
-
     @InjectMocks
     private TestGlobalExceptionHandler handlerUnderTest;
-
     @Mock
     private MethodArgumentNotValidException mex;
-
     @Mock
     private HttpMessageNotReadableException hex;
-
     @Mock
     private JsonProcessingException jpe;
-
     @Mock
     private BindingResult result;
-
     @Mock
     private FieldNameConverter converter;
-
     @Mock
     private HttpHeaders headers;
-
     @Mock
     private WebRequest request;
 
@@ -89,18 +68,20 @@ class GlobalExceptionHandlerTest {
         when(result.getFieldErrors()).thenReturn(Collections.singletonList(new FieldError(OBJECT1, FIELD1, MESSAGE1)));
         when(result.getGlobalErrors()).thenReturn(Collections.singletonList(new ObjectError(OBJECT2, MESSAGE2)));
         when(converter.toSnakeCase(FIELD1)).thenReturn(FIELD1);
+        when(converter.toSnakeCase(OBJECT2)).thenReturn(OBJECT2);
 
         // When
         final ResponseEntity<Object> response = handlerUnderTest.handleMethodArgumentNotValid(mex, headers, ORIGINAL_STATUS, request);
 
         // Then
-        final ApiError error = (ApiError) response.getBody();
-        assertThat(error, is(notNullValue()));
-        assertThat(error.getStatus(), is(HttpStatus.BAD_REQUEST));
-        assertThat(error.getErrors().stream()
-                .anyMatch(o -> o.equals(FIELD1 + ": " + MESSAGE1)), is(true));
-        assertThat(error.getErrors().stream()
-                .anyMatch(o -> o.equals(OBJECT2 + ": " + MESSAGE2)), is(true));
+        final ApiResponse errorResponse = (ApiResponse) response.getBody();
+        List<ApiError> errors = errorResponse.getErrors();
+        assertThat(errorResponse, is(notNullValue()));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+        assertThat(errors, contains(
+                ApiErrors.raiseError(new ApiError(ApiErrors.BAD_REQUEST_ERROR, FIELD1, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE1),
+                ApiErrors.raiseError(new ApiError(ApiErrors.BAD_REQUEST_ERROR, OBJECT2, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION), MESSAGE2))
+        );
     }
 
     @Test
@@ -115,10 +96,11 @@ class GlobalExceptionHandlerTest {
                 handlerUnderTest.handleHttpMessageNotReadable(hex, headers, ORIGINAL_STATUS, request);
 
         // Then
-        final ApiError error = (ApiError) response.getBody();
-        assertThat(error, is(notNullValue()));
-        assertThat(error.getStatus(), is(HttpStatus.BAD_REQUEST));
-        assertThat(error.getErrors().get(0), is(ORIGINAL_MESSAGE));
+        final ApiResponse errorResponse = (ApiResponse) response.getBody();
+        List<ApiError> errors = errorResponse.getErrors();
+        assertThat(errorResponse, is(notNullValue()));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+        assertThat(errors, contains(ApiErrors.raiseError(ApiErrors.ERR_JSON_PROCESSING, ORIGINAL_MESSAGE)));
     }
 
     @Test
@@ -138,5 +120,22 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody(), is(nullValue()));
     }
 
+    /**
+     * Extends {@link GlobalExceptionHandler} to facilitate its unit testing.
+     */
+    private static final class TestGlobalExceptionHandler extends GlobalExceptionHandler {
 
+        public TestGlobalExceptionHandler(FieldNameConverter converter) {
+            super(converter);
+        }
+
+        @Override
+        protected ResponseEntity<Object> handleExceptionInternal(final Exception ex,
+                                                                 final Object body,
+                                                                 final HttpHeaders headers,
+                                                                 final HttpStatus status,
+                                                                 final WebRequest request) {
+            return new ResponseEntity<>(body, status);
+        }
+    }
 }

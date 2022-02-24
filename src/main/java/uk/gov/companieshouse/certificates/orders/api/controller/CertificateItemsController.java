@@ -153,7 +153,7 @@ public class CertificateItemsController {
                     .withErrorMessage(errorMsg).build();
             logErrorsWithStatus(logMap, Collections.singletonList(apiError), NOT_FOUND);
             LOGGER.error(errorMsg, logMap);
-            return errorResponse(NOT_FOUND, apiError);
+            return ApiErrors.errorResponse(NOT_FOUND, apiError);
         }
     }
 
@@ -191,14 +191,14 @@ public class CertificateItemsController {
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.error("update certificate item request had validation errors", logMap);
-            return errorResponse(BAD_REQUEST, errors);
+            return ApiErrors.errorResponse(BAD_REQUEST, errors);
         }
 
         Optional<CertificateItem> certRetrieved = certificateItemService.getCertificateItemById(id);
         if (!certRetrieved.isPresent()) {
             logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
             LOGGER.error("certificate item not found", logMap);
-            return errorResponse(NOT_FOUND, ApiErrors.ERR_CERTIFICATE_NOT_FOUND);
+            return ApiErrors.errorResponse(NOT_FOUND, ApiErrors.ERR_CERTIFICATE_NOT_FOUND);
         }
         final CertificateItem itemRetrieved = certRetrieved.get();
         logMap.put(COMPANY_NUMBER_LOG_KEY, itemRetrieved.getCompanyNumber());
@@ -213,7 +213,7 @@ public class CertificateItemsController {
         if (!patchedErrors.isEmpty()) {
             logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
-            return errorResponse(BAD_REQUEST, patchedErrors);
+            return ApiErrors.errorResponse(BAD_REQUEST, patchedErrors);
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
@@ -269,7 +269,7 @@ public class CertificateItemsController {
             // Map company to certificate type
             CertificateTypeMapResult certificateTypeMapResult = certificateTypeMapper.mapToCertificateType(companyProfile);
             if (certificateTypeMapResult.isMappingError()) {
-                return errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
+                return ApiErrors.errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
             }
 
             CertificateItem enrichedCertificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItem);
@@ -279,7 +279,7 @@ public class CertificateItemsController {
             if (!errors.isEmpty()) {
                 logErrorsWithStatus(logMap, errors, BAD_REQUEST);
                 LOGGER.errorRequest(servletRequest, "create certificate certificateItem validation errors", logMap);
-                return errorResponse(BAD_REQUEST, errors);
+                return ApiErrors.errorResponse(BAD_REQUEST, errors);
             }
 
             CertificateItem createdCertificateItem = certificateItemService.createCertificateItem(enrichedCertificateItem);
@@ -292,9 +292,9 @@ public class CertificateItemsController {
             final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(createdCertificateItem);
             return ResponseEntity.status(CREATED).body(certificateItemResponse);
         } catch (CompanyNotFoundException e) {
-            return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
+            return ApiErrors.errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
         } catch (CompanyServiceException ex) {
-            return errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
+            return ApiErrors.errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -310,14 +310,6 @@ public class CertificateItemsController {
         public CertificateItemOptions getItemOptions() {
             return itemOptions;
         }
-    }
-
-    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, ApiError apiError) {
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(Collections.singletonList(apiError)));
-    }
-
-    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, List<ApiError> errors) {
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(errors));
     }
 
     private <T> ResponseEntity<Object> errorResponse(HttpStatus httpStatus, Set<ConstraintViolation<T>> violations) {

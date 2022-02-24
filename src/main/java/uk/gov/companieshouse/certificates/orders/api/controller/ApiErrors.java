@@ -1,8 +1,12 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 
+import java.util.Collections;
 import java.util.List;
 
 public final class ApiErrors {
@@ -49,6 +53,8 @@ public final class ApiErrors {
     private static final String INCLUDE_NATIONALITY_ERROR = "include-nationality-error";
     private static final String INCLUDE_OCCUPATION_ERROR = "include-occupation-error";
     private static final String INCLUDE_DOB_TYPE_ERROR = "include-dob-type-error";
+
+    public static final String BAD_REQUEST_ERROR = "bad-request-error";
 
     private static final String COMPANY_NUMBER_LOCATION = "company_number";
     private static final String COMPANY_TYPE_LOCATION = "company_type";
@@ -172,9 +178,6 @@ public final class ApiErrors {
     public static final ApiError ERR_MEMBER_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR = new ApiError(INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, MEMBER_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_LOCATION, BOOLEAN_LOCATION_TYPE, ERROR_TYPE_VALIDATION);
     public static final ApiError ERR_MEMBER_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR = new ApiError(INCLUDE_DOB_TYPE_ERROR, MEMBER_DETAILS_INCLUDE_DOB_TYPE_LOCATION, BOOLEAN_LOCATION_TYPE, ERROR_TYPE_VALIDATION);
 
-
-
-
     private ApiErrors() {}
 
     public static void raiseError(List<ApiError> apiErrors, ApiError apiError, String errorMessage, Object ...objects) {
@@ -183,5 +186,13 @@ public final class ApiErrors {
 
     public static ApiError raiseError(ApiError apiError, String errorMessage, Object ...objects) {
         return ApiErrorBuilder.builder(apiError).withErrorMessage(String.format(errorMessage, objects)).build();
+    }
+
+    public static ResponseEntity<Object> errorResponse(HttpStatus httpStatus, ApiError apiError) {
+        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(Collections.singletonList(apiError)));
+    }
+
+    public static ResponseEntity<Object> errorResponse(HttpStatus httpStatus, List<ApiError> errors) {
+        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(errors));
     }
 }

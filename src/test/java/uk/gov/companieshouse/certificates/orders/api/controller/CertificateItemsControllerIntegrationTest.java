@@ -62,9 +62,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.Objects.isNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
@@ -74,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -519,41 +516,41 @@ class CertificateItemsControllerIntegrationTest {
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid delivery timescale")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
-
-        // Given
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setQuantity(QUANTITY);
-
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
+//    @Test
+//    @DisplayName("Fails to create certificate item with an invalid delivery timescale")
+//    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryTimescale() throws Exception {
+//
+//        // Given
+//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+//        itemOptionsRequest.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
+//
+//        final CertificateItemCreate newItem = new CertificateItemCreate();
+//        newItem.setCompanyNumber(COMPANY_NUMBER);
+//        newItem.setItemOptions(itemOptionsRequest);
+//        newItem.setQuantity(QUANTITY);
+//
+//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_TIMESCALE_MESSAGE));
+//
+//        // When and Then
+//        mockMvc.perform(post(CERTIFICATES_URL)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(makeSameDayDeliveryTimescaleInvalid(newItem)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+//                .andDo(MockMvcResultHandlers.print());
+//
+//        // Then
+//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+//    }
 
     @Test
     @DisplayName("Fails to create certificate item with an invalid company status")
@@ -587,40 +584,40 @@ class CertificateItemsControllerIntegrationTest {
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid collection location")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
-
-        // Given
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setQuantity(QUANTITY);
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(makeBelfastCollectionLocationInvalid(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
+//    @Test
+//    @DisplayName("Fails to create certificate item with an invalid collection location")
+//    void createCertificateItemFailsToCreateCertificateItemWithInvalidCollectionLocation() throws Exception {
+//
+//        // Given
+//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+//        itemOptionsRequest.setCollectionLocation(COLLECTION_LOCATION);
+//
+//        final CertificateItemCreate newItem = new CertificateItemCreate();
+//        newItem.setCompanyNumber(COMPANY_NUMBER);
+//        newItem.setItemOptions(itemOptionsRequest);
+//        newItem.setQuantity(QUANTITY);
+//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList(INVALID_COLLECTION_LOCATION_MESSAGE));
+//
+//        // When and Then
+//        mockMvc.perform(post(CERTIFICATES_URL)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(makeBelfastCollectionLocationInvalid(newItem)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+//                .andDo(MockMvcResultHandlers.print());
+//
+//        // Then
+//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+//    }
 
     @Test
     @DisplayName("Fails to create certificate item with missing collection details")
@@ -659,40 +656,40 @@ class CertificateItemsControllerIntegrationTest {
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid delivery method")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
-
-        // Given
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setQuantity(QUANTITY);
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(makePostalDeliveryMethodInvalid(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
+//    @Test
+//    @DisplayName("Fails to create certificate item with an invalid delivery method")
+//    void createCertificateItemFailsToCreateCertificateItemWithInvalidDeliveryMethod() throws Exception {
+//
+//        // Given
+//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+//        itemOptionsRequest.setDeliveryMethod(DELIVERY_METHOD);
+//
+//        final CertificateItemCreate newItem = new CertificateItemCreate();
+//        newItem.setCompanyNumber(COMPANY_NUMBER);
+//        newItem.setItemOptions(itemOptionsRequest);
+//        newItem.setQuantity(QUANTITY);
+//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList(INVALID_DELIVERY_METHOD_MESSAGE));
+//
+//        // When and Then
+//        mockMvc.perform(post(CERTIFICATES_URL)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(makePostalDeliveryMethodInvalid(newItem)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+//                .andDo(MockMvcResultHandlers.print());
+//
+//        // Then
+//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+//    }
 
     @Test
     @DisplayName("Fails to create certificate item with include Company objects, good standing," +
@@ -812,81 +809,81 @@ class CertificateItemsControllerIntegrationTest {
         assertItemWasNotSaved(EXPECTED_ITEM_ID);
     }
 
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid include DOB type")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
+//    @Test
+//    @DisplayName("Fails to create certificate item with an invalid include DOB type")
+//    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeDobType() throws Exception {
+//
+//        // Given
+//        final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
+//        director.setIncludeDobType(INCLUDE_DOB_TYPE);
+//
+//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+//        itemOptionsRequest.setDirectorDetails(director);
+//
+//        final CertificateItemCreate newItem = new CertificateItemCreate();
+//        newItem.setItemOptions(itemOptionsRequest);
+//        newItem.setCompanyNumber(COMPANY_NUMBER);
+//        newItem.setQuantity(QUANTITY);
+//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
+//
+//        // When and Then
+//        mockMvc.perform(post(CERTIFICATES_URL)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(makePartialIncludeDobTypeInvalid(newItem)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+//                .andDo(MockMvcResultHandlers.print());
+//
+//        // Then
+//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+//    }
 
-        // Given
-        final DirectorOrSecretaryDetails director = new DirectorOrSecretaryDetails();
-        director.setIncludeDobType(INCLUDE_DOB_TYPE);
-
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setDirectorDetails(director);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setQuantity(QUANTITY);
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_DOB_TYPE_MESSAGE));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(makePartialIncludeDobTypeInvalid(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
-
-    @Test
-    @DisplayName("Fails to create certificate item with an invalid include address records type")
-    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
-
-        // Given
-        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
-
-        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
-        itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
-
-        final CertificateItemCreate newItem = new CertificateItemCreate();
-        newItem.setCompanyNumber(COMPANY_NUMBER);
-        newItem.setItemOptions(itemOptionsRequest);
-        newItem.setQuantity(QUANTITY);
-        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
-
-        // When and Then
-        mockMvc.perform(post(CERTIFICATES_URL)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
-                .andDo(MockMvcResultHandlers.print());
-
-        // Then
-        assertItemWasNotSaved(EXPECTED_ITEM_ID);
-    }
+//    @Test
+//    @DisplayName("Fails to create certificate item with an invalid include address records type")
+//    void createCertificateItemFailsToCreateCertificateItemWithInvalidIncludeAddressRecordsType() throws Exception {
+//
+//        // Given
+//        final RegisteredOfficeAddressDetails registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
+//        registeredOfficeAddressDetails.setIncludeAddressRecordsType(INCLUDE_ADDRESS_RECORDS_TYPE);
+//
+//        final CertificateItemOptionsRequest itemOptionsRequest = new CertificateItemOptionsRequest();
+//        itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+//
+//        final CertificateItemCreate newItem = new CertificateItemCreate();
+//        newItem.setCompanyNumber(COMPANY_NUMBER);
+//        newItem.setItemOptions(itemOptionsRequest);
+//        newItem.setQuantity(QUANTITY);
+//        when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList(INVALID_INCLUDE_ADDRESS_RECORDS_TYPE_MESSAGE));
+//
+//        // When and Then
+//        mockMvc.perform(post(CERTIFICATES_URL)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "create"))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(newItem)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json(objectMapper.writeValueAsString(expectedValidationError)))
+//                .andDo(MockMvcResultHandlers.print());
+//
+//        // Then
+//        assertItemWasNotSaved(EXPECTED_ITEM_ID);
+//    }
 
     @Test
     @DisplayName("Fails to create certificate item with conflicting details settings")
@@ -1398,35 +1395,35 @@ class CertificateItemsControllerIntegrationTest {
         Assertions.assertEquals(ERIC_IDENTITY_VALUE, foundItem.get().getUserId());
     }
 
-    @Test
-    @DisplayName("Quantity must be greater than 0")
-    void updateCertificateItemRejectsZeroQuantity() throws Exception {
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        itemUpdate.setQuantity(INVALID_QUANTITY);
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        repository.save(savedItem);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                        .content(objectMapper.writeValueAsString(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error", is("quantity-error")))
-                .andDo(MockMvcResultHandlers.print());
-    }
+//    @Test
+//    @DisplayName("Quantity must be greater than 0")
+//    void updateCertificateItemRejectsZeroQuantity() throws Exception {
+//        // Given
+//        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+//        itemUpdate.setQuantity(INVALID_QUANTITY);
+//
+//        final CertificateItem savedItem = new CertificateItem();
+//        savedItem.setId(EXPECTED_ITEM_ID);
+//        savedItem.setQuantity(QUANTITY);
+//        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+//        repository.save(savedItem);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST, singletonList("quantity: must be greater than or equal to 1"));
+//
+//        // When and then
+//        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+//                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+//                        .content(objectMapper.writeValueAsString(itemUpdate)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.errors[0].error", is("quantity-error")))
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 
     @Test
     @DisplayName("Unknown field is ignored")
@@ -1812,46 +1809,46 @@ class CertificateItemsControllerIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    @Test
-    @DisplayName("Rejects update request with conflicting details settings")
-    void updateCertificateItemRejectsConflictingDetailsSettings() throws Exception {
-        // Given
-        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
-        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
-        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
-        itemUpdate.setItemOptions(options);
-
-        final CertificateItem savedItem = new CertificateItem();
-        savedItem.setId(EXPECTED_ITEM_ID);
-        savedItem.setQuantity(QUANTITY);
-        savedItem.setUserId(ERIC_IDENTITY_VALUE);
-        CertificateItemOptions savedOptions = new CertificateItemOptions();
-        savedOptions.setCompanyType("limited");
-        savedOptions.setCompanyStatus("active");
-        savedItem.setItemOptions(savedOptions);
-        repository.save(savedItem);
-        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-
-        final ApiError expectedValidationError =
-                new ApiError(BAD_REQUEST,
-                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
-
-        // When and then
-        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
-                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
-                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
-                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
-                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
-                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
-                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
-                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].error").value(is("include-address-error")))
-                .andExpect(jsonPath("$.errors[1].error").value(is("include-nationality-error")))
-                .andExpect(jsonPath("$.errors[2].error").value(is("include-occupation-error")))
-                .andDo(MockMvcResultHandlers.print());
-    }
+//    @Test
+//    @DisplayName("Rejects update request with conflicting details settings")
+//    void updateCertificateItemRejectsConflictingDetailsSettings() throws Exception {
+//        // Given
+//        final PatchValidationCertificateItemDTO itemUpdate = new PatchValidationCertificateItemDTO();
+//        final CertificateItemOptionsRequest options = new CertificateItemOptionsRequest();
+//        options.setDirectorDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+//        options.setSecretaryDetails(CONFLICTING_DIRECTOR_OR_SECRETARY_DETAILS);
+//        itemUpdate.setItemOptions(options);
+//
+//        final CertificateItem savedItem = new CertificateItem();
+//        savedItem.setId(EXPECTED_ITEM_ID);
+//        savedItem.setQuantity(QUANTITY);
+//        savedItem.setUserId(ERIC_IDENTITY_VALUE);
+//        CertificateItemOptions savedOptions = new CertificateItemOptions();
+//        savedOptions.setCompanyType("limited");
+//        savedOptions.setCompanyStatus("active");
+//        savedItem.setItemOptions(savedOptions);
+//        repository.save(savedItem);
+//        when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
+//
+//        final ApiError expectedValidationError =
+//                new ApiError(BAD_REQUEST,
+//                        asList(CONFLICTING_DIRECTOR_DETAILS_MESSAGE, CONFLICTING_SECRETARY_DETAILS_MESSAGE));
+//
+//        // When and then
+//        mockMvc.perform(patch(CERTIFICATES_URL + EXPECTED_ITEM_ID)
+//                        .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
+//                        .header(ERIC_IDENTITY_TYPE_HEADER_NAME, ERIC_IDENTITY_TYPE_OAUTH2_VALUE)
+//                        .header(ERIC_IDENTITY_HEADER_NAME, ERIC_IDENTITY_VALUE)
+//                        .header(ERIC_AUTHORISED_USER_HEADER_NAME, ERIC_AUTHORISED_USER_VALUE)
+//                        .header(ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME, String.format(TOKEN_PERMISSION_VALUE, "update"))
+//                        .contentType(PatchMediaType.APPLICATION_MERGE_PATCH)
+//                        .content(makeCurrentIncludeAddressRecordsTypeInvalid(itemUpdate)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.errors[0].error").value(is("include-address-error")))
+//                .andExpect(jsonPath("$.errors[1].error").value(is("include-nationality-error")))
+//                .andExpect(jsonPath("$.errors[2].error").value(is("include-occupation-error")))
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 
     @ParameterizedTest(name = "Raise errors if {0}")
     @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller.CertificateItemsControllerTestData#invalidStatusTypeErrorFixtures")
