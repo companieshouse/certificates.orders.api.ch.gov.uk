@@ -195,16 +195,4 @@ class CertificateItemsControllerTestData {
                         .build())
         );
     }
-
-    static Stream<Arguments> betterInitial() {
-        //new JsonRequestFixture("/integrationTestData/initialRequest.json", "/integrationTestData/initialResponse.json")
-        return Stream.of(
-                Arguments.of(JsonRequestFixture.builder()
-                        .withRequestResource("/integrationTestData/initial/initialRequest.json")
-                        .withExpectedResponseResource("/integrationTestData/initial/initialResponse.json")
-                        .withCompanyStatus(CompanyStatus.ACTIVE)
-                        .withCompanyType(CompanyType.LIMITED_COMPANY)
-                        .build())
-        );
-    }
 }

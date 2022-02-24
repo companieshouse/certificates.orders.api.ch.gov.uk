@@ -1,0 +1,49 @@
+{
+  "company_number": "12345678",
+  "customer_reference": "Test",
+  "item_options": {
+    "administrators_details": {
+      "include_basic_information": true
+    },
+    "collection_location": "cardiff",
+    "contact_number": "12345678901",
+    "delivery_method": "collection",
+    "delivery_timescale": "standard",
+    "designated_member_details": {
+      "include_address": true,
+      "include_appointment_date": true,
+      "include_basic_information": true,
+      "include_country_of_residence": true,
+      "include_dob_type": "partial"
+    },
+    "forename": "John",
+    "general_partner_details": {
+      "include_basic_information": true
+    },
+    "include_email_copy": false,
+    "include_good_standing_information": false,
+    "limited_partner_details": {
+      "include_basic_information": true
+    },
+    "liquidators_details": {
+      "include_basic_information": true
+    },
+    "member_details": {
+      "include_address": true,
+      "include_appointment_date": true,
+      "include_basic_information": true,
+      "include_country_of_residence": true,
+      "include_dob_type": "partial"
+    },
+    "principal_place_of_business_details": {
+      "include_address_records_type": "current-previous-and-prior",
+      "include_dates": false
+    },
+    "registered_office_address_details": {
+      "include_address_records_type": "current-previous-and-prior",
+      "include_dates": false
+    },
+    "surname": "Smith"
+  },
+  "quantity": 1
+}

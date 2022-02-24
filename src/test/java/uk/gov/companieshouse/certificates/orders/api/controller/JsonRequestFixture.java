@@ -1,28 +1,27 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.api.error.ApiError;
-import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
+import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 public class JsonRequestFixture {
 
-    private final String jsonRequestResourceName;
-    private final String jsonResponseResourceName;
+    private final String requestBody;
+    private final int expectedResponseCode;
+    private final String expectedResponseBody;
     private final CompanyType companyType;
     private final CompanyStatus companyStatus;
+    private final String description;
+    private final CompanyServiceException companyServiceException;
 
     public JsonRequestFixture(Builder builder) {
-        this.jsonRequestResourceName = builder.jsonRequestResourceName;
-        this.jsonResponseResourceName = builder.jsonResponseResourceName;
+        this.requestBody = builder.requestBody;
+        this.expectedResponseCode = builder.expectedResponseCode;
+        this.expectedResponseBody = builder.expectedResponseBody;
         this.companyType = builder.companyType;
         this.companyStatus = builder.companyStatus;
+        this.description = builder.description;
+        this.companyServiceException = builder.companyServiceException;
     }
 
     public CompanyType getCompanyType() {
@@ -33,20 +32,25 @@ public class JsonRequestFixture {
         return companyStatus;
     }
 
-    public String getRequest() {
-        try {
-            return IOUtils.resourceToString(this.jsonRequestResourceName, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String getRequestBody() {
+        return requestBody;
     }
 
-    public String getExpectedResponse() {
-        try {
-            return IOUtils.resourceToString(this.jsonResponseResourceName, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String getExpectedResponseBody() {
+        return expectedResponseBody;
+    }
+
+    public int getExpectedResponseCode() {
+        return expectedResponseCode;
+    }
+
+    public CompanyServiceException getCompanyServiceException() {
+        return companyServiceException;
+    }
+
+    @Override
+    public String toString() {
+        return this.description;
     }
 
     public static Builder builder() {
@@ -54,21 +58,29 @@ public class JsonRequestFixture {
     }
 
     static class Builder {
-        private String jsonRequestResourceName;
-        private String jsonResponseResourceName;
+        private String requestBody;
+        private String expectedResponseBody;
+        private int expectedResponseCode;
         private CompanyType companyType;
         private CompanyStatus companyStatus;
+        private String description;
+        private CompanyServiceException companyServiceException;
 
         private Builder() {
         }
 
-        public Builder withRequestResource(String requestResource) {
-            this.jsonRequestResourceName = requestResource;
+        public Builder withRequestBody(String requestResource) {
+            this.requestBody = requestResource;
             return this;
         }
 
-        public Builder withExpectedResponseResource(String responseResource) {
-            this.jsonResponseResourceName = responseResource;
+        public Builder withExpectedResponseBody(String responseResource) {
+            this.expectedResponseBody = responseResource;
+            return this;
+        }
+
+        public Builder withExpectedResponseCode(int responseCode) {
+            this.expectedResponseCode = responseCode;
             return this;
         }
 
@@ -79,6 +91,16 @@ public class JsonRequestFixture {
 
         public Builder withCompanyStatus(CompanyStatus companyStatus) {
             this.companyStatus = companyStatus;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withCompanyServiceException(CompanyServiceException exception) {
+            this.companyServiceException = exception;
             return this;
         }
 
