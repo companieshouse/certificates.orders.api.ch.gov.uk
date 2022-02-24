@@ -58,7 +58,7 @@ public class CertificateItemsControllerCreateEndpointIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("uk.gov.companieshouse.certificates.orders.api.controller." +
             "CertificateItemsControllerCreateEndpointTestData#createEndpointTestData")
-    @DisplayName("Test create certificate endpoint")
+    @DisplayName("Create certificate endpoint")
     void testCreateEndpoint(JsonRequestFixture requestFixture) throws Exception {
         Optional.ofNullable(requestFixture.getCompanyStatus())
                 .ifPresent(status -> when(companyProfileResource.getCompanyStatus()).thenReturn(status));

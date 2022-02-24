@@ -6,6 +6,7 @@ import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 public class JsonRequestFixture {
 
+    private final String savedResource;
     private final String requestBody;
     private final int expectedResponseCode;
     private final String expectedResponseBody;
@@ -15,6 +16,7 @@ public class JsonRequestFixture {
     private final CompanyServiceException companyServiceException;
 
     public JsonRequestFixture(Builder builder) {
+        this.savedResource = builder.savedResource;
         this.requestBody = builder.requestBody;
         this.expectedResponseCode = builder.expectedResponseCode;
         this.expectedResponseBody = builder.expectedResponseBody;
@@ -22,6 +24,10 @@ public class JsonRequestFixture {
         this.companyStatus = builder.companyStatus;
         this.description = builder.description;
         this.companyServiceException = builder.companyServiceException;
+    }
+
+    public String getSavedResource() {
+        return savedResource;
     }
 
     public CompanyType getCompanyType() {
@@ -58,6 +64,7 @@ public class JsonRequestFixture {
     }
 
     static class Builder {
+        private String savedResource;
         private String requestBody;
         private String expectedResponseBody;
         private int expectedResponseCode;
@@ -67,6 +74,11 @@ public class JsonRequestFixture {
         private CompanyServiceException companyServiceException;
 
         private Builder() {
+        }
+
+        public Builder withSavedResource(String savedResource) {
+            this.savedResource = savedResource;
+            return this;
         }
 
         public Builder withRequestBody(String requestResource) {
