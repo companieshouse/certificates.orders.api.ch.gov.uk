@@ -25,8 +25,8 @@ public class ApiErrorBuilder {
     }
 
     public ApiError build() {
-        ApiError apiError = new ApiError(this.apiError);
-        apiError.setErrorValues(errorValues);
-        return apiError;
+        ApiError result = new ApiError(this.apiError);
+        result.setErrorValues(errorValues);
+        return result;
     }
 }

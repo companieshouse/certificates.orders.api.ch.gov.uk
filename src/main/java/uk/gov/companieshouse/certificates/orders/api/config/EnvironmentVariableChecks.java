@@ -12,6 +12,9 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 public class EnvironmentVariableChecks {
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
+    private EnvironmentVariableChecks(){
+    }
+
     /**
      * Checks whether all required environment variables have defined values.
      * @return whether all required environment variables have defined values (<code>true</code>), or not

@@ -34,7 +34,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("feature-flags-enabled")
-public class CertificateItemsControllerInitialEndpointIntegrationTest {
+class CertificateItemsControllerInitialEndpointIntegrationTest {
 
     private static final String INITIAL_CERTIFICATE_URL = "/orderable/certificates/initial";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";

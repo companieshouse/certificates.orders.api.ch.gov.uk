@@ -13,8 +13,8 @@ import static uk.gov.companieshouse.certificates.orders.api.environment.Required
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.ITEMS_DATABASE;
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.MONGODB_URL;
 
-public class EnvironmentVariablesCheckTest {
-    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
+class EnvironmentVariablesCheckTest {
+    private EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Test
     @DisplayName("Check returns true where all required environment variables are populated")

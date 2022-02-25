@@ -24,7 +24,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.E
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("feature-flags-enabled")
-public class UserAuthorisationInterceptorIntegrationTest {
+class UserAuthorisationInterceptorIntegrationTest {
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -61,7 +61,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Return not found when a certificate item does not exist")
     void getCertificateItemReturnsNotFound() throws Exception {
@@ -78,7 +77,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Return unauthorised if Eric headers are not present")
     void getCertificateItemReturnsUnauthorisedWhenEricHeadersAreNotPresent() throws Exception {
@@ -91,7 +89,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Return unauthorised if the user has not created the certificate")
     void getCertificateItemReturnsUnauthorisedIfUserDidNotCreateCertificate() throws Exception {
@@ -115,7 +112,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Return unauthorised if the user does not have the right token permission")
     void getCertificateItemReturnsUnauthorisedIfMissingTokenPermission() throws Exception {
@@ -139,7 +135,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Fails to create certificate item with incorrect token permission")
     void updateCertificateItemUnauthorizedTokenPermission() throws Exception {
@@ -164,7 +159,6 @@ public class UserAuthorisationInterceptorIntegrationTest {
 
     }
 
-    // TODO: move to authorisation interceptor integration tests
     @Test
     @DisplayName("Reports failure to find certificate item")
     void updateCertificateItemReportsFailureToFindItem() throws Exception {
