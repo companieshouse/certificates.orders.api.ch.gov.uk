@@ -143,8 +143,8 @@ class PatchItemRequestValidatorTest {
     }
 
     @Test
-    @DisplayName("Unknown field is ignored")
-    void getValidationErrorsIgnoresUnknownField() throws IOException {
+    @DisplayName("Validation error raised if unknown field specified")
+    void getValidationErrorsRaisesErrorIfUnknownFieldSpecified() throws IOException {
         // Given
         final String jsonWithUnknownField = "{ \"idx\": \"CHS1\" }";
         final JsonMergePatch patch = patchFactory.patchFromJson(jsonWithUnknownField);
@@ -153,7 +153,7 @@ class PatchItemRequestValidatorTest {
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
 
         // Then
-        assertThat(errors, is(empty()));
+        assertThat(errors, contains(ApiErrors.ERR_JSON_PROCESSING));
     }
 
     /**

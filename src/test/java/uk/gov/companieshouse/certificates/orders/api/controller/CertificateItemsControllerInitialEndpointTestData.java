@@ -41,9 +41,9 @@ class CertificateItemsControllerInitialEndpointTestData {
                             .withDescription("Raises client error if company type null")
                             .build()),
                     Arguments.of(JsonRequestFixture.builder()
-                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/request.json", StandardCharsets.UTF_8))
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_status_invalid/request.json", StandardCharsets.UTF_8))
                             .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
-                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/response.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_status_invalid/response.json", StandardCharsets.UTF_8))
                             .withCompanyType(CompanyType.LIMITED_COMPANY)
                             .withCompanyStatus(null)
                             .withDescription("Raises client error if company status null")

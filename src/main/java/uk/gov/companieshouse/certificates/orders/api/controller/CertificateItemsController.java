@@ -23,7 +23,6 @@ import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
 import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
@@ -35,7 +34,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.Validator;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,9 +69,6 @@ public class CertificateItemsController {
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
-    private final Validator constraintValidator;
-    private final FieldNameConverter fieldNameConverter;
-    private final Map<String, ApiError> errorMap;
 
     /**
      * Constructor.
@@ -95,9 +90,7 @@ public class CertificateItemsController {
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
-                                      final Validator validator,
-                                      final FieldNameConverter fieldNameConverter) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.certificateOptionsValidator = certificateOptionsValidator;
@@ -106,10 +99,6 @@ public class CertificateItemsController {
         this.certificateItemService = certificateItemService;
         this.companyService = companyService;
         this.certificateTypeMapper = certificateTypeMapper;
-        this.constraintValidator = validator;
-        this.fieldNameConverter = fieldNameConverter;
-        this.errorMap = new HashMap<>();
-        this.errorMap.put("company_number", ApiErrors.ERR_COMPANY_NUMBER_REQUIRED);
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
