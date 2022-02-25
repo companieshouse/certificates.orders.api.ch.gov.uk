@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.config;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,9 +47,8 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .setPropertyNamingStrategy(SNAKE_CASE)
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                 .findAndRegisterModules();
     }
 

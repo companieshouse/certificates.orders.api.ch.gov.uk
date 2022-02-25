@@ -49,8 +49,17 @@ class CertificateItemsControllerUpdateEndpointTestData {
                             .withCompanyStatus(CompanyStatus.ACTIVE)
                             .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
                             .withDescription("Raises client error if certificate options invalid")
+                            .build()),
+                    Arguments.of(JsonRequestFixture.builder()
+                            .withSavedResource(IOUtils.resourceToString("/integrationTestData/update/negative/unknown_properties_set/item.json", StandardCharsets.UTF_8))
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/update/negative/unknown_properties_set/request.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/update/negative/unknown_properties_set/response.json", StandardCharsets.UTF_8))
+                            .withCompanyStatus(CompanyStatus.ACTIVE)
+                            .withCompanyType(CompanyType.LIMITED_LIABILITY_PARTNERSHIP)
+                            .withDescription("Raises client error if unknown fields present in request")
                             .build())
-            );
+                    );
         } catch(IOException e) {
             throw new RuntimeException(e);
         }

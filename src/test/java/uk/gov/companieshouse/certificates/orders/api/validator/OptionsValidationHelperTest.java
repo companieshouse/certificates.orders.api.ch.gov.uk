@@ -371,4 +371,19 @@ class OptionsValidationHelperTest {
                 ApiErrors.raiseError(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED, "include_director_details: must not exist when company status is dissolved"),
                 ApiErrors.raiseError(ApiErrors.ERR_INCLUDE_GOOD_STANDING_INFORMATION_SUPPLIED, "include_good_standing_information: must not exist when company status is dissolved")));
     }
+
+    @Test
+    @DisplayName("Validation error raised if limited partnership not active")
+    void testRaiseValidationErrorIfLimitedPartnershipNotActive() {
+        //given
+        certificateItemOptions.setCompanyType(CompanyType.LIMITED_PARTNERSHIP.getCompanyType());
+        certificateItemOptions.setCompanyStatus(CompanyStatus.DISSOLVED.getStatusName());
+        OptionsValidationHelper helper = new OptionsValidationHelper(requestValidatable, featureOptions);
+
+        //when
+        helper.validateLimitedPartnershipOptions();
+
+        //then
+        assertThat(helper.getErrors(), contains(ApiErrors.raiseError(ApiErrors.ERR_COMPANY_STATUS_INVALID, "company_status: dissolved not valid for company type limited-partnership")));
+    }
 }

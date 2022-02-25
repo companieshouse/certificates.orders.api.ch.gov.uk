@@ -11,15 +11,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.IdGeneratorService;
+import wiremock.org.eclipse.jetty.http.HttpStatus;
 
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -84,5 +89,20 @@ public class CertificateItemsControllerCreateEndpointIntegrationTest {
                 .andExpect(status().is(requestFixture.getExpectedResponseCode()))
                 .andExpect(content().json(requestFixture.getExpectedResponseBody()))
                 .andDo(MockMvcResultHandlers.print());
+
+        if (!HttpStatus.isSuccess(requestFixture.getExpectedResponseCode())) {
+            assertItemWasNotSaved(EXPECTED_ITEM_ID);
+        }
+    }
+
+    /**
+     * Verifies that the item that could have been created by the create item POST request cannot in fact be retrieved
+     * from the database.
+     *
+     * @param expectedItemId the expected ID of the newly created item
+     */
+    private void assertItemWasNotSaved(final String expectedItemId) {
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
+        assertThat(retrievedCertificateItem.isPresent(), is(false));
     }
 }

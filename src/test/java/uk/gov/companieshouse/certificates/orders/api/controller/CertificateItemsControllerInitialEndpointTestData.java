@@ -30,15 +30,23 @@ class CertificateItemsControllerInitialEndpointTestData {
                             .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/absent_company_number/response.json", StandardCharsets.UTF_8))
                             .withCompanyStatus(CompanyStatus.ACTIVE)
                             .withCompanyType(CompanyType.LIMITED_COMPANY)
-                            .withDescription("Initial endpoint raises client error if company number absent")
+                            .withDescription("Raises client error if company number absent")
                             .build()),
                     Arguments.of(JsonRequestFixture.builder()
                             .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/request.json", StandardCharsets.UTF_8))
                             .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
                             .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/response.json", StandardCharsets.UTF_8))
                             .withCompanyType(null)
+                            .withCompanyStatus(CompanyStatus.ACTIVE)
+                            .withDescription("Raises client error if company type null")
+                            .build()),
+                    Arguments.of(JsonRequestFixture.builder()
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/request.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_type_null/response.json", StandardCharsets.UTF_8))
+                            .withCompanyType(CompanyType.LIMITED_COMPANY)
                             .withCompanyStatus(null)
-                            .withDescription("Initial endpoint raises client error if company type null")
+                            .withDescription("Raises client error if company status null")
                             .build()),
                     Arguments.of(JsonRequestFixture.builder()
                             .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_not_found/request.json", StandardCharsets.UTF_8))
@@ -47,7 +55,7 @@ class CertificateItemsControllerInitialEndpointTestData {
                             .withCompanyServiceException(new CompanyNotFoundException("Company not found"))
                             .withCompanyType(null)
                             .withCompanyStatus(null)
-                            .withDescription("Initial endpoint raises client error if company not found")
+                            .withDescription("Raises client error if company not found")
                             .build()),
                     Arguments.of(JsonRequestFixture.builder()
                             .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/company_profile_error/request.json", StandardCharsets.UTF_8))
@@ -56,8 +64,17 @@ class CertificateItemsControllerInitialEndpointTestData {
                             .withCompanyServiceException(new CompanyServiceException("Error calling company profile API"))
                             .withCompanyType(null)
                             .withCompanyStatus(null)
-                            .withDescription("Initial endpoint raises server error if other error returned by company profile API")
+                            .withDescription("Raises server error if other error returned by company profile API")
+                            .build()),
+                    Arguments.of(JsonRequestFixture.builder()
+                            .withRequestBody(IOUtils.resourceToString("/integrationTestData/initial/negative/unknown_properties_set/request.json", StandardCharsets.UTF_8))
+                            .withExpectedResponseCode(HttpStatus.BAD_REQUEST.value())
+                            .withExpectedResponseBody(IOUtils.resourceToString("/integrationTestData/initial/negative/unknown_properties_set/response.json", StandardCharsets.UTF_8))
+                            .withCompanyType(CompanyType.LIMITED_COMPANY)
+                            .withCompanyStatus(CompanyStatus.ACTIVE)
+                            .withDescription("Raises client error if unknown fields present in request")
                             .build())
+
             );
         } catch(IOException e) {
             throw new RuntimeException(e);

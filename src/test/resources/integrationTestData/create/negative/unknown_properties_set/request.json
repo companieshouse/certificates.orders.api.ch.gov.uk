@@ -2,5 +2,6 @@
   "company_number": "12345678",
   "item_options": {
   },
-  "quantity": 0
+  "unknown_property": "unknown",
+  "quantity": 1
 }

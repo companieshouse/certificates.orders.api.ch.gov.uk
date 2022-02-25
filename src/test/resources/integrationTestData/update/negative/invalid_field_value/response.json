@@ -1,5 +1,7 @@
 {
-  "errors": [{
-    "error": "quantity-error"
-  }]
+  "errors": [
+    {
+      "error": "quantity-error"
+    }
+  ]
 }

@@ -1,6 +1,18 @@
 {
   "errors": [
     {
+      "error": "collection-location-required-error"
+    },
+    {
+      "error": "forename-required-error"
+    },
+    {
+      "error": "surname-required-error"
+    },
+    {
+      "error": "include-email-copy-is-true-error"
+    },
+    {
       "error": "principal-place-of-business-details-error"
     },
     {
