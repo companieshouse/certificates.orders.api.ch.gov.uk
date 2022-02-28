@@ -27,7 +27,6 @@ public class CertificateItemCreate {
     @JsonProperty("kind")
     private String kind;
 
-    private boolean isPostalDelivery;
     @Min(1)
     @JsonProperty("quantity")
     private int quantity;
@@ -62,14 +61,6 @@ public class CertificateItemCreate {
 
     public void setKind(String kind) {
         this.kind = kind;
-    }
-
-    public boolean isPostalDelivery() {
-        return isPostalDelivery;
-    }
-
-    public void setPostalDelivery(boolean postalDelivery) {
-        isPostalDelivery = postalDelivery;
     }
 
     public int getQuantity() {
