@@ -29,6 +29,11 @@ liquidated:
     certificate:
       enabled: ${LIQUIDATED_COMPANY_CERTIFICATES_ENABLED}
 
+administrator:
+  company:
+    certificate:
+      enabled: ${ADMINISTRATOR_COMPANY_CERTIFICATES_ENABLED}
+
 server:
   error:
     include-message: always

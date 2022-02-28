@@ -167,6 +167,41 @@ class CertificateTypeMapperUnitTest {
         assertThat(result.getMappingError(), is(nullValue()));
     }
 
+    @ParameterizedTest
+    @MethodSource("validCompanyTypes")
+    void shouldMapAdministrationCompanyToIncorporationCertificate(String companyType) {
+        //given
+        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        when(featureOptions.isAdministratorCompanyCertificateEnabled()).thenReturn(true);
+
+        //when
+        CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
+
+        //then
+        assertThat(result, not(nullValue()));
+        assertThat(result.getCertificateType(), is(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES));
+        assertThat(result.isMappingError(), is(false));
+        assertThat(result.getMappingError(), is(nullValue()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("validCompanyTypes")
+    void shouldNotMapAdministrationCompanyToIncorporationCertificateWhenAdministratorCompanyCertificateDisabled(String companyType) {
+        //given
+        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
+        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+
+        //when
+        CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
+
+        //then
+        assertThat(result, not(nullValue()));
+        assertThat(result.getCertificateType(), is(nullValue()));
+        assertThat(result.isMappingError(), is(true));
+        assertThat(result.getMappingError(), is(ApiErrors.ERR_COMPANY_STATUS_INVALID));
+    }
+
     private static Stream<String> validCompanyTypes() {
         return Stream.of("llp",
                 "ltd",

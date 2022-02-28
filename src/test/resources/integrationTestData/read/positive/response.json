@@ -1,0 +1,42 @@
+{
+  "company_name": "ACME LIMITED",
+  "company_number": "12345678",
+  "customer_reference": "Test",
+  "item_options": {
+    "certificate_type": "incorporation-with-all-name-changes",
+    "collection_location": "cardiff",
+    "company_type":  "ltd",
+    "company_status": "active",
+    "contact_number": "12345678901",
+    "delivery_method": "collection",
+    "delivery_timescale": "standard",
+    "director_details": {
+      "include_address": true,
+      "include_appointment_date": true,
+      "include_basic_information": true,
+      "include_country_of_residence": true,
+      "include_dob_type": "partial",
+      "include_nationality": true,
+      "include_occupation": true
+    },
+    "forename": "John",
+    "include_company_objects_information": true,
+    "include_email_copy": false,
+    "include_good_standing_information": true,
+    "registered_office_address_details": {
+      "include_address_records_type": "current-previous-and-prior",
+      "include_dates": false
+    },
+    "secretary_details": {
+      "include_address": true,
+      "include_appointment_date": true,
+      "include_basic_information": true,
+      "include_country_of_residence": true,
+      "include_dob_type": "partial",
+      "include_nationality": true,
+      "include_occupation": true
+    },
+    "surname": "Smith"
+  },
+  "quantity": 1
+}

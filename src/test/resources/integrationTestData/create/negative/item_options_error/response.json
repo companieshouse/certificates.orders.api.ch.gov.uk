@@ -1,0 +1,37 @@
+{
+  "errors": [
+    {
+      "error": "collection-location-required-error"
+    },
+    {
+      "error": "forename-required-error"
+    },
+    {
+      "error": "surname-required-error"
+    },
+    {
+      "error": "include-email-copy-is-true-error"
+    },
+    {
+      "error": "principal-place-of-business-details-error"
+    },
+    {
+      "error": "general-partner-details-error"
+    },
+    {
+      "error": "limited-partner-details-error"
+    },
+    {
+      "error": "designated-members-details-error"
+    },
+    {
+      "error": "members-details-error"
+    },
+    {
+      "error": "liquidators-details-supplied-error"
+    },
+    {
+      "error": "administrators-details-supplied-error"
+    }
+  ]
+}

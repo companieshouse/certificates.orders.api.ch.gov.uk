@@ -1,17 +1,20 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.model.AdministratorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.LiquidatorsDetails;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 
 import java.util.List;
 
 class CertificateItemsFixture {
-    private final String companyType;
+    private final CompanyType companyType;
     private final CompanyStatus companyStatus;
     private final Boolean includeGoodStandingInformation;
     private final LiquidatorsDetails liquidatorsDetails;
     private final List<ApiError> expectedErrors;
+    private final AdministratorsDetails administratorsDetails;
 
     private CertificateItemsFixture(Builder builder) {
         companyType = builder.companyType;
@@ -19,6 +22,7 @@ class CertificateItemsFixture {
         includeGoodStandingInformation = builder.includeGoodStandingInformation;
         liquidatorsDetails = builder.liquidatorsDetails;
         expectedErrors = builder.expectedErrors;
+        administratorsDetails = builder.administratorsDetails;
     }
 
     public static Builder newBuilder() {
@@ -26,16 +30,17 @@ class CertificateItemsFixture {
     }
 
     public static final class Builder {
-        private String companyType;
+        private CompanyType companyType;
         private CompanyStatus companyStatus;
         private Boolean includeGoodStandingInformation;
         private LiquidatorsDetails liquidatorsDetails;
         private List<ApiError> expectedErrors;
+        private AdministratorsDetails administratorsDetails;
 
         private Builder() {
         }
 
-        public Builder withCompanyType(String companyType) {
+        public Builder withCompanyType(CompanyType companyType) {
             this.companyType = companyType;
             return this;
         }
@@ -60,12 +65,17 @@ class CertificateItemsFixture {
             return this;
         }
 
+        public Builder withAdministratorsDetails(AdministratorsDetails administratorsDetails) {
+            this.administratorsDetails = administratorsDetails;
+            return this;
+        }
+
         public CertificateItemsFixture build() {
             return new CertificateItemsFixture(this);
         }
     }
 
-    public String getCompanyType() {
+    public CompanyType getCompanyType() {
         return companyType;
     }
 
@@ -79,6 +89,10 @@ class CertificateItemsFixture {
 
     public LiquidatorsDetails getLiquidatorsDetails() {
         return liquidatorsDetails;
+    }
+
+    public AdministratorsDetails getAdministratorsDetails() {
+        return administratorsDetails;
     }
 
     public List<ApiError> getExpectedErrors() {

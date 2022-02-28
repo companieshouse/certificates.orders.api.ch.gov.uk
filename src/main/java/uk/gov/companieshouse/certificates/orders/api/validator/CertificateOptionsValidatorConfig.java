@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import java.util.function.Consumer;
 
@@ -46,7 +47,9 @@ class CertificateOptionsValidatorConfig {
      * @return
      */
     @Bean
-    CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions) {
+    CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions,
+                                                            OptionsValidationHelperFactory factory,
+                                                            FieldNameConverter fieldNameConverter) {
         Consumer<OptionsValidationHelper> strategy;
         if (featureOptions.isLlpCertificateOrdersEnabled() && featureOptions.isLpCertificateOrdersEnabled()) {
             strategy = this::allFeatureOptionsEnabledStrategy;
@@ -57,7 +60,7 @@ class CertificateOptionsValidatorConfig {
         } else {
             strategy = this::noFeatureOptionsEnabledStrategy;
         }
-        return new CertificateOptionsValidator(strategy);
+        return new CertificateOptionsValidator(strategy, factory, fieldNameConverter);
     }
 
     private void noFeatureOptionsEnabledStrategy(OptionsValidationHelper optionsValidationHelper) {

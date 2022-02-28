@@ -3,25 +3,27 @@ package uk.gov.companieshouse.certificates.orders.api.validator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.error.ApiError;
+import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 
 /**
  * Implements validation of the request payload specific to the the patch item request only.
  */
 @Component
-public class PatchItemRequestValidator extends RequestValidator {
+public class PatchItemRequestValidator {
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
@@ -35,9 +37,7 @@ public class PatchItemRequestValidator extends RequestValidator {
      */
     public PatchItemRequestValidator(final ObjectMapper objectMapper,
                                      final Validator validator,
-                                     final FieldNameConverter converter,
-                                     final CertificateOptionsValidator certificateOptionsValidator) {
-        super(certificateOptionsValidator);
+                                     final FieldNameConverter converter) {
         this.objectMapper = objectMapper;
         this.validator = validator;
         this.converter = converter;
@@ -48,29 +48,25 @@ public class PatchItemRequestValidator extends RequestValidator {
      * @param patch the item to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    public List<String> getValidationErrors(final JsonMergePatch patch) {
+    public List<ApiError> getValidationErrors(final JsonMergePatch patch) {
         try {
             final PatchValidationCertificateItemDTO dto =
                     objectMapper.readValue(patch.toJsonValue().toString(), PatchValidationCertificateItemDTO.class);
             final Set<ConstraintViolation<PatchValidationCertificateItemDTO>> violations = validator.validate(dto);
             return violations.stream()
-                    .map(violation -> converter.toSnakeCase(violation.getPropertyPath().toString())
-                            + ": " + violation.getMessage())
+                    .sorted(Comparator.comparing(a -> a.getPropertyPath().toString()))
+                    .map(this::raiseError)
                     .collect(Collectors.toList());
         } catch (JsonProcessingException jpe) {
-            return singletonList(jpe.getOriginalMessage());
-        } catch (IOException ex) {
-            // This exception will not occur because there are no low-level IO operations here.
-            return EMPTY_LIST;
+            return singletonList(ApiErrors.ERR_JSON_PROCESSING);
         }
     }
 
-    /**
-     * Validates the patched item provided, returning any errors found.
-     * @param requestValidatable to be validated
-     * @return the errors found, which will be empty if the item is found to be valid
-     */
-    public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
-        return getValidationErrors(requestValidatable, converter);
+    private ApiError raiseError(ConstraintViolation<PatchValidationCertificateItemDTO> violation) {
+        String fieldName = violation.getPropertyPath().toString();
+        String snakeCaseFieldName = converter.fromUpperCamelToSnakeCase(fieldName);
+        return ApiErrorBuilder.builder(new ApiError(converter.fromLowerUnderscoreToLowerHyphenCase(snakeCaseFieldName) + "-error", snakeCaseFieldName, ApiErrors.OBJECT_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
+                .withErrorMessage(snakeCaseFieldName + ": " + violation.getMessage())
+                .build();
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.error.ApiError;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
@@ -22,10 +21,10 @@ import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemServ
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyNotFoundException;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
+import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatable;
@@ -34,18 +33,13 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.util.ArrayList;
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -63,21 +57,18 @@ import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConst
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.STATUS_LOG_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.USER_ID_LOG_KEY;
 
-
 @RestController
 public class CertificateItemsController {
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final CreateItemRequestValidator createItemRequestValidator;
     private final PatchItemRequestValidator patchItemRequestValidator;
+    private final CertificateOptionsValidator certificateOptionsValidator;
     private final CertificateItemMapper mapper;
     private final PatchMerger patcher;
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
-    private final Validator constraintValidator;
-    private final FieldNameConverter fieldNameConverter;
-    private final Map<String, ApiError> errorMap;
 
     /**
      * Constructor.
@@ -94,43 +85,33 @@ public class CertificateItemsController {
      */
     public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
                                       final PatchItemRequestValidator patchItemRequestValidator,
+                                      final CertificateOptionsValidator certificateOptionsValidator,
                                       final CertificateItemMapper mapper,
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
-                                      final Validator validator,
-                                      final FieldNameConverter fieldNameConverter) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
+        this.certificateOptionsValidator = certificateOptionsValidator;
         this.mapper = mapper;
         this.patcher = patcher;
         this.certificateItemService = certificateItemService;
         this.companyService = companyService;
         this.certificateTypeMapper = certificateTypeMapper;
-        this.constraintValidator = validator;
-        this.fieldNameConverter = fieldNameConverter;
-        this.errorMap = new HashMap<>();
-        this.errorMap.put("company_number", ApiErrors.ERR_COMPANY_NUMBER_IS_NULL);
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
-    public ResponseEntity<Object> createCertificateItem(final @RequestBody CertificateItemCreate certificateItem,
+    public ResponseEntity<Object> createCertificateItem(final @RequestBody @Valid CertificateItemCreate certificateItemCreate,
                                                         HttpServletRequest servletRequest,
                                                         final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-        Set<ConstraintViolation<CertificateItemCreate>> violations = constraintValidator.validate(certificateItem);
-        if (!violations.isEmpty()) {
-            return errorResponse(BAD_REQUEST, violations);
-        }
+        CertificateItem certificateItem = mapper.certificateItemCreateToCertificateItem(certificateItemCreate);
 
         return createCertificateItem(servletRequest,
                 requestId,
-                certificateItem::getCompanyNumber,
-                companyProfileResource -> createItemRequestValidator.getValidationErrors(
-                        new CompanyCertificateInformation(companyProfileResource.getCompanyStatus(),
-                                certificateItem.getId(),
-                                certificateItem.getItemOptions())),
-                () -> mapper.certificateItemCreateToCertificateItem(certificateItem));
+                enrichedCertificateItem -> createItemRequestValidator.getValidationErrors(
+                        new CompanyCertificateInformation(enrichedCertificateItem.getItemOptions())),
+                certificateItem);
     }
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
@@ -149,29 +130,24 @@ public class CertificateItemsController {
             return ResponseEntity.status(OK).body(createdCertificateItemDTO);
         } else {
             String errorMsg = "certificate resource not found";
-            final List<String> errors = new ArrayList<>();
-            errors.add(errorMsg);
-            logErrorsWithStatus(logMap, errors, NOT_FOUND);
+            final ApiError apiError = ApiErrorBuilder.builder(ApiErrors.ERR_CERTIFICATE_NOT_FOUND)
+                    .withErrorMessage(errorMsg).build();
+            logErrorsWithStatus(logMap, Collections.singletonList(apiError), NOT_FOUND);
             LOGGER.error(errorMsg, logMap);
-            return ResponseEntity.status(NOT_FOUND).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(NOT_FOUND, errors));
+            return ApiErrors.errorResponse(NOT_FOUND, apiError);
         }
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.initial}")
-    public ResponseEntity<Object> initialCertificateItem(final @RequestBody CertificateItemInitial certificateItem,
+    public ResponseEntity<Object> initialCertificateItem(final @RequestBody @Valid CertificateItemInitial certificateItemInitial,
                                                          HttpServletRequest servletRequest,
                                                          final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
-
-        Set<ConstraintViolation<CertificateItemInitial>> violations = constraintValidator.validate(certificateItem);
-        if (!violations.isEmpty()) {
-            return errorResponse(BAD_REQUEST, violations);
-        }
+        CertificateItem certificateItem = mapper.certificateItemInitialToCertificateItem(certificateItemInitial);
 
         return createCertificateItem(servletRequest,
                 requestId,
-                certificateItem::getCompanyNumber,
-                companyStatus -> Collections.emptyList(),
-                () -> mapper.certificateItemInitialToCertificateItem(certificateItem));
+                enrichedCertificateItem -> Collections.emptyList(),
+                certificateItem);
     }
 
     @PatchMapping(path = "${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}",
@@ -185,18 +161,19 @@ public class CertificateItemsController {
         LOGGER.info("update certificate item request", logMap);
         logMap.remove(MESSAGE);
 
-        final List<String> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
+        // Domain validation
+        final List<ApiError> errors = patchItemRequestValidator.getValidationErrors(mergePatchDocument);
         if (!errors.isEmpty()) {
             logErrorsWithStatus(logMap, errors, BAD_REQUEST);
             LOGGER.error("update certificate item request had validation errors", logMap);
-            return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, errors));
+            return ApiErrors.errorResponse(BAD_REQUEST, errors);
         }
 
         Optional<CertificateItem> certRetrieved = certificateItemService.getCertificateItemById(id);
         if (!certRetrieved.isPresent()) {
             logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
             LOGGER.error("certificate item not found", logMap);
-            return ResponseEntity.notFound().build();
+            return ApiErrors.errorResponse(NOT_FOUND, ApiErrors.ERR_CERTIFICATE_NOT_FOUND);
         }
         final CertificateItem itemRetrieved = certRetrieved.get();
         logMap.put(COMPANY_NUMBER_LOG_KEY, itemRetrieved.getCompanyNumber());
@@ -205,15 +182,13 @@ public class CertificateItemsController {
         // Apply the patch
         final CertificateItem patchedItem = patcher.mergePatch(mergePatchDocument, itemRetrieved, CertificateItem.class);
 
-        final List<String> patchedErrors = patchItemRequestValidator.getValidationErrors(
-                new CompanyCertificateInformation(
-                        CompanyStatus.getEnumValue(itemRetrieved.getItemOptions().getCompanyStatus()),
-                        patchedItem.getId(),
-                        patchedItem.getItemOptions()));
+        // Certificate item options validation
+        final List<ApiError> patchedErrors = certificateOptionsValidator.getValidationErrors(
+                new CompanyCertificateInformation(patchedItem.getItemOptions()));
         if (!patchedErrors.isEmpty()) {
             logErrorsWithStatus(logMap, patchedErrors, BAD_REQUEST);
             LOGGER.error("patched certificate item had validation errors", logMap);
-            return ResponseEntity.status(BAD_REQUEST).body(new uk.gov.companieshouse.certificates.orders.api.controller.ApiError(BAD_REQUEST, patchedErrors));
+            return ApiErrors.errorResponse(BAD_REQUEST, patchedErrors);
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
@@ -247,99 +222,68 @@ public class CertificateItemsController {
      * @param errors a list of errors
      */
     private void logErrorsWithStatus(Map<String, Object> logMap,
-                                     final List<String> errors, HttpStatus status) {
+                                     final List<ApiError> errors, HttpStatus status) {
         logMap.put(ERRORS_LOG_KEY, errors);
         logMap.put(STATUS_LOG_KEY, status);
     }
 
-    private ResponseEntity<Object> createCertificateItem(HttpServletRequest servletRequest,
-                                                         String requestId,
-                                                         Supplier<String> companyNumberSupplier,
-                                                         Function<CompanyProfileResource, List<String>> customValidationFunction,
-                                                         Supplier<CertificateItem> certificateItemSupplier) {
+    private ResponseEntity<Object> createCertificateItem(final HttpServletRequest servletRequest,
+                                                         final String requestId,
+                                                         final Function<CertificateItem, List<ApiError>> customValidationFunction,
+                                                         final CertificateItem certificateItem) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         LOGGER.infoRequest(servletRequest, "create certificate item servletRequest", logMap);
 
+        // TODO: validation of input request models should be performed in prior to certificate creation. i.e. all
+        //  validation that does not required company status and company type
+
         try {
             // Get company profile
-            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(companyNumberSupplier.get());
+            final CompanyProfileResource companyProfile = companyService.getCompanyProfile(certificateItem.getCompanyNumber());
 
             // Map company to certificate type
             CertificateTypeMapResult certificateTypeMapResult = certificateTypeMapper.mapToCertificateType(companyProfile);
             if (certificateTypeMapResult.isMappingError()) {
-                return errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
+                return ApiErrors.errorResponse(BAD_REQUEST, certificateTypeMapResult.getMappingError());
             }
 
+            CertificateItem enrichedCertificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItem);
+
             // Perform custom validation
-            final List<String> errors = customValidationFunction.apply(companyProfile);
+            final List<ApiError> errors = customValidationFunction.apply(enrichedCertificateItem);
             if (!errors.isEmpty()) {
                 logErrorsWithStatus(logMap, errors, BAD_REQUEST);
                 LOGGER.errorRequest(servletRequest, "create certificate certificateItem validation errors", logMap);
-                return errorResponse(BAD_REQUEST, errors);
+                return ApiErrors.errorResponse(BAD_REQUEST, errors);
             }
 
-            CertificateItem certificateItem = mapper.enrichCertificateItem(EricHeaderHelper.getIdentity(servletRequest), companyProfile, certificateTypeMapResult, certificateItemSupplier.get());
-            certificateItem = certificateItemService.createCertificateItem(certificateItem);
-            logMap.put(USER_ID_LOG_KEY, certificateItem.getUserId());
-            logMap.put(COMPANY_NUMBER_LOG_KEY, certificateItem.getCompanyNumber());
-            logMap.put(CERTIFICATE_ID_LOG_KEY, certificateItem.getId());
+            CertificateItem createdCertificateItem = certificateItemService.createCertificateItem(enrichedCertificateItem);
+            logMap.put(USER_ID_LOG_KEY, createdCertificateItem.getUserId());
+            logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItem.getCompanyNumber());
+            logMap.put(CERTIFICATE_ID_LOG_KEY, createdCertificateItem.getId());
             logMap.put(STATUS_LOG_KEY, CREATED);
             logMap.remove(MESSAGE);
             LOGGER.infoRequest(servletRequest, "certificate certificateItem created", logMap);
-            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(certificateItem);
+            final CertificateItemResponse certificateItemResponse = mapper.certificateItemToCertificateItemResponse(createdCertificateItem);
             return ResponseEntity.status(CREATED).body(certificateItemResponse);
         } catch (CompanyNotFoundException e) {
-            return errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
+            return ApiErrors.errorResponse(BAD_REQUEST, ApiErrors.ERR_COMPANY_NOT_FOUND);
         } catch (CompanyServiceException ex) {
-            return errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
+            return ApiErrors.errorResponse(INTERNAL_SERVER_ERROR, ApiErrors.ERR_SERVICE_UNAVAILABLE);
         }
     }
 
     private static class CompanyCertificateInformation implements RequestValidatable {
 
-        private final CompanyStatus companyStatus;
-        private final String certificateId;
         private final CertificateItemOptions itemOptions;
 
-        public CompanyCertificateInformation(CompanyStatus companyStatus,
-                                             String certificateId,
-                                             CertificateItemOptions itemOptions) {
-            this.companyStatus = companyStatus;
-            this.certificateId = certificateId;
+        public CompanyCertificateInformation(CertificateItemOptions itemOptions) {
             this.itemOptions = itemOptions;
-        }
-
-        @Override
-        public CompanyStatus getCompanyStatus() {
-            return companyStatus;
-        }
-
-        @Override
-        public String getCertificateId() {
-            return certificateId;
         }
 
         @Override
         public CertificateItemOptions getItemOptions() {
             return itemOptions;
         }
-    }
-
-    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, ApiError apiError) {
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(Collections.singletonList(apiError)));
-    }
-
-    private ResponseEntity<Object> errorResponse(HttpStatus httpStatus, List<String> errors) {
-        List<ApiError> apiErrors = errors.stream().map(e -> new ApiError(e, "item_options", ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION)).collect(Collectors.toList());
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(apiErrors));
-    }
-
-    private <T> ResponseEntity<Object> errorResponse(HttpStatus httpStatus, Set<ConstraintViolation<T>> violations) {
-        List<ApiError> apiErrors = violations.stream().map(v -> {
-            String fieldName = fieldNameConverter.toSnakeCase(v.getPropertyPath().toString());
-            return errorMap.getOrDefault(fieldName,
-                    new ApiError(fieldName + ": " + v.getMessage(), fieldName, ApiErrors.STRING_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION));
-        }).collect(Collectors.toList());
-        return ResponseEntity.status(httpStatus).body(new ApiResponse<>(apiErrors));
     }
 }

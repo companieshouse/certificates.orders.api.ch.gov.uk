@@ -33,6 +33,11 @@ liquidated:
     certificate:
       enabled: true
 
+administrator:
+  company:
+    certificate:
+      enabled: true
+
 ---
 
 spring:
@@ -44,6 +49,16 @@ lp:
 llp:
   certificate:
     orders:
+      enabled: false
+
+liquidated:
+  company:
+    certificate:
+      enabled: false
+
+administrator:
+  company:
+    certificate:
       enabled: false
 
 ---
@@ -59,6 +74,16 @@ llp:
     orders:
       enabled: false
 
+liquidated:
+  company:
+    certificate:
+      enabled: false
+
+administrator:
+  company:
+    certificate:
+      enabled: false
+
 ---
 
 spring:
@@ -72,8 +97,17 @@ llp:
     orders:
       enabled: true
 
+liquidated:
+  company:
+    certificate:
+      enabled: false
+
+administrator:
+  company:
+    certificate:
+      enabled: false
+
 server:
   error:
     include-message: always
     include-binding-errors: always
-

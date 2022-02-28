@@ -3,19 +3,19 @@ package uk.gov.companieshouse.certificates.orders.api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
-import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.
  */
 @JsonPropertyOrder(alphabetic = true)
-public class CertificateItemCreate extends ItemDTO {
-
+public class CertificateItemCreate {
     @NotNull
     @JsonProperty("item_options")
-    private CertificateItemOptions itemOptions;
+    private CertificateItemOptionsRequest itemOptions;
 
     @NotNull
     @JsonProperty("company_number")
@@ -24,11 +24,18 @@ public class CertificateItemCreate extends ItemDTO {
     @JsonProperty("customer_reference")
     private String customerReference;
 
-    public CertificateItemOptions getItemOptions() {
+    @JsonProperty("kind")
+    private String kind;
+
+    @Min(1)
+    @JsonProperty("quantity")
+    private int quantity;
+
+    public CertificateItemOptionsRequest getItemOptions() {
         return itemOptions;
     }
 
-    public void setItemOptions(CertificateItemOptions itemOptions) {
+    public void setItemOptions(CertificateItemOptionsRequest itemOptions) {
         this.itemOptions = itemOptions;
     }
 
@@ -46,6 +53,22 @@ public class CertificateItemCreate extends ItemDTO {
 
     public String getCustomerReference() {
         return customerReference;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     @Override

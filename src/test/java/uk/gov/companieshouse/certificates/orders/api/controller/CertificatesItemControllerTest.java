@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
@@ -20,14 +20,15 @@ import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemServ
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyService;
 import uk.gov.companieshouse.certificates.orders.api.service.CompanyServiceException;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMerger;
+import uk.gov.companieshouse.certificates.orders.api.validator.CertificateOptionsValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
 
 import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Validator;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -98,6 +99,12 @@ class CertificatesItemControllerTest {
     @Mock
     private Validator constraintValidator;
 
+    @Mock
+    private CertificateOptionsValidator certificateOptionsValidator;
+
+    @Mock
+    private CertificateItem certificateItem;
+
     @InjectMocks
     private CertificateItemsController controllerUnderTest;
 
@@ -134,9 +141,10 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Update certificate item supplied patch has validation errors")
     void updateCertificateItemPatchValidationErrors() {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
-        when(validator.getValidationErrors(patch)).thenReturn(errors);
+
+        when(validator.getValidationErrors(patch))
+                .thenReturn(Collections.singletonList(ApiErrors.ERR_SURNAME_REQUIRED));
+
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
                 TOKEN_REQUEST_ID_VALUE);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
@@ -145,8 +153,7 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Update certificate item patched certificate has validation errors")
     void updateCertificateItemMergedValidationErrors() {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
+        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_CERTIFICATE_ID_SUPPLIED);
         when(validator.getValidationErrors(patch)).thenReturn(errors);
 
         ResponseEntity<Object> response = controllerUnderTest.updateCertificateItem(patch, ITEM_ID,
@@ -180,9 +187,8 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item is successful")
     void createCertificateItemSuccessful() throws CompanyServiceException {
-        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
-        when(companyService.getCompanyProfile("number")).thenReturn(
-                new CompanyProfileResource("name", "type", CompanyStatus.ACTIVE));
+        when(companyService.getCompanyProfile(any())).thenReturn(
+                new CompanyProfileResource("name", CompanyType.LIMITED_COMPANY.getCompanyType(), CompanyStatus.ACTIVE));
         when(certificateItemService.createCertificateItem(enrichedCertificateItem))
                 .thenReturn(item);
         when(mapper.certificateItemCreateToCertificateItem(certificateItemCreate)).thenReturn(nonEnrichedCertificateItem);
@@ -190,7 +196,6 @@ class CertificatesItemControllerTest {
                 .thenReturn(enrichedCertificateItem);
         when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
         when(certificateTypeMapper.mapToCertificateType(any())).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
 
         ResponseEntity<Object> response =
                 controllerUnderTest.createCertificateItem(certificateItemCreate, request, TOKEN_REQUEST_ID_VALUE);
@@ -202,14 +207,14 @@ class CertificatesItemControllerTest {
     @Test
     @DisplayName("Create certificate item has validation errors")
     void createCertificateItemValidationErrors() throws CompanyServiceException {
-        List<String> errors = new ArrayList<>();
-        errors.add("error");
-        when(certificateItemCreate.getCompanyNumber()).thenReturn("number");
+        List<ApiError> errors = Collections.singletonList(ApiErrors.ERR_DIRECTOR_DETAILS_SUPPLIED);
+        CertificateItemCreate certificateItemCreate = new CertificateItemCreate();
+        certificateItemCreate.setCompanyNumber("number");
         when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
         when(createValidator.getValidationErrors(any())).thenReturn(errors);
         when(certificateTypeMapper.mapToCertificateType(companyProfileResource)).thenReturn(new CertificateTypeMapResult(CertificateType.INCORPORATION));
-        when(constraintValidator.validate(any())).thenReturn(Collections.emptySet());
+        when(mapper.certificateItemCreateToCertificateItem(any())).thenReturn(certificateItem);
+        when(mapper.enrichCertificateItem(any(), any(), any(), any())).thenReturn(enrichedCertificateItem);
 
         ResponseEntity<Object>
                 response =

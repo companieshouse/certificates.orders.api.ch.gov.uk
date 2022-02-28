@@ -1,26 +1,21 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
+import uk.gov.companieshouse.api.error.ApiError;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Implements validation of the request payload specific to the the create item request only.
  */
 @Component
-public class CreateItemRequestValidator extends RequestValidator {
+public class CreateItemRequestValidator {
+    private final CertificateOptionsValidator certificateOptionsValidator;
 
-    private final FieldNameConverter converter;
-
-    /**
-     * Constructor.
-     * @param converter the converter this uses to present field names as they appear in the request JSON payload
-     */
-    public CreateItemRequestValidator(FieldNameConverter converter, CertificateOptionsValidator certificateOptionsValidator) {
-        super(certificateOptionsValidator);
-        this.converter = converter;
+    @Autowired
+    public CreateItemRequestValidator(CertificateOptionsValidator certificateOptionsValidator) {
+        this.certificateOptionsValidator = certificateOptionsValidator;
     }
 
     /**
@@ -28,12 +23,7 @@ public class CreateItemRequestValidator extends RequestValidator {
      * @param requestValidatable to be validated
      * @return the errors found, which will be empty if the item is found to be valid
      */
-    public List<String> getValidationErrors(final RequestValidatable requestValidatable) {
-        final List<String> errors = new ArrayList<>();
-        if (requestValidatable.getCertificateId() != null) {
-            errors.add("id: must be null in a create item request");
-        }
-        errors.addAll(getValidationErrors(requestValidatable, converter));
-        return errors;
+    public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
+        return certificateOptionsValidator.getValidationErrors(requestValidatable);
     }
 }

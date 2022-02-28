@@ -39,6 +39,8 @@ class CertificateTypeMapper implements CompanyProfileToCertificateTypeMapper {
             return new CertificateTypeMapResult(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
         } else if (companyStatus == CompanyStatus.LIQUIDATION && featureOptions.isLiquidatedCompanyCertificateEnabled()) {
             return new CertificateTypeMapResult(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
+        } else if (companyStatus == CompanyStatus.ADMINISTRATION && featureOptions.isAdministratorCompanyCertificateEnabled()) {
+            return new CertificateTypeMapResult(CertificateType.INCORPORATION_WITH_ALL_NAME_CHANGES);
         } else if (companyStatus == CompanyStatus.DISSOLVED) {
             return new CertificateTypeMapResult(CertificateType.DISSOLUTION);
         } else {
