@@ -36,7 +36,6 @@ import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,14 +128,8 @@ public class CertificateItemsController {
         LOGGER.info("get certificate item request", logMap);
         logMap.remove(MESSAGE);
 
-        Enumeration<String> headerNames = servletRequest.getHeaderNames();
-        while(headerNames.hasMoreElements())
-        {
-            String headerName = headerNames.nextElement();
-            LOGGER.info("header: " + headerName + ", value = " + servletRequest.getHeader(headerName));
-        }
-
-        LOGGER.info("User entitled to free certificates?: " + authoriser.hasPermission("/admin/free-certs", servletRequest));
+        LOGGER.info("User entitled to free certificates?: " +
+                authoriser.hasPermission("/admin/free-certs", servletRequest));
 
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if (item.isPresent()) {
