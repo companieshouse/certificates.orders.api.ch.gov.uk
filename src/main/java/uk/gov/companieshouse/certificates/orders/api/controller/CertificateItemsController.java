@@ -71,6 +71,7 @@ public class CertificateItemsController {
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
+    private final Oauth2Authoriser authoriser;
 
     /**
      * Constructor.
@@ -84,6 +85,7 @@ public class CertificateItemsController {
      * @param certificateItemService     the service used by this to manage and store certificate items
      * @param companyService             to get company profile
      * @param certificateTypeMapper      company profile to certificate type mapper
+     * @param authoriser                 the authoriser used to determine entitlement to free certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
                                       final PatchItemRequestValidator patchItemRequestValidator,
@@ -92,7 +94,8 @@ public class CertificateItemsController {
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
+                                      final Oauth2Authoriser authoriser) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.certificateOptionsValidator = certificateOptionsValidator;
@@ -101,6 +104,7 @@ public class CertificateItemsController {
         this.certificateItemService = certificateItemService;
         this.companyService = companyService;
         this.certificateTypeMapper = certificateTypeMapper;
+        this.authoriser = authoriser;
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
@@ -119,8 +123,7 @@ public class CertificateItemsController {
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
                                                      final HttpServletRequest servletRequest,
-                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId,
-                                                     final Oauth2Authoriser authoriser) {
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);
         LOGGER.info("get certificate item request", logMap);
@@ -133,7 +136,7 @@ public class CertificateItemsController {
             LOGGER.info("header: " + headerName + ", value = " + servletRequest.getHeader(headerName));
         }
 
-        LOGGER.info("User entitled to free certificates?: " + authoriser.checkPermission("/admin/free-certs", servletRequest));
+        LOGGER.info("User entitled to free certificates?: " + authoriser.hasPermission("/admin/free-certs", servletRequest));
 
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if (item.isPresent()) {
