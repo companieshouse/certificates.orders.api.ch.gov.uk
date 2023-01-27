@@ -69,10 +69,14 @@ public enum ItemType {
      * Populates the item costs fields.
      * @param item the item bearing the item costs
      * @param calculator the item costs calculator
+     * @param userGetsFreeCertificates whether the current user is entitled to free certificates (<code>true</code>),
+     *                                 or not (<code>false</code>)
      */
-    public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
+    public void populateItemCosts(final Item item,
+                                  final CertificateCostCalculatorService calculator,
+                                  final boolean userGetsFreeCertificates) {
         final CertificateCostCalculation calculation =
-                calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
+                calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item), userGetsFreeCertificates);
         item.setPostageCost(calculation.getPostageCost());
         item.setItemCosts(calculation.getItemCosts());
         item.setTotalItemCost(calculation.getTotalItemCost());

@@ -128,10 +128,11 @@ public class CertificateItemsController {
         LOGGER.info("get certificate item request", logMap);
         logMap.remove(MESSAGE);
 
-        LOGGER.info("User entitled to free certificates?: " +
-                authoriser.hasPermission("/admin/free-certs", servletRequest));
+        final boolean entitledToFreeCertificates =
+                authoriser.hasPermission("/admin/free-certs", servletRequest);
+        LOGGER.info("User entitled to free certificates?: " + entitledToFreeCertificates);
 
-        Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
+        Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id, entitledToFreeCertificates);
         if (item.isPresent()) {
             final CertificateItemResponse createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponse(item.get());
             logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItemDTO.getCompanyNumber());
@@ -202,7 +203,8 @@ public class CertificateItemsController {
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
-        final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
+        // TODO BI-12341 Assume here we don't know who the user is, but it shouldn't matter as costs not updated in DB.
+        final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem, false);
         final CertificateItemResponse responseDTO = mapper.certificateItemToCertificateItemResponse(savedItem);
 
         logMap.put(STATUS_LOG_KEY, OK);
@@ -267,7 +269,12 @@ public class CertificateItemsController {
                 return ApiErrors.errorResponse(BAD_REQUEST, errors);
             }
 
-            CertificateItem createdCertificateItem = certificateItemService.createCertificateItem(enrichedCertificateItem);
+            final boolean entitledToFreeCertificates =
+                    authoriser.hasPermission("/admin/free-certs", servletRequest);
+            LOGGER.info("User entitled to free certificates?: " + entitledToFreeCertificates);
+
+            CertificateItem createdCertificateItem =
+                    certificateItemService.createCertificateItem(enrichedCertificateItem, entitledToFreeCertificates);
             logMap.put(USER_ID_LOG_KEY, createdCertificateItem.getUserId());
             logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItem.getCompanyNumber());
             logMap.put(CERTIFICATE_ID_LOG_KEY, createdCertificateItem.getId());
