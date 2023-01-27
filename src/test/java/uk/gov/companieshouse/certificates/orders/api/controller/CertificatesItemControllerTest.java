@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.EricAuthoriser;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -105,6 +106,9 @@ class CertificatesItemControllerTest {
     @Mock
     private CertificateItem certificateItem;
 
+    @Mock
+    private EricAuthoriser authoriser;
+
     @InjectMocks
     private CertificateItemsController controllerUnderTest;
 
@@ -168,7 +172,7 @@ class CertificatesItemControllerTest {
                 Optional.of(item));
         when(mapper.certificateItemToCertificateItemResponse(item)).thenReturn(certificateItemResponse);
 
-        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
+        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, request, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertThat(response.getBody(), is(certificateItemResponse));
@@ -179,7 +183,7 @@ class CertificatesItemControllerTest {
     void getCertificateItemNotFound() {
         when(certificateItemService.getCertificateItemWithCosts(ITEM_ID)).thenReturn(
                 Optional.empty());
-        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, TOKEN_REQUEST_ID_VALUE);
+        ResponseEntity<Object> response = controllerUnderTest.getCertificateItem(ITEM_ID, request, TOKEN_REQUEST_ID_VALUE);
 
         assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
     }
