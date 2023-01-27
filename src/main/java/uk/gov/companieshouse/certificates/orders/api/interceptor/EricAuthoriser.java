@@ -11,10 +11,10 @@ import static uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelpe
 
 @Component
 public
-class Oauth2Authoriser {
+class EricAuthoriser {
     private final StringHelper stringHelper;
 
-    public Oauth2Authoriser(final StringHelper stringHelper) {
+    public EricAuthoriser(final StringHelper stringHelper) {
         this.stringHelper = stringHelper;
     }
 

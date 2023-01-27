@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
-import uk.gov.companieshouse.certificates.orders.api.interceptor.Oauth2Authoriser;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.EricAuthoriser;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -71,7 +71,7 @@ public class CertificateItemsController {
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
-    private final Oauth2Authoriser authoriser;
+    private final EricAuthoriser authoriser;
 
     /**
      * Constructor.
@@ -95,7 +95,7 @@ public class CertificateItemsController {
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
                                       final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
-                                      final Oauth2Authoriser authoriser) {
+                                      final EricAuthoriser authoriser) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.certificateOptionsValidator = certificateOptionsValidator;
