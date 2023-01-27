@@ -35,11 +35,7 @@ class EricAuthoriser {
 
         // Note: permissions are space separated
         final Set<String> permissions = stringHelper.asSet("\\s+", authorisedRolesHeader);
-        if (! permissions.contains(permission)) {
-            return false;
-        }
-
-        return true;
+        return permissions.contains(permission);
     }
 
 }
