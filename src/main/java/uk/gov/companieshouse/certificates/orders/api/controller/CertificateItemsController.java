@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.Oauth2Authoriser;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -35,6 +36,7 @@ import javax.json.JsonMergePatch;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,11 +118,23 @@ public class CertificateItemsController {
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
-                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
+                                                     final HttpServletRequest servletRequest,
+                                                     final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId,
+                                                     final Oauth2Authoriser authoriser) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);
         LOGGER.info("get certificate item request", logMap);
         logMap.remove(MESSAGE);
+
+        Enumeration<String> headerNames = servletRequest.getHeaderNames();
+        while(headerNames.hasMoreElements())
+        {
+            String headerName = headerNames.nextElement();
+            LOGGER.info("header: " + headerName + ", value = " + servletRequest.getHeader(headerName));
+        }
+
+        LOGGER.info("User entitled to free certificates?: " + authoriser.checkPermission("/admin/free-certs", servletRequest));
+
         Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
         if (item.isPresent()) {
             final CertificateItemResponse createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponse(item.get());

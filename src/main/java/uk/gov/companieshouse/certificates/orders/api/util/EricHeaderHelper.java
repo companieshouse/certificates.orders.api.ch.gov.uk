@@ -12,6 +12,8 @@ public class EricHeaderHelper {
     public static final String ERIC_IDENTITY                = "ERIC-Identity";
     public static final String ERIC_IDENTITY_TYPE           = "ERIC-Identity-Type";
 
+    public static final String ERIC_AUTHORISED_ROLES = "ERIC-Authorised-Roles";
+
     private EricHeaderHelper() { }
 
     public static String getIdentity(HttpServletRequest request) {
