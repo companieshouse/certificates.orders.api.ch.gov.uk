@@ -116,5 +116,5 @@ variable "log_level" {
 }
 variable "certificates_orders_api_version" {
   type        = string
-  description = "The version of the psc-discrepancies.api.ch.gov.uk container to run."
+  description = "The version of the certificates_orders.api.ch.gov.uk container to run."
 }

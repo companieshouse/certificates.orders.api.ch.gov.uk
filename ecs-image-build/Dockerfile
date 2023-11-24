@@ -4,4 +4,4 @@
 
 PORT=8080
 
-exec java -jar -Dserver.port="${PORT}" "psc-discrepancies.api.ch.gov.uk.jar"
+exec java -jar -Dserver.port="${PORT}" "certificates_orders.api.ch.gov.uk.jar"
