@@ -1,13 +1,13 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                  = "" # this must match the stack name the service deploys into
+  stack_name                  = "order-service" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "certificates-orders-api"
   container_port              = "8080"
   docker_repo                 = "certificates-orders.api.ch.gov.uk"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority   = 31
+  lb_listener_rule_priority   = 42
   lb_listener_paths           = ["/certificates-orders/*"]
   healthcheck_path            = "/certificates-orders/healthcheck" #healthcheck path for certificates-orders-api
   healthcheck_matcher         = "200-302"
