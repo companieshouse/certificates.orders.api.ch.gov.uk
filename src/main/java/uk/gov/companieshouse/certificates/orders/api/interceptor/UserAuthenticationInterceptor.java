@@ -1,13 +1,13 @@
 package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 import uk.gov.companieshouse.certificates.orders.api.util.EricHeaderHelper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.companieshouse.certificates.orders.api.logging.LoggingConstants.*;
 
 @Component
-public class UserAuthenticationInterceptor extends HandlerInterceptorAdapter {
+public class UserAuthenticationInterceptor implements HandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 

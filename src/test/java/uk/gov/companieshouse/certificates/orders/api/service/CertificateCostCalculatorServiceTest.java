@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
 import uk.gov.companieshouse.certificates.orders.api.model.ProductType;
@@ -20,6 +21,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*
  * Unit/integration tests the {@link CertificateCostCalculatorService} class.
  */
 @SpringBootTest
+@ActiveProfiles("llp-feature-flag-enabled")
 class CertificateCostCalculatorServiceTest {
 
     private static final String POSTAGE_COST = "0";

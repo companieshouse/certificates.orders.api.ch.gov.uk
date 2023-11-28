@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.certificates.orders.api.config.CostsConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,6 +15,7 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*
  * Unit tests the {@link CostsConfig} class.
  */
 @SpringBootTest
+@ActiveProfiles("llp-feature-flag-enabled")
 class CostsConfigTest {
 
     @Autowired

@@ -53,7 +53,7 @@ class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
 
     private CertificateItemOptions certificateItemOptions;
 
-    @Value("${spring.profiles.active}")
+    @Value("${spring.config.activate.on-profile}")
     private String activeProfile;
     @Autowired
     private CreateItemRequestValidator validatorUnderTest;

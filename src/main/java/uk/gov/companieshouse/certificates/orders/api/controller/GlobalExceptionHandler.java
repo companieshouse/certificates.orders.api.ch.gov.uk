@@ -30,7 +30,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         this.converter = converter;
     }
 
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             final MethodArgumentNotValidException ex,
             final HttpHeaders headers,
@@ -40,7 +39,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ApiErrors.errorResponse(HttpStatus.BAD_REQUEST, buildBadRequestApiError(ex));
     }
 
-    @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             final HttpMessageNotReadableException ex,
             final HttpHeaders headers,

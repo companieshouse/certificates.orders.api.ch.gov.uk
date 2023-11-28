@@ -45,7 +45,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest.class.getName());
 
-    @Value("${spring.profiles.active}")
+    @Value("${spring.config.activate.on-profile}")
     private String activeProfile;
 
     private CertificateItemOptions certificateItemOptions;
@@ -135,7 +135,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         GeneralPartnerDetails generalPartnerDetails = new GeneralPartnerDetails();
         LimitedPartnerDetails limitedPartnerDetails = new LimitedPartnerDetails();
         PrincipalPlaceOfBusinessDetails principalPlaceOfBusinessDetails = new PrincipalPlaceOfBusinessDetails();
-	
+
         certificateItemOptions.setCertificateType(DISSOLUTION);
         certificateItemOptions.setIncludeCompanyObjectsInformation(true);
         certificateItemOptions.setIncludeGoodStandingInformation(true);
@@ -283,7 +283,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
                 ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_APPOINTMENT_DATE, "member_details.include_appointment_date: must not be set when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_COUNTRY_OF_RESIDENCE_ERROR, "member_details.include_country_of_residence: must not be set when include_basic_information is false"),
                 ApiErrors.raiseError(ApiErrors.ERR_MEMBER_DETAILS_INCLUDE_DOB_TYPE_SUPPLIED_ERROR, "member_details.include_dob_type: must not be set when include_basic_information is false")
-                ));
+        ));
     }
 
     @Test
@@ -439,7 +439,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
         certificateItemOptions.setCompanyType("llp");
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
-	
+
         //when
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);
 
@@ -522,4 +522,5 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
                 ApiErrors.raiseError(ApiErrors.ERR_MEMBERS_DETAILS_SUPPLIED, "include_member_details: must not exist when company type is limited")
         ));
     }
+
 }

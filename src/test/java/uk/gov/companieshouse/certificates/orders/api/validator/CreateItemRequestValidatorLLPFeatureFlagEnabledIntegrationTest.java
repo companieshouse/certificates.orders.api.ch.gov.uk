@@ -42,7 +42,7 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest.class.getName());
 
-    @Value("${spring.profiles.active}")
+    @Value("${spring.config.activate.on-profile}")
     private String activeProfile;
 
     @MockBean

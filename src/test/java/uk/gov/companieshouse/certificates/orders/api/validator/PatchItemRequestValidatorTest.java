@@ -18,18 +18,14 @@ import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
-import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.TestMergePatchFactory;
 
 import javax.json.JsonMergePatch;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -37,14 +33,9 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
-import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.

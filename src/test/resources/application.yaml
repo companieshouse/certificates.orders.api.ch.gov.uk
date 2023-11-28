@@ -1,6 +1,7 @@
 spring:
-  profiles:
-    active: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
+  config:
+    activate:
+      on-profile: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
 
   data:
     mongodb:
@@ -18,7 +19,9 @@ uk:
 ---
 
 spring:
-  profiles: feature-flags-enabled
+  config:
+    activate:
+      on-profile: feature-flags-enabled
 lp:
   certificate:
     orders:
@@ -41,7 +44,9 @@ administrator:
 ---
 
 spring:
-  profiles: feature-flags-disabled
+  config:
+    activate:
+      on-profile: feature-flags-disabled
 lp:
   certificate:
     orders:
@@ -64,7 +69,9 @@ administrator:
 ---
 
 spring:
-  profiles: lp-feature-flag-enabled
+  config:
+    activate:
+      on-profile: lp-feature-flag-enabled
 lp:
   certificate:
     orders:
@@ -87,7 +94,9 @@ administrator:
 ---
 
 spring:
-  profiles: llp-feature-flag-enabled
+  config:
+    activate:
+      on-profile: llp-feature-flag-enabled
 lp:
   certificate:
     orders:

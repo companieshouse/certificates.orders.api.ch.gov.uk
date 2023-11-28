@@ -10,8 +10,8 @@ import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
 import javax.json.JsonMergePatch;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
