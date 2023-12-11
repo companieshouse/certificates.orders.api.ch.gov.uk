@@ -321,10 +321,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.10.0.2594</version>
-                <configuration>
-					<jdk>11</jdk>
-				</configuration>
+                <version>3.4.0.905</version>
             </plugin>
 		</plugins>
 	</build>
