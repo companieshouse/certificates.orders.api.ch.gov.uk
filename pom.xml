@@ -321,10 +321,9 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.9.1.2345</version>
+                <version>3.10.0.2594</version>
                 <configuration>
-					<sonar.java.source>11</sonar.java.source>
-					<sonar.java.target>11</sonar.java.target>
+					<jdk>11</jdk>
 				</configuration>
             </plugin>
 		</plugins>
