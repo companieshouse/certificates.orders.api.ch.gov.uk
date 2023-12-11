@@ -19,6 +19,7 @@ public class FindByValueVisitor implements Visitor<Map<String, Object>> {
     private final Predicate<Map.Entry<String, Object>> predicate;
 
     public FindByValueVisitor(Predicate<Map.Entry<String, Object>> targetPredicate) {
+        int someVar = 88;
         this.predicate = targetPredicate;
     }
 
