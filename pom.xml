@@ -318,7 +318,15 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven-surefire-plugin.version}</version>
 			</plugin>
-
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2345</version>
+                <configuration>
+					<sonar.java.source>11</sonar.java.source>
+					<sonar.java.target>11</sonar.java.target>
+				</configuration>
+            </plugin>
 		</plugins>
 	</build>
 
