@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.certificates.orders.api.converter;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.data.convert.WritingConverter;
@@ -16,15 +16,10 @@ public final class EnumToStringConverterFactory implements ConverterFactory<Enum
         return new EnumToStringConverter<>(targetType);
     }
 
-    private static class EnumToStringConverter<T extends String> implements Converter<Enum<?>, T> {
-        private final Class<T> targetType;
-
-        public EnumToStringConverter(Class<T> targetType) {
-            this.targetType = targetType;
-        }
+    private record EnumToStringConverter<T extends String>(Class<T> targetType) implements Converter<Enum<?>, T> {
 
         public T convert(@Nonnull Enum source) {
-            return targetType.cast(convertEnumValueNameToJson(source));
+                return targetType.cast(convertEnumValueNameToJson(source));
+            }
         }
-    }
 }

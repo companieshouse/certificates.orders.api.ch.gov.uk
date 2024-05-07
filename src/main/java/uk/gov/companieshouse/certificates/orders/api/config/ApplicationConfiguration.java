@@ -1,19 +1,15 @@
 package uk.gov.companieshouse.certificates.orders.api.config;
 
-import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import uk.gov.companieshouse.api.interceptor.CRUDAuthenticationInterceptor;
 import uk.gov.companieshouse.api.util.security.Permission.Key;
 import uk.gov.companieshouse.certificates.orders.api.interceptor.LoggingInterceptor;
@@ -33,6 +29,7 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     private UserAuthorisationInterceptor userAuthorisationInterceptor;
 
     @Autowired
+    @Lazy
     private CRUDAuthenticationInterceptor crudPermissionsInterceptor;
 
     @Override

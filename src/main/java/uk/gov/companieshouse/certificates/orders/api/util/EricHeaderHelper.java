@@ -2,7 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.util;
 
 import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class EricHeaderHelper {
     public static final String OAUTH2_IDENTITY_TYPE         = "oauth2";

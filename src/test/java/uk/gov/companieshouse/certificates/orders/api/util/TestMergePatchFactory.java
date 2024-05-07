@@ -3,9 +3,9 @@ package uk.gov.companieshouse.certificates.orders.api.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
-import javax.json.Json;
-import javax.json.JsonMergePatch;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonMergePatch;
+import jakarta.json.JsonReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

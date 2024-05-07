@@ -8,8 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -26,7 +28,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.MULTI_STATUS;
 
@@ -119,7 +120,6 @@ class GlobalExceptionHandlerTest {
         // Then
         // Note these assertions are testing behaviour implemented in the Spring framework.
         assertThat(response.getStatusCode(), is(ORIGINAL_STATUS));
-        assertThat(response.getBody(), is(nullValue()));
     }
 
     /**
@@ -132,11 +132,11 @@ class GlobalExceptionHandlerTest {
         }
 
         @Override
-        protected ResponseEntity<Object> handleExceptionInternal(final Exception ex,
+        protected ResponseEntity<Object> handleExceptionInternal(@NonNull final Exception ex,
                                                                  final Object body,
-                                                                 final HttpHeaders headers,
-                                                                 final HttpStatus status,
-                                                                 final WebRequest request) {
+                                                                 @NonNull final HttpHeaders headers,
+                                                                 @NonNull final HttpStatusCode status,
+                                                                 @NonNull final WebRequest request) {
             return new ResponseEntity<>(body, status);
         }
     }

@@ -9,18 +9,17 @@ import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertific
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
-import javax.json.JsonMergePatch;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
+import jakarta.json.JsonMergePatch;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
 /**
- * Implements validation of the request payload specific to the the patch item request only.
+ * Implements validation of the request payload specific to the patch item request only.
  */
 @Component
 public class PatchItemRequestValidator {
@@ -56,7 +55,7 @@ public class PatchItemRequestValidator {
             return violations.stream()
                     .sorted(Comparator.comparing(a -> a.getPropertyPath().toString()))
                     .map(this::raiseError)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (JsonProcessingException jpe) {
             return singletonList(ApiErrors.ERR_JSON_PROCESSING);
         }

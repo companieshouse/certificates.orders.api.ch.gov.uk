@@ -4,10 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -19,13 +18,14 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod.COLLECTION;
@@ -37,13 +37,15 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
 @SpringBootTest
-@ActiveProfiles("llp-feature-flag-enabled")
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=false
+    llp.certificate.orders.enabled=true
+    liquidated.company.certificate.enabled=false
+    administrator.company.certificate.enabled=false
+  """
+)
 class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest.class.getName());
-
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     @MockBean
     private RequestValidatable requestValidatable;
@@ -55,9 +57,8 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        LOGGER.debug("Active profile " + activeProfile);
         certificateItemOptions = new CertificateItemOptions();
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test
@@ -401,7 +402,7 @@ class CreateItemRequestValidatorLLPFeatureFlagEnabledIntegrationTest {
     @DisplayName("Handles absence of item options smoothly")
     void handlesAbsenceOfItemOptionsSmoothly() {
         // Given
-        when(requestValidatable.getItemOptions()).thenReturn(null);
+        when(requestValidatable.itemOptions()).thenReturn(null);
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);

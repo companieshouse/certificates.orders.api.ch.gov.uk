@@ -7,7 +7,7 @@ import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 @Component
 public class OptionsValidationHelperFactory {
 
-    private FeatureOptions featureOptions;
+    private final FeatureOptions featureOptions;
 
     @Autowired
     public OptionsValidationHelperFactory(FeatureOptions featureOptions) {

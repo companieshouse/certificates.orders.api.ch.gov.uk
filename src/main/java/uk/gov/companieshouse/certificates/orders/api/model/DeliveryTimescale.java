@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import uk.gov.companieshouse.certificates.orders.api.config.CostsConfig;
 
 import static uk.gov.companieshouse.certificates.orders.api.converter.EnumValueNameConverter.convertEnumValueNameToJson;
-import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.*;
+import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.CERTIFICATE;
+import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.CERTIFICATE_ADDITIONAL_COPY;
+import static uk.gov.companieshouse.certificates.orders.api.model.ProductType.CERTIFICATE_SAME_DAY;
 
 /**
  * Values of this represent the possible delivery timescales.

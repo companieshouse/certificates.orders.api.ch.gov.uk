@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
@@ -20,7 +20,6 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,7 +28,14 @@ import static org.mockito.Mockito.when;
 
 @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
 @SpringBootTest
-@ActiveProfiles("feature-flags-disabled")
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=false
+    llp.certificate.orders.enabled=false
+    liquidated.company.certificate.enabled=false
+    administrator.company.certificate.enabled=false
+  """
+)
 class CreateItemRequestValidatorFeatureFlagsDisabledIntegrationTest {
 
     @MockBean
@@ -43,7 +49,7 @@ class CreateItemRequestValidatorFeatureFlagsDisabledIntegrationTest {
     @BeforeEach
     void beforeEach() {
         certificateItemOptions = new CertificateItemOptions();
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test

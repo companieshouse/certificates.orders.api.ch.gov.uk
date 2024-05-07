@@ -35,8 +35,7 @@ public class RegisteredOfficeAddressDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RegisteredOfficeAddressDetails)) return false;
-        RegisteredOfficeAddressDetails that = (RegisteredOfficeAddressDetails) o;
+        if (!(o instanceof RegisteredOfficeAddressDetails that)) return false;
         return includeAddressRecordsType == that.includeAddressRecordsType &&
                 Objects.equals(includeDates, that.includeDates);
     }
