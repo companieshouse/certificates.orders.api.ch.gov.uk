@@ -3,7 +3,8 @@ package uk.gov.companieshouse.certificates.orders.api.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 class IdGeneratorServiceTest {
 
@@ -15,7 +16,7 @@ class IdGeneratorServiceTest {
 
         final String id = idGeneratorService.autoGenerateId();
 
-        assertTrue(id.matches("^CRT-\\d{6}-\\d{6}$")); ;
+        assertTrue(id.matches("^CRT-\\d{6}-\\d{6}$"));
 
     }
 

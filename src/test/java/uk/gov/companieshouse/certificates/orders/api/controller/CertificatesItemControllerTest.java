@@ -26,9 +26,9 @@ import uk.gov.companieshouse.certificates.orders.api.validator.CompanyType;
 import uk.gov.companieshouse.certificates.orders.api.validator.CreateItemRequestValidator;
 import uk.gov.companieshouse.certificates.orders.api.validator.PatchItemRequestValidator;
 
-import javax.json.JsonMergePatch;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Validator;
+import jakarta.json.JsonMergePatch;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Validator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

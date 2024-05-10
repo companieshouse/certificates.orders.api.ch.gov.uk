@@ -6,14 +6,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.company.CompanyResourceHandler;
@@ -22,17 +18,16 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
+import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import java.io.IOException;
-import uk.gov.companieshouse.certificates.orders.api.validator.CompanyStatus;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.*;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromHttpResponseException;
 import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromIOException;
 
@@ -40,7 +35,6 @@ import static uk.gov.companieshouse.api.error.ApiErrorResponseException.fromIOEx
  * Unit tests the {@link CompanyService} class.
  */
 @ExtendWith(MockitoExtension.class)
-@RunWith(PowerMockRunner.class)
 @PrepareForTest(HttpResponseException.class)
 class CompanyServiceTest {
 
@@ -99,8 +93,8 @@ class CompanyServiceTest {
                 "limited-partnership",
                 CompanyStatus.ACTIVE
         )));
-        assertThat(resource.getCompanyName(), is("TEST LIMITED"));
-        assertThat(resource.getCompanyType(), is("limited-partnership"));
+        assertThat(resource.companyName(), is("TEST LIMITED"));
+        assertThat(resource.companyType(), is("limited-partnership"));
         verify(handler).get("/company/12345678");
     }
 
@@ -145,15 +139,19 @@ class CompanyServiceTest {
      * This is a JUnit 4 test to take advantage of PowerMock.
      * @throws Exception should something unexpected happen
      */
+
+
+
+
     @Test
     void getCompanyProfileNonInternalServerErrorApiExceptionIsBadRequest() throws Exception {
 
         // Given
-        final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
+        HttpResponseException httpResponseException = mock(HttpResponseException.class);
         when(httpResponseException.getStatusCode()).thenReturn(404);
         when(httpResponseException.getStatusMessage()).thenReturn("Not Found");
         when(httpResponseException.getHeaders()).thenReturn(new HttpHeaders());
-        final ApiErrorResponseException ex = fromHttpResponseException(httpResponseException);
+        ApiErrorResponseException ex = fromHttpResponseException(httpResponseException);
 
         when(apiClientService.getInternalApiClient()).thenReturn(apiClient);
         when(apiClient.company()).thenReturn(handler);
@@ -167,10 +165,15 @@ class CompanyServiceTest {
         assertThat(exception.getMessage(), is("Company profile not found company number 00006400"));
     }
 
+
+
+
+
+
     @Test
     void shouldThrowCompanyServiceExceptionWhenApiClientReturnsOtherNotFoundErrors() throws Exception {
         //given
-        final HttpResponseException httpResponseException = PowerMockito.mock(HttpResponseException.class);
+        final HttpResponseException httpResponseException = mock(HttpResponseException.class);
         when(httpResponseException.getStatusCode()).thenReturn(500);
         when(httpResponseException.getStatusMessage()).thenReturn("Service unavailable");
         when(httpResponseException.getHeaders()).thenReturn(new HttpHeaders());

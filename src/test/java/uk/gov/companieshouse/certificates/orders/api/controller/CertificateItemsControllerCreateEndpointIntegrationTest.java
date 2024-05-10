@@ -9,9 +9,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
@@ -30,14 +29,29 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@ActiveProfiles("feature-flags-enabled")
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=true
+    llp.certificate.orders.enabled=true
+    liquidated.company.certificate.enabled=true
+    administrator.company.certificate.enabled=true
+  """
+)
 class CertificateItemsControllerCreateEndpointIntegrationTest {
 
-    private static final String CERTIFICATES_URL = "/orderable/certificates/";
+    private static final String CERTIFICATES_URL = "/orderable/certificates";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
     private static final String TOKEN_PERMISSION_VALUE = "user_orders=%s";
 
@@ -67,15 +81,15 @@ class CertificateItemsControllerCreateEndpointIntegrationTest {
     @DisplayName("Create certificate endpoint")
     void testCreateEndpoint(JsonRequestFixture requestFixture) throws Exception {
         Optional.ofNullable(requestFixture.getCompanyStatus())
-                .ifPresent(status -> when(companyProfileResource.getCompanyStatus()).thenReturn(status));
+                .ifPresent(status -> when(companyProfileResource.companyStatus()).thenReturn(status));
         Optional.ofNullable(requestFixture.getCompanyType())
-                .ifPresent(type -> when(companyProfileResource.getCompanyType()).thenReturn(type.getCompanyType()));
+                .ifPresent(type -> when(companyProfileResource.companyType()).thenReturn(type.getCompanyType()));
         if (isNull(requestFixture.getCompanyServiceException())) {
             when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         } else {
             when(companyService.getCompanyProfile(any())).thenThrow(requestFixture.getCompanyServiceException());
         }
-        when(companyProfileResource.getCompanyName()).thenReturn("ACME LIMITED");
+        when(companyProfileResource.companyName()).thenReturn("ACME LIMITED");
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         mockMvc.perform(post(CERTIFICATES_URL)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)
@@ -91,18 +105,16 @@ class CertificateItemsControllerCreateEndpointIntegrationTest {
                 .andDo(MockMvcResultHandlers.print());
 
         if (!HttpStatus.isSuccess(requestFixture.getExpectedResponseCode())) {
-            assertItemWasNotSaved(EXPECTED_ITEM_ID);
+            assertItemWasNotSaved();
         }
     }
 
     /**
      * Verifies that the item that could have been created by the create item POST request cannot in fact be retrieved
      * from the database.
-     *
-     * @param expectedItemId the expected ID of the newly created item
      */
-    private void assertItemWasNotSaved(final String expectedItemId) {
-        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(expectedItemId);
+    private void assertItemWasNotSaved() {
+        final Optional<CertificateItem> retrievedCertificateItem = repository.findById(CertificateItemsControllerCreateEndpointIntegrationTest.EXPECTED_ITEM_ID);
         assertThat(retrievedCertificateItem.isPresent(), is(false));
     }
 }

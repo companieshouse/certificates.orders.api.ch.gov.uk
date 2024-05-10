@@ -31,9 +31,9 @@ import uk.gov.companieshouse.certificates.orders.api.validator.RequestValidatabl
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import javax.json.JsonMergePatch;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.json.JsonMergePatch;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -170,7 +170,7 @@ public class CertificateItemsController {
         }
 
         Optional<CertificateItem> certRetrieved = certificateItemService.getCertificateItemById(id);
-        if (!certRetrieved.isPresent()) {
+        if (certRetrieved.isEmpty()) {
             logMap.put(STATUS_LOG_KEY, HttpStatus.NOT_FOUND);
             LOGGER.error("certificate item not found", logMap);
             return ApiErrors.errorResponse(NOT_FOUND, ApiErrors.ERR_CERTIFICATE_NOT_FOUND);
@@ -273,17 +273,7 @@ public class CertificateItemsController {
         }
     }
 
-    private static class CompanyCertificateInformation implements RequestValidatable {
+    private record CompanyCertificateInformation(CertificateItemOptions itemOptions) implements RequestValidatable {
 
-        private final CertificateItemOptions itemOptions;
-
-        public CompanyCertificateInformation(CertificateItemOptions itemOptions) {
-            this.itemOptions = itemOptions;
-        }
-
-        @Override
-        public CertificateItemOptions getItemOptions() {
-            return itemOptions;
-        }
     }
 }

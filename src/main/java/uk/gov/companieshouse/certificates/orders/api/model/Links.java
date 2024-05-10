@@ -25,8 +25,7 @@ public class Links {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Links)) return false;
-        Links links = (Links) o;
+        if (!(o instanceof Links links)) return false;
         return Objects.equals(self, links.self);
     }
 

@@ -45,6 +45,7 @@ class PatchMergerTest {
 
     @Configuration
     static class Config {
+
         @Bean
         public ObjectMapper objectMapper() {
             return new ApplicationConfiguration().objectMapper();

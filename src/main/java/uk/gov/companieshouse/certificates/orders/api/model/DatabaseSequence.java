@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  *  An instance of this is used to track the ID value assigned to the latest
  *  item to have been created so that IDs can be generated in sequence as per
- *  https://www.baeldung.com/spring-boot-mongodb-auto-generated-field.
+ *  <a href="https://www.baeldung.com/spring-boot-mongodb-auto-generated-field">...</a>.
  */
 @Document(collection = "database_sequences")
 public class DatabaseSequence {

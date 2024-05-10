@@ -73,3 +73,8 @@ sonar:
 sonar-pr-analysis:
 	mvn sonar:sonar	-P sonar-pr-analysis
 
+.PHONY: security-check
+security-check:
+	mvn org.owasp:dependency-check-maven:update-only
+	mvn org.owasp:dependency-check-maven:check -DassemblyAnalyzerEnabled=false -DfailBuildOnCVSS=4 -DsuppressionFiles=suppress.xml
+

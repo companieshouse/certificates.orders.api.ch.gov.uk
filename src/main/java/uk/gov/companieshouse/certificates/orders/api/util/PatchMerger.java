@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 
-import javax.json.JsonMergePatch;
-import javax.json.JsonValue;
+import jakarta.json.JsonMergePatch;
+import jakarta.json.JsonValue;
 
 @Component
 public class PatchMerger {

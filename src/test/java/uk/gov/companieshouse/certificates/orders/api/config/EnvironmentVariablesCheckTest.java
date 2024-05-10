@@ -1,20 +1,26 @@
 package uk.gov.companieshouse.certificates.orders.api.config;
 
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 import static java.util.Arrays.stream;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.API_URL;
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.CHS_API_KEY;
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.ITEMS_DATABASE;
 import static uk.gov.companieshouse.certificates.orders.api.environment.RequiredEnvironmentVariables.MONGODB_URL;
 
+@ExtendWith(SystemStubsExtension.class)
 class EnvironmentVariablesCheckTest {
-    private EnvironmentVariables environmentVariables = new EnvironmentVariables();
+
+    @SystemStub
+    private EnvironmentVariables environmentVariables;
 
     @Test
     @DisplayName("Check returns true where all required environment variables are populated")
@@ -26,7 +32,7 @@ class EnvironmentVariablesCheckTest {
         assertTrue(EnvironmentVariableChecks.checkEnvironmentVariables());
 
         stream(RequiredEnvironmentVariables.values()).forEach(
-                variable -> environmentVariables.clear(variable.getName()));
+                variable -> environmentVariables.remove(variable.getName()));
     }
 
     @Test
@@ -71,7 +77,7 @@ class EnvironmentVariablesCheckTest {
         stream(RequiredEnvironmentVariables.values()).forEach(
                 variable -> {
                     if (variable != missingVariable) {
-                        environmentVariables.clear(variable.getName());
+                        environmentVariables.remove(variable.getName());
                     }
                 });
     }

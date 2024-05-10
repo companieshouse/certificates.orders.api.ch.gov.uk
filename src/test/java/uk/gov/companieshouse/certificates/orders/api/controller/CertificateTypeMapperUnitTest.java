@@ -36,8 +36,8 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldErrorWhenCompanyStatusIsInvalid(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(null);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(companyProfileResource.companyStatus()).thenReturn(null);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -53,8 +53,8 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldMapActiveCompanyToIncorporationCertificate(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -70,9 +70,9 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldMapLiquidatedCompanyToIncorporationCertificateWhenLiquidationFeatureEnabled(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(true);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(featureOptions.liquidatedCompanyCertificateEnabled()).thenReturn(true);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -88,9 +88,9 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldErrorWhenMappingLiquidatedCompanyToIncorporationCertificateWhenLiquidationFeatureDisabled(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(featureOptions.isLiquidatedCompanyCertificateEnabled()).thenReturn(false);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(featureOptions.liquidatedCompanyCertificateEnabled()).thenReturn(false);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.LIQUIDATION);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -106,8 +106,8 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldMapDissolvedCompanyToDissolutionCertificate(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.DISSOLVED);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -122,8 +122,8 @@ class CertificateTypeMapperUnitTest {
     @Test
     void shouldErrorWhenMappingInvalidCompanyTypeToCertificate() {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn("invalid-type");
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyProfileResource.companyType()).thenReturn("invalid-type");
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -138,8 +138,8 @@ class CertificateTypeMapperUnitTest {
     @Test
     void shouldErrorWhenMappingLimitedPartnershipToCertificateTypeWhenCompanyStatusIsNotActive() {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn("limited-partnership");
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.DISSOLVED);
+        when(companyProfileResource.companyType()).thenReturn("limited-partnership");
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.DISSOLVED);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -154,8 +154,8 @@ class CertificateTypeMapperUnitTest {
     @Test
     void shouldMapLimitedPartnershipToCertificateTypeWhenCompanyStatusActive() {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn("limited-partnership");
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ACTIVE);
+        when(companyProfileResource.companyType()).thenReturn("limited-partnership");
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.ACTIVE);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -171,9 +171,9 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldMapAdministrationCompanyToIncorporationCertificate(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
-        when(featureOptions.isAdministratorCompanyCertificateEnabled()).thenReturn(true);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        when(featureOptions.administratorCompanyCertificateEnabled()).thenReturn(true);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);
@@ -189,8 +189,8 @@ class CertificateTypeMapperUnitTest {
     @MethodSource("validCompanyTypes")
     void shouldNotMapAdministrationCompanyToIncorporationCertificateWhenAdministratorCompanyCertificateDisabled(String companyType) {
         //given
-        when(companyProfileResource.getCompanyType()).thenReturn(companyType);
-        when(companyProfileResource.getCompanyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
+        when(companyProfileResource.companyType()).thenReturn(companyType);
+        when(companyProfileResource.companyStatus()).thenReturn(CompanyStatus.ADMINISTRATION);
 
         //when
         CertificateTypeMapResult result = certificateTypeMapper.mapToCertificateType(companyProfileResource);

@@ -30,7 +30,7 @@ public class CertificateCostCalculatorService {
     /**
      * Calculates the certificate item costs given the quantity and delivery timescale.
      * @param quantity the quantity of certificate items specified. Assumed to be >= 1.
-     * @param deliveryTimescale the delivery time scale specified
+     * @param deliveryTimescale the delivery timescale specified
      * @return the outcome of the costs calculations
      */
     public CertificateCostCalculation calculateCosts(final int quantity,
@@ -68,7 +68,7 @@ public class CertificateCostCalculatorService {
 
     /**
      * Utility that calculates the total item cost from the item costs and postage cost provided. This is the total
-     * cost of all of the certificates, including postage.
+     * cost of all the certificates, including postage.
      * @param costs the item costs
      * @param postageCost the postage cost
      * @return the total item cost (as a String)
@@ -82,9 +82,9 @@ public class CertificateCostCalculatorService {
 
     /**
      * Utility method that checks the arguments provided to it. Throws an {@link IllegalArgumentException} should these
-     * be outside of the range of reasonable values.
+     * be outside the range of reasonable values.
      * @param quantity the quantity of certificate items specified
-     * @param deliveryTimescale the delivery time scale specified
+     * @param deliveryTimescale the delivery timescale specified
      */
     private void checkArguments(final int quantity, final DeliveryTimescale deliveryTimescale) {
         if (quantity < 1) {

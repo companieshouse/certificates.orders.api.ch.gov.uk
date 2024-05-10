@@ -9,7 +9,10 @@ import uk.gov.companieshouse.certificates.orders.api.config.CostsConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.SAME_DAY_EXTRA_CERTIFICATE_DISCOUNT;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.SAME_DAY_INDIVIDUAL_CERTIFICATE_COST;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.STANDARD_EXTRA_CERTIFICATE_DISCOUNT;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.STANDARD_INDIVIDUAL_CERTIFICATE_COST;
 
 /**
  * Unit/integration tests the {@link DeliveryTimescale} enum.

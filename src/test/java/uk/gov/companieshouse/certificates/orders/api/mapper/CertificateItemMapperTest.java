@@ -235,22 +235,7 @@ class CertificateItemMapperTest {
 
     @Test
     void testCertificateItemEntityToDtoMapping() {
-        final CertificateItem item = new CertificateItem();
-        item.setId(ID);
-        item.setCompanyName(COMPANY_NAME);
-        item.setCompanyNumber(COMPANY_NUMBER);
-        item.setCustomerReference(CUSTOMER_REFERENCE);
-        item.setQuantity(QUANTITY);
-        item.setDescription(DESCRIPTION);
-        item.setDescriptionIdentifier(DESCRIPTION_IDENTIFIER);
-        item.setDescriptionValues(DESCRIPTION_VALUES);
-        item.setItemCosts(ITEM_COSTS);
-        item.setKind(KIND);
-        item.setPostalDelivery(POSTAL_DELIVERY);
-        item.setItemOptions(ITEM_OPTIONS);
-        item.setEtag(TOKEN_ETAG);
-        item.setPostageCost(POSTAGE_COST);
-        item.setTotalItemCost(TOTAL_ITEM_COST);
+        final CertificateItem item = getCertificateItem();
 
         final CertificateItemCreate dto = mapperUnderTest.certificateItemToCertificateItemDTO(item);
 
@@ -281,6 +266,21 @@ class CertificateItemMapperTest {
     @Test
     void testCertificateItemToCertificateItemResponse() {
         //given
+        final CertificateItem item = getCertificateItem();
+
+        //when
+        final CertificateItemResponse dto = mapperUnderTest.certificateItemToCertificateItemResponse(item);
+
+        //then
+        assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
+        assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
+        assertThat(dto.getQuantity(), is(item.getQuantity()));
+        assertThat(dto.getKind(), is(item.getKind()));
+        assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
+        assertThat(dto.getItemOptions(), is(item.getItemOptions()));
+    }
+
+    private static CertificateItem getCertificateItem() {
         final CertificateItem item = new CertificateItem();
         item.setId(ID);
         item.setCompanyName(COMPANY_NAME);
@@ -297,17 +297,7 @@ class CertificateItemMapperTest {
         item.setEtag(TOKEN_ETAG);
         item.setPostageCost(POSTAGE_COST);
         item.setTotalItemCost(TOTAL_ITEM_COST);
-
-        //when
-        final CertificateItemResponse dto = mapperUnderTest.certificateItemToCertificateItemResponse(item);
-
-        //then
-        assertThat(dto.getCompanyNumber(), is(item.getCompanyNumber()));
-        assertThat(dto.getCustomerReference(), is(item.getCustomerReference()));
-        assertThat(dto.getQuantity(), is(item.getQuantity()));
-        assertThat(dto.getKind(), is(item.getKind()));
-        assertThat(dto.isPostalDelivery(), is(item.isPostalDelivery()));
-        assertThat(dto.getItemOptions(), is(item.getItemOptions()));
+        return item;
     }
 
     /**

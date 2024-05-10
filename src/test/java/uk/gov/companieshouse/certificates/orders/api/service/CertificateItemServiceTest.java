@@ -184,7 +184,7 @@ class CertificateItemServiceTest {
      */
     private void verifyCostsFields(final Item item) {
         final List<ItemCosts> costs = item.getItemCosts();
-        final ItemCosts cost = costs.get(0);
+        final ItemCosts cost = costs.getFirst();
         assertThat(cost, Matchers.is(notNullValue()));
         assertThat(cost.getDiscountApplied(), Matchers.is(DISCOUNT_APPLIED));
         assertThat(cost.getItemCost(), Matchers.is(ITEM_COST));
