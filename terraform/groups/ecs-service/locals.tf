@@ -1,5 +1,4 @@
 # Define all hardcoded local variable and local variables looked up from data resources
-
 locals {
   stack_name                 = "order-service" # this must match the stack name the service deploys into
   name_prefix                = "${local.stack_name}-${var.environment}"
@@ -25,6 +24,7 @@ locals {
   vpc_name = local.stack_secrets["vpc_name"]
 
   # create a map of secret name => secret arn to pass into ecs service module
+  
   # using the trimprefix function to remove the prefixed path from the secret name
   secrets_arn_map = {
     for sec in data.aws_ssm_parameter.secret :
