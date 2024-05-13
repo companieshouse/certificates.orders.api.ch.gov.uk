@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.Gson;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * An instance of this represents the JSON serializable certificate item for use in REST requests and responses.

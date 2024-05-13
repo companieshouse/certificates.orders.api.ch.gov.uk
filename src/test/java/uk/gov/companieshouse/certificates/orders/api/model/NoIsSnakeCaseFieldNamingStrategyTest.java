@@ -22,7 +22,7 @@ class NoIsSnakeCaseFieldNamingStrategyTest {
      */
     private static class TestNoIsSnakeCaseFieldNamingStrategy extends NoIsSnakeCaseFieldNamingStrategy {
 
-        private String snakeCaseFieldName;
+        private final String snakeCaseFieldName;
 
         public TestNoIsSnakeCaseFieldNamingStrategy(String snakeCaseFieldName) {
             this.snakeCaseFieldName = snakeCaseFieldName;

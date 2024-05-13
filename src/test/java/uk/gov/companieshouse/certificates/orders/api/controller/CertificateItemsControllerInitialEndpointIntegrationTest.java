@@ -29,7 +29,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -66,15 +74,15 @@ class CertificateItemsControllerInitialEndpointIntegrationTest {
     @DisplayName("Create initial certificate endpoint")
     void testInitialEndpoint(JsonRequestFixture requestFixture) throws Exception {
         Optional.ofNullable(requestFixture.getCompanyStatus())
-                .ifPresent(status -> when(companyProfileResource.getCompanyStatus()).thenReturn(status));
+                .ifPresent(status -> when(companyProfileResource.companyStatus()).thenReturn(status));
         Optional.ofNullable(requestFixture.getCompanyType())
-                .ifPresent(type -> when(companyProfileResource.getCompanyType()).thenReturn(type.getCompanyType()));
+                .ifPresent(type -> when(companyProfileResource.companyType()).thenReturn(type.getCompanyType()));
         if (isNull(requestFixture.getCompanyServiceException())) {
             when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         } else {
             when(companyService.getCompanyProfile(any())).thenThrow(requestFixture.getCompanyServiceException());
         }
-        when(companyProfileResource.getCompanyName()).thenReturn("ACME LIMITED");
+        when(companyProfileResource.companyName()).thenReturn("ACME LIMITED");
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)

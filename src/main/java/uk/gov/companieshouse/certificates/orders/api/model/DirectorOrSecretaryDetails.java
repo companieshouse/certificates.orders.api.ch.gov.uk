@@ -90,8 +90,7 @@ public class DirectorOrSecretaryDetails implements DateOfBirthIncludable<Map<Str
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DirectorOrSecretaryDetails)) return false;
-        DirectorOrSecretaryDetails that = (DirectorOrSecretaryDetails) o;
+        if (!(o instanceof DirectorOrSecretaryDetails that)) return false;
         return Objects.equals(includeAddress, that.includeAddress) &&
                 Objects.equals(includeAppointmentDate, that.includeAppointmentDate) &&
                 Objects.equals(includeBasicInformation, that.includeBasicInformation) &&

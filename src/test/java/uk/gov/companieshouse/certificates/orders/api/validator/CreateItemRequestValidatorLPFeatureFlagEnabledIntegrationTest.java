@@ -4,10 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -19,8 +18,6 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.List;
 
@@ -39,14 +36,16 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
 /**
  * Unit tests the {@link CreateItemRequestValidator} class.
  */
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=true
+    llp.certificate.orders.enabled=false
+    liquidated.company.certificate.enabled=false
+    administrator.company.certificate.enabled=false
+  """
+)
 @SpringBootTest
-@ActiveProfiles("lp-feature-flag-enabled")
 class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest.class.getName());
-
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     private CertificateItemOptions certificateItemOptions;
 
@@ -58,9 +57,8 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        LOGGER.debug("Active profile " + activeProfile);
         certificateItemOptions = new CertificateItemOptions();
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test
@@ -408,7 +406,7 @@ class CreateItemRequestValidatorLPFeatureFlagEnabledIntegrationTest {
     @DisplayName("Handles absence of item options smoothly")
     void handlesAbsenceOfItemOptionsSmoothly() {
         // Given
-        when(requestValidatable.getItemOptions()).thenReturn(null);
+        when(requestValidatable.itemOptions()).thenReturn(null);
 
         // When
         final List<ApiError> errors = validatorUnderTest.getValidationErrors(requestValidatable);

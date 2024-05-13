@@ -1,6 +1,10 @@
 package uk.gov.companieshouse.certificates.orders.api.validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.json.JsonMergePatch;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.ApplicationConfiguration;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
@@ -18,18 +22,10 @@ import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
 import uk.gov.companieshouse.certificates.orders.api.dto.PatchValidationCertificateItemDTO;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
-import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
-import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
-import uk.gov.companieshouse.certificates.orders.api.model.IncludeAddressRecordsType;
 import uk.gov.companieshouse.certificates.orders.api.model.ItemCosts;
-import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 import uk.gov.companieshouse.certificates.orders.api.util.TestMergePatchFactory;
 
-import javax.json.JsonMergePatch;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -37,20 +33,23 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
-import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
-import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
 
 /**
  * Unit tests the {@link PatchItemRequestValidator} class.
  */
+
 @SpringBootTest
-@ActiveProfiles("feature-flags-disabled")
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=false
+    llp.certificate.orders.enabled=false
+    liquidated.company.certificate.enabled=false
+    administrator.company.certificate.enabled=false
+  """
+)
 class PatchItemRequestValidatorTest {
     @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
     @Configuration
@@ -102,16 +101,14 @@ class PatchItemRequestValidatorTest {
 
     private PatchValidationCertificateItemDTO itemUpdate;
 
-    private CertificateItemOptions certificateItemOptions;
-
     @MockBean
     private RequestValidatable requestValidatable;
 
     @BeforeEach
     void setUp() {
         itemUpdate = new PatchValidationCertificateItemDTO();
-        certificateItemOptions = new CertificateItemOptions();
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        CertificateItemOptions certificateItemOptions = new CertificateItemOptions();
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test
@@ -154,20 +151,5 @@ class PatchItemRequestValidatorTest {
 
         // Then
         assertThat(errors, contains(ApiErrors.ERR_JSON_PROCESSING));
-    }
-
-    /**
-     * Utility method that asserts that the validator produces a "<field name>: must be null"
-     * error message.
-     *
-     * @throws IOException should something unexpected happen
-     */
-    private void assertFieldMustBeNullErrorProduced(ApiError apiError) throws IOException {
-        // Given
-        final JsonMergePatch patch = patchFactory.patchFromPojo(itemUpdate);
-        // When
-        final List<ApiError> errors = validatorUnderTest.getValidationErrors(patch);
-        // Then
-        assertThat(errors, contains(apiError));
     }
 }

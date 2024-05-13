@@ -21,7 +21,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.ItemType.*;
+import static uk.gov.companieshouse.certificates.orders.api.ItemType.CERTIFICATE;
+import static uk.gov.companieshouse.certificates.orders.api.ItemType.CERTIFIED_COPY;
+import static uk.gov.companieshouse.certificates.orders.api.ItemType.SCAN_ON_DEMAND;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 

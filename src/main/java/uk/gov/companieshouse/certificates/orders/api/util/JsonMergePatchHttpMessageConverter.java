@@ -5,12 +5,13 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import javax.json.Json;
-import javax.json.JsonMergePatch;
-import javax.json.JsonReader;
-import javax.json.JsonWriter;
+import jakarta.json.Json;
+import jakarta.json.JsonMergePatch;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonWriter;
 
 /**
  * HTTP message converter for {@link JsonMergePatch}.
@@ -25,12 +26,13 @@ public class JsonMergePatchHttpMessageConverter extends AbstractHttpMessageConve
     }
 
     @Override
-    protected boolean supports(Class<?> clazz) {
+    protected boolean supports(@NonNull Class<?> clazz) {
         return JsonMergePatch.class.isAssignableFrom(clazz);
     }
 
     @Override
-    protected JsonMergePatch readInternal(Class<? extends JsonMergePatch> clazz, HttpInputMessage inputMessage) {
+    @NonNull
+    protected JsonMergePatch readInternal(@NonNull Class<? extends JsonMergePatch> clazz, @NonNull HttpInputMessage inputMessage) {
 
         try (JsonReader reader = Json.createReader(inputMessage.getBody())) {
             return Json.createMergePatch(reader.readValue());
@@ -40,7 +42,7 @@ public class JsonMergePatchHttpMessageConverter extends AbstractHttpMessageConve
     }
 
     @Override
-    protected void writeInternal(JsonMergePatch jsonMergePatch, HttpOutputMessage outputMessage) {
+    protected void writeInternal(@NonNull JsonMergePatch jsonMergePatch, @NonNull HttpOutputMessage outputMessage) {
 
         try (JsonWriter writer = Json.createWriter(outputMessage.getBody())) {
             writer.write(jsonMergePatch.toJsonValue());

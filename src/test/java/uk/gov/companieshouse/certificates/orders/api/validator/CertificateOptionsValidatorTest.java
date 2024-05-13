@@ -7,9 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.error.ApiError;
-import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptions;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
-import uk.gov.companieshouse.certificates.orders.api.model.*;
+import uk.gov.companieshouse.certificates.orders.api.model.BasicInformationIncludable;
+import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
+import uk.gov.companieshouse.certificates.orders.api.model.CollectionLocation;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryMethod;
+import uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale;
+import uk.gov.companieshouse.certificates.orders.api.model.DirectorOrSecretaryDetails;
+import uk.gov.companieshouse.certificates.orders.api.model.Visitor;
 import uk.gov.companieshouse.certificates.orders.api.util.ApiErrorBuilder;
 import uk.gov.companieshouse.certificates.orders.api.util.FieldNameConverter;
 
@@ -19,10 +24,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static uk.gov.companieshouse.certificates.orders.api.model.CertificateType.DISSOLUTION;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.SAME_DAY;
 import static uk.gov.companieshouse.certificates.orders.api.model.DeliveryTimescale.STANDARD;
 import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType.PARTIAL;
@@ -54,7 +62,7 @@ class CertificateOptionsValidatorTest {
     @Test
     void correctlyFailsWhenCompanyTypeIsNull() {
         // Given
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
         when(optionsValidationHelper.companyTypeIsNull()).thenReturn(true);
 
@@ -69,7 +77,7 @@ class CertificateOptionsValidatorTest {
     void correctlyPassesWhenCompanyTypeIsNotNull() {
         // Given
         certificateItemOptions.setCompanyType("ltd");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
         when(optionsValidationHelper.companyTypeIsNull()).thenReturn(false);
 
@@ -98,7 +106,7 @@ class CertificateOptionsValidatorTest {
         // Given
         certificateItemOptions.setCompanyType("limited");
         certificateItemOptions.setDeliveryMethod(DeliveryMethod.COLLECTION);
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -120,7 +128,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setForename("TOM");
         certificateItemOptions.setSurname("COBLEY");
         certificateItemOptions.setCollectionLocation(CollectionLocation.LONDON);
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -135,7 +143,7 @@ class CertificateOptionsValidatorTest {
         //given
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setDeliveryTimescale(DeliveryTimescale.STANDARD);
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         //when
@@ -152,7 +160,7 @@ class CertificateOptionsValidatorTest {
         //given
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setDeliveryTimescale(DeliveryTimescale.SAME_DAY);
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         //when
@@ -168,7 +176,7 @@ class CertificateOptionsValidatorTest {
     void collectionLocationIsOptionalByDefault() {
         // Given
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -186,7 +194,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setIncludeGoodStandingInformation(true);
         certificateItemOptions.setCompanyType("limited");
         certificateItemOptions.setCompanyStatus(CompanyStatus.ACTIVE.getStatusName());
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -203,7 +211,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryTimescale(SAME_DAY);
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -220,7 +228,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDeliveryTimescale(STANDARD);
         certificateItemOptions.setIncludeEmailCopy(true);
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -245,7 +253,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -271,7 +279,7 @@ class CertificateOptionsValidatorTest {
     @Test
     @DisplayName("Can include other details with basic information")
     void canIncludeOtherDetailsWithBasicInformation() {
-        // Given
+        //Given
         DirectorOrSecretaryDetails directorOrSecretaryDetails = new DirectorOrSecretaryDetails();
         directorOrSecretaryDetails.setIncludeAddress(true);
         directorOrSecretaryDetails.setIncludeAppointmentDate(true);
@@ -284,7 +292,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -307,7 +315,7 @@ class CertificateOptionsValidatorTest {
         certificateItemOptions.setDirectorDetails(directorOrSecretaryDetails);
         certificateItemOptions.setSecretaryDetails(directorOrSecretaryDetails);
         certificateItemOptions.setCompanyType("limited");
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
         when(optionsValidationHelperFactory.createOptionsValidationHelper(any())).thenReturn(optionsValidationHelper);
 
         // When
@@ -327,7 +335,7 @@ class CertificateOptionsValidatorTest {
     @DisplayName("Handles absence of item options smoothly")
     void handlesAbsenceOfItemOptionsSmoothly() {
         // Given
-        when(requestValidatable.getItemOptions()).thenReturn(null);
+        when(requestValidatable.itemOptions()).thenReturn(null);
 
         // When
         final List<ApiError> errors = validator.getValidationErrors(requestValidatable);
@@ -354,7 +362,7 @@ class CertificateOptionsValidatorTest {
             "contains another field set to true")
     void testRaiseValidationErrorIfBasicInformationObjectOtherFieldValuesSet() {
         // Given
-        BasicInformationIncludable<Map<String, Object>> containsBasicInformation = new BasicInformationIncludable<Map<String, Object>>() {
+        BasicInformationIncludable<Map<String, Object>> containsBasicInformation = new BasicInformationIncludable<>() {
 
             @Override
             public Boolean getIncludeBasicInformation() {

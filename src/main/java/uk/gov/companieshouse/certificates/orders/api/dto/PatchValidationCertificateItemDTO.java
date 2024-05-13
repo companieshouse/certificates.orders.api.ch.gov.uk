@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 /**
  * Instantiated from PATCH request JSON body to facilitate PATCH request validation.
