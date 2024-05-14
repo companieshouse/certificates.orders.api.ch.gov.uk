@@ -76,9 +76,9 @@ public class CertificateOptionsValidator {
     List<ApiError> validateCertificateOptions(RequestValidatable requestValidatable) {
         List<ApiError> errors = new ArrayList<>();
         OptionsValidationHelper optionsValidationHelper = this.optionsValidationHelperFactory.createOptionsValidationHelper(requestValidatable);
-        if (nonNull(requestValidatable.getItemOptions()) && !optionsValidationHelper.companyTypeIsNull()) {
-            errors.addAll(validateDeliveryMethod(requestValidatable.getItemOptions()));
-            errors.addAll(validateDeliveryTimescale(requestValidatable.getItemOptions()));
+        if (nonNull(requestValidatable.itemOptions()) && !optionsValidationHelper.companyTypeIsNull()) {
+            errors.addAll(validateDeliveryMethod(requestValidatable.itemOptions()));
+            errors.addAll(validateDeliveryTimescale(requestValidatable.itemOptions()));
             // Delegate additional validation to supplied validation strategy
             strategy.accept(optionsValidationHelper);
         }
@@ -94,7 +94,7 @@ public class CertificateOptionsValidator {
      */
     public List<ApiError> getValidationErrors(final RequestValidatable requestValidatable) {
         final List<ApiError> errors = new ArrayList<>();
-        CertificateItemOptions options = requestValidatable.getItemOptions();
+        CertificateItemOptions options = requestValidatable.itemOptions();
         if (options == null) {
             return errors;
         }
@@ -177,10 +177,20 @@ public class CertificateOptionsValidator {
         final List<String> incorrectlySetFields = incorrectlySetFieldsValueFinder.getKeys();
         final List<ApiError> errors = new ArrayList<>();
         if (!incorrectlySetFields.isEmpty()) {
-            errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
-                            new ApiError(fieldNameConverter.fromLowerUnderscoreToLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + "." + field + ": must not be set when include_basic_information is false")
-                    .build()).collect(Collectors.toList()));
+            errors.addAll(incorrectlySetFields.stream()
+                    .map(field -> {
+                        String fieldName = fieldNameConverter.fromLowerUnderscoreToLowerHyphenCase(field);
+                        String errorMessage = detailsFieldName + "." + field + ": must not be set when include_basic_information is false";
+
+                        return ApiErrorBuilder.builder(
+                                new ApiError(fieldName + "-error",
+                                            detailsFieldName + "." + field,
+                                            ApiErrors.BOOLEAN_LOCATION_TYPE,
+                                            ApiErrors.ERROR_TYPE_VALIDATION))
+                                .withErrorMessage(errorMessage)
+                                .build();
+                    })
+                    .toList());
         }
         return errors;
     }

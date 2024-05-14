@@ -44,18 +44,17 @@ class CertificateOptionsValidatorConfig {
      * options field validation strategy.
      *
      * @param featureOptions containing company type specific feature options
-     * @return
      */
     @Bean
     CertificateOptionsValidator certificateOptionsValidator(FeatureOptions featureOptions,
                                                             OptionsValidationHelperFactory factory,
                                                             FieldNameConverter fieldNameConverter) {
         Consumer<OptionsValidationHelper> strategy;
-        if (featureOptions.isLlpCertificateOrdersEnabled() && featureOptions.isLpCertificateOrdersEnabled()) {
+        if (featureOptions.llpCertificateOrdersEnabled() && featureOptions.lpCertificateOrdersEnabled()) {
             strategy = this::allFeatureOptionsEnabledStrategy;
-        } else if (featureOptions.isLpCertificateOrdersEnabled()) {
+        } else if (featureOptions.lpCertificateOrdersEnabled()) {
             strategy = this::lpFeatureOptionEnabledStrategy;
-        } else if (featureOptions.isLlpCertificateOrdersEnabled()) {
+        } else if (featureOptions.llpCertificateOrdersEnabled()) {
             strategy = this::llpFeatureOptionEnabledStrategy;
         } else {
             strategy = this::noFeatureOptionsEnabledStrategy;

@@ -1,22 +1,8 @@
 package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_API_KEY_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,11 +11,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerMapping;
-
-import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
 import uk.gov.companieshouse.api.util.security.EricConstants;
 import uk.gov.companieshouse.api.util.security.SecurityConstants;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
+import uk.gov.companieshouse.certificates.orders.api.service.CertificateItemService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_API_KEY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
 
 @ExtendWith(MockitoExtension.class)
 class UserAuthorisationInterceptorTest {
@@ -66,7 +63,7 @@ class UserAuthorisationInterceptorTest {
         doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
-        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -75,7 +72,7 @@ class UserAuthorisationInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
-        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -94,7 +91,7 @@ class UserAuthorisationInterceptorTest {
         doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.of(item));
 
-        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -103,7 +100,7 @@ class UserAuthorisationInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.POST.toString());
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE);
 
-        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -118,14 +115,14 @@ class UserAuthorisationInterceptorTest {
         doReturn(ERIC_IDENTITY_TYPE_OAUTH2_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         when(service.getCertificateItemById(ITEM_ID)).thenReturn(Optional.empty());
 
-        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
     @DisplayName("Does not Authorise an external API key is used")
     void willNotAuthoriseIfRequestIsExternalAPIKey() {
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE);
-        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -135,7 +132,7 @@ class UserAuthorisationInterceptorTest {
         doReturn("request-id").when(request).getHeader("X-Request-ID");
         doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         doReturn(SecurityConstants.INTERNAL_USER_ROLE).when(request).getHeader(EricConstants.ERIC_AUTHORISED_KEY_ROLES);
-        assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertTrue(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
@@ -145,13 +142,13 @@ class UserAuthorisationInterceptorTest {
         doReturn("request-id").when(request).getHeader("X-Request-ID");
         doReturn(ERIC_IDENTITY_TYPE_API_KEY_VALUE).when(request).getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME);
         doReturn(SecurityConstants.INTERNAL_USER_ROLE).when(request).getHeader(EricConstants.ERIC_AUTHORISED_KEY_ROLES);
-        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 
     @Test
     @DisplayName("Does not Authorise if POST and unrecognised identity type")
     void willNotAuthoriseIfRequestIsPostAndUnrecognisedIdentity() {
         when(request.getHeader(ERIC_IDENTITY_TYPE_HEADER_NAME)).thenReturn(INVALID_IDENTITY_TYPE_VALUE);
-        assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
+        Assertions.assertFalse(userAuthorisationInterceptor.preHandle(request, response, null));
     }
 }

@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.error.ApiError;
 import java.util.List;
 
 /**
- * Implements validation of the request payload specific to the the create item request only.
+ * Implements validation of the request payload specific to the create item request only.
  */
 @Component
 public class CreateItemRequestValidator {

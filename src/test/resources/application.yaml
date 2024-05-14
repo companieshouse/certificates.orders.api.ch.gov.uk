@@ -1,6 +1,7 @@
 spring:
-  profiles:
-    active: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
+  config:
+    active:
+      on-profile: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
 
   data:
     mongodb:
@@ -13,100 +14,6 @@ uk:
           api:
             certificates: /orderable/certificates
             initial: /orderable/certificates/initial
-            health: /healthcheck
-
----
-
-spring:
-  profiles: feature-flags-enabled
-lp:
-  certificate:
-    orders:
-      enabled: true
-llp:
-  certificate:
-    orders:
-      enabled: true
-
-liquidated:
-  company:
-    certificate:
-      enabled: true
-
-administrator:
-  company:
-    certificate:
-      enabled: true
-
----
-
-spring:
-  profiles: feature-flags-disabled
-lp:
-  certificate:
-    orders:
-      enabled: false
-llp:
-  certificate:
-    orders:
-      enabled: false
-
-liquidated:
-  company:
-    certificate:
-      enabled: false
-
-administrator:
-  company:
-    certificate:
-      enabled: false
-
----
-
-spring:
-  profiles: lp-feature-flag-enabled
-lp:
-  certificate:
-    orders:
-      enabled: true
-llp:
-  certificate:
-    orders:
-      enabled: false
-
-liquidated:
-  company:
-    certificate:
-      enabled: false
-
-administrator:
-  company:
-    certificate:
-      enabled: false
-
----
-
-spring:
-  profiles: llp-feature-flag-enabled
-lp:
-  certificate:
-    orders:
-      enabled: false
-llp:
-  certificate:
-    orders:
-      enabled: true
-
-liquidated:
-  company:
-    certificate:
-      enabled: false
-
-administrator:
-  company:
-    certificate:
-      enabled: false
-
 server:
   error:
     include-message: always

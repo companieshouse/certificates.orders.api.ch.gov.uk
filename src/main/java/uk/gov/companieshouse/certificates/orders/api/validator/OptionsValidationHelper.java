@@ -20,7 +20,7 @@ class OptionsValidationHelper {
 
     OptionsValidationHelper(RequestValidatable requestValidatable, FeatureOptions featureOptions) {
         this.featureOptions = featureOptions;
-        this.options = requestValidatable.getItemOptions();
+        this.options = requestValidatable.itemOptions();
         this.companyStatus = CompanyStatus.getEnumValue(this.options.getCompanyStatus());
     }
 
@@ -47,7 +47,7 @@ class OptionsValidationHelper {
         notMemberDetails();
         notRegisteredOfficeAddressDetails();
         if (options.getLiquidatorsDetails() != null) {
-            if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
+            if (featureOptions.liquidatedCompanyCertificateEnabled()) {
                 ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
                         String.format("include_liquidators_details: must not exist when company type is %s",
                         options.getCompanyType()));
@@ -58,7 +58,7 @@ class OptionsValidationHelper {
         }
 
         if (options.getAdministratorsDetails() != null) {
-            if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
+            if (featureOptions.administratorCompanyCertificateEnabled()) {
                 ApiErrors.raiseError(errors,  ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,
                         String.format("include_administrators_details: must not exist when company type is %s",
                         options.getCompanyType()));
@@ -108,13 +108,13 @@ class OptionsValidationHelper {
     private void verifyCompanyStatus() {
         validateDissolvedCompany();
         validateGoodStanding();
-        if (featureOptions.isLiquidatedCompanyCertificateEnabled()) {
+        if (featureOptions.liquidatedCompanyCertificateEnabled()) {
             validateLiquidatorsDetails();
         } else if (options.getLiquidatorsDetails() != null) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_LIQUIDATORS_DETAILS_SUPPLIED,
                     "include_liquidators_details: must not exist");
         }
-        if (featureOptions.isAdministratorCompanyCertificateEnabled()) {
+        if (featureOptions.administratorCompanyCertificateEnabled()) {
             validateAdministratorsDetails();
         } else if (options.getAdministratorsDetails() != null) {
             ApiErrors.raiseError(errors, ApiErrors.ERR_ADMINISTRATORS_DETAILS_SUPPLIED,

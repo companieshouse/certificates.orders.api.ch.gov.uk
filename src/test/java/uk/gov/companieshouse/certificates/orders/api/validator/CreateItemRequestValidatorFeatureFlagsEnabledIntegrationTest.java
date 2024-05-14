@@ -5,10 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.config.FeatureOptionsConfig;
 import uk.gov.companieshouse.certificates.orders.api.controller.ApiErrors;
@@ -21,8 +20,6 @@ import uk.gov.companieshouse.certificates.orders.api.model.LimitedPartnerDetails
 import uk.gov.companieshouse.certificates.orders.api.model.MemberDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.PrincipalPlaceOfBusinessDetails;
 import uk.gov.companieshouse.certificates.orders.api.model.RegisteredOfficeAddressDetails;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.List;
 
@@ -43,27 +40,29 @@ import static uk.gov.companieshouse.certificates.orders.api.model.IncludeDobType
  */
 @Import({CertificateOptionsValidatorConfig.class, FeatureOptionsConfig.class})
 @SpringBootTest
-@ActiveProfiles("feature-flags-enabled")
+@TestPropertySource(
+        properties = """
+    lp.certificate.orders.enabled=true
+    llp.certificate.orders.enabled=true
+    liquidated.company.certificate.enabled=true
+    administrator.company.certificate.enabled=true
+  """
+)
 class CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateItemRequestValidatorFeatureFlagsEnabledIntegrationTest.class.getName());
 
     @Mock
     private RequestValidatable requestValidatable;
 
     private CertificateItemOptions certificateItemOptions;
 
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
     @Autowired
     private CreateItemRequestValidator validatorUnderTest;
 
     @BeforeEach
     void setUp() {
-        LOGGER.debug("Active profile " + activeProfile);
         certificateItemOptions = new CertificateItemOptions();
 
-        when(requestValidatable.getItemOptions()).thenReturn(certificateItemOptions);
+        when(requestValidatable.itemOptions()).thenReturn(certificateItemOptions);
     }
 
     @Test

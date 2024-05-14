@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.companieshouse.certificates.orders.api.config.AbstractMongoConfig;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
@@ -29,12 +32,21 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("feature-flags-enabled")
-class CertificateItemsControllerInitialEndpointIntegrationTest {
+@Testcontainers
+class CertificateItemsControllerInitialEndpointIntegrationTest extends AbstractMongoConfig {
 
     private static final String INITIAL_CERTIFICATE_URL = "/orderable/certificates/initial";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -55,6 +67,11 @@ class CertificateItemsControllerInitialEndpointIntegrationTest {
     @Autowired
     private CertificateItemRepository repository;
 
+    @BeforeAll
+    static void setup() {
+        mongoDBContainer.start();
+    }
+
     @AfterEach
     void tearDown() {
         repository.findById(EXPECTED_ITEM_ID).ifPresent(repository::delete);
@@ -66,15 +83,15 @@ class CertificateItemsControllerInitialEndpointIntegrationTest {
     @DisplayName("Create initial certificate endpoint")
     void testInitialEndpoint(JsonRequestFixture requestFixture) throws Exception {
         Optional.ofNullable(requestFixture.getCompanyStatus())
-                .ifPresent(status -> when(companyProfileResource.getCompanyStatus()).thenReturn(status));
+                .ifPresent(status -> when(companyProfileResource.companyStatus()).thenReturn(status));
         Optional.ofNullable(requestFixture.getCompanyType())
-                .ifPresent(type -> when(companyProfileResource.getCompanyType()).thenReturn(type.getCompanyType()));
+                .ifPresent(type -> when(companyProfileResource.companyType()).thenReturn(type.getCompanyType()));
         if (isNull(requestFixture.getCompanyServiceException())) {
             when(companyService.getCompanyProfile(any())).thenReturn(companyProfileResource);
         } else {
             when(companyService.getCompanyProfile(any())).thenThrow(requestFixture.getCompanyServiceException());
         }
-        when(companyProfileResource.getCompanyName()).thenReturn("ACME LIMITED");
+        when(companyProfileResource.companyName()).thenReturn("ACME LIMITED");
         when(idGeneratorService.autoGenerateId()).thenReturn(EXPECTED_ITEM_ID);
         mockMvc.perform(post(INITIAL_CERTIFICATE_URL)
                         .header(REQUEST_ID_HEADER_NAME, TOKEN_REQUEST_ID_VALUE)

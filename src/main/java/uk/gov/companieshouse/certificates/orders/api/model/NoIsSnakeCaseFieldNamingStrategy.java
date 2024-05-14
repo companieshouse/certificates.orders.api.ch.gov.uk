@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.model;
 
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy;
+import org.springframework.lang.NonNull;
 
 /**
  * Extends {@link SnakeCaseFieldNamingStrategy} to change the naming strategy for boolean fields, to remove the
@@ -10,7 +11,8 @@ import org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy;
 public class NoIsSnakeCaseFieldNamingStrategy extends SnakeCaseFieldNamingStrategy {
 
     @Override
-    public String getFieldName(final PersistentProperty<?> property) {
+    @NonNull
+    public String getFieldName(@NonNull final PersistentProperty<?> property) {
         final String snakeCaseName = getSnakeCaseFieldName(property);
         final Class<?> fieldType = property.getType();
         if ((fieldType == Boolean.class || fieldType == boolean.class) && snakeCaseName.startsWith("is_")) {

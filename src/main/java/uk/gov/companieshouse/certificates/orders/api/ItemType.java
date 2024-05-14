@@ -24,8 +24,8 @@ public enum ItemType {
         }
     };
 
-    private String itemType;
-    private String kind;
+    private final String itemType;
+    private final String kind;
 
     ItemType(String itemType, String kind) {
         this.itemType = itemType;
@@ -73,9 +73,9 @@ public enum ItemType {
     public void populateItemCosts(final Item item, final CertificateCostCalculatorService calculator) {
         final CertificateCostCalculation calculation =
                 calculator.calculateCosts(item.getQuantity(), getOrDefaultDeliveryTimescale(item));
-        item.setPostageCost(calculation.getPostageCost());
-        item.setItemCosts(calculation.getItemCosts());
-        item.setTotalItemCost(calculation.getTotalItemCost());
+        item.setPostageCost(calculation.postageCost());
+        item.setItemCosts(calculation.itemCosts());
+        item.setTotalItemCost(calculation.totalItemCost());
     }
 
     /**

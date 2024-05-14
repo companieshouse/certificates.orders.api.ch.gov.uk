@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +12,31 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.companieshouse.certificates.orders.api.config.AbstractMongoConfig;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
 import uk.gov.companieshouse.certificates.orders.api.util.PatchMediaType;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.*;
 import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_TOKEN_PERMISSIONS_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_AUTHORISED_USER_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_TYPE_OAUTH2_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.ERIC_IDENTITY_VALUE;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.REQUEST_ID_HEADER_NAME;
+import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.TOKEN_REQUEST_ID_VALUE;
 
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("feature-flags-enabled")
-class UserAuthorisationInterceptorIntegrationTest {
+@Testcontainers
+class UserAuthorisationInterceptorIntegrationTest extends AbstractMongoConfig{
 
     private static final String CERTIFICATES_URL = "/orderable/certificates/";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -40,6 +52,11 @@ class UserAuthorisationInterceptorIntegrationTest {
 
     @Autowired
     private CertificateItemRepository repository;
+
+    @BeforeAll
+    static void setup() {
+        mongoDBContainer.start();
+    }
 
     @AfterEach
     void tearDown() {

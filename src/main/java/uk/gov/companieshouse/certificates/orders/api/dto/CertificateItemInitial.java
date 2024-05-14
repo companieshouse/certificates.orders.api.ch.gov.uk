@@ -3,7 +3,7 @@ package uk.gov.companieshouse.certificates.orders.api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @JsonPropertyOrder(alphabetic = true)
 public class CertificateItemInitial {
