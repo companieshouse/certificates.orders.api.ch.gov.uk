@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -62,6 +63,11 @@ class CertificateItemsControllerReadEndpointIntegrationTest extends AbstractMong
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @BeforeAll
+    static void setup() {
+        mongoDBContainer.start();
+    }
 
     @AfterEach
     void tearDown() {

@@ -2,6 +2,7 @@ package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.companieshouse.certificates.orders.api.config.AbstractMongoConfig;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptionsRequest;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
@@ -32,7 +35,8 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.E
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("feature-flags-enabled")
-class CertificateItemsControllerIntegrationTest {
+@Testcontainers
+class CertificateItemsControllerIntegrationTest extends AbstractMongoConfig {
 
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
     private static final String COMPANY_NUMBER = "00006400";
@@ -44,6 +48,11 @@ class CertificateItemsControllerIntegrationTest {
     private ObjectMapper objectMapper;
     @Autowired
     private CertificateItemRepository repository;
+
+    @BeforeAll
+    static void setup() {
+        mongoDBContainer.start();
+    }
 
     @AfterEach
     void tearDown() {
