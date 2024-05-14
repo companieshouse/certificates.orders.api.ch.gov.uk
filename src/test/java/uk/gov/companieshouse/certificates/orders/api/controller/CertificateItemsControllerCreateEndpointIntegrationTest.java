@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.certificates.orders.api.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.companieshouse.certificates.orders.api.config.AbstractMongoConfig;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CompanyProfileResource;
 import uk.gov.companieshouse.certificates.orders.api.repository.CertificateItemRepository;
@@ -49,7 +52,8 @@ import static uk.gov.companieshouse.certificates.orders.api.util.TestConstants.T
     administrator.company.certificate.enabled=true
   """
 )
-class CertificateItemsControllerCreateEndpointIntegrationTest {
+@Testcontainers
+class CertificateItemsControllerCreateEndpointIntegrationTest extends AbstractMongoConfig {
 
     private static final String CERTIFICATES_URL = "/orderable/certificates";
     private static final String EXPECTED_ITEM_ID = "CRT-123456-123456";
@@ -69,6 +73,11 @@ class CertificateItemsControllerCreateEndpointIntegrationTest {
 
     @Autowired
     private CertificateItemRepository repository;
+
+    @BeforeAll
+    static void setup() {
+        mongoDBContainer.start();
+    }
 
     @AfterEach
     void tearDown() {
