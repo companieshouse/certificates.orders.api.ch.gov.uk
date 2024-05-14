@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Produces a list of map keys corresponding to found map target values.
@@ -30,6 +31,8 @@ public class FindByValueVisitor implements Visitor<Map<String, Object>> {
     }
 
     public List<String> getKeys() {
-        return keys.stream().map(Map.Entry::getKey).toList();
+        return keys.stream()
+                    .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }

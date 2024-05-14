@@ -177,10 +177,20 @@ public class CertificateOptionsValidator {
         final List<String> incorrectlySetFields = incorrectlySetFieldsValueFinder.getKeys();
         final List<ApiError> errors = new ArrayList<>();
         if (!incorrectlySetFields.isEmpty()) {
-            errors.addAll(incorrectlySetFields.stream().map(field -> ApiErrorBuilder.builder(
-                            new ApiError(fieldNameConverter.fromLowerUnderscoreToLowerHyphenCase(field) + "-error", detailsFieldName + "." + field, ApiErrors.BOOLEAN_LOCATION_TYPE, ApiErrors.ERROR_TYPE_VALIDATION))
-                    .withErrorMessage(detailsFieldName + "." + field + ": must not be set when include_basic_information is false")
-                    .build()).toList());
+            errors.addAll(incorrectlySetFields.stream()
+                    .map(field -> {
+                        String fieldName = fieldNameConverter.fromLowerUnderscoreToLowerHyphenCase(field);
+                        String errorMessage = detailsFieldName + "." + field + ": must not be set when include_basic_information is false";
+
+                        return ApiErrorBuilder.builder(
+                                new ApiError(fieldName + "-error",
+                                            detailsFieldName + "." + field,
+                                            ApiErrors.BOOLEAN_LOCATION_TYPE,
+                                            ApiErrors.ERROR_TYPE_VALIDATION))
+                                .withErrorMessage(errorMessage)
+                                .build();
+                    })
+                    .toList());
         }
         return errors;
     }
