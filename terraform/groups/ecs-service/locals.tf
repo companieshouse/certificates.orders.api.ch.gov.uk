@@ -9,7 +9,7 @@ locals {
   docker_repo                = "certificates.orders.api.ch.gov.uk"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority  = 62
-  lb_listener_paths          = ["/orderable/certificates"]
+  lb_listener_paths          = ["/orderable/certificates*"]
   healthcheck_path           = "/healthcheck" #healthcheck path for certificates orders api
   healthcheck_matcher        = "200"
   s3_config_bucket           = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
