@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.error.ApiError;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemCreate;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemInitial;
 import uk.gov.companieshouse.certificates.orders.api.dto.CertificateItemResponse;
+import uk.gov.companieshouse.certificates.orders.api.interceptor.EricAuthoriser;
 import uk.gov.companieshouse.certificates.orders.api.mapper.CertificateItemMapper;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItem;
 import uk.gov.companieshouse.certificates.orders.api.model.CertificateItemOptions;
@@ -69,6 +70,7 @@ public class CertificateItemsController {
     private final CertificateItemService certificateItemService;
     private final CompanyService companyService;
     private final CompanyProfileToCertificateTypeMapper certificateTypeMapper;
+    private final EricAuthoriser authoriser;
 
     /**
      * Constructor.
@@ -82,6 +84,7 @@ public class CertificateItemsController {
      * @param certificateItemService     the service used by this to manage and store certificate items
      * @param companyService             to get company profile
      * @param certificateTypeMapper      company profile to certificate type mapper
+     * @param authoriser                 the authoriser used to determine entitlement to free certificate items
      */
     public CertificateItemsController(final CreateItemRequestValidator createItemRequestValidator,
                                       final PatchItemRequestValidator patchItemRequestValidator,
@@ -90,7 +93,8 @@ public class CertificateItemsController {
                                       final PatchMerger patcher,
                                       final CertificateItemService certificateItemService,
                                       final CompanyService companyService,
-                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper) {
+                                      final CompanyProfileToCertificateTypeMapper certificateTypeMapper,
+                                      final EricAuthoriser authoriser) {
         this.createItemRequestValidator = createItemRequestValidator;
         this.patchItemRequestValidator = patchItemRequestValidator;
         this.certificateOptionsValidator = certificateOptionsValidator;
@@ -99,6 +103,7 @@ public class CertificateItemsController {
         this.certificateItemService = certificateItemService;
         this.companyService = companyService;
         this.certificateTypeMapper = certificateTypeMapper;
+        this.authoriser = authoriser;
     }
 
     @PostMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}")
@@ -116,12 +121,19 @@ public class CertificateItemsController {
 
     @GetMapping("${uk.gov.companieshouse.certificates.orders.api.certificates}/{id}")
     public ResponseEntity<Object> getCertificateItem(final @PathVariable String id,
+                                                     final HttpServletRequest servletRequest,
                                                      final @RequestHeader(REQUEST_ID_HEADER_NAME) String requestId) {
         Map<String, Object> logMap = createLoggingDataMap(requestId);
         logMap.put(CERTIFICATE_ID_LOG_KEY, id);
         LOGGER.info("get certificate item request", logMap);
         logMap.remove(MESSAGE);
-        Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id);
+
+        final boolean entitledToFreeCertificates =
+                authoriser.hasPermission("/admin/free-certs", servletRequest);
+        LOGGER.info("User entitled to free certificates?: " + entitledToFreeCertificates);
+
+        Optional<CertificateItem> item = certificateItemService.getCertificateItemWithCosts(id, entitledToFreeCertificates);
+
         if (item.isPresent()) {
             final CertificateItemResponse createdCertificateItemDTO = mapper.certificateItemToCertificateItemResponse(item.get());
             logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItemDTO.getCompanyNumber());
@@ -192,7 +204,8 @@ public class CertificateItemsController {
         }
 
         logMap.put(PATCHED_COMPANY_NUMBER, patchedItem.getCompanyNumber());
-        final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem);
+        // TODO BI-12341 Assume here we don't know who the user is, but it shouldn't matter as costs not updated in DB.
+        final CertificateItem savedItem = certificateItemService.saveCertificateItem(patchedItem, false);
         final CertificateItemResponse responseDTO = mapper.certificateItemToCertificateItemResponse(savedItem);
 
         logMap.put(STATUS_LOG_KEY, OK);
@@ -257,7 +270,12 @@ public class CertificateItemsController {
                 return ApiErrors.errorResponse(BAD_REQUEST, errors);
             }
 
-            CertificateItem createdCertificateItem = certificateItemService.createCertificateItem(enrichedCertificateItem);
+            final boolean entitledToFreeCertificates =
+                    authoriser.hasPermission("/admin/free-certs", servletRequest);
+            LOGGER.info("User entitled to free certificates?: " + entitledToFreeCertificates);
+
+            CertificateItem createdCertificateItem =
+                    certificateItemService.createCertificateItem(enrichedCertificateItem, entitledToFreeCertificates);
             logMap.put(USER_ID_LOG_KEY, createdCertificateItem.getUserId());
             logMap.put(COMPANY_NUMBER_LOG_KEY, createdCertificateItem.getCompanyNumber());
             logMap.put(CERTIFICATE_ID_LOG_KEY, createdCertificateItem.getId());

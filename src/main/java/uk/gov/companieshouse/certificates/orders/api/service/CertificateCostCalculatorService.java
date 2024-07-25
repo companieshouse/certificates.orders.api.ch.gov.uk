@@ -29,16 +29,19 @@ public class CertificateCostCalculatorService {
 
     /**
      * Calculates the certificate item costs given the quantity and delivery timescale.
-     * @param quantity the quantity of certificate items specified. Assumed to be >= 1.
-     * @param deliveryTimescale the delivery timescale specified
+     * @param quantity                 the quantity of certificate items specified. Assumed to be >= 1.
+     * @param deliveryTimescale        the delivery timescale specified
+     * @param userGetsFreeCertificates whether the current user is entitled to free certificates
      * @return the outcome of the costs calculations
      */
     public CertificateCostCalculation calculateCosts(final int quantity,
-                                                     final DeliveryTimescale deliveryTimescale) {
+                                                     final DeliveryTimescale deliveryTimescale,
+                                                     boolean userGetsFreeCertificates) {
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> itemCosts = new ArrayList<>();
         for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
-            final ItemCosts cost = calculateSingleItemCosts(certificateNumber, deliveryTimescale);
+            final ItemCosts cost =
+                    calculateSingleItemCosts(certificateNumber, deliveryTimescale, userGetsFreeCertificates);
             itemCosts.add(cost);
         }
         final String totalItemCost = calculateTotalItemCost(itemCosts, POSTAGE_COST);
@@ -52,18 +55,35 @@ public class CertificateCostCalculatorService {
      * @param deliveryTimescale the delivery timescale
      * @return the costs for the certificate
      */
-    private ItemCosts calculateSingleItemCosts(final int certificateNumber, final DeliveryTimescale deliveryTimescale) {
+    private ItemCosts calculateSingleItemCosts(final int certificateNumber,
+                                               final DeliveryTimescale deliveryTimescale,
+                                               final boolean userGetsFreeCertificates) {
         final ItemCosts cost = new ItemCosts();
-        final int discountApplied = certificateNumber > 1 ? deliveryTimescale.getExtraCertificateDiscount(costs) : 0;
+        final int itemCostForTimescale = deliveryTimescale.getIndividualCertificateCost(costs);
+        cost.setItemCost(Integer.toString(itemCostForTimescale));
+        final int discountApplied = userGetsFreeCertificates ?
+                itemCostForTimescale : getDiscountAppliedForNumberAndTimescale(certificateNumber, deliveryTimescale);
         cost.setDiscountApplied(Integer.toString(discountApplied));
         cost.setItemCost(Integer.toString(deliveryTimescale.getIndividualCertificateCost(costs)));
-        final int calculatedCost = deliveryTimescale.getIndividualCertificateCost(costs) - discountApplied;
+        final int calculatedCost = itemCostForTimescale - discountApplied;
         cost.setCalculatedCost(Integer.toString(calculatedCost));
         final ProductType productType =
                 certificateNumber > 1 ? deliveryTimescale.getAdditionalCertificatesProductType() :
                         deliveryTimescale.getFirstCertificateProductType();
         cost.setProductType(productType);
         return cost;
+    }
+
+    /**
+     * Gets the discount applied to this item based on its number and delivery timescale
+     * @param certificateNumber the number of the certificate, used to determine whether the certificate is the first
+     *                          and therefore full price, or an additional certificate, and therefore discounted
+     * @param deliveryTimescale the delivery timescale
+     * @return the discount
+     */
+    private int getDiscountAppliedForNumberAndTimescale(final int certificateNumber,
+                                                        final DeliveryTimescale deliveryTimescale) {
+        return certificateNumber > 1 ? deliveryTimescale.getExtraCertificateDiscount(costs) : 0;
     }
 
     /**
