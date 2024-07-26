@@ -173,7 +173,7 @@ class CertificateItemServiceTest {
         cost.setItemCost(ITEM_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
-        when(calculator.calculateCosts(anyInt(), eq(DeliveryTimescale.STANDARD), false)).thenReturn(
+        when(calculator.calculateCosts(anyInt(), eq(DeliveryTimescale.STANDARD), eq(false))).thenReturn(
                 new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
         return item;
     }

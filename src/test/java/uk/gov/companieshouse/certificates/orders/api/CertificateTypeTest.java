@@ -94,7 +94,7 @@ class CertificateTypeTest {
         item.setQuantity(1);
         final List<ItemCosts> costs = new ArrayList<>();
         when(calculator.calculateCosts(anyInt(),
-                eq(STANDARD), false)).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
+                eq(STANDARD), eq(false))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
 
         // When
         CERTIFICATE.populateItemCosts(item, calculator, false);
