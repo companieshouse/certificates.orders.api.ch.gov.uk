@@ -1,16 +1,20 @@
 package uk.gov.companieshouse.certificates.orders.api.util;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 @ExtendWith(MockitoExtension.class)
-public class StringHelperTest {
+class StringHelperTest {
 
     private StringHelper stringHelper;
 
@@ -19,74 +23,29 @@ public class StringHelperTest {
         stringHelper = new StringHelper();
     }
 
-    @Test
-    void testAsSetWithNonEmptyString() {
-        String values = "read write execute";
-        Set<String> result = stringHelper.asSet("\\s+", values);
+    @ParameterizedTest
+    @CsvSource({
+            "'read write execute', '\\s+', 3, 'read,write,execute'",
+            "'', '\\s+', 0, ''",
+            "'null', '\\s+', 0, ''",
+            "'read,write,execute', ',', 3, 'read,write,execute'",
+            "'read,,write,,execute', ',', 3, 'read,write,execute'",
+            "',read,write,execute,', ',', 3, 'read,write,execute'",
+            "' read \t write\nexecute ', '\\s+', 3, 'read,write,execute'"
+    })
+    void testAsSet(String values, String delimiter, int expectedSize, String expectedValues) {
+        // Interpret "null" as an actual null value
+        if ("null".equals(values)) {
+            values = null;
+        }
 
-        assertEquals(3, result.size());
-        assertTrue(result.contains("read"));
-        assertTrue(result.contains("write"));
-        assertTrue(result.contains("execute"));
-    }
+        Set<String> result = stringHelper.asSet(delimiter, values);
 
-    @Test
-    void testAsSetWithEmptyString() {
-        String values = "";
-        Set<String> result = stringHelper.asSet("\\s+", values);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testAsSetWithNullString() {
-        String values = null;
-        Set<String> result = stringHelper.asSet("\\s+", values);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testAsSetWithMultipleDelimiters() {
-        String values = "read,write,execute";
-        Set<String> result = stringHelper.asSet(",", values);
-
-        assertEquals(3, result.size());
-        assertTrue(result.contains("read"));
-        assertTrue(result.contains("write"));
-        assertTrue(result.contains("execute"));
-    }
-
-    @Test
-    void testAsSetWithEmptyValuesBetweenDelimiters() {
-        String values = "read,,write,,execute";
-        Set<String> result = stringHelper.asSet(",", values);
-
-        assertEquals(3, result.size());
-        assertTrue(result.contains("read"));
-        assertTrue(result.contains("write"));
-        assertTrue(result.contains("execute"));
-    }
-
-    @Test
-    void testAsSetWithTrailingAndLeadingDelimiters() {
-        String values = ",read,write,execute,";
-        Set<String> result = stringHelper.asSet(",", values);
-
-        assertEquals(3, result.size());
-        assertTrue(result.contains("read"));
-        assertTrue(result.contains("write"));
-        assertTrue(result.contains("execute"));
-    }
-
-    @Test
-    void testAsSetWithMixedWhitespace() {
-        String values = " read \t write\nexecute ";
-        Set<String> result = stringHelper.asSet("\\s+", values);
-
-        assertEquals(3, result.size());
-        assertTrue(result.contains("read"));
-        assertTrue(result.contains("write"));
-        assertTrue(result.contains("execute"));
+        assertEquals(expectedSize, result.size());
+        if (expectedSize > 0) {
+            Set<String> expectedSet = Arrays.stream(expectedValues.split(","))
+                    .collect(Collectors.toSet());
+            assertTrue(result.containsAll(expectedSet));
+        }
     }
 }

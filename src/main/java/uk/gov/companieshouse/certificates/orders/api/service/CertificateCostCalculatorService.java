@@ -40,7 +40,7 @@ public class CertificateCostCalculatorService {
         checkArguments(quantity, deliveryTimescale);
         final List<ItemCosts> itemCosts = new ArrayList<>();
         for (int certificateNumber = 1; certificateNumber <= quantity; certificateNumber++) {
-            final ItemCosts cost =
+            final var cost =
                     calculateSingleItemCosts(certificateNumber, deliveryTimescale, userGetsFreeCertificates);
             itemCosts.add(cost);
         }

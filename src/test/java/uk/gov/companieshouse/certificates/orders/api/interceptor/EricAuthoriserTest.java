@@ -16,7 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EricAuthoriserTest {
+class EricAuthoriserTest {
 
     @Mock
     private StringHelper stringHelper;
