@@ -46,7 +46,7 @@ class CertificateCostCalculatorServiceTest {
 
         // Given and when
         final CertificateCostCalculation calculation =
-                calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD);
+                calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD, false);
         final List<ItemCosts> costs = calculation.itemCosts();
 
         // Then
@@ -67,7 +67,7 @@ class CertificateCostCalculatorServiceTest {
 
         // Given and when
         final CertificateCostCalculation calculation =
-                calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.STANDARD);
+                calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.STANDARD, false);
         final List<ItemCosts> costs = calculation.itemCosts();
 
         // Then
@@ -98,7 +98,7 @@ class CertificateCostCalculatorServiceTest {
 
         // Given and when
         final CertificateCostCalculation calculation =
-            calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+            calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.SAME_DAY, false);
         final List<ItemCosts> costs = calculation.itemCosts();
 
         // Then
@@ -119,7 +119,7 @@ class CertificateCostCalculatorServiceTest {
 
         // Given and when
         final CertificateCostCalculation calculation =
-            calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.SAME_DAY);
+            calculatorUnderTest.calculateCosts(MULTIPLE_QUANTITY, DeliveryTimescale.SAME_DAY, false);
         final List<ItemCosts> costs = calculation.itemCosts();
 
         // Then
@@ -150,7 +150,7 @@ class CertificateCostCalculatorServiceTest {
     void tooFewItemsTriggerIllegalArgumentException() {
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(0, DeliveryTimescale.STANDARD));
+                                        () -> calculatorUnderTest.calculateCosts(0, DeliveryTimescale.STANDARD, false));
         assertThat(exception.getMessage(), is("quantity must be greater than or equal to 1!"));
     }
 
@@ -159,7 +159,7 @@ class CertificateCostCalculatorServiceTest {
     void noDeliveryTimescaleTriggersIllegalArgumentException() {
         final IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                                        () -> calculatorUnderTest.calculateCosts(1, null));
+                                        () -> calculatorUnderTest.calculateCosts(1, null, false));
         assertThat(exception.getMessage(), is("deliveryTimescale must not be null!"));
     }
 

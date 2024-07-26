@@ -77,7 +77,7 @@ class CertificateItemServiceTest {
         final LocalDateTime intervalStart = LocalDateTime.now();
 
         // When
-        serviceUnderTest.createCertificateItem(item);
+        serviceUnderTest.createCertificateItem(item, false);
 
         // Then
         final LocalDateTime intervalEnd = LocalDateTime.now();
@@ -101,7 +101,7 @@ class CertificateItemServiceTest {
         item.setCreatedAt(intervalStart);
 
         // When
-        serviceUnderTest.saveCertificateItem(item);
+        serviceUnderTest.saveCertificateItem(item, false);
 
         // Then
         final LocalDateTime intervalEnd = LocalDateTime.now();
@@ -120,7 +120,7 @@ class CertificateItemServiceTest {
         when(repository.findById(ITEM_SOUGHT_ID_VALUE)).thenReturn(Optional.of(item));
 
         // When
-        final Optional<CertificateItem> itemRetrieved = serviceUnderTest.getCertificateItemWithCosts(ITEM_SOUGHT_ID_VALUE);
+        final Optional<CertificateItem> itemRetrieved = serviceUnderTest.getCertificateItemWithCosts(ITEM_SOUGHT_ID_VALUE, false);
 
         // Then
         verify(repository).findById(ITEM_SOUGHT_ID_VALUE);
@@ -173,7 +173,7 @@ class CertificateItemServiceTest {
         cost.setItemCost(ITEM_COST);
         cost.setCalculatedCost(CALCULATED_COST);
         costs.add(cost);
-        when(calculator.calculateCosts(anyInt(), eq(DeliveryTimescale.STANDARD))).thenReturn(
+        when(calculator.calculateCosts(anyInt(), eq(DeliveryTimescale.STANDARD), false)).thenReturn(
                 new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
         return item;
     }
