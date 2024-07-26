@@ -176,4 +176,24 @@ class CertificateCostCalculatorServiceTest {
         return Integer.toString(total);
     }
 
+    @Test
+    @DisplayName("Calculates standard delivery single certificate cost correctly when user gets free certificates")
+    void calculatesStandardSingleCertificateCostCorrectlyWithFreeCertificates() {
+
+        // Given and when
+        final CertificateCostCalculation calculation =
+                calculatorUnderTest.calculateCosts(SINGLE_QUANTITY, DeliveryTimescale.STANDARD, true);
+        final List<ItemCosts> costs = calculation.itemCosts();
+
+        // Then
+        assertThat(costs.size(), is(SINGLE_QUANTITY));
+        final ItemCosts cost = costs.getFirst();
+        assertThat(cost.getItemCost(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING));
+        assertThat(cost.getDiscountApplied(), is(STANDARD_INDIVIDUAL_CERTIFICATE_COST_STRING));  // Full discount
+        assertThat(cost.getCalculatedCost(), is("0"));  // The calculated cost should be zero
+        assertThat(cost.getProductType(), is(CERTIFICATE));
+        assertThat(calculation.postageCost(), is(POSTAGE_COST));
+        assertThat(calculation.totalItemCost(), is(calculateExpectedTotalItemCost(costs, POSTAGE_COST)));
+
+    }
 }
