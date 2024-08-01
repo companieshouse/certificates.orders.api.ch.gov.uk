@@ -94,13 +94,13 @@ class CertificateTypeTest {
         item.setQuantity(1);
         final List<ItemCosts> costs = new ArrayList<>();
         when(calculator.calculateCosts(anyInt(),
-                eq(STANDARD))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
+                eq(STANDARD), eq(false))).thenReturn(new CertificateCostCalculation(costs, POSTAGE_COST, TOTAL_ITEM_COST));
 
         // When
-        CERTIFICATE.populateItemCosts(item, calculator);
+        CERTIFICATE.populateItemCosts(item, calculator, false);
 
         // Then
-        verify(calculator).calculateCosts(1, STANDARD);
+        verify(calculator).calculateCosts(1, STANDARD, false);
         assertThat(item.getItemCosts(), is(costs));
         assertThat(item.getPostageCost(), is(POSTAGE_COST));
         assertThat(item.getTotalItemCost(), is(TOTAL_ITEM_COST));

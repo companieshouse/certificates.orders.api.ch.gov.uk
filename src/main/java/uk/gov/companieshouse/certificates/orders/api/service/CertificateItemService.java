@@ -43,15 +43,17 @@ public class CertificateItemService {
      *
      * @param item the item to be created
      * @return the created item
+     * @param userGetsFreeCertificates whether the current user is entitled to free certificates (<code>true</code>),
+     *                                 or not (<code>false</code>)
      */
-    public CertificateItem createCertificateItem(final CertificateItem item) {
+    public CertificateItem createCertificateItem(final CertificateItem item, final boolean userGetsFreeCertificates) {
         CERTIFICATE.populateReadOnlyFields(item, descriptions);
         item.setId(idGenerator.autoGenerateId());
         setCreationDateTimes(item);
         item.setEtag(etagGenerator.generateEtag());
         item.setLinks(linksGenerator.generateLinks(item.getId()));
         final CertificateItem itemSaved = repository.save(item);
-        CERTIFICATE.populateItemCosts(itemSaved, calculator);
+        CERTIFICATE.populateItemCosts(itemSaved, calculator, userGetsFreeCertificates);
         return itemSaved;
     }
 
@@ -59,15 +61,18 @@ public class CertificateItemService {
      * Saves the certificate item, assumed to have been updated, to the database.
      *
      * @param updatedCertificateItem the certificate item to save
+     * @param userGetsFreeCertificates whether the current user is entitled to free certificates (<code>true</code>),
+     *                                 or not (<code>false</code>)
      * @return the latest certificate item state resulting from the save
      */
-    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem) {
+    public CertificateItem saveCertificateItem(final CertificateItem updatedCertificateItem,
+                                               final boolean userGetsFreeCertificates) {
         final LocalDateTime now = LocalDateTime.now();
         updatedCertificateItem.setUpdatedAt(now);
         CERTIFICATE.populateDerivedDescriptionFields(updatedCertificateItem, descriptions);
         updatedCertificateItem.setEtag(etagGenerator.generateEtag());
         final CertificateItem itemSaved = repository.save(updatedCertificateItem);
-        CERTIFICATE.populateItemCosts(itemSaved, calculator);
+        CERTIFICATE.populateItemCosts(itemSaved, calculator, userGetsFreeCertificates);
         return itemSaved;
     }
 
@@ -84,7 +89,7 @@ public class CertificateItemService {
 
     /**
      * Gets the certificate item by its ID, and returns it as-is, without decorating it in any way.
-     * (Compare with {@link #getCertificateItemWithCosts(String)}).
+     * (Compare with {@link #getCertificateItemWithCosts(String, boolean)}).
      *
      * @param id the ID of the certificate item to be retrieved
      * @return the undecorated item retrieved from the DB
@@ -98,11 +103,14 @@ public class CertificateItemService {
      * (Compare with {@link #getCertificateItemById(String)}).
      *
      * @param id the ID of the certificate item to be retrieved
+     * @param userGetsFreeCertificates whether the current user is entitled to free certificates (<code>true</code>),
+     *                                 or not (<code>false</code>)
      * @return the item, complete with its calculated costs
      */
-    public Optional<CertificateItem> getCertificateItemWithCosts(final String id) {
+    public Optional<CertificateItem> getCertificateItemWithCosts(final String id,
+                                                                 final boolean userGetsFreeCertificates) {
         final Optional<CertificateItem> retrievedItem = repository.findById(id);
-        retrievedItem.ifPresent(item -> CERTIFICATE.populateItemCosts(item, calculator));
+        retrievedItem.ifPresent(item -> CERTIFICATE.populateItemCosts(item, calculator, userGetsFreeCertificates));
         return retrievedItem;
     }
 }
