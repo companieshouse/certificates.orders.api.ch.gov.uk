@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.5</version>
+        <version>2.1.6</version>
     </parent>
     <artifactId>certificates.orders.api.ch.gov.uk</artifactId>
     <version>unversioned</version>
@@ -54,7 +54,7 @@
         <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
 
         <!-- Spring -->
-        <spring-boot-dependencies.version>3.2.5</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.3.2</spring-boot-dependencies.version>
         <spring-web.version>6.1.6</spring-web.version>
         <spring-boot-maven-plugin.version>3.2.5</spring-boot-maven-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
@@ -302,9 +302,7 @@
                         <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21:latest</image>
                     </from>
                     <to>
-                        <image>
-                            416670754337.dkr.ecr.eu-west-2.amazonaws.com/certificates.orders.api.ch.gov.uk:latest
-                        </image>
+                        <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/certificates.orders.api.ch.gov.uk:latest</image>
                     </to>
                 </configuration>
             </plugin>
