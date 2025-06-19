@@ -75,6 +75,7 @@ public class CompanyServiceIntegrationTest {
         environmentVariables.set("API_URL", "http://localhost:" + wireMockPort);
         environmentVariables.set("PAYMENTS_API_URL", "http://localhost:" + wireMockPort);
         environmentVariables.set("DOCUMENT_API_LOCAL_URL", "http://localhost:" + wireMockPort);
+        environmentVariables.set("ORACLE_QUERY_API_URL", "http://localhost:" + wireMockPort);
     }
 
     @Test
