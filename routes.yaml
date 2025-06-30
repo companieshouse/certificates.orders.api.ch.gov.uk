@@ -1,6 +1,0 @@
-app_name: certificates.orders.api.ch.gov.uk
-group: api
-# XXX Make sure all services with /scudOrders/ based routes have a weight LOWER than 1000
-weight: 991
-routes:
-   1: ^/orderable/certificates.*
