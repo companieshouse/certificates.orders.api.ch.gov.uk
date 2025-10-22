@@ -335,6 +335,12 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
         </dependency>
+        <!--CVE-2025-52520(7.5), CVE-2025-53506(7.5), CVE-2025-48989(7.5)-->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat-embed-core.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
