@@ -1,5 +1,10 @@
+#costs:
+#  standard_cost: 22
+#  same_day_cost: 65
+#  standard_discount: 12
+#  same_day_discount: 55
 costs:
-  standard_cost: 22
-  same_day_cost: 65
-  standard_discount: 12
-  same_day_discount: 55
+  standard_cost: ${STANDARD_FEE}
+  same_day_cost: ${EXPRESS_FEE}
+  standard_discount: ${STANDARD_DISCOUNT}
+  same_day_discount: ${EXPRESS_DISCOUNT}
