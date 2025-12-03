@@ -9,6 +9,8 @@ uk:
             health: /healthcheck
 
 spring:
+  config:
+    import: "classpath:cost.yaml"
   data:
     mongodb:
       uri: ${MONGODB_URL}
