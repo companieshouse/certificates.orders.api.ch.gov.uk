@@ -10,7 +10,7 @@ uk:
 
 spring:
   config:
-    import: "classpath:cost.yaml"
+    import: "classpath:costs.yaml"
   data:
     mongodb:
       uri: ${MONGODB_URL}
