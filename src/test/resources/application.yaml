@@ -1,5 +1,6 @@
 spring:
   config:
+    import: "classpath:cost.yaml"
     active:
       on-profile: feature-flags-enabled,feature-flags-disabled,lp-feature-flag-enabled,llp-feature-flag-enabled
 
