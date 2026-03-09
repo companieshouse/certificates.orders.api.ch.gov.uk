@@ -28,8 +28,8 @@
         <jakarta.json.version>1.1.7</jakarta.json.version>
         <jackson.version>2.19.1</jackson.version>
         <snakeyaml.version>2.4</snakeyaml.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-        <tomcat-embed-core.version>11.0.15</tomcat-embed-core.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <tomcat-embed-core.version>11.0.18</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.15</tomcat-embed-websocket.version>
         <opentelemetry-instrumentation-bom.version>2.16.0</opentelemetry-instrumentation-bom.version>
 
@@ -38,7 +38,7 @@
         <api-helper-java.version>3.0.1</api-helper-java.version>
         <api-sdk-manager-java-library.version>3.0.11</api-sdk-manager-java-library.version>
         <api-sdk-java.version>6.3.1</api-sdk-java.version>
-        <api-security-java.version>2.0.8</api-security-java.version>
+        <api-security-java.version>2.0.23</api-security-java.version>
         <private-api-sdk-java.version>4.0.313</private-api-sdk-java.version>
 
         <start-class>uk.gov.companieshouse.certificates.orders.api.CertificatesApiApplication</start-class>
@@ -58,9 +58,9 @@
         <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
 
         <!-- Spring -->
-        <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <spring-boot-dependencies.version>3.5.11</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
 
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
@@ -108,6 +108,29 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- CVE-2025-68161(6.3) -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.25.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>2.25.3</version>
+            </dependency>
+            <!--CVE-2025-52520(7.5), CVE-2025-53506(7.5), CVE-2025-48989(7.5)-->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <!--CVE-2025-48924-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -131,13 +154,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
@@ -318,18 +334,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!--CVE-2025-48924-->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-        </dependency>
-        <!--CVE-2025-52520(7.5), CVE-2025-53506(7.5), CVE-2025-48989(7.5)-->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat-embed-core.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-websocket</artifactId>
